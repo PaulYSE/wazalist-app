@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "wazalist-app",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "1e79858d-b9d3-4d0e-b182-6a87e4043dfc",
+			"database_name": "wazalist-db"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
