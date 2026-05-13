@@ -28,16 +28,22 @@ a{color:var(--accent);text-decoration:none}
 .field input:focus{border-color:var(--accent)}
 .abtn{width:100%;padding:10px;background:var(--accent2);border:none;border-radius:var(--r);color:#fff;font-size:14px;cursor:pointer;margin-top:4px}
 .abtn:hover{background:var(--accent)}
+.abtn-ghost{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:14px;cursor:pointer;margin-top:8px}
+.abtn-ghost:hover{background:var(--bg2);color:var(--text1)}
 .aswitch{margin-top:14px;font-size:13px;color:var(--text3);text-align:center}
 .aswitch span{color:var(--accent);cursor:pointer}
 .aerr{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
 .aok{color:var(--green);font-size:13px;margin-top:8px;min-height:18px}
+.adivider{display:flex;align-items:center;gap:10px;margin:16px 0}
+.adivider hr{flex:1;border:none;border-top:1px solid var(--border)}
+.adivider span{font-size:12px;color:var(--text3)}
 
 /* ── Layout ── */
 #app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
 .topbar h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
 .tagline{font-size:12px;color:var(--text3)}
+.guest-badge{font-size:11px;padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text3)}
 .search-row{display:flex;gap:8px;flex:1;min-width:200px}
 #searchInput{flex:1;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
 #searchInput:focus{border-color:var(--accent)}
@@ -57,13 +63,23 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .waza-card.selected{background:var(--bg3);border-left-color:var(--accent)}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
-.waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
 .b-tag{background:#2a2040;color:#b3a8f0;border:1px solid #3d3560}
 .b-new{background:#1e2030;color:#6a7090}
 .b-ip{background:#1c2a1c;color:var(--green)}
 .b-done{background:#1a2a1a;color:#6ddb9e;border:1px solid #2d5a3d}
 .b-bm{background:#2a2010;color:var(--gold)}
+
+/* ── Shape markers ── */
+.shapes-row{display:flex;gap:4px;flex-wrap:wrap}
+/* in cards, shapes are small */
+.shape-pip{font-size:13px;line-height:1;opacity:.25;transition:opacity .12s}
+.shape-pip.on{opacity:1}
+/* in detail, shapes are buttons */
+.shape-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s;line-height:1}
+.shape-btn:hover{background:var(--bg3)}
+.shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
 
 /* ── Detail ── */
 .d-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:8px;font-size:15px}
@@ -103,7 +119,7 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .drow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .drow:hover .drn{color:var(--accent)}
 .drn{font-size:14px}
-.drs{font-size:12px;color:var(--text3);margin-left:auto}
+.drs{font-size:12px;color:var(--text3);margin-left:auto;flex-shrink:0}
 
 /* ── Nav ── */
 .nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -139,16 +155,20 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
     <div class="field"><label>PIN</label><input id="li-pin" type="password" placeholder="4–8 digits" maxlength="8"></div>
     <button class="abtn" id="li-btn">Sign in</button>
     <div class="aerr" id="li-err"></div>
-    <div class="aswitch">No account? <span id="toReg">Create one</span></div>
+    <div class="adivider"><hr><span>or</span><hr></div>
+    <button class="abtn-ghost" id="guestBtn">Continue as guest</button>
+    <div class="aswitch" style="margin-top:12px">No account? <span id="toReg">Create one</span></div>
   </div>
   <div class="abox" id="regBox" style="display:none">
     <h2>⛩ Wazalist</h2>
-    <div class="sub">Create an account to track progress across devices</div>
+    <div class="sub">Create an account to sync progress across devices</div>
     <div class="field"><label>Email</label><input id="rg-email" type="email" placeholder="you@example.com"></div>
     <div class="field"><label>PIN (4–8 digits)</label><input id="rg-pin" type="password" placeholder="Choose a PIN" maxlength="8"></div>
     <button class="abtn" id="rg-btn">Create account</button>
     <div class="aerr" id="rg-err"></div>
-    <div class="aswitch">Already registered? <span id="toLi">Sign in</span></div>
+    <div class="adivider"><hr><span>or</span><hr></div>
+    <button class="abtn-ghost" id="guestBtn2">Continue as guest</button>
+    <div class="aswitch" style="margin-top:12px">Already registered? <span id="toLi">Sign in</span></div>
   </div>
 </div>
 
@@ -158,6 +178,7 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
     <div style="display:flex;align-items:center;gap:8px">
       <h1>⛩ Wazalist</h1>
       <span class="tagline">Wotagei Skills Database</span>
+      <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
     </div>
     <div class="search-row">
       <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
@@ -197,7 +218,12 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
   <div class="modal">
     <h2>⛩ Wazalist — User Guide</h2>
     <h3>What is this?</h3>
-    <p>Wazalist is a reference database of wotagei Waza (skills/techniques). Browse all entries, watch reference videos, and track your learning progress. Your data syncs across devices via your account.</p>
+    <p>Wazalist is a reference database of wotagei Waza (skills/techniques). Browse all entries, watch reference videos, and track your learning progress.</p>
+    <h3>Guest vs account</h3>
+    <ul>
+      <li><b>Guest mode</b> — progress, bookmarks, and shape markers are saved locally in your browser on this device only.</li>
+      <li><b>Account</b> — progress syncs across devices via your email and PIN.</li>
+    </ul>
     <h3>Browsing & searching</h3>
     <ul>
       <li>Type in the search bar to filter by Japanese or English name.</li>
@@ -214,23 +240,36 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
       <li><b>Completed</b> — you have mastered this Waza.</li>
       <li><b>★ Bookmark</b> — "want to learn" marker, independent of learning stage.</li>
     </ul>
+    <h3>Shape markers</h3>
+    <p>Each Waza has 6 shape markers (● ▲ ■ ♥ ★ ◆). Toggle any combination — their meaning is entirely up to you. Shapes appear on the Waza card, detail view, and dashboard.</p>
     <h3>Dashboard</h3>
-    <p>See your progress stats and lists of bookmarked and in-progress Waza. The progress bar tracks completion of your bookmarked Waza only.</p>
+    <p>See your progress stats, bookmarked Waza, and in-progress Waza. The progress bar tracks completion of bookmarked Waza only.</p>
     <h3>Video references</h3>
     <p>Each Waza may have up to 6 video links. Supported platforms: YouTube, Bilibili, Twitter/X, NicoNico, Facebook.</p>
-    <h3>Account</h3>
-    <p>Progress is saved to your account and syncs across devices. Sign in with your email and PIN from any browser.</p>
     <button class="mclosebtn" id="closeModal">Got it!</button>
   </div>
 </div>
 
 <script>
-// ── State ────────────────────────────────────────────────────
+// ── Constants ────────────────────────────────────────────────
+const SHAPES = ['●','▲','■','♥','★','◆'];
+
+// ── Mode & state ─────────────────────────────────────────────
+let isGuest = false;
 let token = localStorage.getItem('wl_token') || '';
 let wazaData = [];
-let prog = {}; // waza_id -> {stage, bookmarked}
+let prog = {};       // waza_id -> {stage, bookmarked, shapes: boolean[6]}
 let selectedId = null;
 let filters = {search:'',tag:'',parent:'',bm:false,ip:false};
+
+// ── localStorage helpers (guest + shape persistence) ─────────
+const LS_KEY = 'wl_local_prog';
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
+}
+function saveLocal(data) {
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
 
 // ── API ──────────────────────────────────────────────────────
 const api = async (path, method='GET', body=null) => {
@@ -249,6 +288,17 @@ const api = async (path, method='GET', body=null) => {
 // ── Auth wiring ──────────────────────────────────────────────
 document.getElementById('toReg').onclick = () => { document.getElementById('loginBox').style.display='none'; document.getElementById('regBox').style.display=''; };
 document.getElementById('toLi').onclick  = () => { document.getElementById('regBox').style.display='none';  document.getElementById('loginBox').style.display=''; };
+
+function startGuest() {
+  isGuest = true;
+  token = '';
+  // load any existing local progress
+  const local = loadLocal();
+  Object.entries(local).forEach(([id, p]) => { prog[+id] = p; });
+  initApp();
+}
+document.getElementById('guestBtn').onclick  = startGuest;
+document.getElementById('guestBtn2').onclick = startGuest;
 
 document.getElementById('li-btn').onclick = async () => {
   const email = document.getElementById('li-email').value.trim();
@@ -275,15 +325,12 @@ document.getElementById('rg-btn').onclick = async () => {
   errEl.className = 'aok';
   errEl.textContent = 'Account created! Signing you in…';
   const li = await api('/api/login','POST',{email,pin});
-  if (li.token) {
-    token = li.token;
-    localStorage.setItem('wl_token', token);
-    initApp();
-  }
+  if (li.token) { token = li.token; localStorage.setItem('wl_token', token); initApp(); }
 };
 
 document.getElementById('logoutBtn').onclick = () => {
   token = '';
+  isGuest = false;
   localStorage.removeItem('wl_token');
   location.reload();
 };
@@ -292,26 +339,54 @@ document.getElementById('logoutBtn').onclick = () => {
 async function initApp() {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  document.getElementById('guestBadge').style.display = isGuest ? '' : 'none';
+  document.getElementById('logoutBtn').textContent = isGuest ? 'Sign in / Register' : 'Sign out';
   document.getElementById('countBar').textContent = 'Loading Waza…';
-  const [wazaRes, progRes] = await Promise.all([api('/api/waza'), api('/api/progress')]);
+
+  // Always fetch Waza from API
+  const wazaRes = await api('/api/waza');
   wazaData = Array.isArray(wazaRes) ? wazaRes : [];
-  if (Array.isArray(progRes)) {
-    progRes.forEach(p => { prog[p.waza_id] = {stage: p.stage, bookmarked: !!p.bookmarked}; });
+
+  if (isGuest) {
+    // Progress already loaded from localStorage in startGuest()
+  } else {
+    // Fetch progress from D1 via API
+    const progRes = await api('/api/progress');
+    if (Array.isArray(progRes)) {
+      progRes.forEach(p => {
+        prog[p.waza_id] = {
+          stage: p.stage,
+          bookmarked: !!p.bookmarked,
+          shapes: p.shapes ? JSON.parse(p.shapes) : [false,false,false,false,false,false]
+        };
+      });
+    }
   }
+
   populateFilters();
   renderList();
   renderDashboard();
 }
 
+// Auto-login if token stored
 if (token) initApp();
 
-// ── Progress ─────────────────────────────────────────────────
-const getP = id => prog[id] || {stage:'new', bookmarked:false};
+// ── Progress helpers ─────────────────────────────────────────
+const emptyP = () => ({stage:'new', bookmarked:false, shapes:[false,false,false,false,false,false]});
+const getP = id => prog[id] || emptyP();
 
-async function saveP(id, stage, bookmarked) {
-  prog[id] = {stage, bookmarked};
+async function saveP(id, stage, bookmarked, shapes) {
+  prog[id] = {stage, bookmarked, shapes};
+
+  if (isGuest) {
+    const local = loadLocal();
+    local[id] = {stage, bookmarked, shapes};
+    saveLocal(local);
+  } else {
+    await api('/api/progress','POST',{waza_id:id, stage, bookmarked, shapes: JSON.stringify(shapes)});
+  }
+
   renderList(); renderDetail(); renderDashboard();
-  await api('/api/progress','POST',{waza_id:id, stage, bookmarked});
 }
 
 // ── Filters ──────────────────────────────────────────────────
@@ -331,9 +406,9 @@ function filterWaza() {
   return wazaData.filter(w => {
     if (search) {
       const s = search.toLowerCase();
-      if (!((w.name_jp||'').toLowerCase().includes(s) ||
-            (w.name_en||'').toLowerCase().includes(s) ||
-            (w.name_en_literal||'').toLowerCase().includes(s) ||
+      if (!((w.name_jp||'').toLowerCase().includes(s)||
+            (w.name_en||'').toLowerCase().includes(s)||
+            (w.name_en_literal||'').toLowerCase().includes(s)||
             (w.name_en_gtranslate||'').toLowerCase().includes(s))) return false;
     }
     if (tag && w.tag !== tag) return false;
@@ -343,6 +418,13 @@ function filterWaza() {
     if (ip && p.stage !== 'inprogress') return false;
     return true;
   });
+}
+
+// Build the small shape pips shown on list cards and dashboard rows
+function shapePips(shapes) {
+  return SHAPES.map((s,i) =>
+    '<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>'
+  ).join('');
 }
 
 // ── Render list ──────────────────────────────────────────────
@@ -356,15 +438,19 @@ function renderList() {
   }
   list.innerHTML = filtered.map(w => {
     const p = getP(w.id);
-    const pb = p.stage==='new'   ? '<span class="badge b-new">New</span>'
+    const pb = p.stage==='new'        ? '<span class="badge b-new">New</span>'
              : p.stage==='inprogress' ? '<span class="badge b-ip">In progress</span>'
-             : '<span class="badge b-done">✓ Completed</span>';
+             :                          '<span class="badge b-done">✓ Completed</span>';
     const bb = p.bookmarked ? '<span class="badge b-bm">★</span>' : '';
     const tb = w.tag ? '<span class="badge b-tag">'+w.tag+'</span>' : '';
+    const hasShape = p.shapes && p.shapes.some(Boolean);
+    const sp = hasShape ? '<div class="shapes-row" style="margin-top:4px">'+shapePips(p.shapes)+'</div>' : '';
     return '<div class="waza-card'+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+pb+tb+'</div></div>';
+      +'<div class="badges">'+bb+pb+tb+'</div>'
+      +sp
+      +'</div>';
   }).join('');
   list.querySelectorAll('.waza-card').forEach(el =>
     el.addEventListener('click', () => selectWaza(+el.dataset.id))
@@ -396,6 +482,7 @@ function renderDetail() {
   const w = wazaData.find(x => x.id === selectedId);
   if (!w) return;
   const p = getP(w.id);
+  const shapes = p.shapes || [false,false,false,false,false,false];
 
   const videos = [w.video0,w.video1,w.video2,w.video3,w.video4,w.video5]
     .filter(v => v && v.trim() && v !== '0');
@@ -417,6 +504,10 @@ function renderDetail() {
     ? siblings.map(s => '<span class="chip" data-id="'+s.id+'">'+(s.name_jp||dispName(s))+'</span>').join('')
     : '<span style="color:var(--text3);font-size:13px">None found</span>';
 
+  const shapeButtons = SHAPES.map((s,i) =>
+    '<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>'
+  ).join('');
+
   panel.innerHTML =
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
@@ -427,6 +518,11 @@ function renderDetail() {
     +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
+
+    +'<div class="dsec"><h3>Shape markers</h3>'
+    +'<div class="shapes-row">'+shapeButtons+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — their meaning is up to you.</div>'
+    +'</div>'
 
     +'<div class="dsec"><h3>Names</h3><div class="dgrid">'
     +'<div class="dfield"><div class="lbl">Japanese</div><div class="val">'+(w.name_jp||'—')+'</div></div>'
@@ -455,10 +551,22 @@ function renderDetail() {
     +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
+  // Progress buttons
   panel.querySelectorAll('.pbtn').forEach(btn =>
-    btn.addEventListener('click', () => saveP(w.id, btn.dataset.s, p.bookmarked))
+    btn.addEventListener('click', () => saveP(w.id, btn.dataset.s, p.bookmarked, shapes))
   );
-  panel.querySelector('#bmBtn').addEventListener('click', () => saveP(w.id, p.stage, !p.bookmarked));
+  // Bookmark
+  panel.querySelector('#bmBtn').addEventListener('click', () => saveP(w.id, p.stage, !p.bookmarked, shapes));
+  // Shape buttons — toggle individual shape
+  panel.querySelectorAll('.shape-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.si;
+      const newShapes = [...shapes];
+      newShapes[i] = !newShapes[i];
+      saveP(w.id, p.stage, p.bookmarked, newShapes);
+    })
+  );
+  // Parent chips
   panel.querySelectorAll('.chip[data-parent]').forEach(chip =>
     chip.addEventListener('click', () => {
       filters.parent = chip.dataset.parent;
@@ -466,6 +574,7 @@ function renderDetail() {
       renderList();
     })
   );
+  // Sibling chips
   panel.querySelectorAll('.chip[data-id]').forEach(chip =>
     chip.addEventListener('click', () => selectWaza(+chip.dataset.id))
   );
@@ -473,19 +582,23 @@ function renderDetail() {
 
 // ── Dashboard ────────────────────────────────────────────────
 function renderDashboard() {
-  const total    = wazaData.length;
-  const bmList   = wazaData.filter(w => getP(w.id).bookmarked);
-  const ipList   = wazaData.filter(w => getP(w.id).stage === 'inprogress');
-  const bmarked  = bmList.length;
-  const bmDone   = bmList.filter(w => getP(w.id).stage === 'completed').length;
-  const bmIP     = bmList.filter(w => getP(w.id).stage === 'inprogress').length;
-  const bmPct    = bmarked ? Math.round(bmDone/bmarked*100) : 0;
+  const total   = wazaData.length;
+  const bmList  = wazaData.filter(w => getP(w.id).bookmarked);
+  const ipList  = wazaData.filter(w => getP(w.id).stage === 'inprogress');
+  const bmarked = bmList.length;
+  const bmDone  = bmList.filter(w => getP(w.id).stage === 'completed').length;
+  const bmIP    = bmList.filter(w => getP(w.id).stage === 'inprogress').length;
+  const bmPct   = bmarked ? Math.round(bmDone/bmarked*100) : 0;
 
-  const row = w =>
-    '<div class="drow" data-id="'+w.id+'">'
-    +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
-    +'<span class="drn">'+(w.name_jp||'—')+'</span>'
-    +'<span class="drs">'+dispName(w)+'</span></div>';
+  const row = w => {
+    const p = getP(w.id);
+    const hasShape = p.shapes && p.shapes.some(Boolean);
+    return '<div class="drow" data-id="'+w.id+'">'
+      +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
+      +'<span class="drn">'+(w.name_jp||'—')+'</span>'
+      +(hasShape?'<div class="shapes-row" style="margin-left:6px">'+shapePips(p.shapes)+'</div>':'')
+      +'<span class="drs">'+dispName(w)+'</span></div>';
+  };
 
   document.getElementById('dashContent').innerHTML =
     '<h2>Dashboard</h2>'
