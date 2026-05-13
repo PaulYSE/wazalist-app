@@ -1,0 +1,11 @@
+name = "wazalist-app"
+main = "src/index.ts"
+compatibility_date = "2026-05-13"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "wazalist-db"
+database_id = "f319a673-74d7-4370-93be-7a23cb5182e8"
+
+[assets]
+directory = "./assets"

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wazalist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f14;color:#e8e6f0;min-height:100vh}
+:root{
+  --bg0:#0f0f14;--bg1:#17171f;--bg2:#1e1e28;--bg3:#262633;
+  --accent:#7c6ff7;--accent2:#5a54c4;
+  --gold:#f5c518;--green:#4caf82;--amber:#e8a030;--red:#e05555;
+  --text1:#e8e6f0;--text2:#a09dba;--text3:#6a6880;
+  --border:#2e2c3e;--r:8px;--rl:12px
+}
+input,select,button{font-family:inherit}
+a{color:var(--accent);text-decoration:none}
+
+/* ── Auth ── */
+#authWrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.abox{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:32px;width:100%;max-width:360px}
+.abox h2{font-size:20px;color:var(--accent);margin-bottom:4px}
+.abox .sub{font-size:13px;color:var(--text3);margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+.field input{width:100%;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
+.field input:focus{border-color:var(--accent)}
+.abtn{width:100%;padding:10px;background:var(--accent2);border:none;border-radius:var(--r);color:#fff;font-size:14px;cursor:pointer;margin-top:4px}
+.abtn:hover{background:var(--accent)}
+.aswitch{margin-top:14px;font-size:13px;color:var(--text3);text-align:center}
+.aswitch span{color:var(--accent);cursor:pointer}
+.aerr{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
+.aok{color:var(--green);font-size:13px;margin-top:8px;min-height:18px}
+
+/* ── Layout ── */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.topbar h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
+.tagline{font-size:12px;color:var(--text3)}
+.search-row{display:flex;gap:8px;flex:1;min-width:200px}
+#searchInput{flex:1;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
+#searchInput:focus{border-color:var(--accent)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0}
+select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;cursor:pointer}
+.btn{padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg3);color:var(--text1)}
+.btn.active{background:var(--accent2);border-color:var(--accent);color:#fff}
+.main{display:flex;flex:1;overflow:hidden}
+.list-panel{width:320px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg0)}
+.detail-panel{flex:1;overflow-y:auto;background:var(--bg1);padding:20px}
+.count-bar{padding:8px 12px;font-size:12px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg1)}
+
+/* ── Cards ── */
+.waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
+.waza-card:hover{background:var(--bg2)}
+.waza-card.selected{background:var(--bg3);border-left-color:var(--accent)}
+.waza-card .njp{font-size:15px;font-weight:500}
+.waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
+.waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
+.b-tag{background:#2a2040;color:#b3a8f0;border:1px solid #3d3560}
+.b-new{background:#1e2030;color:#6a7090}
+.b-ip{background:#1c2a1c;color:var(--green)}
+.b-done{background:#1a2a1a;color:#6ddb9e;border:1px solid #2d5a3d}
+.b-bm{background:#2a2010;color:var(--gold)}
+
+/* ── Detail ── */
+.d-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:8px;font-size:15px}
+.d-njp{font-size:26px;font-weight:700;margin-bottom:2px}
+.d-nen{font-size:16px;color:var(--accent);margin-bottom:14px}
+.dsec{margin-bottom:18px}
+.dsec h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dfield{background:var(--bg2);border-radius:var(--r);padding:8px 12px}
+.dfield .lbl{font-size:11px;color:var(--text3);margin-bottom:2px}
+.dfield .val{font-size:14px}
+.chip{display:inline-block;padding:3px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;margin:3px}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.vlinks{display:flex;flex-direction:column;gap:6px}
+.vlink{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text1);text-decoration:none;transition:all .12s}
+.vlink:hover{border-color:var(--accent);background:var(--bg3)}
+.vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
+.prog-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.pbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
+.pbtn:hover{background:var(--bg3)}
+.pbtn.pnew.on{background:#1e2030;color:#8899cc;border-color:#3a4060}
+.pbtn.pip.on{background:#1c2a1c;color:var(--green);border-color:#2d5a3d}
+.pbtn.pdone.on{background:#1a2a1a;color:#6ddb9e;border-color:#2d6040}
+.bmbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
+.bmbtn:hover{background:var(--bg3)}
+.bmbtn.on{background:#2a2010;color:var(--gold);border-color:#5a4010}
+
+/* ── Dashboard ── */
+.dash{padding:16px}
+.dash h2{font-size:16px;font-weight:600;margin-bottom:16px}
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.scard{background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center}
+.scard .n{font-size:22px;font-weight:700}
+.scard .l{font-size:11px;color:var(--text3);margin-top:2px}
+.dsec2{margin-bottom:20px}
+.dsec2 h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.drow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.drow:hover .drn{color:var(--accent)}
+.drn{font-size:14px}
+.drs{font-size:12px;color:var(--text3);margin-left:auto}
+
+/* ── Nav ── */
+.nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
+.ntab{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
+.ntab:hover{color:var(--text1)}
+.ntab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── Modal ── */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:24px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:18px;font-weight:600;color:var(--accent);margin-bottom:16px}
+.modal h3{font-size:13px;font-weight:600;color:var(--text2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.5px}
+.modal p,.modal li{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:4px}
+.modal ul{padding-left:18px}
+.mclosebtn{margin-top:20px;width:100%;padding:9px;background:var(--accent2);border:none;border-radius:var(--r);color:#fff;font-size:14px;cursor:pointer}
+
+@media(max-width:600px){
+  .main{flex-direction:column}
+  .list-panel{width:100%;max-height:45vh;border-right:none;border-bottom:1px solid var(--border)}
+  .dstats{grid-template-columns:repeat(2,1fr)}
+  .dgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authWrap">
+  <div class="abox" id="loginBox">
+    <h2>⛩ Wazalist</h2>
+    <div class="sub">Wotagei Skills Database</div>
+    <div class="field"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="field"><label>PIN</label><input id="li-pin" type="password" placeholder="4–8 digits" maxlength="8"></div>
+    <button class="abtn" id="li-btn">Sign in</button>
+    <div class="aerr" id="li-err"></div>
+    <div class="aswitch">No account? <span id="toReg">Create one</span></div>
+  </div>
+  <div class="abox" id="regBox" style="display:none">
+    <h2>⛩ Wazalist</h2>
+    <div class="sub">Create an account to track progress across devices</div>
+    <div class="field"><label>Email</label><input id="rg-email" type="email" placeholder="you@example.com"></div>
+    <div class="field"><label>PIN (4–8 digits)</label><input id="rg-pin" type="password" placeholder="Choose a PIN" maxlength="8"></div>
+    <button class="abtn" id="rg-btn">Create account</button>
+    <div class="aerr" id="rg-err"></div>
+    <div class="aswitch">Already registered? <span id="toLi">Sign in</span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <h1>⛩ Wazalist</h1>
+      <span class="tagline">Wotagei Skills Database</span>
+    </div>
+    <div class="search-row">
+      <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
+    </div>
+    <button class="btn" id="helpBtn">? Guide</button>
+    <button class="btn" id="logoutBtn">Sign out</button>
+  </div>
+  <div class="nav-tabs">
+    <button class="ntab active" data-tab="browse">Browse</button>
+    <button class="ntab" data-tab="dashboard">Dashboard</button>
+  </div>
+  <div id="browseView" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="filter-row">
+      <select id="filterTag"><option value="">All levels</option></select>
+      <select id="filterParent"><option value="">All families</option></select>
+      <button class="btn" id="filterBM">★ Bookmarked</button>
+      <button class="btn" id="filterIP">⏳ In progress</button>
+      <button class="btn" id="clearFilters" style="margin-left:auto">Clear filters</button>
+    </div>
+    <div class="main">
+      <div class="list-panel">
+        <div class="count-bar" id="countBar">Loading…</div>
+        <div id="wazaList"></div>
+      </div>
+      <div class="detail-panel" id="detailPanel">
+        <div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="dashboardView" style="display:none;flex:1;overflow-y:auto">
+    <div class="dash" id="dashContent"></div>
+  </div>
+</div>
+
+<!-- GUIDE -->
+<div id="modalBg" class="mbg" style="display:none">
+  <div class="modal">
+    <h2>⛩ Wazalist — User Guide</h2>
+    <h3>What is this?</h3>
+    <p>Wazalist is a reference database of wotagei Waza (skills/techniques). Browse all entries, watch reference videos, and track your learning progress. Your data syncs across devices via your account.</p>
+    <h3>Browsing & searching</h3>
+    <ul>
+      <li>Type in the search bar to filter by Japanese or English name.</li>
+      <li>Use <b>All levels</b> to filter by skill tag.</li>
+      <li>Use <b>All families</b> to filter by parent Waza / family group.</li>
+      <li>Click <b>★ Bookmarked</b> or <b>⏳ In progress</b> to filter by those states.</li>
+      <li>Click a Waza in the list to open its full detail view.</li>
+      <li>In the detail view, click a parent chip to filter to that family.</li>
+    </ul>
+    <h3>Progress tracking</h3>
+    <ul>
+      <li><b>New</b> — default state for all Waza.</li>
+      <li><b>In progress</b> — you are actively learning this Waza.</li>
+      <li><b>Completed</b> — you have mastered this Waza.</li>
+      <li><b>★ Bookmark</b> — "want to learn" marker, independent of learning stage.</li>
+    </ul>
+    <h3>Dashboard</h3>
+    <p>See your progress stats and lists of bookmarked and in-progress Waza. The progress bar tracks completion of your bookmarked Waza only.</p>
+    <h3>Video references</h3>
+    <p>Each Waza may have up to 6 video links. Supported platforms: YouTube, Bilibili, Twitter/X, NicoNico, Facebook.</p>
+    <h3>Account</h3>
+    <p>Progress is saved to your account and syncs across devices. Sign in with your email and PIN from any browser.</p>
+    <button class="mclosebtn" id="closeModal">Got it!</button>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────
+let token = localStorage.getItem('wl_token') || '';
+let wazaData = [];
+let prog = {}; // waza_id -> {stage, bookmarked}
+let selectedId = null;
+let filters = {search:'',tag:'',parent:'',bm:false,ip:false};
+
+// ── API ──────────────────────────────────────────────────────
+const api = async (path, method='GET', body=null) => {
+  const opts = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? {'Authorization': 'Bearer '+token} : {})
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+};
+
+// ── Auth wiring ──────────────────────────────────────────────
+document.getElementById('toReg').onclick = () => { document.getElementById('loginBox').style.display='none'; document.getElementById('regBox').style.display=''; };
+document.getElementById('toLi').onclick  = () => { document.getElementById('regBox').style.display='none';  document.getElementById('loginBox').style.display=''; };
+
+document.getElementById('li-btn').onclick = async () => {
+  const email = document.getElementById('li-email').value.trim();
+  const pin   = document.getElementById('li-pin').value.trim();
+  const errEl = document.getElementById('li-err');
+  errEl.textContent = '';
+  if (!email || !pin) { errEl.textContent = 'Please fill in both fields.'; return; }
+  const res = await api('/api/login','POST',{email,pin});
+  if (res.error) { errEl.textContent = res.error; return; }
+  token = res.token;
+  localStorage.setItem('wl_token', token);
+  initApp();
+};
+
+document.getElementById('rg-btn').onclick = async () => {
+  const email = document.getElementById('rg-email').value.trim();
+  const pin   = document.getElementById('rg-pin').value.trim();
+  const errEl = document.getElementById('rg-err');
+  errEl.className = 'aerr';
+  errEl.textContent = '';
+  if (!email || !pin) { errEl.textContent = 'Please fill in both fields.'; return; }
+  const res = await api('/api/register','POST',{email,pin});
+  if (res.error) { errEl.textContent = res.error; return; }
+  errEl.className = 'aok';
+  errEl.textContent = 'Account created! Signing you in…';
+  const li = await api('/api/login','POST',{email,pin});
+  if (li.token) {
+    token = li.token;
+    localStorage.setItem('wl_token', token);
+    initApp();
+  }
+};
+
+document.getElementById('logoutBtn').onclick = () => {
+  token = '';
+  localStorage.removeItem('wl_token');
+  location.reload();
+};
+
+// ── Init ─────────────────────────────────────────────────────
+async function initApp() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('countBar').textContent = 'Loading Waza…';
+  const [wazaRes, progRes] = await Promise.all([api('/api/waza'), api('/api/progress')]);
+  wazaData = Array.isArray(wazaRes) ? wazaRes : [];
+  if (Array.isArray(progRes)) {
+    progRes.forEach(p => { prog[p.waza_id] = {stage: p.stage, bookmarked: !!p.bookmarked}; });
+  }
+  populateFilters();
+  renderList();
+  renderDashboard();
+}
+
+if (token) initApp();
+
+// ── Progress ─────────────────────────────────────────────────
+const getP = id => prog[id] || {stage:'new', bookmarked:false};
+
+async function saveP(id, stage, bookmarked) {
+  prog[id] = {stage, bookmarked};
+  renderList(); renderDetail(); renderDashboard();
+  await api('/api/progress','POST',{waza_id:id, stage, bookmarked});
+}
+
+// ── Filters ──────────────────────────────────────────────────
+function populateFilters() {
+  const tags = [...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
+  document.getElementById('filterTag').innerHTML =
+    '<option value="">All levels</option>' + tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
+  const parents = [...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
+  document.getElementById('filterParent').innerHTML =
+    '<option value="">All families</option>' + parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
+}
+
+const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
+
+function filterWaza() {
+  const {search,tag,parent,bm,ip} = filters;
+  return wazaData.filter(w => {
+    if (search) {
+      const s = search.toLowerCase();
+      if (!((w.name_jp||'').toLowerCase().includes(s) ||
+            (w.name_en||'').toLowerCase().includes(s) ||
+            (w.name_en_literal||'').toLowerCase().includes(s) ||
+            (w.name_en_gtranslate||'').toLowerCase().includes(s))) return false;
+    }
+    if (tag && w.tag !== tag) return false;
+    if (parent && w.parent_en0 !== parent && w.parent_en1 !== parent) return false;
+    const p = getP(w.id);
+    if (bm && !p.bookmarked) return false;
+    if (ip && p.stage !== 'inprogress') return false;
+    return true;
+  });
+}
+
+// ── Render list ──────────────────────────────────────────────
+function renderList() {
+  const filtered = filterWaza();
+  document.getElementById('countBar').textContent = filtered.length + ' of ' + wazaData.length + ' Waza';
+  const list = document.getElementById('wazaList');
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(w => {
+    const p = getP(w.id);
+    const pb = p.stage==='new'   ? '<span class="badge b-new">New</span>'
+             : p.stage==='inprogress' ? '<span class="badge b-ip">In progress</span>'
+             : '<span class="badge b-done">✓ Completed</span>';
+    const bb = p.bookmarked ? '<span class="badge b-bm">★</span>' : '';
+    const tb = w.tag ? '<span class="badge b-tag">'+w.tag+'</span>' : '';
+    return '<div class="waza-card'+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+      +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+      +'<div class="nen">'+dispName(w)+'</div>'
+      +'<div class="badges">'+bb+pb+tb+'</div></div>';
+  }).join('');
+  list.querySelectorAll('.waza-card').forEach(el =>
+    el.addEventListener('click', () => selectWaza(+el.dataset.id))
+  );
+}
+
+function selectWaza(id) { selectedId=id; renderList(); renderDetail(); }
+
+// ── Platform detection ───────────────────────────────────────
+const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter / X',nico:'NicoNico',fb:'Facebook',other:'Video'};
+const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
+function platform(url) {
+  if (!url) return 'other';
+  if (/youtu\.be|youtube\.com/.test(url)) return 'yt';
+  if (/bilibili\.com|b23\.tv/.test(url)) return 'bili';
+  if (/twitter\.com|x\.com/.test(url)) return 'tw';
+  if (/nicovideo\.jp|nico\.ms/.test(url)) return 'nico';
+  if (/facebook\.com|fb\.com/.test(url)) return 'fb';
+  return 'other';
+}
+
+// ── Render detail ────────────────────────────────────────────
+function renderDetail() {
+  const panel = document.getElementById('detailPanel');
+  if (selectedId === null) {
+    panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';
+    return;
+  }
+  const w = wazaData.find(x => x.id === selectedId);
+  if (!w) return;
+  const p = getP(w.id);
+
+  const videos = [w.video0,w.video1,w.video2,w.video3,w.video4,w.video5]
+    .filter(v => v && v.trim() && v !== '0');
+  const videoHTML = videos.length
+    ? videos.map((v,i) => {
+        const pl = platform(v);
+        return '<a class="vlink" href="'+v+'" target="_blank" rel="noopener">'
+          +'<div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div>'
+          +'<span>'+platLabel[pl]+'</span>'
+          +'<span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';
+      }).join('')
+    : '<div style="color:var(--text3);font-size:13px">No video references</div>';
+
+  const siblings = wazaData.filter(x => x.id !== w.id && (
+    (w.parent_en0 && (x.parent_en0===w.parent_en0||x.parent_en1===w.parent_en0)) ||
+    (w.parent_en1 && (x.parent_en0===w.parent_en1||x.parent_en1===w.parent_en1))
+  )).slice(0,12);
+  const sibHTML = siblings.length
+    ? siblings.map(s => '<span class="chip" data-id="'+s.id+'">'+(s.name_jp||dispName(s))+'</span>').join('')
+    : '<span style="color:var(--text3);font-size:13px">None found</span>';
+
+  panel.innerHTML =
+    '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
+    +'<div class="d-nen">'+dispName(w)+'</div>'
+
+    +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
+    +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
+    +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In progress</button>'
+    +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
+    +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
+    +'</div></div>'
+
+    +'<div class="dsec"><h3>Names</h3><div class="dgrid">'
+    +'<div class="dfield"><div class="lbl">Japanese</div><div class="val">'+(w.name_jp||'—')+'</div></div>'
+    +'<div class="dfield"><div class="lbl">English</div><div class="val">'+(w.name_en||'—')+'</div></div>'
+    +'<div class="dfield"><div class="lbl">Literal</div><div class="val">'+(w.name_en_literal||'—')+'</div></div>'
+    +'<div class="dfield"><div class="lbl">Google translate</div><div class="val">'+(w.name_en_gtranslate||'—')+'</div></div>'
+    +'</div></div>'
+
+    +((w.reference||w.tag)
+      ? '<div class="dsec"><h3>Classification</h3><div class="dgrid">'
+        +(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')
+        +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
+        +'</div></div>' : '')
+
+    +((w.parent_jp0||w.parent_jp1)
+      ? '<div class="dsec"><h3>Parent techniques (prerequisites)</h3><div>'
+        +(w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
+        +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')
+        +'</div></div>' : '')
+
+    +((w.author_jp||w.author_en)
+      ? '<div class="dsec"><h3>Creator</h3>'
+        +'<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'
+        +(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div></div>' : '')
+
+    +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
+    +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
+
+  panel.querySelectorAll('.pbtn').forEach(btn =>
+    btn.addEventListener('click', () => saveP(w.id, btn.dataset.s, p.bookmarked))
+  );
+  panel.querySelector('#bmBtn').addEventListener('click', () => saveP(w.id, p.stage, !p.bookmarked));
+  panel.querySelectorAll('.chip[data-parent]').forEach(chip =>
+    chip.addEventListener('click', () => {
+      filters.parent = chip.dataset.parent;
+      document.getElementById('filterParent').value = chip.dataset.parent;
+      renderList();
+    })
+  );
+  panel.querySelectorAll('.chip[data-id]').forEach(chip =>
+    chip.addEventListener('click', () => selectWaza(+chip.dataset.id))
+  );
+}
+
+// ── Dashboard ────────────────────────────────────────────────
+function renderDashboard() {
+  const total    = wazaData.length;
+  const bmList   = wazaData.filter(w => getP(w.id).bookmarked);
+  const ipList   = wazaData.filter(w => getP(w.id).stage === 'inprogress');
+  const bmarked  = bmList.length;
+  const bmDone   = bmList.filter(w => getP(w.id).stage === 'completed').length;
+  const bmIP     = bmList.filter(w => getP(w.id).stage === 'inprogress').length;
+  const bmPct    = bmarked ? Math.round(bmDone/bmarked*100) : 0;
+
+  const row = w =>
+    '<div class="drow" data-id="'+w.id+'">'
+    +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
+    +'<span class="drn">'+(w.name_jp||'—')+'</span>'
+    +'<span class="drs">'+dispName(w)+'</span></div>';
+
+  document.getElementById('dashContent').innerHTML =
+    '<h2>Dashboard</h2>'
+    +'<div class="dstats">'
+    +'<div class="scard"><div class="n" style="color:var(--gold)">'+bmarked+'</div><div class="l">Bookmarked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In progress</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--green)">'+bmDone+'</div><div class="l">Completed</div></div>'
+    +'<div class="scard"><div class="n">'+total+'</div><div class="l">Total Waza</div></div>'
+    +'</div>'
+    +'<div style="background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:20px">'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px">'
+    +'<span>Bookmarked Waza completion</span><span>'+bmDone+' / '+bmarked+' ('+bmPct+'%)</span></div>'
+    +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden">'
+    +'<div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
+    +(bmarked===0?'<div style="font-size:12px;color:var(--text3);margin-top:6px">Bookmark Waza you want to learn to start tracking here.</div>':'')
+    +'</div>'
+    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'
+    +(bmList.length ? bmList.map(row).join('') : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')
+    +'</div>'
+    +'<div class="dsec2"><h3>⏳ In progress ('+ipList.length+')</h3>'
+    +(ipList.length ? ipList.map(row).join('') : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No Waza in progress yet.</div>')
+    +'</div>';
+
+  document.querySelectorAll('.drow').forEach(el =>
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+      document.querySelector('[data-tab="browse"]').classList.add('active');
+      document.getElementById('browseView').style.display='flex';
+      document.getElementById('dashboardView').style.display='none';
+      selectWaza(+el.dataset.id);
+    })
+  );
+}
+
+// ── Filter events ────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', e => { filters.search=e.target.value; renderList(); });
+document.getElementById('filterTag').addEventListener('change', e => { filters.tag=e.target.value; renderList(); });
+document.getElementById('filterParent').addEventListener('change', e => { filters.parent=e.target.value; renderList(); });
+document.getElementById('filterBM').addEventListener('click', function() { filters.bm=!filters.bm; this.classList.toggle('active',filters.bm); renderList(); });
+document.getElementById('filterIP').addEventListener('click', function() { filters.ip=!filters.ip; this.classList.toggle('active',filters.ip); renderList(); });
+document.getElementById('clearFilters').addEventListener('click', () => {
+  filters={search:'',tag:'',parent:'',bm:false,ip:false};
+  document.getElementById('searchInput').value='';
+  document.getElementById('filterTag').value='';
+  document.getElementById('filterParent').value='';
+  document.getElementById('filterBM').classList.remove('active');
+  document.getElementById('filterIP').classList.remove('active');
+  renderList();
+});
+
+// ── Nav tabs ─────────────────────────────────────────────────
+document.querySelectorAll('.ntab').forEach(tab =>
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const t = tab.dataset.tab;
+    document.getElementById('browseView').style.display = t==='browse'?'flex':'none';
+    document.getElementById('dashboardView').style.display = t==='dashboard'?'block':'none';
+    if (t==='dashboard') renderDashboard();
+  })
+);
+
+// ── Modal ────────────────────────────────────────────────────
+document.getElementById('helpBtn').addEventListener('click', () => { document.getElementById('modalBg').style.display='flex'; });
+document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('modalBg').style.display='none'; });
+document.getElementById('modalBg').addEventListener('click', e => { if(e.target===document.getElementById('modalBg')) document.getElementById('modalBg').style.display='none'; });
+</script>
+</body>
+</html>
