@@ -1,10 +1,5 @@
-export async function renderHtml(env: Env, content: string) {
-    // Fetch the HTML template from assets
-    const response = await env.ASSETS.fetch('index.html');
-    let html = await response.text();
-    
-    // Replace placeholder with actual data
-    html = html.replace('{{content}}', content);
-    
-    return html;
+export async function renderHtml(env: Env) {
+	// Just serve the HTML file from assets
+	const response = await env.ASSETS.fetch('index.html');
+	return response.text();
 }
