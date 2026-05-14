@@ -15,6 +15,15 @@ export default {
 			});
 		}
 
+		if (path === "/api/progress") {
+			const authHeader = request.headers.get("Authorization");
+			return new Response(JSON.stringify([]), {
+				headers: {
+					"content-type": "application/json",
+				},
+			});
+		}
+
 		if (path === '/api/login' && request.method === 'POST') {
 			const body = await request.json();
 			// Implement login logic with email/pin
@@ -33,6 +42,14 @@ export default {
 			return new Response(JSON.stringify({ 
 				error: "Registration not implemented yet"
 			}), {
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+
+		if (path === '/api/progress' && request.method === 'POST') {
+			const body = await request.json();
+			// Implement progress update logic
+			return new Response(JSON.stringify({ success: true }), {
 				headers: { "Content-Type": "application/json" }
 			});
 		}
