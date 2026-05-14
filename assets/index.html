@@ -511,23 +511,23 @@ function renderDetail(){
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
     // Bookmark — not collapsible, always visible
-    +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
+    +'<div class="dsec"><div class="prog-row">'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
 
     // Like/Dislike — not collapsible
-    +'<div class="dsec"><h3>Like / Dislike</h3><div class="like-row">'
+    +'<div class="dsec"><div class="like-row">'
     +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'" id="likeBtn">👍 Like</button>'
     +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'" id="dislikeBtn">👎 Dislike</button>'
     +'</div></div>'
 
     // Shapes — not collapsible
-    +'<div class="dsec"><h3>Shape markers</h3>'
-    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — meaning is up to you.</div></div>'
+    +'<div class="dsec"><h3>Markers</h3>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')
+    +'</div></div>'
 
     // Videos — not collapsible
-    +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
+    +'<div class="dsec"><h3>Link to Videos</h3><div class="vlinks">'+videoHTML+'</div></div>'
 
     // Collapsible sections
     +sec('names','Names',
