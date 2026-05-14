@@ -66,14 +66,10 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
 .waza-card:hover{filter:brightness(1.08)}
 .waza-card.selected{outline:1px solid var(--accent)}
-/* shape tints — one per shape index */
-.waza-card.sh-0{background:#1a1500;border-left-color:#c8a800} /* ● amber */
-.waza-card.sh-1{background:#001a10;border-left-color:#00b86a} /* ▲ green */
-.waza-card.sh-2{background:#00101a;border-left-color:#0099cc} /* ■ blue */
-.waza-card.sh-3{background:#1a0015;border-left-color:#cc0077} /* ♥ pink */
-.waza-card.sh-4{background:#0d001a;border-left-color:#8844cc} /* ★ purple */
-.waza-card.sh-5{background:#001515;border-left-color:#009999} /* ◆ teal */
-.waza-card.sh-none{background:transparent;border-left-color:transparent}
+.waza-card.s-inprogress{background:#1f1a00;border-left-color:var(--amber)}
+.waza-card.s-completed{background:#001a0d;border-left-color:var(--green)}
+.waza-card.s-forgotten{background:#1a0000;border-left-color:var(--red)}
+.waza-card.s-new{background:transparent;border-left-color:transparent}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
@@ -94,12 +90,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
 
 /* ── Expanded waza card (My List) ── */
 .waza-card-expanded{border-radius:var(--r);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;cursor:pointer;transition:filter .12s}
-.waza-card-expanded.sh-0{background:#1a1500;border-color:#c8a800}
-.waza-card-expanded.sh-1{background:#001a10;border-color:#00b86a}
-.waza-card-expanded.sh-2{background:#00101a;border-color:#0099cc}
-.waza-card-expanded.sh-3{background:#1a0015;border-color:#cc0077}
-.waza-card-expanded.sh-4{background:#0d001a;border-color:#8844cc}
-.waza-card-expanded.sh-5{background:#001515;border-color:#009999}
 .waza-card-expanded:hover{filter:brightness(1.06)}
 .wce-header{padding:12px 14px 8px}
 .wce-header .njp{font-size:15px;font-weight:600}
@@ -250,7 +240,13 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div class="filter-row">
       <select id="filterTag"><option value="">All levels</option></select>
       <select id="filterParent"><option value="">All families</option></select>
-
+      <select id="filterProgress">
+        <option value="">All progress</option>
+        <option value="new">New</option>
+        <option value="inprogress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="forgotten">Forgotten</option>
+      </select>
       <select id="filterShape">
         <option value="">All shapes</option>
         <option value="any">Has any shape</option>
@@ -334,12 +330,13 @@ select.active{border-color:var(--accent);color:var(--accent)}
 
 <script>
 const SHAPES = ['●','▲','■','♥','★','◆'];
+const STAGE_ORDER = ['inprogress','completed','forgotten','new'];
 const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter/X',nico:'NicoNico',fb:'Facebook',other:'Video'};
 const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
 
 let isGuest=false, token=localStorage.getItem('wl_token')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
-let filters={search:'',parent:'',shape:'',bm:false,like:false,dislike:false};
+let filters={search:'',tag:'',parent:'',progress:'',shape:'',bm:false,like:false};
 
 // ── localStorage ─────────────────────────────────────────────
 const LS_KEY='wl_local_prog';
@@ -561,12 +558,14 @@ function renderDetail(){
       +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
       +'</div>'):'')
 
-    +((w.parent_jp0||w.parent_jp1)?'<div class="dsec"><h3>Parent techniques (prerequisites)</h3><div>'
-      +(w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
-      +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')
-      +'</div></div>':'')
+    +((w.parent_jp0||w.parent_jp1)?sec('parents','Parent techniques (prerequisites)',
+      (w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
+      +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')):'')
 
-    +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>'
+    +((w.author_jp||w.author_en)?sec('creator','Creator',
+      '<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'+(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div>'):'')
+
+    +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
   // Progress buttons
   panel.querySelectorAll('.pbtn').forEach(btn=>btn.addEventListener('click',()=>saveP(w.id,{stage:btn.dataset.s})));
@@ -616,7 +615,7 @@ function expandedCard(w){
   const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
   const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
   const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
-  return'<div class="waza-card-expanded '+shapeClass(shapes)+'" data-id="'+w.id+'">'
+  return'<div class="waza-card-expanded '+stageClass(p.stage)+'" data-id="'+w.id+'">'
     +'<div class="wce-header">'
     +'<div class="njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="nen">'+dispName(w)+'</div>'
@@ -677,23 +676,31 @@ function renderDashMyList(){
 
 function renderDashStats(){
   const total=wazaData.length;
+  const counts={new:0,inprogress:0,completed:0,forgotten:0};
   let liked=0,disliked=0,bookmarked=0,shaped=0;
-  wazaData.forEach(w=>{const p=getP(w.id);if(p.bookmarked)bookmarked++;if(p.like==='like')liked++;if(p.like==='dislike')disliked++;if(p.shapes&&p.shapes.some(Boolean))shaped++;});
+  wazaData.forEach(w=>{const p=getP(w.id);counts[p.stage]=(counts[p.stage]||0)+1;if(p.bookmarked)bookmarked++;if(p.like==='like')liked++;if(p.like==='dislike')disliked++;if(p.shapes&&p.shapes.some(Boolean))shaped++;});
+
+  const bar=(label,count,color)=>{const pct=total?Math.round(count/total*100):0;return'<div class="stat-bar-wrap"><div class="stat-bar-label"><span>'+label+'</span><span>'+count+' / '+total+' ('+pct+'%)</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';};
 
   const shapeCounts=Array(6).fill(0);
   wazaData.forEach(w=>{const p=getP(w.id);if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});});
 
-  const bar=(label,count,color)=>{const pct=total?Math.round(count/total*100):0;return'<div class="stat-bar-wrap"><div class="stat-bar-label"><span>'+label+'</span><span>'+count+' ('+pct+'%)</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';};
-
   document.getElementById('dashStats').innerHTML=
-    '<div class="dsec2"><h3>Engagement</h3>'
-    +'<div class="dstats" style="grid-template-columns:repeat(3,1fr)">'
+    '<div class="dsec2"><h3>Progress breakdown</h3>'
+    +bar('In Progress',counts.inprogress,'var(--amber)')
+    +bar('Completed',counts.completed,'var(--green)')
+    +bar('Forgotten',counts.forgotten,'var(--red)')
+    +bar('New (untouched)',counts.new,'var(--text3)')
+    +'</div>'
+    +'<div class="dsec2"><h3>Engagement</h3>'
+    +'<div class="dstats" style="grid-template-columns:repeat(2,1fr)">'
     +'<div class="scard"><div class="n" style="color:var(--gold)">'+bookmarked+'</div><div class="l">Bookmarked</div></div>'
     +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
     +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Shape-marked</div></div>'
     +'</div></div>'
     +'<div class="dsec2"><h3>Shape marker usage</h3>'
-    +SHAPES.map((s,i)=>bar(s+' Shape '+(i+1),shapeCounts[i],['#c8a800','#00b86a','#0099cc','#cc0077','#8844cc','#009999'][i])).join('')
+    +SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+s+'</span><span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span></div>').join('')
     +'</div>';
 }
 
