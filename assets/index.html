@@ -718,7 +718,9 @@ function attachDrowListeners(id){
 document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
   document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
   activeDTab=tab.dataset.dtab;
-  ['home','mylist','stats'].forEach(t=>document.getElementById('dash'+t.charAt(0).toUpperCase()+t.slice(1)).style.display=t===activeDTab?'':'none');
+  document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
+  document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
+  document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
   renderDashboard();
 }));
 
