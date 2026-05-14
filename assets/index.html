@@ -627,26 +627,17 @@ function expandedCard(w){
 
 function renderDashHome(){
   const bmList=wazaData.filter(w=>getP(w.id).bookmarked);
-  const ipList=wazaData.filter(w=>getP(w.id).stage==='inprogress');
   const bmarked=bmList.length;
-  const bmDone=bmList.filter(w=>getP(w.id).stage==='completed').length;
-  const bmIP=bmList.filter(w=>getP(w.id).stage==='inprogress').length;
-  const bmPct=bmarked?Math.round(bmDone/bmarked*100):0;
 
   document.getElementById('dashHome').innerHTML=
     '<div class="dstats">'
     +'<div class="scard"><div class="n" style="color:var(--gold)">'+bmarked+'</div><div class="l">Bookmarked</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In Progress</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--green)">'+bmDone+'</div><div class="l">Completed</div></div>'
     +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
     +'</div>'
     +'<div style="background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:20px">'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px"><span>Bookmarked Waza completion</span><span>'+bmDone+' / '+bmarked+' ('+bmPct+'%)</span></div>'
-    +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden"><div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
     +(bmarked===0?'<div style="font-size:12px;color:var(--text3);margin-top:6px">Bookmark Waza you want to learn to start tracking here.</div>':'')
     +'</div>'
-    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>'
-    +'<div class="dsec2"><h3>⏳ In Progress ('+ipList.length+')</h3>'+(ipList.length?ipList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No Waza in progress yet.</div>')+'</div>';
+    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>';
 
   attachDrowListeners('dashHome');
 }
