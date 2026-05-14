@@ -454,7 +454,7 @@ function renderList(){
     return'<div class="waza-card '+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+lb+tb+'</div>'
+      +'<div class="badges">'+bb+lb+'</div>'
       +sp+'</div>';
   }).join('');
   list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -577,7 +577,7 @@ function expandedCard(w){
     +'<div class="wce-header">'
     +'<div class="njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="nen">'+dispName(w)+'</div>'
-    +'<div class="wce-badges">'+bb+lb+tb+'</div>'
+    +'<div class="wce-badges">'+bb+lb+'</div>'
     +sp+'</div>'
     +videoButtons(w)
     +'</div>';
