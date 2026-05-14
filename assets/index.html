@@ -428,7 +428,6 @@ function filterWaza(){
 
 // ── Shared helpers ────────────────────────────────────────────
 const stageClass=s=>s==='inprogress'?'s-inprogress':s==='completed'?'s-completed':s==='forgotten'?'s-forgotten':'s-new';
-const stageBadge=s=>s==='inprogress'?'<span class="badge b-ip">In Progress</span>':s==='completed'?'<span class="badge b-done">✓ Completed</span>':s==='forgotten'?'<span class="badge b-forgotten">Forgotten</span>':'<span class="badge b-new">New</span>';
 const shapePips=shapes=>SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
 
 function platform(url){
@@ -469,7 +468,7 @@ function renderList(){
     return'<div class="waza-card '+stageClass(p.stage)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+'</div>'
+      +'<div class="badges">'+bb+lb+'</div>'
       +sp+'</div>';
   }).join('');
   list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -601,7 +600,7 @@ function expandedCard(w){
     +'<div class="wce-header">'
     +'<div class="njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="nen">'+dispName(w)+'</div>'
-    +'<div class="wce-badges">'+bb+stageBadge(p.stage)+lb+'</div>'
+    +'<div class="wce-badges">'+bb+lb+'</div>'
     +sp+'</div>'
     +videoButtons(w)
     +'</div>';
