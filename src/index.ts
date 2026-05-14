@@ -6,7 +6,7 @@ export default {
 		const path = url.pathname;
 
 		if (path === "/api/waza") {
-			const stmt = env.DB.prepare("SELECT * FROM waza LIMIT 20");
+			const stmt = env.DB.prepare("SELECT * FROM waza");
 			const { results } = await stmt.all();
 			return new Response(JSON.stringify(results), {
 				headers: {
