@@ -124,12 +124,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .vlink:hover{border-color:var(--accent);background:var(--bg3)}
 .vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
 .prog-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
-.pbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
-.pbtn:hover{background:var(--bg3)}
-.pbtn.pnew.on{background:#1e2030;color:#8899cc;border-color:#3a4060}
-.pbtn.pip.on{background:#2a1f00;color:var(--amber);border-color:#5a3f00}
-.pbtn.pdone.on{background:#001a0d;color:#6ddb9e;border-color:#2d5a3d}
-.pbtn.pforgot.on{background:#2a0000;color:#e08080;border-color:#5a1a1a}
 .bmbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
 .bmbtn:hover{background:var(--bg3)}
 .bmbtn.on{background:#2a2010;color:var(--gold);border-color:#5a4010}
@@ -520,12 +514,8 @@ function renderDetail(){
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
-    // Progress — not collapsible, always visible
+    // Bookmark — not collapsible, always visible
     +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
-    +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
-    +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In Progress</button>'
-    +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
-    +'<button class="pbtn pforgot'+(p.stage==='forgotten'?' on':'')+'" data-s="forgotten">✕ Forgotten</button>'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
 
@@ -552,9 +542,8 @@ function renderDetail(){
       +'<div class="dfield"><div class="lbl">Google translate</div><div class="val">'+(w.name_en_gtranslate||'—')+'</div></div>'
       +'</div>')
 
-    +((w.tag||w.reference)?sec('classif','Classification',
+    +((w.reference)?sec('classif','Classification',
       '<div class="dgrid">'
-      +(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')
       +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
       +'</div>'):'')
 
@@ -567,8 +556,7 @@ function renderDetail(){
 
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
-  // Progress buttons
-  panel.querySelectorAll('.pbtn').forEach(btn=>btn.addEventListener('click',()=>saveP(w.id,{stage:btn.dataset.s})));
+  // Marker buttons
   panel.querySelector('#bmBtn').addEventListener('click',()=>saveP(w.id,{bookmarked:!p.bookmarked}));
   panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
   panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
