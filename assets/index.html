@@ -59,27 +59,40 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 
 /* ── Cards ── */
 .waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
-.waza-card:hover{background:var(--bg2)}
-.waza-card.selected{background:var(--bg3);border-left-color:var(--accent)}
+.waza-card:hover{filter:brightness(1.08)}
+.waza-card.selected{outline:1px solid var(--accent)}
+/* stage color tints */
+.waza-card.s-inprogress{background:#1f1a00;border-left-color:#e8a030}
+.waza-card.s-completed{background:#001a0d;border-left-color:#4caf82}
+.waza-card.s-forgotten{background:#1a0000;border-left-color:#e05555}
+.waza-card.s-new{background:transparent;border-left-color:transparent}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
 .b-tag{background:#2a2040;color:#b3a8f0;border:1px solid #3d3560}
 .b-new{background:#1e2030;color:#6a7090}
-.b-ip{background:#1c2a1c;color:var(--green)}
-.b-done{background:#1a2a1a;color:#6ddb9e;border:1px solid #2d5a3d}
+.b-ip{background:#2a1f00;color:var(--amber);border:1px solid #5a3f00}
+.b-done{background:#001a0d;color:#6ddb9e;border:1px solid #2d5a3d}
+.b-forgotten{background:#2a0000;color:#e08080;border:1px solid #5a1a1a}
 .b-bm{background:#2a2010;color:var(--gold)}
+.b-like{background:#001a2a;color:#60b8f0;border:1px solid #004a7a}
+.b-dislike{background:#2a0010;color:#e080a0;border:1px solid #5a0020}
 
 /* ── Shape markers ── */
 .shapes-row{display:flex;gap:4px;flex-wrap:wrap}
-/* in cards, shapes are small */
-.shape-pip{font-size:13px;line-height:1;opacity:.25;transition:opacity .12s}
+.shape-pip{font-size:13px;line-height:1;opacity:.2;transition:opacity .12s}
 .shape-pip.on{opacity:1}
-/* in detail, shapes are buttons */
 .shape-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s;line-height:1}
 .shape-btn:hover{background:var(--bg3)}
 .shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
+
+/* ── Like / Dislike ── */
+.like-row{display:flex;gap:8px;margin-top:6px}
+.like-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:14px;cursor:pointer;transition:all .12s;color:var(--text2)}
+.like-btn:hover{background:var(--bg3)}
+.like-btn.like-on{background:#001a2a;color:#60b8f0;border-color:#004a7a}
+.like-btn.dislike-on{background:#2a0010;color:#e080a0;border-color:#5a0020}
 
 /* ── Detail ── */
 .d-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:8px;font-size:15px}
@@ -101,15 +114,19 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .pbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
 .pbtn:hover{background:var(--bg3)}
 .pbtn.pnew.on{background:#1e2030;color:#8899cc;border-color:#3a4060}
-.pbtn.pip.on{background:#1c2a1c;color:var(--green);border-color:#2d5a3d}
-.pbtn.pdone.on{background:#1a2a1a;color:#6ddb9e;border-color:#2d6040}
+.pbtn.pip.on{background:#2a1f00;color:var(--amber);border-color:#5a3f00}
+.pbtn.pdone.on{background:#001a0d;color:#6ddb9e;border-color:#2d5a3d}
+.pbtn.pforgot.on{background:#2a0000;color:#e08080;border-color:#5a1a1a}
 .bmbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
 .bmbtn:hover{background:var(--bg3)}
 .bmbtn.on{background:#2a2010;color:var(--gold);border-color:#5a4010}
 
 /* ── Dashboard ── */
-.dash{padding:16px}
-.dash h2{font-size:16px;font-weight:600;margin-bottom:16px}
+.dash{padding:16px;height:100%;overflow-y:auto}
+.dash-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0}
+.dtab{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
+.dtab:hover{color:var(--text1)}
+.dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
 .scard{background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center}
 .scard .n{font-size:22px;font-weight:700}
@@ -120,6 +137,14 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .drow:hover .drn{color:var(--accent)}
 .drn{font-size:14px}
 .drs{font-size:12px;color:var(--text3);margin-left:auto;flex-shrink:0}
+/* stat bars */
+.stat-bar-wrap{margin-bottom:12px}
+.stat-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px}
+.stat-bar-track{background:var(--bg3);border-radius:20px;height:8px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:20px;transition:width .4s}
+/* mylist stage section headers */
+.mylist-stage-header{padding:6px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:2px;margin-top:12px}
+.mylist-stage-header:first-child{margin-top:0}
 
 /* ── Nav ── */
 .nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -190,6 +215,8 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
     <button class="ntab active" data-tab="browse">Browse</button>
     <button class="ntab" data-tab="dashboard">Dashboard</button>
   </div>
+
+  <!-- BROWSE -->
   <div id="browseView" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
     <div class="filter-row">
       <select id="filterTag"><option value="">All levels</option></select>
@@ -208,8 +235,19 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
       </div>
     </div>
   </div>
-  <div id="dashboardView" style="display:none;flex:1;overflow-y:auto">
-    <div class="dash" id="dashContent"></div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardView" style="display:none;flex:1;overflow:hidden">
+    <div class="dash">
+      <div class="dash-tabs">
+        <button class="dtab active" data-dtab="home">Home</button>
+        <button class="dtab" data-dtab="mylist">My List</button>
+        <button class="dtab" data-dtab="stats">Stats</button>
+      </div>
+      <div id="dashHome"></div>
+      <div id="dashMyList" style="display:none"></div>
+      <div id="dashStats" style="display:none"></div>
+    </div>
   </div>
 </div>
 
@@ -221,7 +259,7 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
     <p>Wazalist is a reference database of wotagei Waza (skills/techniques). Browse all entries, watch reference videos, and track your learning progress.</p>
     <h3>Guest vs account</h3>
     <ul>
-      <li><b>Guest mode</b> — progress, bookmarks, and shape markers are saved locally in your browser on this device only.</li>
+      <li><b>Guest mode</b> — all data saved locally in your browser on this device only.</li>
       <li><b>Account</b> — progress syncs across devices via your email and PIN.</li>
     </ul>
     <h3>Browsing & searching</h3>
@@ -231,296 +269,241 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
       <li>Use <b>All families</b> to filter by parent Waza / family group.</li>
       <li>Click <b>★ Bookmarked</b> or <b>⏳ In progress</b> to filter by those states.</li>
       <li>Click a Waza in the list to open its full detail view.</li>
-      <li>In the detail view, click a parent chip to filter to that family.</li>
     </ul>
     <h3>Progress tracking</h3>
     <ul>
-      <li><b>New</b> — default state for all Waza.</li>
-      <li><b>In progress</b> — you are actively learning this Waza.</li>
-      <li><b>Completed</b> — you have mastered this Waza.</li>
-      <li><b>★ Bookmark</b> — "want to learn" marker, independent of learning stage.</li>
+      <li><b>New</b> — default, no color.</li>
+      <li><b>In progress</b> — yellow card tint.</li>
+      <li><b>Completed</b> — green card tint.</li>
+      <li><b>Forgotten</b> — red card tint.</li>
+      <li><b>★ Bookmark</b> — "want to learn" flag, independent of stage.</li>
     </ul>
+    <h3>Like / Dislike</h3>
+    <p>👍 Like or 👎 Dislike any Waza as another tracking method. These are mutually exclusive.</p>
     <h3>Shape markers</h3>
-    <p>Each Waza has 6 shape markers (● ▲ ■ ♥ ★ ◆). Toggle any combination — their meaning is entirely up to you. Shapes appear on the Waza card, detail view, and dashboard.</p>
+    <p>6 shape markers (● ▲ ■ ♥ ★ ◆) per Waza. Toggle any combination — meaning is entirely up to you.</p>
     <h3>Dashboard</h3>
-    <p>See your progress stats, bookmarked Waza, and in-progress Waza. The progress bar tracks completion of bookmarked Waza only.</p>
-    <h3>Video references</h3>
-    <p>Each Waza may have up to 6 video links. Supported platforms: YouTube, Bilibili, Twitter/X, NicoNico, Facebook.</p>
+    <ul>
+      <li><b>Home</b> — overview stats and quick lists of bookmarked and in-progress Waza.</li>
+      <li><b>My List</b> — full list of your tracked Waza sorted by stage, bookmarked first.</li>
+      <li><b>Stats</b> — detailed breakdown of your progress across all Waza.</li>
+    </ul>
     <button class="mclosebtn" id="closeModal">Got it!</button>
   </div>
 </div>
 
 <script>
-// ── Constants ────────────────────────────────────────────────
 const SHAPES = ['●','▲','■','♥','★','◆'];
+const STAGE_ORDER = ['inprogress','completed','forgotten','new'];
 
 // ── Mode & state ─────────────────────────────────────────────
 let isGuest = false;
 let token = localStorage.getItem('wl_token') || '';
 let wazaData = [];
-let prog = {};       // waza_id -> {stage, bookmarked, shapes: boolean[6]}
+let prog = {};
 let selectedId = null;
 let filters = {search:'',tag:'',parent:'',bm:false,ip:false};
+let activeDTab = 'home';
 
-// ── localStorage helpers (guest + shape persistence) ─────────
+// ── localStorage ─────────────────────────────────────────────
 const LS_KEY = 'wl_local_prog';
-function loadLocal() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; }
-}
-function saveLocal(data) {
-  localStorage.setItem(LS_KEY, JSON.stringify(data));
-}
+function loadLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch { return {}; } }
+function saveLocal(d) { localStorage.setItem(LS_KEY, JSON.stringify(d)); }
 
 // ── API ──────────────────────────────────────────────────────
 const api = async (path, method='GET', body=null) => {
-  const opts = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? {'Authorization': 'Bearer '+token} : {})
-    }
-  };
+  const opts = { method, headers:{'Content-Type':'application/json', ...(token?{'Authorization':'Bearer '+token}:{})} };
   if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(path, opts);
-  return r.json();
+  return (await fetch(path, opts)).json();
 };
 
-// ── Auth wiring ──────────────────────────────────────────────
-document.getElementById('toReg').onclick = () => { document.getElementById('loginBox').style.display='none'; document.getElementById('regBox').style.display=''; };
-document.getElementById('toLi').onclick  = () => { document.getElementById('regBox').style.display='none';  document.getElementById('loginBox').style.display=''; };
+// ── Auth ─────────────────────────────────────────────────────
+document.getElementById('toReg').onclick  = () => { document.getElementById('loginBox').style.display='none'; document.getElementById('regBox').style.display=''; };
+document.getElementById('toLi').onclick   = () => { document.getElementById('regBox').style.display='none';  document.getElementById('loginBox').style.display=''; };
 
 function startGuest() {
-  isGuest = true;
-  token = '';
-  // load any existing local progress
-  const local = loadLocal();
-  Object.entries(local).forEach(([id, p]) => { prog[+id] = p; });
+  isGuest = true; token = '';
+  Object.entries(loadLocal()).forEach(([id,p]) => { prog[+id] = p; });
   initApp();
 }
 document.getElementById('guestBtn').onclick  = startGuest;
 document.getElementById('guestBtn2').onclick = startGuest;
 
 document.getElementById('li-btn').onclick = async () => {
-  const email = document.getElementById('li-email').value.trim();
-  const pin   = document.getElementById('li-pin').value.trim();
-  const errEl = document.getElementById('li-err');
-  errEl.textContent = '';
-  if (!email || !pin) { errEl.textContent = 'Please fill in both fields.'; return; }
-  const res = await api('/api/login','POST',{email,pin});
-  if (res.error) { errEl.textContent = res.error; return; }
-  token = res.token;
-  localStorage.setItem('wl_token', token);
-  initApp();
+  const email=document.getElementById('li-email').value.trim(), pin=document.getElementById('li-pin').value.trim();
+  const errEl=document.getElementById('li-err'); errEl.textContent='';
+  if (!email||!pin){errEl.textContent='Please fill in both fields.';return;}
+  const res=await api('/api/login','POST',{email,pin});
+  if (res.error){errEl.textContent=res.error;return;}
+  token=res.token; localStorage.setItem('wl_token',token); initApp();
 };
 
 document.getElementById('rg-btn').onclick = async () => {
-  const email = document.getElementById('rg-email').value.trim();
-  const pin   = document.getElementById('rg-pin').value.trim();
-  const errEl = document.getElementById('rg-err');
-  errEl.className = 'aerr';
-  errEl.textContent = '';
-  if (!email || !pin) { errEl.textContent = 'Please fill in both fields.'; return; }
-  const res = await api('/api/register','POST',{email,pin});
-  if (res.error) { errEl.textContent = res.error; return; }
-  errEl.className = 'aok';
-  errEl.textContent = 'Account created! Signing you in…';
-  const li = await api('/api/login','POST',{email,pin});
-  if (li.token) { token = li.token; localStorage.setItem('wl_token', token); initApp(); }
+  const email=document.getElementById('rg-email').value.trim(), pin=document.getElementById('rg-pin').value.trim();
+  const errEl=document.getElementById('rg-err'); errEl.className='aerr'; errEl.textContent='';
+  if (!email||!pin){errEl.textContent='Please fill in both fields.';return;}
+  const res=await api('/api/register','POST',{email,pin});
+  if (res.error){errEl.textContent=res.error;return;}
+  errEl.className='aok'; errEl.textContent='Account created! Signing you in…';
+  const li=await api('/api/login','POST',{email,pin});
+  if (li.token){token=li.token; localStorage.setItem('wl_token',token); initApp();}
 };
 
 document.getElementById('logoutBtn').onclick = () => {
-  token = '';
-  isGuest = false;
-  localStorage.removeItem('wl_token');
-  location.reload();
+  token=''; isGuest=false; localStorage.removeItem('wl_token'); location.reload();
 };
 
 // ── Init ─────────────────────────────────────────────────────
 async function initApp() {
-  document.getElementById('authWrap').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('guestBadge').style.display = isGuest ? '' : 'none';
-  document.getElementById('logoutBtn').textContent = isGuest ? 'Sign in / Register' : 'Sign out';
-  document.getElementById('countBar').textContent = 'Loading Waza…';
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('guestBadge').style.display=isGuest?'':'none';
+  document.getElementById('logoutBtn').textContent=isGuest?'Sign in / Register':'Sign out';
+  document.getElementById('countBar').textContent='Loading Waza…';
 
-  // Always fetch Waza from API
   const wazaRes = await api('/api/waza');
   wazaData = Array.isArray(wazaRes) ? wazaRes : [];
 
-  if (isGuest) {
-    // Progress already loaded from localStorage in startGuest()
-  } else {
-    // Fetch progress from D1 via API
+  if (!isGuest) {
     const progRes = await api('/api/progress');
     if (Array.isArray(progRes)) {
       progRes.forEach(p => {
         prog[p.waza_id] = {
           stage: p.stage,
           bookmarked: !!p.bookmarked,
-          shapes: p.shapes ? JSON.parse(p.shapes) : [false,false,false,false,false,false]
+          shapes: p.shapes ? JSON.parse(p.shapes) : Array(6).fill(false),
+          like: p.like || null  // 'like' | 'dislike' | null
         };
       });
     }
   }
 
-  populateFilters();
-  renderList();
-  renderDashboard();
+  populateFilters(); renderList(); renderDashboard();
 }
-
-// Auto-login if token stored
 if (token) initApp();
 
-// ── Progress helpers ─────────────────────────────────────────
-const emptyP = () => ({stage:'new', bookmarked:false, shapes:[false,false,false,false,false,false]});
+// ── Progress ─────────────────────────────────────────────────
+const emptyP = () => ({stage:'new', bookmarked:false, shapes:Array(6).fill(false), like:null});
 const getP = id => prog[id] || emptyP();
 
-async function saveP(id, stage, bookmarked, shapes) {
-  prog[id] = {stage, bookmarked, shapes};
-
-  if (isGuest) {
-    const local = loadLocal();
-    local[id] = {stage, bookmarked, shapes};
-    saveLocal(local);
-  } else {
-    await api('/api/progress','POST',{waza_id:id, stage, bookmarked, shapes: JSON.stringify(shapes)});
-  }
-
+async function saveP(id, patch) {
+  const cur = getP(id);
+  prog[id] = {...cur, ...patch};
+  if (isGuest) { const l=loadLocal(); l[id]=prog[id]; saveLocal(l); }
+  else { await api('/api/progress','POST',{waza_id:id, ...prog[id], shapes:JSON.stringify(prog[id].shapes)}); }
   renderList(); renderDetail(); renderDashboard();
 }
 
 // ── Filters ──────────────────────────────────────────────────
 function populateFilters() {
-  const tags = [...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
-  document.getElementById('filterTag').innerHTML =
-    '<option value="">All levels</option>' + tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
-  const parents = [...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
-  document.getElementById('filterParent').innerHTML =
-    '<option value="">All families</option>' + parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
+  const tags=[...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
+  document.getElementById('filterTag').innerHTML='<option value="">All levels</option>'+tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
+  const parents=[...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
+  document.getElementById('filterParent').innerHTML='<option value="">All families</option>'+parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
 }
 
-const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
+const dispName = w => w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
 
 function filterWaza() {
-  const {search,tag,parent,bm,ip} = filters;
-  return wazaData.filter(w => {
-    if (search) {
-      const s = search.toLowerCase();
-      if (!((w.name_jp||'').toLowerCase().includes(s)||
-            (w.name_en||'').toLowerCase().includes(s)||
-            (w.name_en_literal||'').toLowerCase().includes(s)||
-            (w.name_en_gtranslate||'').toLowerCase().includes(s))) return false;
-    }
-    if (tag && w.tag !== tag) return false;
-    if (parent && w.parent_en0 !== parent && w.parent_en1 !== parent) return false;
-    const p = getP(w.id);
-    if (bm && !p.bookmarked) return false;
-    if (ip && p.stage !== 'inprogress') return false;
+  const {search,tag,parent,bm,ip}=filters;
+  return wazaData.filter(w=>{
+    if (search){const s=search.toLowerCase();if(!((w.name_jp||'').toLowerCase().includes(s)||(w.name_en||'').toLowerCase().includes(s)||(w.name_en_literal||'').toLowerCase().includes(s)||(w.name_en_gtranslate||'').toLowerCase().includes(s)))return false;}
+    if (tag&&w.tag!==tag)return false;
+    if (parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
+    const p=getP(w.id);
+    if (bm&&!p.bookmarked)return false;
+    if (ip&&p.stage!=='inprogress')return false;
     return true;
   });
 }
 
-// Build the small shape pips shown on list cards and dashboard rows
+function stageClass(stage) {
+  return stage==='inprogress'?'s-inprogress':stage==='completed'?'s-completed':stage==='forgotten'?'s-forgotten':'s-new';
+}
+function stageBadge(stage) {
+  return stage==='inprogress'?'<span class="badge b-ip">In Progress</span>'
+        :stage==='completed' ?'<span class="badge b-done">✓ Completed</span>'
+        :stage==='forgotten' ?'<span class="badge b-forgotten">Forgotten</span>'
+        :'<span class="badge b-new">New</span>';
+}
 function shapePips(shapes) {
-  return SHAPES.map((s,i) =>
-    '<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>'
-  ).join('');
+  return SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
 }
 
 // ── Render list ──────────────────────────────────────────────
 function renderList() {
-  const filtered = filterWaza();
-  document.getElementById('countBar').textContent = filtered.length + ' of ' + wazaData.length + ' Waza';
-  const list = document.getElementById('wazaList');
-  if (!filtered.length) {
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';
-    return;
-  }
-  list.innerHTML = filtered.map(w => {
-    const p = getP(w.id);
-    const pb = p.stage==='new'        ? '<span class="badge b-new">New</span>'
-             : p.stage==='inprogress' ? '<span class="badge b-ip">In progress</span>'
-             :                          '<span class="badge b-done">✓ Completed</span>';
-    const bb = p.bookmarked ? '<span class="badge b-bm">★</span>' : '';
-    const tb = w.tag ? '<span class="badge b-tag">'+w.tag+'</span>' : '';
-    const hasShape = p.shapes && p.shapes.some(Boolean);
-    const sp = hasShape ? '<div class="shapes-row" style="margin-top:4px">'+shapePips(p.shapes)+'</div>' : '';
-    return '<div class="waza-card'+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+  const filtered=filterWaza();
+  document.getElementById('countBar').textContent=filtered.length+' of '+wazaData.length+' Waza';
+  const list=document.getElementById('wazaList');
+  if (!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
+  list.innerHTML=filtered.map(w=>{
+    const p=getP(w.id);
+    const shapes=p.shapes||Array(6).fill(false);
+    const hasShape=shapes.some(Boolean);
+    const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
+    const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+    const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
+    const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
+    const sel=selectedId===w.id?' selected':'';
+    return '<div class="waza-card '+stageClass(p.stage)+sel+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+pb+tb+'</div>'
-      +sp
-      +'</div>';
+      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+      +sp+'</div>';
   }).join('');
-  list.querySelectorAll('.waza-card').forEach(el =>
-    el.addEventListener('click', () => selectWaza(+el.dataset.id))
-  );
+  list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
 }
 
-function selectWaza(id) { selectedId=id; renderList(); renderDetail(); }
+function selectWaza(id){selectedId=id;renderList();renderDetail();}
 
-// ── Platform detection ───────────────────────────────────────
-const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter / X',nico:'NicoNico',fb:'Facebook',other:'Video'};
-const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
-function platform(url) {
-  if (!url) return 'other';
-  if (/youtu\.be|youtube\.com/.test(url)) return 'yt';
-  if (/bilibili\.com|b23\.tv/.test(url)) return 'bili';
-  if (/twitter\.com|x\.com/.test(url)) return 'tw';
-  if (/nicovideo\.jp|nico\.ms/.test(url)) return 'nico';
-  if (/facebook\.com|fb\.com/.test(url)) return 'fb';
-  return 'other';
+// ── Platform ─────────────────────────────────────────────────
+const platLabel={yt:'YouTube',bili:'Bilibili',tw:'Twitter / X',nico:'NicoNico',fb:'Facebook',other:'Video'};
+const platColor={yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
+function platform(url){
+  if(!url)return'other';
+  if(/youtu\.be|youtube\.com/.test(url))return'yt';
+  if(/bilibili\.com|b23\.tv/.test(url))return'bili';
+  if(/twitter\.com|x\.com/.test(url))return'tw';
+  if(/nicovideo\.jp|nico\.ms/.test(url))return'nico';
+  if(/facebook\.com|fb\.com/.test(url))return'fb';
+  return'other';
 }
 
 // ── Render detail ────────────────────────────────────────────
 function renderDetail() {
-  const panel = document.getElementById('detailPanel');
-  if (selectedId === null) {
-    panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';
-    return;
-  }
-  const w = wazaData.find(x => x.id === selectedId);
-  if (!w) return;
-  const p = getP(w.id);
-  const shapes = p.shapes || [false,false,false,false,false,false];
+  const panel=document.getElementById('detailPanel');
+  if (selectedId===null){panel.innerHTML='<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';return;}
+  const w=wazaData.find(x=>x.id===selectedId); if(!w)return;
+  const p=getP(w.id);
+  const shapes=p.shapes||Array(6).fill(false);
 
-  const videos = [w.video0,w.video1,w.video2,w.video3,w.video4,w.video5]
-    .filter(v => v && v.trim() && v !== '0');
-  const videoHTML = videos.length
-    ? videos.map((v,i) => {
-        const pl = platform(v);
-        return '<a class="vlink" href="'+v+'" target="_blank" rel="noopener">'
-          +'<div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div>'
-          +'<span>'+platLabel[pl]+'</span>'
-          +'<span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';
-      }).join('')
-    : '<div style="color:var(--text3);font-size:13px">No video references</div>';
+  const videos=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
+  const videoHTML=videos.length
+    ?videos.map((v,i)=>{const pl=platform(v);return'<a class="vlink" href="'+v+'" target="_blank" rel="noopener"><div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div><span>'+platLabel[pl]+'</span><span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';}).join('')
+    :'<div style="color:var(--text3);font-size:13px">No video references</div>';
 
-  const siblings = wazaData.filter(x => x.id !== w.id && (
-    (w.parent_en0 && (x.parent_en0===w.parent_en0||x.parent_en1===w.parent_en0)) ||
-    (w.parent_en1 && (x.parent_en0===w.parent_en1||x.parent_en1===w.parent_en1))
-  )).slice(0,12);
-  const sibHTML = siblings.length
-    ? siblings.map(s => '<span class="chip" data-id="'+s.id+'">'+(s.name_jp||dispName(s))+'</span>').join('')
-    : '<span style="color:var(--text3);font-size:13px">None found</span>';
+  const siblings=wazaData.filter(x=>x.id!==w.id&&((w.parent_en0&&(x.parent_en0===w.parent_en0||x.parent_en1===w.parent_en0))||(w.parent_en1&&(x.parent_en0===w.parent_en1||x.parent_en1===w.parent_en1)))).slice(0,12);
+  const sibHTML=siblings.length?siblings.map(s=>'<span class="chip" data-id="'+s.id+'">'+(s.name_jp||dispName(s))+'</span>').join(''):'<span style="color:var(--text3);font-size:13px">None found</span>';
 
-  const shapeButtons = SHAPES.map((s,i) =>
-    '<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>'
-  ).join('');
-
-  panel.innerHTML =
+  panel.innerHTML=
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
     +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
     +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
-    +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In progress</button>'
+    +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In Progress</button>'
     +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
+    +'<button class="pbtn pforgot'+(p.stage==='forgotten'?' on':'')+'" data-s="forgotten">✕ Forgotten</button>'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
 
+    +'<div class="dsec"><h3>Like / Dislike</h3><div class="like-row">'
+    +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'" id="likeBtn">👍 Like</button>'
+    +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'" id="dislikeBtn">👎 Dislike</button>'
+    +'</div></div>'
+
     +'<div class="dsec"><h3>Shape markers</h3>'
-    +'<div class="shapes-row">'+shapeButtons+'</div>'
+    +'<div class="shapes-row">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
     +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — their meaning is up to you.</div>'
     +'</div>'
 
@@ -531,115 +514,168 @@ function renderDetail() {
     +'<div class="dfield"><div class="lbl">Google translate</div><div class="val">'+(w.name_en_gtranslate||'—')+'</div></div>'
     +'</div></div>'
 
-    +((w.reference||w.tag)
-      ? '<div class="dsec"><h3>Classification</h3><div class="dgrid">'
-        +(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')
-        +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
-        +'</div></div>' : '')
-
-    +((w.parent_jp0||w.parent_jp1)
-      ? '<div class="dsec"><h3>Parent techniques (prerequisites)</h3><div>'
-        +(w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
-        +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')
-        +'</div></div>' : '')
-
-    +((w.author_jp||w.author_en)
-      ? '<div class="dsec"><h3>Creator</h3>'
-        +'<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'
-        +(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div></div>' : '')
-
+    +((w.reference||w.tag)?'<div class="dsec"><h3>Classification</h3><div class="dgrid">'+(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')+(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')+'</div></div>':'')
+    +((w.parent_jp0||w.parent_jp1)?'<div class="dsec"><h3>Parent techniques (prerequisites)</h3><div>'+(w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')+(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')+'</div></div>':'')
+    +((w.author_jp||w.author_en)?'<div class="dsec"><h3>Creator</h3><div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'+(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div></div>':'')
     +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
-  // Progress buttons
-  panel.querySelectorAll('.pbtn').forEach(btn =>
-    btn.addEventListener('click', () => saveP(w.id, btn.dataset.s, p.bookmarked, shapes))
-  );
-  // Bookmark
-  panel.querySelector('#bmBtn').addEventListener('click', () => saveP(w.id, p.stage, !p.bookmarked, shapes));
-  // Shape buttons — toggle individual shape
-  panel.querySelectorAll('.shape-btn').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const i = +btn.dataset.si;
-      const newShapes = [...shapes];
-      newShapes[i] = !newShapes[i];
-      saveP(w.id, p.stage, p.bookmarked, newShapes);
-    })
-  );
-  // Parent chips
-  panel.querySelectorAll('.chip[data-parent]').forEach(chip =>
-    chip.addEventListener('click', () => {
-      filters.parent = chip.dataset.parent;
-      document.getElementById('filterParent').value = chip.dataset.parent;
-      renderList();
-    })
-  );
-  // Sibling chips
-  panel.querySelectorAll('.chip[data-id]').forEach(chip =>
-    chip.addEventListener('click', () => selectWaza(+chip.dataset.id))
-  );
+  panel.querySelectorAll('.pbtn').forEach(btn=>btn.addEventListener('click',()=>saveP(w.id,{stage:btn.dataset.s})));
+  panel.querySelector('#bmBtn').addEventListener('click',()=>saveP(w.id,{bookmarked:!p.bookmarked}));
+  panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
+  panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
+  panel.querySelectorAll('.shape-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const ns=[...shapes]; ns[+btn.dataset.si]=!ns[+btn.dataset.si]; saveP(w.id,{shapes:ns});
+  }));
+  panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{
+    filters.parent=chip.dataset.parent; document.getElementById('filterParent').value=chip.dataset.parent; renderList();
+  }));
+  panel.querySelectorAll('.chip[data-id]').forEach(chip=>chip.addEventListener('click',()=>selectWaza(+chip.dataset.id)));
 }
 
 // ── Dashboard ────────────────────────────────────────────────
 function renderDashboard() {
-  const total   = wazaData.length;
-  const bmList  = wazaData.filter(w => getP(w.id).bookmarked);
-  const ipList  = wazaData.filter(w => getP(w.id).stage === 'inprogress');
-  const bmarked = bmList.length;
-  const bmDone  = bmList.filter(w => getP(w.id).stage === 'completed').length;
-  const bmIP    = bmList.filter(w => getP(w.id).stage === 'inprogress').length;
-  const bmPct   = bmarked ? Math.round(bmDone/bmarked*100) : 0;
+  if (activeDTab==='home')   renderDashHome();
+  if (activeDTab==='mylist') renderDashMyList();
+  if (activeDTab==='stats')  renderDashStats();
+}
 
-  const row = w => {
-    const p = getP(w.id);
-    const hasShape = p.shapes && p.shapes.some(Boolean);
-    return '<div class="drow" data-id="'+w.id+'">'
-      +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
-      +'<span class="drn">'+(w.name_jp||'—')+'</span>'
-      +(hasShape?'<div class="shapes-row" style="margin-left:6px">'+shapePips(p.shapes)+'</div>':'')
-      +'<span class="drs">'+dispName(w)+'</span></div>';
-  };
+function drow(w) {
+  const p=getP(w.id);
+  const shapes=p.shapes||Array(6).fill(false);
+  const hasShape=shapes.some(Boolean);
+  const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
+  return '<div class="drow '+stageClass(p.stage)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
+    +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
+    +'<span class="drn">'+(w.name_jp||'—')+'</span>'
+    +(hasShape?'<div class="shapes-row" style="margin-left:4px">'+shapePips(shapes)+'</div>':'')
+    +lb
+    +'<span class="drs">'+dispName(w)+'</span></div>';
+}
 
-  document.getElementById('dashContent').innerHTML =
-    '<h2>Dashboard</h2>'
-    +'<div class="dstats">'
+function renderDashHome() {
+  const total=wazaData.length;
+  const bmList=wazaData.filter(w=>getP(w.id).bookmarked);
+  const ipList=wazaData.filter(w=>getP(w.id).stage==='inprogress');
+  const bmarked=bmList.length;
+  const bmDone=bmList.filter(w=>getP(w.id).stage==='completed').length;
+  const bmIP=bmList.filter(w=>getP(w.id).stage==='inprogress').length;
+  const bmPct=bmarked?Math.round(bmDone/bmarked*100):0;
+
+  document.getElementById('dashHome').innerHTML=
+    '<div class="dstats">'
     +'<div class="scard"><div class="n" style="color:var(--gold)">'+bmarked+'</div><div class="l">Bookmarked</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In progress</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In Progress</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--green)">'+bmDone+'</div><div class="l">Completed</div></div>'
     +'<div class="scard"><div class="n">'+total+'</div><div class="l">Total Waza</div></div>'
     +'</div>'
     +'<div style="background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:20px">'
-    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px">'
-    +'<span>Bookmarked Waza completion</span><span>'+bmDone+' / '+bmarked+' ('+bmPct+'%)</span></div>'
-    +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden">'
-    +'<div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px"><span>Bookmarked Waza completion</span><span>'+bmDone+' / '+bmarked+' ('+bmPct+'%)</span></div>'
+    +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden"><div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
     +(bmarked===0?'<div style="font-size:12px;color:var(--text3);margin-top:6px">Bookmark Waza you want to learn to start tracking here.</div>':'')
     +'</div>'
-    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'
-    +(bmList.length ? bmList.map(row).join('') : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')
-    +'</div>'
-    +'<div class="dsec2"><h3>⏳ In progress ('+ipList.length+')</h3>'
-    +(ipList.length ? ipList.map(row).join('') : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No Waza in progress yet.</div>')
-    +'</div>';
+    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>'
+    +'<div class="dsec2"><h3>⏳ In Progress ('+ipList.length+')</h3>'+(ipList.length?ipList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No Waza in progress yet.</div>')+'</div>';
 
-  document.querySelectorAll('.drow').forEach(el =>
-    el.addEventListener('click', () => {
-      document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-      document.querySelector('[data-tab="browse"]').classList.add('active');
-      document.getElementById('browseView').style.display='flex';
-      document.getElementById('dashboardView').style.display='none';
-      selectWaza(+el.dataset.id);
-    })
-  );
+  attachDrowListeners('dashHome');
 }
 
+function renderDashMyList() {
+  // Bookmarked first, then group rest by stage order, exclude 'new' with no data
+  const tracked = wazaData.filter(w => {
+    const p=getP(w.id);
+    return p.bookmarked || p.stage!=='new' || p.like || (p.shapes&&p.shapes.some(Boolean));
+  });
+  const bmWaza = tracked.filter(w=>getP(w.id).bookmarked);
+  const byStage = {};
+  STAGE_ORDER.forEach(s=>{ byStage[s]=tracked.filter(w=>!getP(w.id).bookmarked&&getP(w.id).stage===s); });
+
+  const stageLabel={inprogress:'⏳ In Progress',completed:'✓ Completed',forgotten:'✕ Forgotten',new:'New'};
+  let html='';
+  if (bmWaza.length) html+='<div class="mylist-stage-header">★ Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(drow).join('');
+  STAGE_ORDER.forEach(s=>{
+    if (byStage[s].length) html+='<div class="mylist-stage-header">'+stageLabel[s]+' ('+byStage[s].length+')</div>'+byStage[s].map(drow).join('');
+  });
+  if (!html) html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking or setting progress on a Waza.</div>';
+
+  document.getElementById('dashMyList').innerHTML=html;
+  attachDrowListeners('dashMyList');
+}
+
+function renderDashStats() {
+  const total=wazaData.length;
+  const counts={new:0,inprogress:0,completed:0,forgotten:0};
+  let liked=0,disliked=0,bookmarked=0,shaped=0;
+  wazaData.forEach(w=>{
+    const p=getP(w.id);
+    counts[p.stage]=(counts[p.stage]||0)+1;
+    if (p.bookmarked) bookmarked++;
+    if (p.like==='like') liked++;
+    if (p.like==='dislike') disliked++;
+    if (p.shapes&&p.shapes.some(Boolean)) shaped++;
+  });
+
+  function bar(label,count,color){
+    const pct=total?Math.round(count/total*100):0;
+    return '<div class="stat-bar-wrap">'
+      +'<div class="stat-bar-label"><span>'+label+'</span><span>'+count+' / '+total+' ('+pct+'%)</span></div>'
+      +'<div class="stat-bar-track"><div class="stat-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+      +'</div>';
+  }
+
+  // Per-shape count
+  const shapeCounts=Array(6).fill(0);
+  wazaData.forEach(w=>{ const p=getP(w.id); if(p.shapes) p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;}); });
+  const shapeRows=SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">'
+    +'<span style="font-size:16px">'+s+'</span>'
+    +'<span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span>'
+    +'</div>').join('');
+
+  document.getElementById('dashStats').innerHTML=
+    '<div class="dsec2"><h3>Progress breakdown</h3>'
+    +bar('In Progress',counts.inprogress,'var(--amber)')
+    +bar('Completed',counts.completed,'var(--green)')
+    +bar('Forgotten',counts.forgotten,'var(--red)')
+    +bar('New (untouched)',counts.new,'var(--text3)')
+    +'</div>'
+    +'<div class="dsec2"><h3>Engagement</h3>'
+    +'<div class="dstats" style="grid-template-columns:repeat(2,1fr)">'
+    +'<div class="scard"><div class="n" style="color:var(--gold)">'+bookmarked+'</div><div class="l">Bookmarked</div></div>'
+    +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
+    +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Shape-marked</div></div>'
+    +'</div></div>'
+    +'<div class="dsec2"><h3>Shape marker usage</h3>'+shapeRows+'</div>';
+}
+
+function attachDrowListeners(containerId) {
+  document.querySelectorAll('#'+containerId+' .drow').forEach(el=>el.addEventListener('click',()=>{
+    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('[data-tab="browse"]').classList.add('active');
+    document.getElementById('browseView').style.display='flex';
+    document.getElementById('dashboardView').style.display='none';
+    selectWaza(+el.dataset.id);
+  }));
+}
+
+// ── Dashboard tabs ───────────────────────────────────────────
+document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  activeDTab=tab.dataset.dtab;
+  document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
+  document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
+  document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
+  renderDashboard();
+}));
+
 // ── Filter events ────────────────────────────────────────────
-document.getElementById('searchInput').addEventListener('input', e => { filters.search=e.target.value; renderList(); });
-document.getElementById('filterTag').addEventListener('change', e => { filters.tag=e.target.value; renderList(); });
-document.getElementById('filterParent').addEventListener('change', e => { filters.parent=e.target.value; renderList(); });
-document.getElementById('filterBM').addEventListener('click', function() { filters.bm=!filters.bm; this.classList.toggle('active',filters.bm); renderList(); });
-document.getElementById('filterIP').addEventListener('click', function() { filters.ip=!filters.ip; this.classList.toggle('active',filters.ip); renderList(); });
-document.getElementById('clearFilters').addEventListener('click', () => {
+document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
+document.getElementById('filterTag').addEventListener('change',e=>{filters.tag=e.target.value;renderList();});
+document.getElementById('filterParent').addEventListener('change',e=>{filters.parent=e.target.value;renderList();});
+document.getElementById('filterBM').addEventListener('click',function(){filters.bm=!filters.bm;this.classList.toggle('active',filters.bm);renderList();});
+document.getElementById('filterIP').addEventListener('click',function(){filters.ip=!filters.ip;this.classList.toggle('active',filters.ip);renderList();});
+document.getElementById('clearFilters').addEventListener('click',()=>{
   filters={search:'',tag:'',parent:'',bm:false,ip:false};
   document.getElementById('searchInput').value='';
   document.getElementById('filterTag').value='';
@@ -650,21 +686,19 @@ document.getElementById('clearFilters').addEventListener('click', () => {
 });
 
 // ── Nav tabs ─────────────────────────────────────────────────
-document.querySelectorAll('.ntab').forEach(tab =>
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    const t = tab.dataset.tab;
-    document.getElementById('browseView').style.display = t==='browse'?'flex':'none';
-    document.getElementById('dashboardView').style.display = t==='dashboard'?'block':'none';
-    if (t==='dashboard') renderDashboard();
-  })
-);
+document.querySelectorAll('.ntab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  const t=tab.dataset.tab;
+  document.getElementById('browseView').style.display=t==='browse'?'flex':'none';
+  document.getElementById('dashboardView').style.display=t==='dashboard'?'block':'none';
+  if (t==='dashboard') renderDashboard();
+}));
 
 // ── Modal ────────────────────────────────────────────────────
-document.getElementById('helpBtn').addEventListener('click', () => { document.getElementById('modalBg').style.display='flex'; });
-document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('modalBg').style.display='none'; });
-document.getElementById('modalBg').addEventListener('click', e => { if(e.target===document.getElementById('modalBg')) document.getElementById('modalBg').style.display='none'; });
+document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('modalBg').style.display='flex';});
+document.getElementById('closeModal').addEventListener('click',()=>{document.getElementById('modalBg').style.display='none';});
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target===document.getElementById('modalBg'))document.getElementById('modalBg').style.display='none';});
 </script>
 </body>
 </html>
