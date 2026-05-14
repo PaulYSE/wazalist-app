@@ -404,8 +404,6 @@ async function saveP(id,patch){
 
 // ── Populate filter dropdowns ─────────────────────────────────
 function populateFilters(){
-  const tags=[...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
-  document.getElementById('filterTag').innerHTML='<option value="">All levels</option>'+tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
   const parents=[...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
   document.getElementById('filterParent').innerHTML='<option value="">All families</option>'+parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
 }
@@ -414,10 +412,9 @@ function populateFilters(){
 const dispName=w=>w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
 
 function filterWaza(){
-  const {search,tag,parent,progress,shape,bm,like}=filters;
+  const {search,parent,progress,shape,bm,like}=filters;
   return wazaData.filter(w=>{
     if(search){const s=search.toLowerCase();if(!((w.name_jp||'').toLowerCase().includes(s)||(w.name_en||'').toLowerCase().includes(s)||(w.name_en_literal||'').toLowerCase().includes(s)||(w.name_en_gtranslate||'').toLowerCase().includes(s)))return false;}
-    if(tag&&w.tag!==tag)return false;
     if(parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
     const p=getP(w.id);
     if(progress&&p.stage!==progress)return false;
@@ -468,12 +465,11 @@ function renderList(){
     const hasShape=shapes.some(Boolean);
     const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
     const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-    const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
     const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
     return'<div class="waza-card '+stageClass(p.stage)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+'</div>'
       +sp+'</div>';
   }).join('');
   list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -588,7 +584,6 @@ function drow(w){
   const hasShape=shapes.some(Boolean);
   const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
   return'<div class="drow '+stageClass(p.stage)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
-    +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
     +'<span class="drn">'+(w.name_jp||'—')+'</span>'
     +(hasShape?'<div class="shapes-row" style="margin-left:4px">'+shapePips(shapes)+'</div>':'')
     +lb+'<span class="drs">'+dispName(w)+'</span></div>';
@@ -601,13 +596,12 @@ function expandedCard(w){
   const hasShape=shapes.some(Boolean);
   const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
   const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-  const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
   const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
   return'<div class="waza-card-expanded '+stageClass(p.stage)+'" data-id="'+w.id+'">'
     +'<div class="wce-header">'
     +'<div class="njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="nen">'+dispName(w)+'</div>'
-    +'<div class="wce-badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+    +'<div class="wce-badges">'+bb+stageBadge(p.stage)+lb+'</div>'
     +sp+'</div>'
     +videoButtons(w)
     +'</div>';
@@ -705,7 +699,6 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 
 // ── Filter events ─────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
-document.getElementById('filterTag').addEventListener('change',e=>{filters.tag=e.target.value;renderList();});
 document.getElementById('filterParent').addEventListener('change',e=>{filters.parent=e.target.value;renderList();});
 document.getElementById('filterProgress').addEventListener('change',e=>{
   filters.progress=e.target.value;
