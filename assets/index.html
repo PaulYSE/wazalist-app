@@ -47,24 +47,28 @@ a{color:var(--accent);text-decoration:none}
 .search-row{display:flex;gap:8px;flex:1;min-width:200px}
 #searchInput{flex:1;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
 #searchInput:focus{border-color:var(--accent)}
-.filter-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0}
+
+/* ── Filter row ── */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center}
 select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;cursor:pointer}
+select.active{border-color:var(--accent);color:var(--accent)}
 .btn{padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg3);color:var(--text1)}
 .btn.active{background:var(--accent2);border-color:var(--accent);color:#fff}
+
+/* ── Browse main ── */
 .main{display:flex;flex:1;overflow:hidden}
 .list-panel{width:320px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg0)}
 .detail-panel{flex:1;overflow-y:auto;background:var(--bg1);padding:20px}
 .count-bar{padding:8px 12px;font-size:12px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg1)}
 
-/* ── Cards ── */
+/* ── Waza cards (browse list) ── */
 .waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
 .waza-card:hover{filter:brightness(1.08)}
 .waza-card.selected{outline:1px solid var(--accent)}
-/* stage color tints */
-.waza-card.s-inprogress{background:#1f1a00;border-left-color:#e8a030}
-.waza-card.s-completed{background:#001a0d;border-left-color:#4caf82}
-.waza-card.s-forgotten{background:#1a0000;border-left-color:#e05555}
+.waza-card.s-inprogress{background:#1f1a00;border-left-color:var(--amber)}
+.waza-card.s-completed{background:#001a0d;border-left-color:var(--green)}
+.waza-card.s-forgotten{background:#1a0000;border-left-color:var(--red)}
 .waza-card.s-new{background:transparent;border-left-color:transparent}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
@@ -79,27 +83,36 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .b-like{background:#001a2a;color:#60b8f0;border:1px solid #004a7a}
 .b-dislike{background:#2a0010;color:#e080a0;border:1px solid #5a0020}
 
-/* ── Shape markers ── */
+/* ── Shape pips ── */
 .shapes-row{display:flex;gap:4px;flex-wrap:wrap}
 .shape-pip{font-size:13px;line-height:1;opacity:.2;transition:opacity .12s}
 .shape-pip.on{opacity:1}
-.shape-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s;line-height:1}
-.shape-btn:hover{background:var(--bg3)}
-.shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
 
-/* ── Like / Dislike ── */
-.like-row{display:flex;gap:8px;margin-top:6px}
-.like-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:14px;cursor:pointer;transition:all .12s;color:var(--text2)}
-.like-btn:hover{background:var(--bg3)}
-.like-btn.like-on{background:#001a2a;color:#60b8f0;border-color:#004a7a}
-.like-btn.dislike-on{background:#2a0010;color:#e080a0;border-color:#5a0020}
+/* ── Expanded waza card (My List) ── */
+.waza-card-expanded{border-radius:var(--r);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;cursor:pointer;transition:filter .12s}
+.waza-card-expanded:hover{filter:brightness(1.06)}
+.wce-header{padding:12px 14px 8px}
+.wce-header .njp{font-size:15px;font-weight:600}
+.wce-header .nen{font-size:12px;color:var(--text2);margin-top:2px}
+.wce-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.wce-shapes{margin-top:6px}
+.wce-videos{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.15)}
+.vid-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:12px;color:var(--text2);text-decoration:none;transition:all .12s;white-space:nowrap}
+.vid-btn:hover{border-color:var(--accent);color:var(--text1)}
+.vid-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* ── Detail ── */
+/* ── Detail panel ── */
 .d-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:8px;font-size:15px}
 .d-njp{font-size:26px;font-weight:700;margin-bottom:2px}
 .d-nen{font-size:16px;color:var(--accent);margin-bottom:14px}
 .dsec{margin-bottom:18px}
 .dsec h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px}
+/* collapsible section */
+.dsec-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}
+.dsec-toggle h3{margin-bottom:0}
+.dsec-toggle .toggle-arrow{font-size:11px;color:var(--text3);transition:transform .2s}
+.dsec-toggle.collapsed .toggle-arrow{transform:rotate(-90deg)}
+.dsec-body{margin-top:8px}
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dfield{background:var(--bg2);border-radius:var(--r);padding:8px 12px}
 .dfield .lbl{font-size:11px;color:var(--text3);margin-bottom:2px}
@@ -120,10 +133,18 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .bmbtn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
 .bmbtn:hover{background:var(--bg3)}
 .bmbtn.on{background:#2a2010;color:var(--gold);border-color:#5a4010}
+.like-row{display:flex;gap:8px;margin-top:6px}
+.like-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:14px;cursor:pointer;transition:all .12s;color:var(--text2)}
+.like-btn:hover{background:var(--bg3)}
+.like-btn.like-on{background:#001a2a;color:#60b8f0;border-color:#004a7a}
+.like-btn.dislike-on{background:#2a0010;color:#e080a0;border-color:#5a0020}
+.shape-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s;line-height:1}
+.shape-btn:hover{background:var(--bg3)}
+.shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
 
 /* ── Dashboard ── */
 .dash{padding:16px;height:100%;overflow-y:auto}
-.dash-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0}
+.dash-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border)}
 .dtab{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
 .dtab:hover{color:var(--text1)}
 .dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
@@ -137,13 +158,11 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 .drow:hover .drn{color:var(--accent)}
 .drn{font-size:14px}
 .drs{font-size:12px;color:var(--text3);margin-left:auto;flex-shrink:0}
-/* stat bars */
 .stat-bar-wrap{margin-bottom:12px}
 .stat-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px}
 .stat-bar-track{background:var(--bg3);border-radius:20px;height:8px;overflow:hidden}
 .stat-bar-fill{height:100%;border-radius:20px;transition:width .4s}
-/* mylist stage section headers */
-.mylist-stage-header{padding:6px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:2px;margin-top:12px}
+.mylist-stage-header{padding:6px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:8px;margin-top:16px}
 .mylist-stage-header:first-child{margin-top:0}
 
 /* ── Nav ── */
@@ -221,9 +240,26 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
     <div class="filter-row">
       <select id="filterTag"><option value="">All levels</option></select>
       <select id="filterParent"><option value="">All families</option></select>
+      <select id="filterProgress">
+        <option value="">All progress</option>
+        <option value="new">New</option>
+        <option value="inprogress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="forgotten">Forgotten</option>
+      </select>
+      <select id="filterShape">
+        <option value="">All shapes</option>
+        <option value="any">Has any shape</option>
+        <option value="0">● marked</option>
+        <option value="1">▲ marked</option>
+        <option value="2">■ marked</option>
+        <option value="3">♥ marked</option>
+        <option value="4">★ marked</option>
+        <option value="5">◆ marked</option>
+      </select>
       <button class="btn" id="filterBM">★ Bookmarked</button>
-      <button class="btn" id="filterIP">⏳ In progress</button>
-      <button class="btn" id="clearFilters" style="margin-left:auto">Clear filters</button>
+      <button class="btn" id="filterLike">👍 Liked</button>
+      <button class="btn" id="clearFilters" style="margin-left:auto">Clear</button>
     </div>
     <div class="main">
       <div class="list-panel">
@@ -256,37 +292,37 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
   <div class="modal">
     <h2>⛩ Wazalist — User Guide</h2>
     <h3>What is this?</h3>
-    <p>Wazalist is a reference database of wotagei Waza (skills/techniques). Browse all entries, watch reference videos, and track your learning progress.</p>
+    <p>Wazalist is a reference database of wotagei Waza. Browse all entries, watch reference videos, and track your learning progress.</p>
     <h3>Guest vs account</h3>
     <ul>
-      <li><b>Guest mode</b> — all data saved locally in your browser on this device only.</li>
-      <li><b>Account</b> — progress syncs across devices via your email and PIN.</li>
+      <li><b>Guest</b> — all data saved locally in your browser on this device only.</li>
+      <li><b>Account</b> — progress syncs across devices via email and PIN.</li>
     </ul>
-    <h3>Browsing & searching</h3>
+    <h3>Browsing & filters</h3>
     <ul>
-      <li>Type in the search bar to filter by Japanese or English name.</li>
-      <li>Use <b>All levels</b> to filter by skill tag.</li>
-      <li>Use <b>All families</b> to filter by parent Waza / family group.</li>
-      <li>Click <b>★ Bookmarked</b> or <b>⏳ In progress</b> to filter by those states.</li>
-      <li>Click a Waza in the list to open its full detail view.</li>
+      <li>Search by Japanese or English name.</li>
+      <li>Filter by skill level, family group, progress stage, or shape markers via dropdowns.</li>
+      <li>Quick-filter by <b>★ Bookmarked</b> or <b>👍 Liked</b> buttons.</li>
     </ul>
     <h3>Progress tracking</h3>
     <ul>
       <li><b>New</b> — default, no color.</li>
-      <li><b>In progress</b> — yellow card tint.</li>
-      <li><b>Completed</b> — green card tint.</li>
-      <li><b>Forgotten</b> — red card tint.</li>
+      <li><b>In Progress</b> — yellow tint.</li>
+      <li><b>Completed</b> — green tint.</li>
+      <li><b>Forgotten</b> — red tint.</li>
       <li><b>★ Bookmark</b> — "want to learn" flag, independent of stage.</li>
     </ul>
     <h3>Like / Dislike</h3>
-    <p>👍 Like or 👎 Dislike any Waza as another tracking method. These are mutually exclusive.</p>
+    <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
     <h3>Shape markers</h3>
-    <p>6 shape markers (● ▲ ■ ♥ ★ ◆) per Waza. Toggle any combination — meaning is entirely up to you.</p>
+    <p>6 shapes (● ▲ ■ ♥ ★ ◆) per Waza. Toggle any combination — meaning is up to you.</p>
+    <h3>Waza detail</h3>
+    <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to reduce clutter.</p>
     <h3>Dashboard</h3>
     <ul>
-      <li><b>Home</b> — overview stats and quick lists of bookmarked and in-progress Waza.</li>
-      <li><b>My List</b> — full list of your tracked Waza sorted by stage, bookmarked first.</li>
-      <li><b>Stats</b> — detailed breakdown of your progress across all Waza.</li>
+      <li><b>Home</b> — overview with bookmarked and in-progress lists.</li>
+      <li><b>My List</b> — expanded cards for all your tracked Waza, with video buttons directly on each card. Sorted: Bookmarked → In Progress → Completed → Forgotten.</li>
+      <li><b>Stats</b> — detailed breakdown of your progress.</li>
     </ul>
     <button class="mclosebtn" id="closeModal">Got it!</button>
   </div>
@@ -295,170 +331,115 @@ select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);bor
 <script>
 const SHAPES = ['●','▲','■','♥','★','◆'];
 const STAGE_ORDER = ['inprogress','completed','forgotten','new'];
+const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter/X',nico:'NicoNico',fb:'Facebook',other:'Video'};
+const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
 
-// ── Mode & state ─────────────────────────────────────────────
-let isGuest = false;
-let token = localStorage.getItem('wl_token') || '';
-let wazaData = [];
-let prog = {};
-let selectedId = null;
-let filters = {search:'',tag:'',parent:'',bm:false,ip:false};
-let activeDTab = 'home';
+let isGuest=false, token=localStorage.getItem('wl_token')||'';
+let wazaData=[], prog={}, selectedId=null, activeDTab='home';
+let filters={search:'',tag:'',parent:'',progress:'',shape:'',bm:false,like:false};
 
 // ── localStorage ─────────────────────────────────────────────
-const LS_KEY = 'wl_local_prog';
-function loadLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch { return {}; } }
-function saveLocal(d) { localStorage.setItem(LS_KEY, JSON.stringify(d)); }
+const LS_KEY='wl_local_prog';
+const loadLocal=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}')}catch{return{}}};
+const saveLocal=d=>localStorage.setItem(LS_KEY,JSON.stringify(d));
 
 // ── API ──────────────────────────────────────────────────────
-const api = async (path, method='GET', body=null) => {
-  const opts = { method, headers:{'Content-Type':'application/json', ...(token?{'Authorization':'Bearer '+token}:{})} };
-  if (body) opts.body = JSON.stringify(body);
-  return (await fetch(path, opts)).json();
+const api=async(path,method='GET',body=null)=>{
+  const opts={method,headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})}};
+  if(body)opts.body=JSON.stringify(body);
+  return(await fetch(path,opts)).json();
 };
 
 // ── Auth ─────────────────────────────────────────────────────
-document.getElementById('toReg').onclick  = () => { document.getElementById('loginBox').style.display='none'; document.getElementById('regBox').style.display=''; };
-document.getElementById('toLi').onclick   = () => { document.getElementById('regBox').style.display='none';  document.getElementById('loginBox').style.display=''; };
+document.getElementById('toReg').onclick=()=>{document.getElementById('loginBox').style.display='none';document.getElementById('regBox').style.display='';};
+document.getElementById('toLi').onclick=()=>{document.getElementById('regBox').style.display='none';document.getElementById('loginBox').style.display='';};
 
-function startGuest() {
-  isGuest = true; token = '';
-  Object.entries(loadLocal()).forEach(([id,p]) => { prog[+id] = p; });
-  initApp();
-}
-document.getElementById('guestBtn').onclick  = startGuest;
-document.getElementById('guestBtn2').onclick = startGuest;
+function startGuest(){isGuest=true;token='';Object.entries(loadLocal()).forEach(([id,p])=>{prog[+id]=p;});initApp();}
+document.getElementById('guestBtn').onclick=startGuest;
+document.getElementById('guestBtn2').onclick=startGuest;
 
-document.getElementById('li-btn').onclick = async () => {
-  const email=document.getElementById('li-email').value.trim(), pin=document.getElementById('li-pin').value.trim();
-  const errEl=document.getElementById('li-err'); errEl.textContent='';
-  if (!email||!pin){errEl.textContent='Please fill in both fields.';return;}
+document.getElementById('li-btn').onclick=async()=>{
+  const email=document.getElementById('li-email').value.trim(),pin=document.getElementById('li-pin').value.trim();
+  const e=document.getElementById('li-err');e.textContent='';
+  if(!email||!pin){e.textContent='Please fill in both fields.';return;}
   const res=await api('/api/login','POST',{email,pin});
-  if (res.error){errEl.textContent=res.error;return;}
-  token=res.token; localStorage.setItem('wl_token',token); initApp();
+  if(res.error){e.textContent=res.error;return;}
+  token=res.token;localStorage.setItem('wl_token',token);initApp();
 };
 
-document.getElementById('rg-btn').onclick = async () => {
-  const email=document.getElementById('rg-email').value.trim(), pin=document.getElementById('rg-pin').value.trim();
-  const errEl=document.getElementById('rg-err'); errEl.className='aerr'; errEl.textContent='';
-  if (!email||!pin){errEl.textContent='Please fill in both fields.';return;}
+document.getElementById('rg-btn').onclick=async()=>{
+  const email=document.getElementById('rg-email').value.trim(),pin=document.getElementById('rg-pin').value.trim();
+  const e=document.getElementById('rg-err');e.className='aerr';e.textContent='';
+  if(!email||!pin){e.textContent='Please fill in both fields.';return;}
   const res=await api('/api/register','POST',{email,pin});
-  if (res.error){errEl.textContent=res.error;return;}
-  errEl.className='aok'; errEl.textContent='Account created! Signing you in…';
+  if(res.error){e.textContent=res.error;return;}
+  e.className='aok';e.textContent='Account created! Signing you in…';
   const li=await api('/api/login','POST',{email,pin});
-  if (li.token){token=li.token; localStorage.setItem('wl_token',token); initApp();}
+  if(li.token){token=li.token;localStorage.setItem('wl_token',token);initApp();}
 };
 
-document.getElementById('logoutBtn').onclick = () => {
-  token=''; isGuest=false; localStorage.removeItem('wl_token'); location.reload();
-};
+document.getElementById('logoutBtn').onclick=()=>{token='';isGuest=false;localStorage.removeItem('wl_token');location.reload();};
 
 // ── Init ─────────────────────────────────────────────────────
-async function initApp() {
+async function initApp(){
   document.getElementById('authWrap').style.display='none';
   document.getElementById('app').style.display='flex';
   document.getElementById('guestBadge').style.display=isGuest?'':'none';
   document.getElementById('logoutBtn').textContent=isGuest?'Sign in / Register':'Sign out';
   document.getElementById('countBar').textContent='Loading Waza…';
-
-  const wazaRes = await api('/api/waza');
-  wazaData = Array.isArray(wazaRes) ? wazaRes : [];
-
-  if (!isGuest) {
-    const progRes = await api('/api/progress');
-    if (Array.isArray(progRes)) {
-      progRes.forEach(p => {
-        prog[p.waza_id] = {
-          stage: p.stage,
-          bookmarked: !!p.bookmarked,
-          shapes: p.shapes ? JSON.parse(p.shapes) : Array(6).fill(false),
-          like: p.like || null  // 'like' | 'dislike' | null
-        };
-      });
-    }
+  const wazaRes=await api('/api/waza');
+  wazaData=Array.isArray(wazaRes)?wazaRes:[];
+  if(!isGuest){
+    const progRes=await api('/api/progress');
+    if(Array.isArray(progRes))progRes.forEach(p=>{prog[p.waza_id]={stage:p.stage,bookmarked:!!p.bookmarked,shapes:p.shapes?JSON.parse(p.shapes):Array(6).fill(false),like:p.like||null};});
   }
-
-  populateFilters(); renderList(); renderDashboard();
+  populateFilters();renderList();renderDashboard();
 }
-if (token) initApp();
+if(token)initApp();
 
-// ── Progress ─────────────────────────────────────────────────
-const emptyP = () => ({stage:'new', bookmarked:false, shapes:Array(6).fill(false), like:null});
-const getP = id => prog[id] || emptyP();
+// ── Progress helpers ─────────────────────────────────────────
+const emptyP=()=>({stage:'new',bookmarked:false,shapes:Array(6).fill(false),like:null});
+const getP=id=>prog[id]||emptyP();
 
-async function saveP(id, patch) {
-  const cur = getP(id);
-  prog[id] = {...cur, ...patch};
-  if (isGuest) { const l=loadLocal(); l[id]=prog[id]; saveLocal(l); }
-  else { await api('/api/progress','POST',{waza_id:id, ...prog[id], shapes:JSON.stringify(prog[id].shapes)}); }
-  renderList(); renderDetail(); renderDashboard();
+async function saveP(id,patch){
+  prog[id]={...getP(id),...patch};
+  if(isGuest){const l=loadLocal();l[id]=prog[id];saveLocal(l);}
+  else await api('/api/progress','POST',{waza_id:id,...prog[id],shapes:JSON.stringify(prog[id].shapes)});
+  renderList();renderDetail();renderDashboard();
 }
 
-// ── Filters ──────────────────────────────────────────────────
-function populateFilters() {
+// ── Populate filter dropdowns ─────────────────────────────────
+function populateFilters(){
   const tags=[...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
   document.getElementById('filterTag').innerHTML='<option value="">All levels</option>'+tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
   const parents=[...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
   document.getElementById('filterParent').innerHTML='<option value="">All families</option>'+parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
 }
 
-const dispName = w => w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
+// ── Filter logic ─────────────────────────────────────────────
+const dispName=w=>w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
 
-function filterWaza() {
-  const {search,tag,parent,bm,ip}=filters;
+function filterWaza(){
+  const {search,tag,parent,progress,shape,bm,like}=filters;
   return wazaData.filter(w=>{
-    if (search){const s=search.toLowerCase();if(!((w.name_jp||'').toLowerCase().includes(s)||(w.name_en||'').toLowerCase().includes(s)||(w.name_en_literal||'').toLowerCase().includes(s)||(w.name_en_gtranslate||'').toLowerCase().includes(s)))return false;}
-    if (tag&&w.tag!==tag)return false;
-    if (parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
+    if(search){const s=search.toLowerCase();if(!((w.name_jp||'').toLowerCase().includes(s)||(w.name_en||'').toLowerCase().includes(s)||(w.name_en_literal||'').toLowerCase().includes(s)||(w.name_en_gtranslate||'').toLowerCase().includes(s)))return false;}
+    if(tag&&w.tag!==tag)return false;
+    if(parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
     const p=getP(w.id);
-    if (bm&&!p.bookmarked)return false;
-    if (ip&&p.stage!=='inprogress')return false;
+    if(progress&&p.stage!==progress)return false;
+    if(shape==='any'&&!(p.shapes&&p.shapes.some(Boolean)))return false;
+    if(shape!==''&&shape!=='any'&&!(p.shapes&&p.shapes[+shape]))return false;
+    if(bm&&!p.bookmarked)return false;
+    if(like&&p.like!=='like')return false;
     return true;
   });
 }
 
-function stageClass(stage) {
-  return stage==='inprogress'?'s-inprogress':stage==='completed'?'s-completed':stage==='forgotten'?'s-forgotten':'s-new';
-}
-function stageBadge(stage) {
-  return stage==='inprogress'?'<span class="badge b-ip">In Progress</span>'
-        :stage==='completed' ?'<span class="badge b-done">✓ Completed</span>'
-        :stage==='forgotten' ?'<span class="badge b-forgotten">Forgotten</span>'
-        :'<span class="badge b-new">New</span>';
-}
-function shapePips(shapes) {
-  return SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
-}
+// ── Shared helpers ────────────────────────────────────────────
+const stageClass=s=>s==='inprogress'?'s-inprogress':s==='completed'?'s-completed':s==='forgotten'?'s-forgotten':'s-new';
+const stageBadge=s=>s==='inprogress'?'<span class="badge b-ip">In Progress</span>':s==='completed'?'<span class="badge b-done">✓ Completed</span>':s==='forgotten'?'<span class="badge b-forgotten">Forgotten</span>':'<span class="badge b-new">New</span>';
+const shapePips=shapes=>SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
 
-// ── Render list ──────────────────────────────────────────────
-function renderList() {
-  const filtered=filterWaza();
-  document.getElementById('countBar').textContent=filtered.length+' of '+wazaData.length+' Waza';
-  const list=document.getElementById('wazaList');
-  if (!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
-  list.innerHTML=filtered.map(w=>{
-    const p=getP(w.id);
-    const shapes=p.shapes||Array(6).fill(false);
-    const hasShape=shapes.some(Boolean);
-    const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
-    const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-    const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
-    const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
-    const sel=selectedId===w.id?' selected':'';
-    return '<div class="waza-card '+stageClass(p.stage)+sel+'" data-id="'+w.id+'">'
-      +'<div class="njp">'+(w.name_jp||'—')+'</div>'
-      +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
-      +sp+'</div>';
-  }).join('');
-  list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
-}
-
-function selectWaza(id){selectedId=id;renderList();renderDetail();}
-
-// ── Platform ─────────────────────────────────────────────────
-const platLabel={yt:'YouTube',bili:'Bilibili',tw:'Twitter / X',nico:'NicoNico',fb:'Facebook',other:'Video'};
-const platColor={yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
 function platform(url){
   if(!url)return'other';
   if(/youtu\.be|youtube\.com/.test(url))return'yt';
@@ -469,26 +450,77 @@ function platform(url){
   return'other';
 }
 
-// ── Render detail ────────────────────────────────────────────
-function renderDetail() {
+// Build video buttons for expanded cards
+function videoButtons(w){
+  const vids=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
+  if(!vids.length)return'';
+  return '<div class="wce-videos">'+vids.map((v,i)=>{
+    const pl=platform(v);
+    return'<a class="vid-btn" href="'+v+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'
+      +'<span class="vid-dot" style="background:'+platColor[pl]+'"></span>'
+      +platLabel[pl]+' '+(i+1)+'</a>';
+  }).join('')+'</div>';
+}
+
+// ── Render browse list ────────────────────────────────────────
+function renderList(){
+  const filtered=filterWaza();
+  document.getElementById('countBar').textContent=filtered.length+' of '+wazaData.length+' Waza';
+  const list=document.getElementById('wazaList');
+  if(!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
+  list.innerHTML=filtered.map(w=>{
+    const p=getP(w.id);
+    const shapes=p.shapes||Array(6).fill(false);
+    const hasShape=shapes.some(Boolean);
+    const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
+    const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+    const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
+    const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
+    return'<div class="waza-card '+stageClass(p.stage)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+      +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+      +'<div class="nen">'+dispName(w)+'</div>'
+      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+      +sp+'</div>';
+  }).join('');
+  list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+}
+
+function selectWaza(id){selectedId=id;renderList();renderDetail();}
+
+// ── Render detail ─────────────────────────────────────────────
+// Track collapsed state per section key
+const collapsed={names:false,classif:false,parents:false,creator:false};
+
+function renderDetail(){
   const panel=document.getElementById('detailPanel');
-  if (selectedId===null){panel.innerHTML='<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';return;}
-  const w=wazaData.find(x=>x.id===selectedId); if(!w)return;
+  if(selectedId===null){panel.innerHTML='<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';return;}
+  const w=wazaData.find(x=>x.id===selectedId);if(!w)return;
   const p=getP(w.id);
   const shapes=p.shapes||Array(6).fill(false);
 
-  const videos=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
-  const videoHTML=videos.length
-    ?videos.map((v,i)=>{const pl=platform(v);return'<a class="vlink" href="'+v+'" target="_blank" rel="noopener"><div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div><span>'+platLabel[pl]+'</span><span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';}).join('')
+  const vids=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
+  const videoHTML=vids.length
+    ?vids.map((v,i)=>{const pl=platform(v);return'<a class="vlink" href="'+v+'" target="_blank" rel="noopener"><div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div><span>'+platLabel[pl]+'</span><span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';}).join('')
     :'<div style="color:var(--text3);font-size:13px">No video references</div>';
 
   const siblings=wazaData.filter(x=>x.id!==w.id&&((w.parent_en0&&(x.parent_en0===w.parent_en0||x.parent_en1===w.parent_en0))||(w.parent_en1&&(x.parent_en0===w.parent_en1||x.parent_en1===w.parent_en1)))).slice(0,12);
   const sibHTML=siblings.length?siblings.map(s=>'<span class="chip" data-id="'+s.id+'">'+(s.name_jp||dispName(s))+'</span>').join(''):'<span style="color:var(--text3);font-size:13px">None found</span>';
 
+  // Collapsible section helper
+  const sec=(key,label,inner)=>{
+    const isCollapsed=collapsed[key];
+    return'<div class="dsec">'
+      +'<div class="dsec-toggle'+(isCollapsed?' collapsed':'')+'" data-key="'+key+'">'
+      +'<h3>'+label+'</h3><span class="toggle-arrow">▾</span></div>'
+      +'<div class="dsec-body" style="'+(isCollapsed?'display:none':'')+'">'
+      +inner+'</div></div>';
+  };
+
   panel.innerHTML=
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
+    // Progress — not collapsible, always visible
     +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
     +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
     +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In Progress</button>'
@@ -497,64 +529,103 @@ function renderDetail() {
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
 
+    // Like/Dislike — not collapsible
     +'<div class="dsec"><h3>Like / Dislike</h3><div class="like-row">'
     +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'" id="likeBtn">👍 Like</button>'
     +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'" id="dislikeBtn">👎 Dislike</button>'
     +'</div></div>'
 
+    // Shapes — not collapsible
     +'<div class="dsec"><h3>Shape markers</h3>'
-    +'<div class="shapes-row">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — their meaning is up to you.</div>'
-    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — meaning is up to you.</div></div>'
 
-    +'<div class="dsec"><h3>Names</h3><div class="dgrid">'
-    +'<div class="dfield"><div class="lbl">Japanese</div><div class="val">'+(w.name_jp||'—')+'</div></div>'
-    +'<div class="dfield"><div class="lbl">English</div><div class="val">'+(w.name_en||'—')+'</div></div>'
-    +'<div class="dfield"><div class="lbl">Literal</div><div class="val">'+(w.name_en_literal||'—')+'</div></div>'
-    +'<div class="dfield"><div class="lbl">Google translate</div><div class="val">'+(w.name_en_gtranslate||'—')+'</div></div>'
-    +'</div></div>'
-
-    +((w.reference||w.tag)?'<div class="dsec"><h3>Classification</h3><div class="dgrid">'+(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')+(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')+'</div></div>':'')
-    +((w.parent_jp0||w.parent_jp1)?'<div class="dsec"><h3>Parent techniques (prerequisites)</h3><div>'+(w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')+(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')+'</div></div>':'')
-    +((w.author_jp||w.author_en)?'<div class="dsec"><h3>Creator</h3><div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'+(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div></div>':'')
+    // Videos — not collapsible
     +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
+
+    // Collapsible sections
+    +sec('names','Names',
+      '<div class="dgrid">'
+      +'<div class="dfield"><div class="lbl">Japanese</div><div class="val">'+(w.name_jp||'—')+'</div></div>'
+      +'<div class="dfield"><div class="lbl">English</div><div class="val">'+(w.name_en||'—')+'</div></div>'
+      +'<div class="dfield"><div class="lbl">Literal</div><div class="val">'+(w.name_en_literal||'—')+'</div></div>'
+      +'<div class="dfield"><div class="lbl">Google translate</div><div class="val">'+(w.name_en_gtranslate||'—')+'</div></div>'
+      +'</div>')
+
+    +((w.tag||w.reference)?sec('classif','Classification',
+      '<div class="dgrid">'
+      +(w.tag?'<div class="dfield"><div class="lbl">Skill level</div><div class="val">'+w.tag+'</div></div>':'')
+      +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
+      +'</div>'):'')
+
+    +((w.parent_jp0||w.parent_jp1)?sec('parents','Parent techniques (prerequisites)',
+      (w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
+      +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')):'')
+
+    +((w.author_jp||w.author_en)?sec('creator','Creator',
+      '<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'+(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div>'):'')
+
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
+  // Progress buttons
   panel.querySelectorAll('.pbtn').forEach(btn=>btn.addEventListener('click',()=>saveP(w.id,{stage:btn.dataset.s})));
   panel.querySelector('#bmBtn').addEventListener('click',()=>saveP(w.id,{bookmarked:!p.bookmarked}));
   panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
   panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
   panel.querySelectorAll('.shape-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    const ns=[...shapes]; ns[+btn.dataset.si]=!ns[+btn.dataset.si]; saveP(w.id,{shapes:ns});
+    const ns=[...shapes];ns[+btn.dataset.si]=!ns[+btn.dataset.si];saveP(w.id,{shapes:ns});
   }));
-  panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{
-    filters.parent=chip.dataset.parent; document.getElementById('filterParent').value=chip.dataset.parent; renderList();
+  // Collapsible toggles
+  panel.querySelectorAll('.dsec-toggle').forEach(el=>el.addEventListener('click',()=>{
+    const key=el.dataset.key;
+    collapsed[key]=!collapsed[key];
+    el.classList.toggle('collapsed',collapsed[key]);
+    el.nextElementSibling.style.display=collapsed[key]?'none':'';
   }));
+  panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{filters.parent=chip.dataset.parent;document.getElementById('filterParent').value=chip.dataset.parent;renderList();}));
   panel.querySelectorAll('.chip[data-id]').forEach(chip=>chip.addEventListener('click',()=>selectWaza(+chip.dataset.id)));
 }
 
-// ── Dashboard ────────────────────────────────────────────────
-function renderDashboard() {
-  if (activeDTab==='home')   renderDashHome();
-  if (activeDTab==='mylist') renderDashMyList();
-  if (activeDTab==='stats')  renderDashStats();
+// ── Dashboard ─────────────────────────────────────────────────
+function renderDashboard(){
+  if(activeDTab==='home')renderDashHome();
+  else if(activeDTab==='mylist')renderDashMyList();
+  else renderDashStats();
 }
 
-function drow(w) {
+// Compact row for Home tab
+function drow(w){
   const p=getP(w.id);
   const shapes=p.shapes||Array(6).fill(false);
   const hasShape=shapes.some(Boolean);
   const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
-  return '<div class="drow '+stageClass(p.stage)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
+  return'<div class="drow '+stageClass(p.stage)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
     +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
     +'<span class="drn">'+(w.name_jp||'—')+'</span>'
     +(hasShape?'<div class="shapes-row" style="margin-left:4px">'+shapePips(shapes)+'</div>':'')
-    +lb
-    +'<span class="drs">'+dispName(w)+'</span></div>';
+    +lb+'<span class="drs">'+dispName(w)+'</span></div>';
 }
 
-function renderDashHome() {
-  const total=wazaData.length;
+// Expanded card for My List tab
+function expandedCard(w){
+  const p=getP(w.id);
+  const shapes=p.shapes||Array(6).fill(false);
+  const hasShape=shapes.some(Boolean);
+  const bb=p.bookmarked?'<span class="badge b-bm">★</span>':'';
+  const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+  const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
+  const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
+  return'<div class="waza-card-expanded '+stageClass(p.stage)+'" data-id="'+w.id+'">'
+    +'<div class="wce-header">'
+    +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+    +'<div class="nen">'+dispName(w)+'</div>'
+    +'<div class="wce-badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+    +sp+'</div>'
+    +videoButtons(w)
+    +'</div>';
+}
+
+function renderDashHome(){
   const bmList=wazaData.filter(w=>getP(w.id).bookmarked);
   const ipList=wazaData.filter(w=>getP(w.id).stage==='inprogress');
   const bmarked=bmList.length;
@@ -567,7 +638,7 @@ function renderDashHome() {
     +'<div class="scard"><div class="n" style="color:var(--gold)">'+bmarked+'</div><div class="l">Bookmarked</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In Progress</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--green)">'+bmDone+'</div><div class="l">Completed</div></div>'
-    +'<div class="scard"><div class="n">'+total+'</div><div class="l">Total Waza</div></div>'
+    +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
     +'</div>'
     +'<div style="background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:20px">'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px"><span>Bookmarked Waza completion</span><span>'+bmDone+' / '+bmarked+' ('+bmPct+'%)</span></div>'
@@ -580,56 +651,39 @@ function renderDashHome() {
   attachDrowListeners('dashHome');
 }
 
-function renderDashMyList() {
-  // Bookmarked first, then group rest by stage order, exclude 'new' with no data
-  const tracked = wazaData.filter(w => {
-    const p=getP(w.id);
-    return p.bookmarked || p.stage!=='new' || p.like || (p.shapes&&p.shapes.some(Boolean));
-  });
-  const bmWaza = tracked.filter(w=>getP(w.id).bookmarked);
-  const byStage = {};
-  STAGE_ORDER.forEach(s=>{ byStage[s]=tracked.filter(w=>!getP(w.id).bookmarked&&getP(w.id).stage===s); });
-
+function renderDashMyList(){
+  const tracked=wazaData.filter(w=>{const p=getP(w.id);return p.bookmarked||p.stage!=='new'||p.like||(p.shapes&&p.shapes.some(Boolean));});
+  const bmWaza=tracked.filter(w=>getP(w.id).bookmarked);
+  const byStage={};STAGE_ORDER.forEach(s=>{byStage[s]=tracked.filter(w=>!getP(w.id).bookmarked&&getP(w.id).stage===s);});
   const stageLabel={inprogress:'⏳ In Progress',completed:'✓ Completed',forgotten:'✕ Forgotten',new:'New'};
+
   let html='';
-  if (bmWaza.length) html+='<div class="mylist-stage-header">★ Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(drow).join('');
-  STAGE_ORDER.forEach(s=>{
-    if (byStage[s].length) html+='<div class="mylist-stage-header">'+stageLabel[s]+' ('+byStage[s].length+')</div>'+byStage[s].map(drow).join('');
-  });
-  if (!html) html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking or setting progress on a Waza.</div>';
+  if(bmWaza.length)html+='<div class="mylist-stage-header">★ Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(expandedCard).join('');
+  STAGE_ORDER.forEach(s=>{if(byStage[s].length)html+='<div class="mylist-stage-header">'+stageLabel[s]+' ('+byStage[s].length+')</div>'+byStage[s].map(expandedCard).join('');});
+  if(!html)html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking or setting progress on a Waza.</div>';
 
   document.getElementById('dashMyList').innerHTML=html;
-  attachDrowListeners('dashMyList');
+
+  // Expanded card click → open in browse
+  document.querySelectorAll('#dashMyList .waza-card-expanded').forEach(el=>el.addEventListener('click',()=>{
+    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('[data-tab="browse"]').classList.add('active');
+    document.getElementById('browseView').style.display='flex';
+    document.getElementById('dashboardView').style.display='none';
+    selectWaza(+el.dataset.id);
+  }));
 }
 
-function renderDashStats() {
+function renderDashStats(){
   const total=wazaData.length;
   const counts={new:0,inprogress:0,completed:0,forgotten:0};
   let liked=0,disliked=0,bookmarked=0,shaped=0;
-  wazaData.forEach(w=>{
-    const p=getP(w.id);
-    counts[p.stage]=(counts[p.stage]||0)+1;
-    if (p.bookmarked) bookmarked++;
-    if (p.like==='like') liked++;
-    if (p.like==='dislike') disliked++;
-    if (p.shapes&&p.shapes.some(Boolean)) shaped++;
-  });
+  wazaData.forEach(w=>{const p=getP(w.id);counts[p.stage]=(counts[p.stage]||0)+1;if(p.bookmarked)bookmarked++;if(p.like==='like')liked++;if(p.like==='dislike')disliked++;if(p.shapes&&p.shapes.some(Boolean))shaped++;});
 
-  function bar(label,count,color){
-    const pct=total?Math.round(count/total*100):0;
-    return '<div class="stat-bar-wrap">'
-      +'<div class="stat-bar-label"><span>'+label+'</span><span>'+count+' / '+total+' ('+pct+'%)</span></div>'
-      +'<div class="stat-bar-track"><div class="stat-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
-      +'</div>';
-  }
+  const bar=(label,count,color)=>{const pct=total?Math.round(count/total*100):0;return'<div class="stat-bar-wrap"><div class="stat-bar-label"><span>'+label+'</span><span>'+count+' / '+total+' ('+pct+'%)</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';};
 
-  // Per-shape count
   const shapeCounts=Array(6).fill(0);
-  wazaData.forEach(w=>{ const p=getP(w.id); if(p.shapes) p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;}); });
-  const shapeRows=SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">'
-    +'<span style="font-size:16px">'+s+'</span>'
-    +'<span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span>'
-    +'</div>').join('');
+  wazaData.forEach(w=>{const p=getP(w.id);if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});});
 
   document.getElementById('dashStats').innerHTML=
     '<div class="dsec2"><h3>Progress breakdown</h3>'
@@ -645,11 +699,13 @@ function renderDashStats() {
     +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Shape-marked</div></div>'
     +'</div></div>'
-    +'<div class="dsec2"><h3>Shape marker usage</h3>'+shapeRows+'</div>';
+    +'<div class="dsec2"><h3>Shape marker usage</h3>'
+    +SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+s+'</span><span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span></div>').join('')
+    +'</div>';
 }
 
-function attachDrowListeners(containerId) {
-  document.querySelectorAll('#'+containerId+' .drow').forEach(el=>el.addEventListener('click',()=>{
+function attachDrowListeners(id){
+  document.querySelectorAll('#'+id+' .drow').forEach(el=>el.addEventListener('click',()=>{
     document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
     document.querySelector('[data-tab="browse"]').classList.add('active');
     document.getElementById('browseView').style.display='flex';
@@ -658,44 +714,49 @@ function attachDrowListeners(containerId) {
   }));
 }
 
-// ── Dashboard tabs ───────────────────────────────────────────
+// ── Dashboard sub-tabs ────────────────────────────────────────
 document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
-  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
   activeDTab=tab.dataset.dtab;
-  document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
-  document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
-  document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
+  ['home','mylist','stats'].forEach(t=>document.getElementById('dash'+t.charAt(0).toUpperCase()+t.slice(1)).style.display=t===activeDTab?'':'none');
   renderDashboard();
 }));
 
-// ── Filter events ────────────────────────────────────────────
+// ── Filter events ─────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
 document.getElementById('filterTag').addEventListener('change',e=>{filters.tag=e.target.value;renderList();});
 document.getElementById('filterParent').addEventListener('change',e=>{filters.parent=e.target.value;renderList();});
+document.getElementById('filterProgress').addEventListener('change',e=>{
+  filters.progress=e.target.value;
+  document.getElementById('filterProgress').classList.toggle('active',!!e.target.value);
+  renderList();
+});
+document.getElementById('filterShape').addEventListener('change',e=>{
+  filters.shape=e.target.value;
+  document.getElementById('filterShape').classList.toggle('active',!!e.target.value);
+  renderList();
+});
 document.getElementById('filterBM').addEventListener('click',function(){filters.bm=!filters.bm;this.classList.toggle('active',filters.bm);renderList();});
-document.getElementById('filterIP').addEventListener('click',function(){filters.ip=!filters.ip;this.classList.toggle('active',filters.ip);renderList();});
+document.getElementById('filterLike').addEventListener('click',function(){filters.like=!filters.like;this.classList.toggle('active',filters.like);renderList();});
 document.getElementById('clearFilters').addEventListener('click',()=>{
-  filters={search:'',tag:'',parent:'',bm:false,ip:false};
-  document.getElementById('searchInput').value='';
-  document.getElementById('filterTag').value='';
-  document.getElementById('filterParent').value='';
+  filters={search:'',tag:'',parent:'',progress:'',shape:'',bm:false,like:false};
+  ['filterTag','filterParent','filterProgress','filterShape'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('active');});
   document.getElementById('filterBM').classList.remove('active');
-  document.getElementById('filterIP').classList.remove('active');
+  document.getElementById('filterLike').classList.remove('active');
+  document.getElementById('searchInput').value='';
   renderList();
 });
 
-// ── Nav tabs ─────────────────────────────────────────────────
+// ── Nav tabs ──────────────────────────────────────────────────
 document.querySelectorAll('.ntab').forEach(tab=>tab.addEventListener('click',()=>{
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-  tab.classList.add('active');
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
   const t=tab.dataset.tab;
   document.getElementById('browseView').style.display=t==='browse'?'flex':'none';
   document.getElementById('dashboardView').style.display=t==='dashboard'?'block':'none';
-  if (t==='dashboard') renderDashboard();
+  if(t==='dashboard')renderDashboard();
 }));
 
-// ── Modal ────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────
 document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('modalBg').style.display='flex';});
 document.getElementById('closeModal').addEventListener('click',()=>{document.getElementById('modalBg').style.display='none';});
 document.getElementById('modalBg').addEventListener('click',e=>{if(e.target===document.getElementById('modalBg'))document.getElementById('modalBg').style.display='none';});
