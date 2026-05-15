@@ -66,10 +66,13 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
 .waza-card:hover{filter:brightness(1.08)}
 .waza-card.selected{outline:1px solid var(--accent)}
-.waza-card.s-inprogress{background:#1f1a00;border-left-color:var(--amber)}
-.waza-card.s-completed{background:#001a0d;border-left-color:var(--green)}
-.waza-card.s-forgotten{background:#1a0000;border-left-color:var(--red)}
-.waza-card.s-new{background:transparent;border-left-color:transparent}
+/* Shape tints — one per shape marker ● ▲ ■ ♥ ★ ◆ */
+.waza-card.sh-0,.waza-card-expanded.sh-0{background:#001824;border-left-color:#4a9aba}
+.waza-card.sh-1,.waza-card-expanded.sh-1{background:#1a1500;border-left-color:#c8a020}
+.waza-card.sh-2,.waza-card-expanded.sh-2{background:#180018;border-left-color:#9060b0}
+.waza-card.sh-3,.waza-card-expanded.sh-3{background:#1a0010;border-left-color:#c04070}
+.waza-card.sh-4,.waza-card-expanded.sh-4{background:#101800;border-left-color:#70a030}
+.waza-card.sh-5,.waza-card-expanded.sh-5{background:#001818;border-left-color:#30a898}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
@@ -423,8 +426,8 @@ function filterWaza(){
 }
 
 // ── Shared helpers ────────────────────────────────────────────
-const stageClass=s=>s==='inprogress'?'s-inprogress':s==='completed'?'s-completed':s==='forgotten'?'s-forgotten':'s-new';
-const stageBadge=s=>s==='inprogress'?'<span class="badge b-ip">In Progress</span>':s==='completed'?'<span class="badge b-done">✓ Completed</span>':s==='forgotten'?'<span class="badge b-forgotten">Forgotten</span>':'<span class="badge b-new">New</span>';
+// Returns a CSS class for the first active shape marker, or '' if none
+const shapeClass=shapes=>{const i=(shapes||[]).findIndex(Boolean);return i>=0?'sh-'+i:'';};
 const shapePips=shapes=>SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
 
 function platform(url){
@@ -463,10 +466,10 @@ function renderList(){
     const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
     const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
     const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
-    return'<div class="waza-card '+stageClass(p.stage)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+    return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
       +'<div class="njp">'+(w.name_jp||'—')+'</div>'
       +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+      +'<div class="badges">'+bb+lb+tb+'</div>'
       +sp+'</div>';
   }).join('');
   list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -580,7 +583,7 @@ function drow(w){
   const shapes=p.shapes||Array(6).fill(false);
   const hasShape=shapes.some(Boolean);
   const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
-  return'<div class="drow '+stageClass(p.stage)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
+  return'<div class="drow '+shapeClass(shapes)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
     +(w.tag?'<span class="badge b-tag" style="flex-shrink:0">'+w.tag+'</span>':'')
     +'<span class="drn">'+(w.name_jp||'—')+'</span>'
     +(hasShape?'<div class="shapes-row" style="margin-left:4px">'+shapePips(shapes)+'</div>':'')
@@ -596,11 +599,11 @@ function expandedCard(w){
   const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
   const tb=w.tag?'<span class="badge b-tag">'+w.tag+'</span>':'';
   const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
-  return'<div class="waza-card-expanded '+stageClass(p.stage)+'" data-id="'+w.id+'">'
+  return'<div class="waza-card-expanded '+shapeClass(shapes)+'" data-id="'+w.id+'">'
     +'<div class="wce-header">'
     +'<div class="njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="nen">'+dispName(w)+'</div>'
-    +'<div class="wce-badges">'+bb+stageBadge(p.stage)+lb+tb+'</div>'
+    +'<div class="wce-badges">'+bb+lb+tb+'</div>'
     +sp+'</div>'
     +videoButtons(w)
     +'</div>';
