@@ -501,11 +501,15 @@ function filterWaza(){
   const {search,tag,parent,progress,shape,bm,like}=filters;
   return wazaData.filter(w=>{
     if (search) {
+      const isExact = search.startsWith('"') && search.endsWith('"');
+      const matchFn = isExact ? matchesQuery : isFuzzyMatch;
+      const query = isExact ? search.slice(1, -1).trim() : search;
+      
       const matches = 
-        isFuzzyMatch(w.name_jp, search) ||
-        isFuzzyMatch(w.name_en, search) ||
-        isFuzzyMatch(w.name_en_literal, search) ||
-        isFuzzyMatch(w.name_en_gtranslate, search);
+        matchFn(w.name_jp, query) ||
+        matchFn(w.name_en, query) ||
+        matchFn(w.name_en_literal, query) ||
+        matchFn(w.name_en_gtranslate, query);
       if (!matches) return false;
     }
     
