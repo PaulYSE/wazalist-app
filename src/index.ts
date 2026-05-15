@@ -1,4 +1,5 @@
 import { renderHtml } from "./renderHtml";
+import { hashPassword } from "./auth";
 
 export default {
 	async fetch(request, env) {
@@ -38,9 +39,41 @@ export default {
 
 		if (path === '/api/register' && request.method === 'POST') {
 			const body = await request.json();
-			// Implement registration logic
+			const { username, email, password } = body;
+
+			// Validate
+			if (!username || !password) {
+				return new Response(JSON.stringify({ error: "Username and password are required" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			// Check for existing user
+			const existing = env.DB.prepare("SELECT id FROM users WHERE username = ?")
+				.bind(username)
+				.first();
+			
+			if (existing) {
+				return new Response(JSON.stringify({ error: "User already exists" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			// Hash password
+			const { hash, salt } = await hashPassword(password);
+			const passwordHash = `${salt}:${hash}`;
+
+			// Store user in database
+			const result = env.DB.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)")
+				.bind(username, email || null, passwordHash)
+				.run();
+
+			// New user created, return success response
 			return new Response(JSON.stringify({ 
-				error: "Registration not implemented yet"
+				success: true,
+				user: { id: result.meta.last_row_id, username }			
 			}), {
 				headers: { "Content-Type": "application/json" }
 			});
