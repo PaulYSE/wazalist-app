@@ -732,7 +732,7 @@ function drow(w){
   const hasShape=shapes.some(Boolean);
   const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
   return'<div class="drow '+shapeClass(shapes)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
-    +'<span class="drn" style="margin-left:0;margin-right:8px">'+(w.name_jp||'—')+'</span>'
+    +'<span class="drn">'+(w.name_jp||'—')+'</span>'
     +'<span class="drs">'+dispName(w)+'</span>'
     +lb
     +(hasShape?'<div class="shapes-row" style="margin-left:auto">'+shapePips(shapes)+'</div>':'')
