@@ -44,7 +44,7 @@ a{color:var(--accent);text-decoration:none}
 .topbar h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
 .tagline{font-size:12px;color:var(--text3)}
 .guest-badge{font-size:11px;padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text3)}
-.search-row{display:flex;gap:8px;flex:1;min-width:200px}
+.search-row{display:flex;gap:8px;min-width:200px;padding:8px 16px;}
 #searchInput{flex:1;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
 #searchInput:focus{border-color:var(--accent)}
 
@@ -274,8 +274,10 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <span class="tagline">Wotagei Skills Database</span>
       <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
     </div>
-    <button class="btn" id="helpBtn">? Guide</button>
-    <button class="btn" id="logoutBtn">Sign out</button>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="btn" id="logoutBtn">Sign out</button>
+      <button class="btn" id="helpBtn">Help</button>
+    </div>
   </div>
   <div class="nav-tabs">
     <button class="ntab active" data-tab="browse">Browse</button>
@@ -356,7 +358,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to reduce clutter.</p>
     <h3>Dashboard</h3>
     <ul>
-      <li><b>Home</b> — overview of your shape-marked and liked Waza.</li>
+      <li><b>Home</b> — overview of your marked and liked Waza.</li>
       <li><b>My List</b> — expanded cards for all your tracked Waza, with video buttons directly on each card.</li>
       <li><b>Stats</b> — detailed breakdown of your progress.</li>
     </ul>
@@ -420,7 +422,7 @@ async function initApp(){
   document.getElementById('authWrap').style.display='none';
   document.getElementById('app').style.display='flex';
   document.getElementById('guestBadge').style.display=isGuest?'':'none';
-  document.getElementById('logoutBtn').textContent=isGuest?'Sign in / Register':'Sign out';
+  document.getElementById('logoutBtn').textContent=isGuest?'Sign in':'Sign out';
   document.getElementById('countBar').textContent='Loading Waza…';
   const wazaRes=await api('/api/waza');
   wazaData=Array.isArray(wazaRes)?wazaRes:[];
@@ -758,14 +760,41 @@ function expandedCard(w){
 function renderDashHome(){
   const shapedList=wazaData.filter(w=>getP(w.id).shapes&&getP(w.id).shapes.some(Boolean));
   const likedList=wazaData.filter(w=>getP(w.id).like==='like');
+  const dislikedList=wazaData.filter(w=>getP(w.id).like==='dislike');
+
+  // Calculate counts
+  let liked=0, disliked=0, shaped=0;
+  const shapeCounts=Array(6).fill(0);
+  wazaData.forEach(w=>{
+    const p=getP(w.id);
+    if(p.like==='like') liked++;
+    if(p.like==='dislike') disliked++;
+    if(p.shapes&&p.shapes.some(Boolean)) shaped++;
+    if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});
+  });
 
   document.getElementById('dashHome').innerHTML=
-    '<div class="dstats" style="grid-template-columns:repeat(2,1fr)">'
-    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shapedList.length+'</div><div class="l">Shape-marked</div></div>'
+    // Overview
+    '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">'
+    +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
+    +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shapedList.length+'</div><div class="l">Marked</div></div>'
     +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
     +'</div>'
-    +'<div class="dsec2"><h3>◆ Shape-marked ('+shapedList.length+')</h3>'+(shapedList.length?shapedList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No shape-marked Waza yet.</div>')+'</div>'
+
+    // Mark Usage
+    +'<div class="dsec2"><h3>Marker Usage</h3>'
+    +SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+s+'</span><span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span></div>').join('')
+    +'</div>'
+
+    // Marked List
+    +'<div class="dsec2"><h3>Marked ('+shapedList.length+')</h3>'+(shapedList.length?shapedList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No marked Waza yet.</div>')+'</div>'
+
+    // Liked List
     +(likedList.length?'<div class="dsec2"><h3>👍 Liked ('+likedList.length+')</h3>'+likedList.map(drow).join('')+'</div>':'');
+
+    // Disliked List
+    +(dislikedList.length?'<div class="dsec2"><h3>👎 Disliked ('+dislikedList.length+')</h3>'+dislikedList.map(drow).join('')+'</div>':'');
 
   attachDrowListeners('dashHome');
 }
@@ -801,7 +830,7 @@ function renderDashStats(){
     +'<div class="dstats">'
     +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
     +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Shape-marked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Marked</div></div>'
     +'</div></div>'
     +'<div class="dsec2"><h3>Shape marker usage</h3>'
     +SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+s+'</span><span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span></div>').join('')
