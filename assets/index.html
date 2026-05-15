@@ -406,13 +406,47 @@ function populateFilters(){
   document.getElementById('filterParent').innerHTML='<option value="">All families</option>'+parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
 }
 
+// ── Normalize user search entry ───────────────────────────────
+function normalizeForSearch(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')           // collapse multiple spaces
+    .normalize('NFD')                // decompose accents (é → e + ́)
+    .replace(/[\u0300-\u036f]/g, ''); // remove diacritical marks
+}
+
+// ── Word-based matching ───────────────────────────────────────
+function matchesQuery(text, query) {
+  if (!text || !query) return false;
+  
+  const normalizedText = normalizeForSearch(text);
+  const normalizedQuery = normalizeForSearch(query);
+  
+  // Level 1: Exact substring match (fast path)
+  if (normalizedText.includes(normalizedQuery)) return true;
+  
+  // Level 2: All query words must appear somewhere in the text
+  const queryWords = normalizedQuery.split(' ').filter(w => w.length > 0);
+  if (queryWords.every(word => normalizedText.includes(word))) return true;
+  
+  return false;
+}
+  
 // ── Filter logic ─────────────────────────────────────────────
 const dispName=w=>w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
 
 function filterWaza(){
   const {search,tag,parent,progress,shape,bm,like}=filters;
   return wazaData.filter(w=>{
-    if(search){const s=search.toLowerCase();if(!((w.name_jp||'').toLowerCase().includes(s)||(w.name_en||'').toLowerCase().includes(s)||(w.name_en_literal||'').toLowerCase().includes(s)||(w.name_en_gtranslate||'').toLowerCase().includes(s)))return false;}
+    if (search) {
+      const matches = 
+        matchesQuery(w.name_jp, search) ||
+        matchesQuery(w.name_en, search) ||
+        matchesQuery(w.name_en_literal, search) ||
+        matchesQuery(w.name_en_gtranslate, search);
+      if (!matches) return false;
+    }
     if(tag&&w.tag!==tag)return false;
     if(parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
     const p=getP(w.id);
