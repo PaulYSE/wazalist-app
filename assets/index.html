@@ -240,12 +240,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div class="filter-row">
       <select id="filterTag"><option value="">All levels</option></select>
       <select id="filterParent"><option value="">All families</option></select>
-      <select id="filterProgress">
-        <option value="">All progress</option>
-        <option value="new">New</option>
-        <option value="completed">Completed</option>
-        <option value="forgotten">Forgotten</option>
-      </select>
       <select id="filterShape">
         <option value="">All shapes</option>
         <option value="any">Has any shape</option>
@@ -300,16 +294,11 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <h3>Browsing & filters</h3>
     <ul>
       <li>Search by Japanese or English name.</li>
-      <li>Filter by skill level, family group, progress stage, or shape markers via dropdowns.</li>
+      <li>Filter by skill level, family group, or shape markers via dropdowns.</li>
       <li>Quick-filter by <b>★ Bookmarked</b> or <b>👍 Liked</b> buttons.</li>
     </ul>
-    <h3>Progress tracking</h3>
-    <ul>
-      <li><b>New</b> — default, no color.</li>
-      <li><b>Completed</b> — green tint.</li>
-      <li><b>Forgotten</b> — red tint.</li>
-      <li><b>★ Bookmark</b> — primary way to track Waza you want to learn, independent of stage.</li>
-    </ul>
+    <h3>Tracking</h3>
+    <p><b>★ Bookmark</b> any Waza you want to learn. Bookmarks are the primary way to track your learning list.</p>
     <h3>Like / Dislike</h3>
     <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
     <h3>Shape markers</h3>
@@ -518,11 +507,8 @@ function renderDetail(){
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
-    // Progress — not collapsible, always visible
-    +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
-    +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
-    +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
-    +'<button class="pbtn pforgot'+(p.stage==='forgotten'?' on':'')+'" data-s="forgotten">✕ Forgotten</button>'
+    // Bookmark — not collapsible, always visible
+    +'<div class="dsec"><h3>Bookmark</h3><div class="prog-row">'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
     +'</div></div>'
 
@@ -564,8 +550,6 @@ function renderDetail(){
 
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
 
-  // Progress buttons
-  panel.querySelectorAll('.pbtn').forEach(btn=>btn.addEventListener('click',()=>saveP(w.id,{stage:btn.dataset.s})));
   panel.querySelector('#bmBtn').addEventListener('click',()=>saveP(w.id,{bookmarked:!p.bookmarked}));
   panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
   panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
@@ -720,11 +704,6 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
 document.getElementById('filterTag').addEventListener('change',e=>{filters.tag=e.target.value;renderList();});
 document.getElementById('filterParent').addEventListener('change',e=>{filters.parent=e.target.value;renderList();});
-document.getElementById('filterProgress').addEventListener('change',e=>{
-  filters.progress=e.target.value;
-  document.getElementById('filterProgress').classList.toggle('active',!!e.target.value);
-  renderList();
-});
 document.getElementById('filterShape').addEventListener('change',e=>{
   filters.shape=e.target.value;
   document.getElementById('filterShape').classList.toggle('active',!!e.target.value);
@@ -734,7 +713,7 @@ document.getElementById('filterBM').addEventListener('click',function(){filters.
 document.getElementById('filterLike').addEventListener('click',function(){filters.like=!filters.like;this.classList.toggle('active',filters.like);renderList();});
 document.getElementById('clearFilters').addEventListener('click',()=>{
   filters={search:'',tag:'',parent:'',progress:'',shape:'',bm:false,like:false};
-  ['filterTag','filterParent','filterProgress','filterShape'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('active');});
+  ['filterTag','filterParent','filterShape'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('active');});
   document.getElementById('filterBM').classList.remove('active');
   document.getElementById('filterLike').classList.remove('active');
   document.getElementById('searchInput').value='';
