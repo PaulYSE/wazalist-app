@@ -274,9 +274,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <span class="tagline">Wotagei Skills Database</span>
       <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
     </div>
-    <div class="search-row">
-      <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
-    </div>
     <button class="btn" id="helpBtn">? Guide</button>
     <button class="btn" id="logoutBtn">Sign out</button>
   </div>
@@ -287,6 +284,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
 
   <!-- BROWSE -->
   <div id="browseView" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="search-row">
+      <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
+    </div>
     <div class="filter-row">
       <select id="filterTag"><option value="">All levels</option></select>
       <select id="filterParent"><option value="">All families</option></select>
