@@ -148,7 +148,7 @@ export default {
 				
 				// Authenticated user — save to database
 				const body = await request.json();
-				const { waza_id, stage, bookmarked, shapes, like } = body;
+				const { waza_id, bookmarked, shapes, like } = body;
 
 				if (!waza_id) {
 					return new Response(JSON.stringify({ error: "waza_id is required" }), {
@@ -158,18 +158,16 @@ export default {
 				}
 
 				await env.DB.prepare(`
-					INSERT INTO progress (user_id, waza_id, stage, bookmarked, shapes, like, updated_at)
-					VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+					INSERT INTO progress (user_id, waza_id, bookmarked, shapes, like, updated_at)
+					VALUES (?, ?, ?, ?, ?, datetime('now'))
 					ON CONFLICT (user_id, waza_id) DO UPDATE SET
-						stage = excluded.stage,
 						bookmarked = excluded.bookmarked,
-						shapes = excluded.shapes,
-						like = excluded.like,
-						updated_at = excluded.updated_at
+						shapes     = excluded.shapes,
+						like       = excluded.like,
+						updated_at = datetime('now')
 				`).bind(
 					user.id,
 					waza_id,
-					stage ?? 'new',
 					bookmarked ? 1 : 0,
 					shapes ?? '[]',
 					like ?? null
