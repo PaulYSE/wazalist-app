@@ -38,3 +38,16 @@ export function generateToken(): string {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
 }
+
+export async function getUserFromSession(env: Env, token: string) {
+    if (!token) return null;
+
+    const user = await env.DB.prepare(`
+        SELECT u.id, u.username, u.email 
+        FROM sessions s 
+        JOIN users u ON s.user_id = u.id 
+        WHERE s.id = ? AND s.expires_at > datetime('now')
+    `).bind(token).first();
+
+    return user || null;
+}

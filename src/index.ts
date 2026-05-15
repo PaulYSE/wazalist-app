@@ -1,5 +1,5 @@
 import { renderHtml } from "./renderHtml";
-import { hashPassword, generateToken } from "./auth";
+import { hashPassword, generateToken, getUserFromSession } from "./auth";
 
 export default {
 	async fetch(request, env) {
@@ -122,9 +122,24 @@ export default {
 		}
 
 		if (path === '/api/progress' && request.method === 'POST') {
-			const body = await request.json();
-			// Implement progress update logic
-			return new Response(JSON.stringify({ success: true }), {
+			const authHeader = request.headers.get("Authorization");
+			const token = authHeader?.replace("Bearer ", "");
+			
+			const user = await getUserFromSession(env, token);
+
+			if (!user) {
+				return new Response(JSON.stringify({ error: "Authentication required" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			// User is authenticated — fetch their progress
+			const { results } = await env.DB.prepare("SELECT * FROM progress WHERE user_id = ?")
+				.bind(user.id)
+				.all();
+
+			return new Response(JSON.stringify(results), {
 				headers: { "Content-Type": "application/json" }
 			});
 		}
