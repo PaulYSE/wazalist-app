@@ -255,8 +255,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
   <div class="abox" id="loginBox">
     <h2>⛩ Wazalist</h2>
     <div class="sub">Wotagei Skills Database</div>
-    <div class="field"><label>Email</label><input id="li-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="field"><label>PIN</label><input id="li-pin" type="password" placeholder="4–8 digits" maxlength="8"></div>
+    <div class="field"><label>Username</label><input id="li-username" type="text" placeholder="your username" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input id="li-password" type="password" placeholder="your password"></div>
     <button class="abtn" id="li-btn">Sign in</button>
     <div class="aerr" id="li-err"></div>
     <div class="adivider"><hr><span>or</span><hr></div>
@@ -266,8 +266,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
   <div class="abox" id="regBox" style="display:none">
     <h2>⛩ Wazalist</h2>
     <div class="sub">Create an account to sync progress across devices</div>
-    <div class="field"><label>Email</label><input id="rg-email" type="email" placeholder="you@example.com"></div>
-    <div class="field"><label>PIN (4–8 digits)</label><input id="rg-pin" type="password" placeholder="Choose a PIN" maxlength="8"></div>
+    <div class="field"><label>Username</label><input id="rg-username" type="text" placeholder="choose a username" autocomplete="username"></div>
+    <div class="field"><label>Email <span style="color:var(--text3);font-weight:400">(optional)</span></label><input id="rg-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input id="rg-password" type="password" placeholder="choose a password" autocomplete="new-password"></div>
     <button class="abtn" id="rg-btn">Create account</button>
     <div class="aerr" id="rg-err"></div>
     <div class="adivider"><hr><span>or</span><hr></div>
@@ -406,22 +407,22 @@ document.getElementById('guestBtn').onclick=startGuest;
 document.getElementById('guestBtn2').onclick=startGuest;
 
 document.getElementById('li-btn').onclick=async()=>{
-  const email=document.getElementById('li-email').value.trim(),pin=document.getElementById('li-pin').value.trim();
+  const username=document.getElementById('li-username').value.trim(),password=document.getElementById('li-password').value;
   const e=document.getElementById('li-err');e.textContent='';
-  if(!email||!pin){e.textContent='Please fill in both fields.';return;}
-  const res=await api('/api/login','POST',{email,pin});
+  if(!username||!password){e.textContent='Please fill in both fields.';return;}
+  const res=await api('/api/login','POST',{username,password});
   if(res.error){e.textContent=res.error;return;}
   token=res.token;localStorage.setItem('wl_token',token);initApp();
 };
 
 document.getElementById('rg-btn').onclick=async()=>{
-  const email=document.getElementById('rg-email').value.trim(),pin=document.getElementById('rg-pin').value.trim();
+  const username=document.getElementById('rg-username').value.trim(),email=document.getElementById('rg-email').value.trim(),password=document.getElementById('rg-password').value;
   const e=document.getElementById('rg-err');e.className='aerr';e.textContent='';
-  if(!email||!pin){e.textContent='Please fill in both fields.';return;}
-  const res=await api('/api/register','POST',{email,pin});
+  if(!username||!password){e.textContent='Username and password are required.';return;}
+  const res=await api('/api/register','POST',{username,email:email||undefined,password});
   if(res.error){e.textContent=res.error;return;}
   e.className='aok';e.textContent='Account created! Signing you in…';
-  const li=await api('/api/login','POST',{email,pin});
+  const li=await api('/api/login','POST',{username,password});
   if(li.token){token=li.token;localStorage.setItem('wl_token',token);initApp();}
 };
 
