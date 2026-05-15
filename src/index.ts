@@ -27,14 +27,49 @@ export default {
 
 		if (path === '/api/login' && request.method === 'POST') {
 			const body = await request.json();
-			// Implement login logic with email/pin
-			// For now, return demo response
+			const { username, password } = body;
+
+			// Validate
+			if (!username || !password) {
+				return new Response(JSON.stringify({ error: "Username and password are required" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			// Fetch user from database
+			const user = await env.DB.prepare("SELECT id, username, password_hash FROM users WHERE username = ?")
+				.bind(username)
+				.first();
+
+			// If user not found, return error
+			if (!user) {
+				return new Response(JSON.stringify({ error: "Invalid username or password" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" }
+				});
+    		}
+
+			// Salt and hash the provided password
+			const [salt, storedHash] = user.password_hash.split(':');
+			const { hash } = await hashPassword(password, salt);
+
+			// Check if the provided password matches the stored hash
+			if (hash !== storedHash) {
+				return new Response(JSON.stringify({ error: "Invalid username or password" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			// Successful login
 			return new Response(JSON.stringify({ 
-				error: "Login not implemented yet",
-				token: "demo-token" 
+				success: true,
+				token: "demo-token",  // We'll replace this with a real session token later
+				user: { id: user.id, username: user.username }
 			}), {
 				headers: { "Content-Type": "application/json" }
-			});
+			});		
 		}
 
 		if (path === '/api/register' && request.method === 'POST') {
