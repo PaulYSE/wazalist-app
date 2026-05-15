@@ -119,6 +119,24 @@ export default {
 			// Try to get user, but don't fail if no token
 			const user = token ? await getUserFromSession(env, token) : null;
 
+			// if (request.method === 'GET') {
+			// 	// Authenticated user — fetch from database
+			// 	if (user) {
+			// 		const { results } = await env.DB.prepare(
+			// 			"SELECT * FROM progress WHERE user_id = ?"
+			// 		).bind(user.id).all();
+					
+			// 		return new Response(JSON.stringify(results), {
+			// 			headers: { "Content-Type": "application/json" }
+			// 		});
+			// 	}
+				
+			// 	// Guest — return empty array (frontend uses localStorage)
+			// 	return new Response(JSON.stringify([]), {
+			// 		headers: { "Content-Type": "application/json" }
+			// 	});
+			// }
+
 			if (request.method === 'GET') {
 				// Authenticated user — fetch from database
 				if (user) {
@@ -126,13 +144,20 @@ export default {
 						"SELECT * FROM progress WHERE user_id = ?"
 					).bind(user.id).all();
 					
-					return new Response(JSON.stringify(results), {
+					return new Response(JSON.stringify({
+						source: 'database',
+						userId: user.id,
+						data: results
+					}), {
 						headers: { "Content-Type": "application/json" }
 					});
 				}
 				
 				// Guest — return empty array (frontend uses localStorage)
-				return new Response(JSON.stringify([]), {
+				return new Response(JSON.stringify({
+					source: 'guest',
+					data: []
+				}), {
 					headers: { "Content-Type": "application/json" }
 				});
 			}
