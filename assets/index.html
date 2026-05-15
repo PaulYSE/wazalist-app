@@ -298,20 +298,13 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
     </div>
     <div class="filter-row">
-      <select id="filterTag"><option value="">All levels</option></select>
-      <select id="filterParent"><option value="">All families</option></select>
-      <select id="filterShape">
-        <option value="">All shapes</option>
-        <option value="any">Has any shape</option>
-        <option value="0">● marked</option>
-        <option value="1">▲ marked</option>
-        <option value="2">■ marked</option>
-        <option value="3">♥ marked</option>
-        <option value="4">★ marked</option>
-        <option value="5">◆ marked</option>
-      </select>
-      <button class="btn" id="filterLike">👍 Liked</button>
-      <button class="btn" id="clearFilters" style="margin-left:auto">Clear</button>
+      <button class="btn" id="filterShapeAll">All</button>
+      <button class="btn shape-filter-btn" data-si="0">●</button>
+      <button class="btn shape-filter-btn" data-si="1">▲</button>
+      <button class="btn shape-filter-btn" data-si="2">■</button>
+      <button class="btn shape-filter-btn" data-si="3">♥</button>
+      <button class="btn shape-filter-btn" data-si="4">★</button>
+      <button class="btn shape-filter-btn" data-si="5">◆</button>
     </div>
     <div class="main">
       <div class="list-panel" id="listPanel">
@@ -386,7 +379,7 @@ let isGuest=false, token=localStorage.getItem('wl_token')||'';
 let currentUsername=localStorage.getItem('wl_username')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
 const savingIds=new Set(); // waza IDs currently being saved
-let filters={search:'',tag:'',parent:'',shape:'',like:false};
+let filters={search:'',shapes:Array(6).fill(false)};
 
 // ── localStorage ─────────────────────────────────────────────
 const LS_KEY='wl_local_prog';
@@ -453,7 +446,7 @@ async function initApp(){
       });
     } catch(err){console.warn('Progress load error:',err);}
   }
-  populateFilters();renderList();renderDashboard();
+  renderList();renderDashboard();
 }
 if(token)initApp();
 
@@ -479,13 +472,7 @@ async function saveP(id,patch){
   }
 }
 
-// ── Populate filter dropdowns ─────────────────────────────────
-function populateFilters(){
-  const tags=[...new Set(wazaData.map(w=>w.tag).filter(Boolean))].sort();
-  document.getElementById('filterTag').innerHTML='<option value="">All levels</option>'+tags.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
-  const parents=[...new Set(wazaData.flatMap(w=>[w.parent_en0,w.parent_en1]).filter(Boolean))].sort();
-  document.getElementById('filterParent').innerHTML='<option value="">All families</option>'+parents.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
-}
+// ── Populate filter dropdowns (removed) ─────────────────────────────────
 
 // ── Normalize user search entry ───────────────────────────────
 function normalizeForSearch(text) {
@@ -579,27 +566,21 @@ function isFuzzyMatch(text, query, maxDistance = 2) {
 const dispName=w=>w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)';
 
 function filterWaza(){
-  const {search,tag,parent,shape,like}=filters;
+  const {search,shapes}=filters;
+  const anyShapeActive=shapes.some(Boolean);
   return wazaData.filter(w=>{
-    if (search) {
-      const isExact = search.startsWith('"') && search.endsWith('"');
-      const matchFn = isExact ? matchesQuery : isFuzzyMatch;
-      const query = isExact ? search.slice(1, -1).trim() : search;
-      
-      const matches = 
-        matchFn(w.name_jp, query) ||
-        matchFn(w.name_en, query) ||
-        matchFn(w.name_en_literal, query) ||
-        matchFn(w.name_en_gtranslate, query);
-      if (!matches) return false;
+    if(search){
+      const isExact=search.startsWith('"')&&search.endsWith('"');
+      const matchFn=isExact?matchesQuery:isFuzzyMatch;
+      const query=isExact?search.slice(1,-1).trim():search;
+      const matches=matchFn(w.name_jp,query)||matchFn(w.name_en,query)||matchFn(w.name_en_literal,query)||matchFn(w.name_en_gtranslate,query);
+      if(!matches)return false;
     }
-    
-    if(tag&&w.tag!==tag)return false;
-    if(parent&&w.parent_en0!==parent&&w.parent_en1!==parent)return false;
-    const p=getP(w.id);
-    if(shape==='any'&&!(p.shapes&&p.shapes.some(Boolean)))return false;
-    if(shape!==''&&shape!=='any'&&!(p.shapes&&p.shapes[+shape]))return false;
-    if(like&&p.like!=='like')return false;
+    if(anyShapeActive){
+      const p=getP(w.id);
+      const ws=p.shapes||Array(6).fill(false);
+      if(!shapes.every((on,i)=>!on||ws[i]))return false;
+    }
     return true;
   });
 }
@@ -756,7 +737,7 @@ function renderDetail(){
     el.classList.toggle('collapsed',collapsed[key]);
     el.nextElementSibling.style.display=collapsed[key]?'none':'';
   }));
-  panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{filters.parent=chip.dataset.parent;document.getElementById('filterParent').value=chip.dataset.parent;renderList();}));
+  panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{filters.search=chip.dataset.parent;document.getElementById('searchInput').value=chip.dataset.parent;renderList();}));
   panel.querySelectorAll('.chip[data-id]').forEach(chip=>chip.addEventListener('click',()=>selectWaza(+chip.dataset.id)));
 }
 
@@ -900,20 +881,27 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 
 // ── Filter events ─────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
-document.getElementById('filterTag').addEventListener('change',e=>{filters.tag=e.target.value;renderList();});
-document.getElementById('filterParent').addEventListener('change',e=>{filters.parent=e.target.value;renderList();});
-document.getElementById('filterShape').addEventListener('change',e=>{
-  filters.shape=e.target.value;
-  document.getElementById('filterShape').classList.toggle('active',!!e.target.value);
-  renderList();
+
+function updateShapeFilterUI(){
+  const anyOn=filters.shapes.some(Boolean);
+  document.getElementById('filterShapeAll').classList.toggle('active',filters.shapes.every(Boolean));
+  document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
+    btn.classList.toggle('active',filters.shapes[+btn.dataset.si]);
+  });
+}
+
+document.getElementById('filterShapeAll').addEventListener('click',()=>{
+  const anyOn=filters.shapes.some(Boolean);
+  filters.shapes=Array(6).fill(!anyOn); // if any are on, turn all off; otherwise turn all on
+  updateShapeFilterUI();renderList();
 });
-document.getElementById('filterLike').addEventListener('click',function(){filters.like=!filters.like;this.classList.toggle('active',filters.like);renderList();});
-document.getElementById('clearFilters').addEventListener('click',()=>{
-  filters={search:'',tag:'',parent:'',shape:'',like:false};
-  ['filterTag','filterParent','filterShape'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('active');});
-  document.getElementById('filterLike').classList.remove('active');
-  document.getElementById('searchInput').value='';
-  renderList();
+
+document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const i=+btn.dataset.si;
+    filters.shapes=filters.shapes.map((v,idx)=>idx===i?!v:v);
+    updateShapeFilterUI();renderList();
+  });
 });
 
 // ── Nav tabs ──────────────────────────────────────────────────
