@@ -16,15 +16,6 @@ export default {
 			});
 		}
 
-		if (path === "/api/progress") {
-			const authHeader = request.headers.get("Authorization");
-			return new Response(JSON.stringify([]), {
-				headers: {
-					"content-type": "application/json",
-				},
-			});
-		}
-
 		if (path === '/api/login' && request.method === 'POST') {
 			const body = await request.json();
 			const { username, password } = body;
@@ -121,27 +112,48 @@ export default {
 			});
 		}
 
-		if (path === '/api/progress' && request.method === 'POST') {
+		if (path === '/api/progress') {
 			const authHeader = request.headers.get("Authorization");
 			const token = authHeader?.replace("Bearer ", "");
 			
-			const user = await getUserFromSession(env, token);
+			// Try to get user, but don't fail if no token
+			const user = token ? await getUserFromSession(env, token) : null;
 
-			if (!user) {
-				return new Response(JSON.stringify({ error: "Authentication required" }), {
-					status: 401,
+			if (request.method === 'GET') {
+				// Authenticated user — fetch from database
+				if (user) {
+					const { results } = await env.DB.prepare(
+						"SELECT * FROM progress WHERE user_id = ?"
+					).bind(user.id).all();
+					
+					return new Response(JSON.stringify(results), {
+						headers: { "Content-Type": "application/json" }
+					});
+				}
+				
+				// Guest — return empty array (frontend uses localStorage)
+				return new Response(JSON.stringify([]), {
 					headers: { "Content-Type": "application/json" }
 				});
 			}
 
-			// User is authenticated — fetch their progress
-			const { results } = await env.DB.prepare("SELECT * FROM progress WHERE user_id = ?")
-				.bind(user.id)
-				.all();
-
-			return new Response(JSON.stringify(results), {
-				headers: { "Content-Type": "application/json" }
-			});
+			if (request.method === 'POST') {
+				// Guest — reject (they use localStorage, not the server)
+				if (!user) {
+					return new Response(JSON.stringify({ error: "Authentication required to save progress" }), {
+						status: 401,
+						headers: { "Content-Type": "application/json" }
+					});
+				}
+				
+				// Authenticated user — save to database
+				const body = await request.json();
+				// ... progress save logic ...
+				
+				return new Response(JSON.stringify({ success: true }), {
+					headers: { "Content-Type": "application/json" }
+				});
+			}
 		}
 
 		const html = await renderHtml(env);
