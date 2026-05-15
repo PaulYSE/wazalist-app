@@ -253,7 +253,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="4">★ marked</option>
         <option value="5">◆ marked</option>
       </select>
-      <button class="btn" id="filterBM">★ Bookmarked</button>
+      <button class="btn" id="filterBM">🔖 Bookmarked</button>
       <button class="btn" id="filterLike">👍 Liked</button>
       <button class="btn" id="clearFilters" style="margin-left:auto">Clear</button>
     </div>
@@ -298,10 +298,10 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <ul>
       <li>Search by Japanese or English name.</li>
       <li>Filter by skill level, family group, or shape markers via dropdowns.</li>
-      <li>Quick-filter by <b>★ Bookmarked</b> or <b>👍 Liked</b> buttons.</li>
+      <li>Quick-filter by <b>🔖 Bookmarked</b> or <b>👍 Liked</b> buttons.</li>
     </ul>
     <h3>Tracking</h3>
-    <p><b>★ Bookmark</b> any Waza you want to learn. Bookmarks are the primary way to track your learning list.</p>
+    <p><b>🔖 Bookmark</b> any Waza you want to learn. Bookmarks are the primary way to track your learning list.</p>
     <h3>Like / Dislike</h3>
     <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
     <h3>Shape markers</h3>
@@ -612,7 +612,7 @@ function renderDetail(){
 
     // Bookmark — not collapsible, always visible
     +'<div class="dsec"><h3>Bookmark</h3><div class="prog-row">'
-    +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
+    +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'🔖 Bookmarked':'🔖 Bookmark')+'</button>'
     +'</div></div>'
 
     // Like/Dislike — not collapsible
@@ -726,7 +726,7 @@ function renderDashHome(){
     +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden"><div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
     +(bmarked===0?'<div style="font-size:12px;color:var(--text3);margin-top:6px">Bookmark Waza you want to learn to start tracking here.</div>':'')
     +'</div>'
-    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>';
+    +'<div class="dsec2"><h3>🔖 Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>';
 
   attachDrowListeners('dashHome');
 }
@@ -738,7 +738,7 @@ function renderDashMyList(){
   const stageLabel={inprogress:'⏳ In Progress (legacy)',completed:'✓ Completed',forgotten:'✕ Forgotten',new:'New'};
 
   let html='';
-  if(bmWaza.length)html+='<div class="mylist-stage-header">★ Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(expandedCard).join('');
+  if(bmWaza.length)html+='<div class="mylist-stage-header">🔖 Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(expandedCard).join('');
   STAGE_ORDER.forEach(s=>{if(byStage[s].length)html+='<div class="mylist-stage-header">'+stageLabel[s]+' ('+byStage[s].length+')</div>'+byStage[s].map(expandedCard).join('');});
   if(!html)html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking Waza you want to learn.</div>';
 
