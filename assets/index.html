@@ -438,8 +438,14 @@ async function initApp(){
   const wazaRes=await api('/api/waza');
   wazaData=Array.isArray(wazaRes)?wazaRes:[];
   if(!isGuest){
-    const progRes=await api('/api/progress');
-    if(Array.isArray(progRes))progRes.forEach(p=>{prog[p.waza_id]={stage:p.stage,bookmarked:!!p.bookmarked,shapes:p.shapes?JSON.parse(p.shapes):Array(6).fill(false),like:p.like||null};});
+    try {
+      const progRes=await api('/api/progress');
+      if(Array.isArray(progRes))progRes.forEach(p=>{
+        let shapes=Array(6).fill(false);
+        try{if(p.shapes)shapes=JSON.parse(p.shapes);}catch{}
+        prog[p.waza_id]={stage:p.stage||'new',bookmarked:!!p.bookmarked,shapes,like:p.like||null};
+      });
+    } catch(err){console.warn('Progress load error:',err);}
   }
   populateFilters();renderList();renderDashboard();
 }
@@ -452,7 +458,12 @@ const getP=id=>prog[id]||emptyP();
 async function saveP(id,patch){
   prog[id]={...getP(id),...patch};
   if(isGuest){const l=loadLocal();l[id]=prog[id];saveLocal(l);}
-  else await api('/api/progress','POST',{waza_id:id,...prog[id],shapes:JSON.stringify(prog[id].shapes)});
+  else {
+    try {
+      const res=await api('/api/progress','POST',{waza_id:id,...prog[id],shapes:JSON.stringify(prog[id].shapes)});
+      if(res.error)console.warn('Progress save failed:',res.error);
+    } catch(err){console.warn('Progress save error:',err);}
+  }
   renderList();renderDetail();renderDashboard();
 }
 

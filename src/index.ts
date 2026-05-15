@@ -148,8 +148,33 @@ export default {
 				
 				// Authenticated user — save to database
 				const body = await request.json();
-				// ... progress save logic ...
-				
+				const { waza_id, stage, bookmarked, shapes, like } = body;
+
+				if (!waza_id) {
+					return new Response(JSON.stringify({ error: "waza_id is required" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" }
+					});
+				}
+
+				await env.DB.prepare(`
+					INSERT INTO progress (user_id, waza_id, stage, bookmarked, shapes, like, updated_at)
+					VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+					ON CONFLICT (user_id, waza_id) DO UPDATE SET
+						stage = excluded.stage,
+						bookmarked = excluded.bookmarked,
+						shapes = excluded.shapes,
+						like = excluded.like,
+						updated_at = excluded.updated_at
+				`).bind(
+					user.id,
+					waza_id,
+					stage ?? 'new',
+					bookmarked ? 1 : 0,
+					shapes ?? '[]',
+					like ?? null
+				).run();
+
 				return new Response(JSON.stringify({ success: true }), {
 					headers: { "Content-Type": "application/json" }
 				});
