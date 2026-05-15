@@ -1,5 +1,5 @@
 import { renderHtml } from "./renderHtml";
-import { hashPassword } from "./auth";
+import { hashPassword, generateToken } from "./auth";
 
 export default {
 	async fetch(request, env) {
@@ -63,9 +63,16 @@ export default {
 			}
 
 			// Successful login
+			const token = generateToken();
+			const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+			await env.DB.prepare("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)")
+				.bind(token, user.id, expiresAt)
+				.run();
+
 			return new Response(JSON.stringify({ 
 				success: true,
-				token: "demo-token",  // We'll replace this with a real session token later
+				token: token,
 				user: { id: user.id, username: user.username }
 			}), {
 				headers: { "Content-Type": "application/json" }

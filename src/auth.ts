@@ -31,3 +31,10 @@ export async function hashPassword(password: string, salt?: string): Promise<{ h
 
     return { hash, salt };
 }
+
+export function generateToken(): string {
+    const buffer = crypto.getRandomValues(new Uint8Array(32));
+    return Array.from(buffer)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
