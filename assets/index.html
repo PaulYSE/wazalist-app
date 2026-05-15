@@ -220,6 +220,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .ntab:hover{color:var(--text1)}
 .ntab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
+.mobile-back{display:none;align-items:center;gap:6px;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);font-size:13px;color:var(--accent);cursor:pointer;flex-shrink:0}
+.mobile-back:hover{background:var(--bg2)}
+
 /* ── Modal ── */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:24px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
@@ -234,6 +237,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
   .list-panel{width:100%;max-height:45vh;border-right:none;border-bottom:1px solid var(--border)}
   .dstats{grid-template-columns:repeat(2,1fr)}
   .dgrid{grid-template-columns:1fr}
+  .mobile-back{display:flex !important}
+  .list-panel.detail-open{display:none}
+  .detail-panel{position:relative}
 }
 </style>
 </head>
@@ -274,7 +280,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <span class="tagline">Wotagei Skills Database</span>
       <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
     </div>
-    <div style="margin-left:auto;display:flex;gap:8px;">
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <span id="saveIndicator" style="font-size:12px;color:var(--green);opacity:0;transition:opacity .3s;white-space:nowrap">Saved ✓</span>
+      <span id="usernameBadge" style="display:none;font-size:12px;color:var(--text2);padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px"></span>
       <button class="btn" id="logoutBtn">Sign out</button>
       <button class="btn" id="helpBtn">Help</button>
     </div>
@@ -306,12 +314,15 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <button class="btn" id="clearFilters" style="margin-left:auto">Clear</button>
     </div>
     <div class="main">
-      <div class="list-panel">
+      <div class="list-panel" id="listPanel">
         <div class="count-bar" id="countBar">Loading…</div>
         <div id="wazaList"></div>
       </div>
       <div class="detail-panel" id="detailPanel">
-        <div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>
+        <div class="mobile-back" id="mobileBack">← Back to list</div>
+        <div id="detailContent">
+          <div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -372,7 +383,9 @@ const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter/X',nico:'NicoNico',f
 const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
 
 let isGuest=false, token=localStorage.getItem('wl_token')||'';
+let currentUsername=localStorage.getItem('wl_username')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
+const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',tag:'',parent:'',shape:'',like:false};
 
 // ── localStorage ─────────────────────────────────────────────
@@ -401,7 +414,9 @@ document.getElementById('li-btn').onclick=async()=>{
   if(!username||!password){e.textContent='Please fill in both fields.';return;}
   const res=await api('/api/login','POST',{username,password});
   if(res.error){e.textContent=res.error;return;}
-  token=res.token;localStorage.setItem('wl_token',token);initApp();
+  token=res.token;localStorage.setItem('wl_token',token);
+  currentUsername=res.user.username;localStorage.setItem('wl_username',currentUsername);
+  initApp();
 };
 
 document.getElementById('rg-btn').onclick=async()=>{
@@ -412,10 +427,10 @@ document.getElementById('rg-btn').onclick=async()=>{
   if(res.error){e.textContent=res.error;return;}
   e.className='aok';e.textContent='Account created! Signing you in…';
   const li=await api('/api/login','POST',{username,password});
-  if(li.token){token=li.token;localStorage.setItem('wl_token',token);initApp();}
+  if(li.token){token=li.token;localStorage.setItem('wl_token',token);currentUsername=li.user.username;localStorage.setItem('wl_username',currentUsername);initApp();}
 };
 
-document.getElementById('logoutBtn').onclick=()=>{token='';isGuest=false;localStorage.removeItem('wl_token');location.reload();};
+document.getElementById('logoutBtn').onclick=()=>{token='';isGuest=false;currentUsername='';localStorage.removeItem('wl_token');localStorage.removeItem('wl_username');location.reload();};
 
 // ── Init ─────────────────────────────────────────────────────
 async function initApp(){
@@ -423,6 +438,8 @@ async function initApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('guestBadge').style.display=isGuest?'':'none';
   document.getElementById('logoutBtn').textContent=isGuest?'Sign in':'Sign out';
+  const ub=document.getElementById('usernameBadge');
+  if(!isGuest&&currentUsername){ub.textContent='@'+currentUsername;ub.style.display='';}else{ub.style.display='none';}
   document.getElementById('countBar').textContent='Loading Waza…';
   const wazaRes=await api('/api/waza');
   wazaData=Array.isArray(wazaRes)?wazaRes:[];
@@ -446,14 +463,20 @@ const getP=id=>prog[id]||emptyP();
 
 async function saveP(id,patch){
   prog[id]={...getP(id),...patch};
-  if(isGuest){const l=loadLocal();l[id]=prog[id];saveLocal(l);}
+  if(isGuest){const l=loadLocal();l[id]=prog[id];saveLocal(l);renderList();renderDetail();renderDashboard();}
   else {
+    savingIds.add(id);
+    renderDetail(); // show spinning state immediately
     try {
       const res=await api('/api/progress','POST',{waza_id:id,shapes:JSON.stringify(prog[id].shapes),like:prog[id].like});
       if(res.error)console.warn('Progress save failed:',res.error);
     } catch(err){console.warn('Progress save error:',err);}
+    savingIds.delete(id);
+    renderList();renderDetail();renderDashboard();
+    // Flash "Saved ✓" indicator
+    const indicator=document.getElementById('saveIndicator');
+    if(indicator){indicator.style.opacity='1';clearTimeout(indicator._t);indicator._t=setTimeout(()=>{indicator.style.opacity='0';},1400);}
   }
-  renderList();renderDetail();renderDashboard();
 }
 
 // ── Populate filter dropdowns ─────────────────────────────────
@@ -629,14 +652,30 @@ function renderList(){
   list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
 }
 
-function selectWaza(id){selectedId=id;renderList();renderDetail();}
+function selectWaza(id){
+  selectedId=id;
+  renderList();renderDetail();
+  // Mobile: hide list panel, show detail panel with back button
+  const isMobile=window.innerWidth<=600;
+  if(isMobile&&id!==null){
+    document.getElementById('listPanel').classList.add('detail-open');
+    document.getElementById('mobileBack').style.display='flex';
+  }
+}
+
+document.getElementById('mobileBack').addEventListener('click',()=>{
+  selectedId=null;
+  document.getElementById('listPanel').classList.remove('detail-open');
+  document.getElementById('mobileBack').style.display='none';
+  renderDetail();
+});
 
 // ── Render detail ─────────────────────────────────────────────
 // Track collapsed state per section key
 const collapsed={names:false,classif:false,parents:false,creator:false};
 
 function renderDetail(){
-  const panel=document.getElementById('detailPanel');
+  const panel=document.getElementById('detailContent');
   if(selectedId===null){panel.innerHTML='<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';return;}
   const w=wazaData.find(x=>x.id===selectedId);if(!w)return;
   const p=getP(w.id);
@@ -660,19 +699,22 @@ function renderDetail(){
       +inner+'</div></div>';
   };
 
+  const isSaving=savingIds.has(w.id);
+  const savingAttr=isSaving?' disabled style="opacity:.5;cursor:default"':'';
+
   panel.innerHTML=
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
     // Like/Dislike — not collapsible
-    +'<div class="dsec"><h3>Like / Dislike</h3><div class="like-row">'
-    +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'" id="likeBtn">👍 Like</button>'
-    +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'" id="dislikeBtn">👎 Dislike</button>'
+    +'<div class="dsec"><h3>Like / Dislike'+(isSaving?' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>':'')+'</h3><div class="like-row">'
+    +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'"'+savingAttr+' id="likeBtn">👍 Like</button>'
+    +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'"'+savingAttr+' id="dislikeBtn">👎 Dislike</button>'
     +'</div></div>'
 
     // Shapes — not collapsible
     +'<div class="dsec"><h3>Shape markers</h3>'
-    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'" data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'"'+savingAttr+' data-si="'+i+'" title="Shape '+(i+1)+'">'+s+'</button>').join('')+'</div>'
     +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — meaning is up to you.</div></div>'
 
     // Videos — not collapsible
