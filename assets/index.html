@@ -148,7 +148,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .dtab{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
 .dtab:hover{color:var(--text1)}
 .dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.dstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
 .scard{background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center}
 .scard .n{font-size:22px;font-weight:700}
 .scard .l{font-size:11px;color:var(--text3);margin-top:2px}
@@ -243,7 +243,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <select id="filterProgress">
         <option value="">All progress</option>
         <option value="new">New</option>
-        <option value="inprogress">In Progress</option>
         <option value="completed">Completed</option>
         <option value="forgotten">Forgotten</option>
       </select>
@@ -307,10 +306,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <h3>Progress tracking</h3>
     <ul>
       <li><b>New</b> — default, no color.</li>
-      <li><b>In Progress</b> — yellow tint.</li>
       <li><b>Completed</b> — green tint.</li>
       <li><b>Forgotten</b> — red tint.</li>
-      <li><b>★ Bookmark</b> — "want to learn" flag, independent of stage.</li>
+      <li><b>★ Bookmark</b> — primary way to track Waza you want to learn, independent of stage.</li>
     </ul>
     <h3>Like / Dislike</h3>
     <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
@@ -320,8 +318,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to reduce clutter.</p>
     <h3>Dashboard</h3>
     <ul>
-      <li><b>Home</b> — overview with bookmarked and in-progress lists.</li>
-      <li><b>My List</b> — expanded cards for all your tracked Waza, with video buttons directly on each card. Sorted: Bookmarked → In Progress → Completed → Forgotten.</li>
+      <li><b>Home</b> — overview with your bookmarked Waza and completion progress.</li>
+      <li><b>My List</b> — expanded cards for all your tracked Waza, with video buttons directly on each card. Sorted: Bookmarked → Completed → Forgotten.</li>
       <li><b>Stats</b> — detailed breakdown of your progress.</li>
     </ul>
     <button class="mclosebtn" id="closeModal">Got it!</button>
@@ -330,7 +328,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
 
 <script>
 const SHAPES = ['●','▲','■','♥','★','◆'];
-const STAGE_ORDER = ['inprogress','completed','forgotten','new'];
+const STAGE_ORDER = ['completed','forgotten','new','inprogress'];
 const platLabel = {yt:'YouTube',bili:'Bilibili',tw:'Twitter/X',nico:'NicoNico',fb:'Facebook',other:'Video'};
 const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#1877f2',other:'#555'};
 
@@ -523,7 +521,6 @@ function renderDetail(){
     // Progress — not collapsible, always visible
     +'<div class="dsec"><h3>Track progress</h3><div class="prog-row">'
     +'<button class="pbtn pnew'+(p.stage==='new'?' on':'')+'" data-s="new">New</button>'
-    +'<button class="pbtn pip'+(p.stage==='inprogress'?' on':'')+'" data-s="inprogress">⏳ In Progress</button>'
     +'<button class="pbtn pdone'+(p.stage==='completed'?' on':'')+'" data-s="completed">✓ Completed</button>'
     +'<button class="pbtn pforgot'+(p.stage==='forgotten'?' on':'')+'" data-s="forgotten">✕ Forgotten</button>'
     +'<button class="bmbtn'+(p.bookmarked?' on':'')+'" id="bmBtn">'+(p.bookmarked?'★ Bookmarked':'☆ Bookmark')+'</button>'
@@ -627,16 +624,13 @@ function expandedCard(w){
 
 function renderDashHome(){
   const bmList=wazaData.filter(w=>getP(w.id).bookmarked);
-  const ipList=wazaData.filter(w=>getP(w.id).stage==='inprogress');
   const bmarked=bmList.length;
   const bmDone=bmList.filter(w=>getP(w.id).stage==='completed').length;
-  const bmIP=bmList.filter(w=>getP(w.id).stage==='inprogress').length;
   const bmPct=bmarked?Math.round(bmDone/bmarked*100):0;
 
   document.getElementById('dashHome').innerHTML=
     '<div class="dstats">'
     +'<div class="scard"><div class="n" style="color:var(--gold)">'+bmarked+'</div><div class="l">Bookmarked</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--amber)">'+bmIP+'</div><div class="l">In Progress</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--green)">'+bmDone+'</div><div class="l">Completed</div></div>'
     +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
     +'</div>'
@@ -645,8 +639,7 @@ function renderDashHome(){
     +'<div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden"><div style="background:var(--green);height:100%;width:'+bmPct+'%;border-radius:20px;transition:width .4s"></div></div>'
     +(bmarked===0?'<div style="font-size:12px;color:var(--text3);margin-top:6px">Bookmark Waza you want to learn to start tracking here.</div>':'')
     +'</div>'
-    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>'
-    +'<div class="dsec2"><h3>⏳ In Progress ('+ipList.length+')</h3>'+(ipList.length?ipList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No Waza in progress yet.</div>')+'</div>';
+    +'<div class="dsec2"><h3>★ Bookmarked ('+bmList.length+')</h3>'+(bmList.length?bmList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No bookmarks yet.</div>')+'</div>';
 
   attachDrowListeners('dashHome');
 }
@@ -655,12 +648,12 @@ function renderDashMyList(){
   const tracked=wazaData.filter(w=>{const p=getP(w.id);return p.bookmarked||p.stage!=='new'||p.like||(p.shapes&&p.shapes.some(Boolean));});
   const bmWaza=tracked.filter(w=>getP(w.id).bookmarked);
   const byStage={};STAGE_ORDER.forEach(s=>{byStage[s]=tracked.filter(w=>!getP(w.id).bookmarked&&getP(w.id).stage===s);});
-  const stageLabel={inprogress:'⏳ In Progress',completed:'✓ Completed',forgotten:'✕ Forgotten',new:'New'};
+  const stageLabel={inprogress:'⏳ In Progress (legacy)',completed:'✓ Completed',forgotten:'✕ Forgotten',new:'New'};
 
   let html='';
   if(bmWaza.length)html+='<div class="mylist-stage-header">★ Bookmarked ('+bmWaza.length+')</div>'+bmWaza.map(expandedCard).join('');
   STAGE_ORDER.forEach(s=>{if(byStage[s].length)html+='<div class="mylist-stage-header">'+stageLabel[s]+' ('+byStage[s].length+')</div>'+byStage[s].map(expandedCard).join('');});
-  if(!html)html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking or setting progress on a Waza.</div>';
+  if(!html)html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Start by bookmarking Waza you want to learn.</div>';
 
   document.getElementById('dashMyList').innerHTML=html;
 
@@ -687,7 +680,6 @@ function renderDashStats(){
 
   document.getElementById('dashStats').innerHTML=
     '<div class="dsec2"><h3>Progress breakdown</h3>'
-    +bar('In Progress',counts.inprogress,'var(--amber)')
     +bar('Completed',counts.completed,'var(--green)')
     +bar('Forgotten',counts.forgotten,'var(--red)')
     +bar('New (untouched)',counts.new,'var(--text3)')
