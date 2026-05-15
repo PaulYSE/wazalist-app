@@ -213,6 +213,13 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .stat-bar-fill{height:100%;border-radius:20px;transition:width .4s}
 .mylist-stage-header{padding:6px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);border-bottom:1px solid var(--border);margin-bottom:8px;margin-top:16px}
 .mylist-stage-header:first-child{margin-top:0}
+.mylist-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.mylist-count{font-size:12px;color:var(--text3);margin-left:auto}
+.crow{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid var(--border);cursor:pointer;border-left:3px solid transparent;transition:background .1s}
+.crow:hover{background:var(--bg2)}
+.crow .crn{font-size:14px;font-weight:500;flex-shrink:0}
+.crow .cren{font-size:12px;color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .crshapes{display:flex;gap:2px;flex-shrink:0}
 
 /* ── Nav ── */
 .nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -380,6 +387,8 @@ let currentUsername=localStorage.getItem('wl_username')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
+let myListView='card'; // 'card' | 'compact'
+let myListShapes=Array(6).fill(false); // shape filters for My List
 
 // ── localStorage ─────────────────────────────────────────────
 const LS_KEY='wl_local_prog';
@@ -821,22 +830,92 @@ function renderDashHome(){
   attachDrowListeners('dashHome');
 }
 
+function myListFiltered(){
+  const anyOn=myListShapes.some(Boolean);
+  return wazaData.filter(w=>{
+    const p=getP(w.id);
+    if(!(p.like||(p.shapes&&p.shapes.some(Boolean))))return false;
+    if(anyOn){
+      const ws=p.shapes||Array(6).fill(false);
+      if(!myListShapes.every((on,i)=>!on||ws[i]))return false;
+    }
+    return true;
+  });
+}
+
+function compactRow(w){
+  const p=getP(w.id);
+  const shapes=p.shapes||Array(6).fill(false);
+  const sc=shapeClass(shapes);
+  return'<div class="crow '+(sc||'')+'" data-id="'+w.id+'">'
+    +'<span class="crn">'+(w.name_jp||'—')+'</span>'
+    +'<span class="cren">'+dispName(w)+'</span>'
+    +'<span class="crshapes">'+shapePips(shapes)+'</span>'
+    +'</div>';
+}
+
+function updateMyListToolbarUI(){
+  const cont=document.getElementById('dashMyList');
+  if(!cont)return;
+  cont.querySelector('#mlViewCard')?.classList.toggle('active',myListView==='card');
+  cont.querySelector('#mlViewCompact')?.classList.toggle('active',myListView==='compact');
+  cont.querySelector('#mlShapeAll')?.classList.toggle('active',myListShapes.every(Boolean));
+  cont.querySelectorAll('.ml-shape-btn').forEach(btn=>{
+    btn.classList.toggle('active',myListShapes[+btn.dataset.si]);
+  });
+}
+
 function renderDashMyList(){
-  const tracked=wazaData.filter(w=>{const p=getP(w.id);return p.like||(p.shapes&&p.shapes.some(Boolean));});
+  const tracked=myListFiltered();
+  const container=document.getElementById('dashMyList');
 
-  let html='';
-  if(tracked.length)html+=tracked.map(expandedCard).join('');
-  else html='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No tracked Waza yet. Like or shape-mark Waza to see them here.</div>';
+  // Build toolbar
+  const toolbar='<div class="mylist-toolbar">'
+    +'<button class="btn'+(myListShapes.every(Boolean)?' active':'')+'" id="mlShapeAll">All</button>'
+    +SHAPES.map((s,i)=>'<button class="btn ml-shape-btn'+(myListShapes[i]?' active':'')+'" data-si="'+i+'">'+s+'</button>').join('')
+    +'<span class="mylist-count" id="mlCount">'+tracked.length+' Waza</span>'
+    +'<button class="btn" id="mlViewToggle">'+(myListView==='card'?'Compact':'Card')+'</button>'
+    +'</div>';
 
-  document.getElementById('dashMyList').innerHTML=html;
+  let content='';
+  if(tracked.length){
+    content=myListView==='compact'
+      ?'<div>'+tracked.map(compactRow).join('')+'</div>'
+      :tracked.map(expandedCard).join('');
+  } else {
+    content='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">'
+      +(wazaData.filter(w=>{const p=getP(w.id);return p.like||(p.shapes&&p.shapes.some(Boolean));}).length
+        ?'No Waza match the active shape filters.'
+        :'No tracked Waza yet. Like or shape-mark Waza to see them here.')
+      +'</div>';
+  }
 
-  document.querySelectorAll('#dashMyList .waza-card-expanded').forEach(el=>el.addEventListener('click',()=>{
+  container.innerHTML=toolbar+content;
+
+  // Toolbar events
+  container.querySelector('#mlViewToggle').addEventListener('click',()=>{myListView=myListView==='card'?'compact':'card';renderDashMyList();});
+  container.querySelector('#mlShapeAll').addEventListener('click',()=>{
+    myListShapes=Array(6).fill(!myListShapes.every(Boolean));
+    renderDashMyList();
+  });
+  container.querySelectorAll('.ml-shape-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const i=+btn.dataset.si;
+      myListShapes=myListShapes.map((v,idx)=>idx===i?!v:v);
+      renderDashMyList();
+    });
+  });
+
+  // Card click → browse
+  const clickHandler=el=>{
     document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
     document.querySelector('[data-tab="browse"]').classList.add('active');
     document.getElementById('browseView').style.display='flex';
     document.getElementById('dashboardView').style.display='none';
     selectWaza(+el.dataset.id);
-  }));
+  };
+  container.querySelectorAll('.waza-card-expanded').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
+  container.querySelectorAll('.crow').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
 }
 
 function renderDashStats(){
