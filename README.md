@@ -1,59 +1,102 @@
-# Worker + D1 Database
+# Wazalist - Wotagei Skills Database
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/d1-template)
+A comprehensive web application for tracking and managing wotagei (Japanese idol fan dance) techniques. Browse waza (skills), mark your progress, and sync your learning journey across devices.
 
-![Worker + D1 Template Preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/cb7cb0a9-6102-4822-633c-b76b7bb25900/public)
+## Features
 
-<!-- dash-content-start -->
+### 📚 Browse & Search
+- **Full-text search** with fuzzy matching (typo-tolerant)
+- Search by Japanese or English names
+- Exact phrase search using quotes (e.g., `"technique name"`)
 
-D1 is Cloudflare's native serverless SQL database ([docs](https://developers.cloudflare.com/d1/)). This project demonstrates using a Worker with a D1 binding to execute a SQL statement. A simple frontend displays the result of this query:
+### 🎯 Filtering System
+- **Skill level** filtering
+- **Family/technique group** filtering
+- **Shape markers** (6 customizable shapes: ● ▲ ■ ♥ ★ ◆)
+- **👍 Liked** quick-filter
 
-```SQL
-SELECT * FROM comments LIMIT 3;
-```
+### 📊 Progress Tracking
+- **Shape markers** - Assign any meaning to 6 different shapes per technique
+- **Like/Dislike** system for personal preference
+- Progress syncs across devices when logged in
+- Guest mode with local browser storage
 
-The D1 database is initialized with a `comments` table and this data:
+### 📱 Dashboard
+- **Home** - Overview of marked and liked techniques
+- **My List** - Expanded cards with video links for tracked techniques
+- **Stats** - Detailed analytics on your learning progress
 
-```SQL
-INSERT INTO comments (author, content)
-VALUES
-    ('Kristian', 'Congrats!'),
-    ('Serena', 'Great job!'),
-    ('Max', 'Keep up the good work!')
-;
-```
+### 🔐 Authentication
+- Create account with email (optional)
+- Guest mode for quick access without registration
+- Secure password hashing (PBKDF2)
+- Session-based authentication (30-day sessions)
 
-> [!IMPORTANT]
-> When using C3 to create this project, select "no" when it asks if you want to deploy. You need to follow this project's [setup steps](https://github.com/cloudflare/templates/tree/main/d1-template#setup-steps) before deploying.
+### 🎥 Video References
+- Multiple video links per technique
+- Support for YouTube, Bilibili, Twitter/X, NicoNico, Facebook
+- Automatic platform detection and icons
 
-<!-- dash-content-end -->
+## Tech Stack
 
-## Getting Started
+### Backend
+- **Runtime**: Cloudflare Workers
+- **Database**: Cloudflare D1 (SQLite)
+- **Authentication**: PBKDF2 password hashing, session tokens
+- **Language**: TypeScript
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+### Frontend
+- **HTML/CSS**: Custom dark theme with CSS Grid/Flexbox
+- **JavaScript**: Vanilla JS (no frameworks)
+- **Features**: Collapsible sections, responsive design, fuzzy search
 
-```
-npm create cloudflare@latest -- --template=cloudflare/templates/d1-template
-```
+## Database Schema
 
-A live public deployment of this template is available at [https://d1-template.templates.workers.dev](https://d1-template.templates.workers.dev)
+```sql
+-- Users table
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
-## Setup Steps
+-- Sessions table
+CREATE TABLE sessions (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
-1. Install the project dependencies with a package manager of your choice:
-   ```bash
-   npm install
-   ```
-2. Create a [D1 database](https://developers.cloudflare.com/d1/get-started/) with the name "d1-template-database":
-   ```bash
-   npx wrangler d1 create d1-template-database
-   ```
-   ...and update the `database_id` field in `wrangler.json` with the new database ID.
-3. Run the following db migration to initialize the database (notice the `migrations` directory in this project):
-   ```bash
-   npx wrangler d1 migrations apply --remote d1-template-database
-   ```
-4. Deploy the project!
-   ```bash
-   npx wrangler deploy
-   ```
+-- Waza (techniques) table
+CREATE TABLE waza (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name_jp TEXT,
+    name_en TEXT,
+    name_en_literal TEXT,
+    name_en_gtranslate TEXT,
+    tag TEXT,                    -- Skill level
+    reference TEXT,              -- Lore/description
+    parent_jp0 TEXT,             -- Prerequisite technique (JP)
+    parent_en0 TEXT,             -- Prerequisite technique (EN)
+    parent_jp1 TEXT,
+    parent_en1 TEXT,
+    author_jp TEXT,
+    author_en TEXT,
+    video0 TEXT, video1 TEXT, video2 TEXT,
+    video3 TEXT, video4 TEXT, video5 TEXT
+);
+
+-- User progress table
+CREATE TABLE progress (
+    user_id INTEGER NOT NULL,
+    waza_id INTEGER NOT NULL,
+    shapes TEXT,                 -- JSON array of 6 booleans
+    like TEXT,                   -- 'like', 'dislike', or NULL
+    updated_at DATETIME,
+    PRIMARY KEY (user_id, waza_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (waza_id) REFERENCES waza(id)
+);
