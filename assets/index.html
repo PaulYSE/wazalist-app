@@ -66,13 +66,70 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .waza-card{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-left:3px solid transparent}
 .waza-card:hover{filter:brightness(1.08)}
 .waza-card.selected{outline:1px solid var(--accent)}
-/* Shape tints — one per shape marker ● ▲ ■ ♥ ★ ◆ */
-.waza-card.sh-0,.waza-card-expanded.sh-0{background:#001824;border-left-color:#4a9aba}
-.waza-card.sh-1,.waza-card-expanded.sh-1{background:#1a1500;border-left-color:#c8a020}
-.waza-card.sh-2,.waza-card-expanded.sh-2{background:#180018;border-left-color:#9060b0}
-.waza-card.sh-3,.waza-card-expanded.sh-3{background:#1a0010;border-left-color:#c04070}
-.waza-card.sh-4,.waza-card-expanded.sh-4{background:#101800;border-left-color:#70a030}
-.waza-card.sh-5,.waza-card-expanded.sh-5{background:#001818;border-left-color:#30a898}
+/* Shape tints — unique color per combination bitmask (bits 0-5 = ● ▲ ■ ♥ ★ ◆, mask 1-63) */
+.waza-card.sh-1,.waza-card-expanded.sh-1,.drow.sh-1{background:hsl(200,44%,8.5%);border-left-color:hsl(200,70%,57%)}
+.waza-card.sh-2,.waza-card-expanded.sh-2,.drow.sh-2{background:hsl(45,44%,8.5%);border-left-color:hsl(45,70%,57%)}
+.waza-card.sh-3,.waza-card-expanded.sh-3,.drow.sh-3{background:hsl(123,48%,9.0%);border-left-color:hsl(123,70%,59%)}
+.waza-card.sh-4,.waza-card-expanded.sh-4,.drow.sh-4{background:hsl(280,44%,8.5%);border-left-color:hsl(280,70%,57%)}
+.waza-card.sh-5,.waza-card-expanded.sh-5,.drow.sh-5{background:hsl(240,48%,9.0%);border-left-color:hsl(240,70%,59%)}
+.waza-card.sh-6,.waza-card-expanded.sh-6,.drow.sh-6{background:hsl(343,48%,9.0%);border-left-color:hsl(343,70%,59%)}
+.waza-card.sh-7,.waza-card-expanded.sh-7,.drow.sh-7{background:hsl(265,52%,9.5%);border-left-color:hsl(265,70%,61%)}
+.waza-card.sh-8,.waza-card-expanded.sh-8,.drow.sh-8{background:hsl(330,44%,8.5%);border-left-color:hsl(330,70%,57%)}
+.waza-card.sh-9,.waza-card-expanded.sh-9,.drow.sh-9{background:hsl(265,48%,9.0%);border-left-color:hsl(265,70%,59%)}
+.waza-card.sh-10,.waza-card-expanded.sh-10,.drow.sh-10{background:hsl(7,48%,9.0%);border-left-color:hsl(7,70%,59%)}
+.waza-card.sh-11,.waza-card-expanded.sh-11,.drow.sh-11{background:hsl(348,52%,9.5%);border-left-color:hsl(348,70%,61%)}
+.waza-card.sh-12,.waza-card-expanded.sh-12,.drow.sh-12{background:hsl(305,48%,9.0%);border-left-color:hsl(305,70%,59%)}
+.waza-card.sh-13,.waza-card-expanded.sh-13,.drow.sh-13{background:hsl(273,52%,9.5%);border-left-color:hsl(273,70%,61%)}
+.waza-card.sh-14,.waza-card-expanded.sh-14,.drow.sh-14{background:hsl(336,52%,9.5%);border-left-color:hsl(336,70%,61%)}
+.waza-card.sh-15,.waza-card-expanded.sh-15,.drow.sh-15{background:hsl(306,56%,10.0%);border-left-color:hsl(306,70%,63%)}
+.waza-card.sh-16,.waza-card-expanded.sh-16,.drow.sh-16{background:hsl(80,44%,8.5%);border-left-color:hsl(80,70%,57%)}
+.waza-card.sh-17,.waza-card-expanded.sh-17,.drow.sh-17{background:hsl(140,48%,9.0%);border-left-color:hsl(140,70%,59%)}
+.waza-card.sh-18,.waza-card-expanded.sh-18,.drow.sh-18{background:hsl(63,48%,9.0%);border-left-color:hsl(63,70%,59%)}
+.waza-card.sh-19,.waza-card-expanded.sh-19,.drow.sh-19{background:hsl(93,52%,9.5%);border-left-color:hsl(93,70%,61%)}
+.waza-card.sh-20,.waza-card-expanded.sh-20,.drow.sh-20{background:hsl(360,48%,9.0%);border-left-color:hsl(360,70%,59%)}
+.waza-card.sh-21,.waza-card-expanded.sh-21,.drow.sh-21{background:hsl(210,52%,9.5%);border-left-color:hsl(210,70%,61%)}
+.waza-card.sh-22,.waza-card-expanded.sh-22,.drow.sh-22{background:hsl(34,52%,9.5%);border-left-color:hsl(34,70%,61%)}
+.waza-card.sh-23,.waza-card-expanded.sh-23,.drow.sh-23{background:hsl(73,56%,10.0%);border-left-color:hsl(73,70%,63%)}
+.waza-card.sh-24,.waza-card-expanded.sh-24,.drow.sh-24{background:hsl(25,48%,9.0%);border-left-color:hsl(25,70%,59%)}
+.waza-card.sh-25,.waza-card-expanded.sh-25,.drow.sh-25{background:hsl(55,52%,9.5%);border-left-color:hsl(55,70%,61%)}
+.waza-card.sh-26,.waza-card-expanded.sh-26,.drow.sh-26{background:hsl(34,52%,9.5%);border-left-color:hsl(34,70%,61%)}
+.waza-card.sh-27,.waza-card-expanded.sh-27,.drow.sh-27{background:hsl(46,56%,10.0%);border-left-color:hsl(46,70%,63%)}
+.waza-card.sh-28,.waza-card-expanded.sh-28,.drow.sh-28{background:hsl(338,52%,9.5%);border-left-color:hsl(338,70%,61%)}
+.waza-card.sh-29,.waza-card-expanded.sh-29,.drow.sh-29{background:hsl(288,56%,10.0%);border-left-color:hsl(288,70%,63%)}
+.waza-card.sh-30,.waza-card-expanded.sh-30,.drow.sh-30{background:hsl(6,56%,10.0%);border-left-color:hsl(6,70%,63%)}
+.waza-card.sh-31,.waza-card-expanded.sh-31,.drow.sh-31{background:hsl(352,60%,10.5%);border-left-color:hsl(352,70%,65%)}
+.waza-card.sh-32,.waza-card-expanded.sh-32,.drow.sh-32{background:hsl(170,44%,8.5%);border-left-color:hsl(170,70%,57%)}
+.waza-card.sh-33,.waza-card-expanded.sh-33,.drow.sh-33{background:hsl(185,48%,9.0%);border-left-color:hsl(185,70%,59%)}
+.waza-card.sh-34,.waza-card-expanded.sh-34,.drow.sh-34{background:hsl(108,48%,9.0%);border-left-color:hsl(108,70%,59%)}
+.waza-card.sh-35,.waza-card-expanded.sh-35,.drow.sh-35{background:hsl(156,52%,9.5%);border-left-color:hsl(156,70%,61%)}
+.waza-card.sh-36,.waza-card-expanded.sh-36,.drow.sh-36{background:hsl(225,48%,9.0%);border-left-color:hsl(225,70%,59%)}
+.waza-card.sh-37,.waza-card-expanded.sh-37,.drow.sh-37{background:hsl(213,52%,9.5%);border-left-color:hsl(213,70%,61%)}
+.waza-card.sh-38,.waza-card-expanded.sh-38,.drow.sh-38{background:hsl(225,52%,9.5%);border-left-color:hsl(225,70%,61%)}
+.waza-card.sh-39,.waza-card-expanded.sh-39,.drow.sh-39{background:hsl(203,56%,10.0%);border-left-color:hsl(203,70%,63%)}
+.waza-card.sh-40,.waza-card-expanded.sh-40,.drow.sh-40{background:hsl(250,48%,9.0%);border-left-color:hsl(250,70%,59%)}
+.waza-card.sh-41,.waza-card-expanded.sh-41,.drow.sh-41{background:hsl(212,52%,9.5%);border-left-color:hsl(212,70%,61%)}
+.waza-card.sh-42,.waza-card-expanded.sh-42,.drow.sh-42{background:hsl(33,52%,9.5%);border-left-color:hsl(33,70%,61%)}
+.waza-card.sh-43,.waza-card-expanded.sh-43,.drow.sh-43{background:hsl(174,56%,10.0%);border-left-color:hsl(174,70%,63%)}
+.waza-card.sh-44,.waza-card-expanded.sh-44,.drow.sh-44{background:hsl(272,52%,9.5%);border-left-color:hsl(272,70%,61%)}
+.waza-card.sh-45,.waza-card-expanded.sh-45,.drow.sh-45{background:hsl(242,56%,10.0%);border-left-color:hsl(242,70%,63%)}
+.waza-card.sh-46,.waza-card-expanded.sh-46,.drow.sh-46{background:hsl(322,56%,10.0%);border-left-color:hsl(322,70%,63%)}
+.waza-card.sh-47,.waza-card-expanded.sh-47,.drow.sh-47{background:hsl(259,60%,10.5%);border-left-color:hsl(259,70%,65%)}
+.waza-card.sh-48,.waza-card-expanded.sh-48,.drow.sh-48{background:hsl(125,48%,9.0%);border-left-color:hsl(125,70%,59%)}
+.waza-card.sh-49,.waza-card-expanded.sh-49,.drow.sh-49{background:hsl(155,52%,9.5%);border-left-color:hsl(155,70%,61%)}
+.waza-card.sh-50,.waza-card-expanded.sh-50,.drow.sh-50{background:hsl(93,52%,9.5%);border-left-color:hsl(93,70%,61%)}
+.waza-card.sh-51,.waza-card-expanded.sh-51,.drow.sh-51{background:hsl(124,56%,10.0%);border-left-color:hsl(124,70%,63%)}
+.waza-card.sh-52,.waza-card-expanded.sh-52,.drow.sh-52{background:hsl(165,52%,9.5%);border-left-color:hsl(165,70%,61%)}
+.waza-card.sh-53,.waza-card-expanded.sh-53,.drow.sh-53{background:hsl(186,56%,10.0%);border-left-color:hsl(186,70%,63%)}
+.waza-card.sh-54,.waza-card-expanded.sh-54,.drow.sh-54{background:hsl(85,56%,10.0%);border-left-color:hsl(85,70%,63%)}
+.waza-card.sh-55,.waza-card-expanded.sh-55,.drow.sh-55{background:hsl(148,60%,10.5%);border-left-color:hsl(148,70%,65%)}
+.waza-card.sh-56,.waza-card-expanded.sh-56,.drow.sh-56{background:hsl(85,52%,9.5%);border-left-color:hsl(85,70%,61%)}
+.waza-card.sh-57,.waza-card-expanded.sh-57,.drow.sh-57{background:hsl(160,56%,10.0%);border-left-color:hsl(160,70%,63%)}
+.waza-card.sh-58,.waza-card-expanded.sh-58,.drow.sh-58{background:hsl(61,56%,10.0%);border-left-color:hsl(61,70%,63%)}
+.waza-card.sh-59,.waza-card-expanded.sh-59,.drow.sh-59{background:hsl(100,60%,10.5%);border-left-color:hsl(100,70%,65%)}
+.waza-card.sh-60,.waza-card-expanded.sh-60,.drow.sh-60{background:hsl(305,56%,10.0%);border-left-color:hsl(305,70%,63%)}
+.waza-card.sh-61,.waza-card-expanded.sh-61,.drow.sh-61{background:hsl(223,60%,10.5%);border-left-color:hsl(223,70%,65%)}
+.waza-card.sh-62,.waza-card-expanded.sh-62,.drow.sh-62{background:hsl(22,60%,10.5%);border-left-color:hsl(22,70%,65%)}
+.waza-card.sh-63,.waza-card-expanded.sh-63,.drow.sh-63{background:hsl(96,64%,11.0%);border-left-color:hsl(96,70%,67%)}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
@@ -526,8 +583,8 @@ function filterWaza(){
 }
 
 // ── Shared helpers ────────────────────────────────────────────
-// Returns a CSS class for the first active shape marker, or '' if none
-const shapeClass=shapes=>{const i=(shapes||[]).findIndex(Boolean);return i>=0?'sh-'+i:'';};
+// Returns a CSS class encoding the full shape bitmask (sh-1 to sh-63), or '' if none
+const shapeClass=shapes=>{const mask=(shapes||[]).reduce((m,on,i)=>on?m|(1<<i):m,0);return mask?'sh-'+mask:'';};
 const shapePips=shapes=>SHAPES.map((s,i)=>'<span class="shape-pip'+(shapes[i]?' on':'')+'" title="Shape '+(i+1)+'">'+s+'</span>').join('');
 
 function platform(url){
