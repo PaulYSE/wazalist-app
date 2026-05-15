@@ -50,7 +50,7 @@ export default {
 			}
 
 			// Check for existing user
-			const existing = env.DB.prepare("SELECT id FROM users WHERE username = ?")
+			const existing = await env.DB.prepare("SELECT id FROM users WHERE username = ?")
 				.bind(username)
 				.first();
 			
@@ -66,7 +66,7 @@ export default {
 			const passwordHash = `${salt}:${hash}`;
 
 			// Store user in database
-			const result = env.DB.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)")
+			const result = await env.DB.prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)")
 				.bind(username, email || null, passwordHash)
 				.run();
 
