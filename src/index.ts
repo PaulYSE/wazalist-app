@@ -120,6 +120,37 @@ export default {
 			}
 		}
 
+		// ── Shape legend ──────────────────────────────────────────
+
+		// GET /api/legend
+		if (path === "/api/legend" && request.method === "GET") {
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
+
+			const row = await env.DB.prepare(
+				"SELECT shape_legend FROM users WHERE id = ?"
+			).bind(user.id).first();
+
+			const legend = row?.shape_legend ?? '["","","","","",""]';
+			return json({ legend: JSON.parse(legend as string) });
+		}
+
+		// POST /api/legend
+		if (path === "/api/legend" && request.method === "POST") {
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
+
+			const { legend } = await request.json();
+			if (!Array.isArray(legend) || legend.length !== 6)
+				return err("legend must be an array of 6 strings");
+
+			await env.DB.prepare(
+				"UPDATE users SET shape_legend = ? WHERE id = ?"
+			).bind(JSON.stringify(legend), user.id).run();
+
+			return json({ success: true });
+		}
+
 		// ── Contributions ─────────────────────────────────────────
 
 		// GET /api/contributions/mine
