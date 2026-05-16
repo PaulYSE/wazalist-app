@@ -55,6 +55,17 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .btn{padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg3);color:var(--text1)}
 .btn.active{background:var(--accent2);border-color:var(--accent);color:#fff}
+.help-circle {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
 
 /* ── Browse main ── */
 .main{display:flex;flex:1;overflow:hidden}
@@ -339,15 +350,16 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div style="display:flex;align-items:center;gap:8px">
       <h1>⛩ Wazalist</h1>
       <span class="tagline">Wotagei Skills Database</span>
-      <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
+      
     </div>
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
       <span id="saveIndicator" style="font-size:12px;color:var(--green);opacity:0;transition:opacity .3s;white-space:nowrap">Saved ✓</span>
+      <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
       <span id="usernameBadge" style="display:none;font-size:12px;color:var(--text2);padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px"></span>
       <button class="btn" id="newWazaBtn" style="display:none">+ Submit Waza</button>
       <a class="btn" id="adminLink" href="/admin" target="_blank" style="display:none;text-decoration:none">Admin</a>
       <button class="btn" id="logoutBtn">Sign out</button>
-      <button class="btn" id="helpBtn">Help</button>
+      <button class="btn help-circle" id="helpBtn" title="Guide">?</button>
     </div>
   </div>
   <div class="nav-tabs">
