@@ -43,7 +43,7 @@ export async function getUserFromSession(env: Env, token: string) {
     if (!token) return null;
 
     const user = await env.DB.prepare(`
-        SELECT u.id, u.username, u.email 
+        SELECT u.id, u.username, u.email, u.is_admin
         FROM sessions s 
         JOIN users u ON s.user_id = u.id 
         WHERE s.id = ? AND s.expires_at > datetime('now')
