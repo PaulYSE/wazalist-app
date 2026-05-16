@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wazalist Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f14;color:#e8e6f0;min-height:100vh}
+:root{
+  --bg0:#0f0f14;--bg1:#17171f;--bg2:#1e1e28;--bg3:#262633;
+  --accent:#7c6ff7;--accent2:#5a54c4;
+  --green:#4caf82;--amber:#e8a030;--red:#e05555;--blue:#60b8f0;
+  --text1:#e8e6f0;--text2:#a09dba;--text3:#6a6880;
+  --border:#2e2c3e;--r:8px;--rl:12px
+}
+input,select,button,textarea{font-family:inherit}
+a{color:var(--accent);text-decoration:none}
+
+/* ── Layout ── */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--bg1);border-bottom:1px solid var(--border)}
+.topbar h1{font-size:16px;font-weight:600;color:var(--accent)}
+.topbar .badge{font-size:11px;padding:2px 8px;background:#2a0040;border:1px solid var(--accent);border-radius:20px;color:var(--accent)}
+#pendingCount{font-size:12px;color:var(--text3);margin-left:auto}
+.body{display:flex;height:calc(100vh - 45px);overflow:hidden}
+
+/* ── Sidebar queue ── */
+.sidebar{width:300px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--bg0)}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
+.stab{flex:1;padding:8px;font-size:12px;color:var(--text2);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;transition:all .12s}
+.stab:hover{color:var(--text1)}
+.stab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.queue-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.queue-item:hover{background:var(--bg2)}
+.queue-item.selected{background:var(--bg2);border-left:3px solid var(--accent)}
+.qi-type{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+.qi-type.edit{color:var(--blue)}
+.qi-type.new{color:var(--amber)}
+.qi-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.qi-meta{font-size:11px;color:var(--text3)}
+.status-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600}
+.s-pending{background:#2a2000;color:var(--amber);border:1px solid var(--amber)}
+.s-approved{background:#002a10;color:var(--green);border:1px solid var(--green)}
+.s-rejected{background:#2a0000;color:var(--red);border:1px solid var(--red)}
+.empty-queue{padding:30px;text-align:center;color:var(--text3);font-size:13px}
+
+/* ── Detail panel ── */
+.detail{flex:1;overflow-y:auto;padding:24px;background:var(--bg1)}
+.d-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:15px}
+.d-header{margin-bottom:20px}
+.d-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.d-meta{font-size:13px;color:var(--text2);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.section{margin-bottom:20px}
+.section h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* ── Diff table ── */
+.diff-table{width:100%;border-collapse:collapse;font-size:13px}
+.diff-table th{padding:6px 10px;text-align:left;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border)}
+.diff-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.diff-table tr.changed td{background:rgba(124,111,247,.07)}
+.field-name{color:var(--text2);width:130px;font-weight:500}
+.val-current{color:var(--text2)}
+.val-proposed{color:var(--text1)}
+.val-proposed.changed{color:var(--accent)}
+.val-empty{color:var(--text3);font-style:italic}
+
+/* ── Edit fields ── */
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.efield{display:flex;flex-direction:column;gap:4px}
+.efield label{font-size:11px;color:var(--text3)}
+.efield input,.efield textarea{padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;resize:vertical}
+.efield input:focus,.efield textarea:focus{border-color:var(--accent)}
+.efield input.modified,.efield textarea.modified{border-color:var(--accent)}
+
+/* ── Actions ── */
+.actions{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.note-wrap{flex:1;min-width:200px}
+.note-wrap label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px}
+.note-wrap textarea{width:100%;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;resize:vertical;min-height:60px}
+.note-wrap textarea:focus{border-color:var(--accent)}
+.btn-group{display:flex;gap:8px;margin-top:auto;padding-top:18px}
+.btn{padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--bg3);color:var(--text1)}
+.btn-approve{background:#003a18;border-color:var(--green);color:var(--green)}
+.btn-approve:hover{background:#004d20}
+.btn-reject{background:#3a0000;border-color:var(--red);color:var(--red)}
+.btn-reject:hover{background:#4d0000}
+.btn-approve:disabled,.btn-reject:disabled{opacity:.4;cursor:default}
+.feedback{font-size:13px;padding:8px 12px;border-radius:var(--r);margin-top:10px}
+.feedback.ok{background:#002a10;color:var(--green);border:1px solid var(--green)}
+.feedback.fail{background:#2a0000;color:var(--red);border:1px solid var(--red)}
+
+/* ── New waza payload view ── */
+.payload-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pfield{background:var(--bg2);border-radius:var(--r);padding:8px 12px}
+.pfield .lbl{font-size:11px;color:var(--text3);margin-bottom:2px}
+.pfield .val{font-size:13px;word-break:break-all}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⛩ Wazalist</h1>
+  <span class="badge">Admin</span>
+  <span id="pendingCount"></span>
+</div>
+
+<div class="body">
+  <!-- Queue sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <button class="stab active" data-status="pending">Pending</button>
+      <button class="stab" data-status="approved">Approved</button>
+      <button class="stab" data-status="rejected">Rejected</button>
+    </div>
+    <div id="queueList"></div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail" id="detailPanel">
+    <div class="d-empty">Select a contribution to review</div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('wl_token') || '';
+const api = async (path, method='GET', body=null) => {
+  const opts = { method, headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+};
+
+// Readable field labels
+const FIELD_LABELS = {
+  name_jp: 'Name (JP)', name_en: 'Name (EN)', name_en_literal: 'Literal', name_en_gtranslate: 'Google Translate',
+  tag: 'Skill level', reference: 'Reference / lore',
+  parent_jp0: 'Parent JP 0', parent_en0: 'Parent EN 0', parent_jp1: 'Parent JP 1', parent_en1: 'Parent EN 1',
+  author_jp: 'Author (JP)', author_en: 'Author (EN)',
+  video0:'Video 1', video1:'Video 2', video2:'Video 3', video3:'Video 4', video4:'Video 5', video5:'Video 6',
+};
+const ALL_FIELDS = Object.keys(FIELD_LABELS);
+
+let queue = [], selectedId = null, currentStatus = 'pending';
+
+// ── Load queue ────────────────────────────────────────────────
+async function loadQueue(status='pending') {
+  currentStatus = status;
+  queue = await api('/api/admin/contributions?status=' + status);
+  renderQueue();
+  document.getElementById('detailPanel').innerHTML = '<div class="d-empty">Select a contribution to review</div>';
+  selectedId = null;
+  if (status === 'pending') {
+    document.getElementById('pendingCount').textContent = queue.length + ' pending';
+  }
+}
+
+function renderQueue() {
+  const el = document.getElementById('queueList');
+  if (!queue.length) { el.innerHTML = '<div class="empty-queue">Nothing here</div>'; return; }
+  el.innerHTML = queue.map(c => {
+    const isNew = c.type === 'new_waza';
+    const label = isNew ? (JSON.parse(c.payload).name_jp || 'New Waza') : (c.waza_name_jp || 'Waza #' + c.waza_id);
+    const ago = timeAgo(c.created_at);
+    return `<div class="queue-item${selectedId===c.id?' selected':''}" data-id="${c.id}">
+      <div class="qi-type ${isNew?'new':'edit'}">${isNew ? 'New Waza' : 'Edit'}</div>
+      <div class="qi-name">${label}</div>
+      <div class="qi-meta">${c.username} · ${ago}</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.queue-item').forEach(el => {
+    el.addEventListener('click', () => selectItem(+el.dataset.id));
+  });
+}
+
+// ── Select item ───────────────────────────────────────────────
+async function selectItem(id) {
+  selectedId = id;
+  renderQueue();
+  const c = queue.find(x => x.id === id);
+  if (!c) return;
+
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = '<div class="d-empty" style="font-size:13px;color:var(--text3)">Loading…</div>';
+
+  const payload = JSON.parse(c.payload);
+  const isNew = c.type === 'new_waza';
+  const isPending = c.status === 'pending';
+
+  // For edits, fetch the current live waza for diffing
+  let currentWaza = null;
+  if (!isNew && c.waza_id) {
+    currentWaza = await api('/api/admin/waza/' + c.waza_id);
+  }
+
+  const statusBadge = `<span class="status-badge s-${c.status}">${c.status}</span>`;
+  const typeLabel = isNew ? '<span style="color:var(--amber);font-weight:600">New Waza</span>' : '<span style="color:var(--blue);font-weight:600">Edit Suggestion</span>';
+  const wazaLabel = isNew ? (payload.name_jp || '(no JP name)') : (c.waza_name_jp || 'Waza #' + c.waza_id);
+
+  // Build diff / field view
+  let fieldsHTML = '';
+  if (isNew) {
+    // New waza — show all submitted fields in a grid with editable inputs
+    fieldsHTML = `<div class="section"><h3>Submitted fields</h3><div class="edit-grid" id="editGrid">`;
+    ALL_FIELDS.forEach(f => {
+      const v = payload[f] || '';
+      const isVideo = f.startsWith('video');
+      fieldsHTML += `<div class="efield">
+        <label>${FIELD_LABELS[f]}</label>
+        ${isVideo
+          ? `<input type="url" data-field="${f}" value="${escHtml(v)}" placeholder="https://…">`
+          : `<input type="text" data-field="${f}" value="${escHtml(v)}">`}
+      </div>`;
+    });
+    fieldsHTML += `</div></div>`;
+  } else {
+    // Edit — diff table + editable proposed values
+    const changedFields = Object.keys(payload);
+    fieldsHTML = `<div class="section"><h3>Proposed changes</h3>
+      <table class="diff-table">
+        <thead><tr><th>Field</th><th>Current</th><th>Proposed (editable)</th></tr></thead>
+        <tbody id="diffBody">`;
+    changedFields.forEach(f => {
+      const cur = currentWaza ? (currentWaza[f] || '') : '—';
+      const prop = payload[f] || '';
+      const changed = cur !== prop;
+      fieldsHTML += `<tr class="${changed?'changed':''}">
+        <td class="field-name">${FIELD_LABELS[f] || f}</td>
+        <td class="val-current">${cur ? escHtml(cur) : '<span class="val-empty">empty</span>'}</td>
+        <td><input type="text" data-field="${f}" value="${escHtml(prop)}" style="width:100%;padding:4px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text1);font-size:13px;outline:none" ${!isPending?'disabled':''}></td>
+      </tr>`;
+    });
+    fieldsHTML += `</tbody></table></div>`;
+  }
+
+  // Admin note (read-only for non-pending)
+  const noteSection = c.admin_note
+    ? `<div class="section"><h3>Admin note</h3><div style="font-size:13px;color:var(--text2);padding:8px;background:var(--bg2);border-radius:var(--r)">${escHtml(c.admin_note)}</div></div>`
+    : '';
+
+  // Actions (only for pending)
+  const actionsHTML = isPending ? `
+    <div class="actions">
+      <div class="note-wrap">
+        <label>Note to contributor (optional)</label>
+        <textarea id="adminNote" placeholder="Explain any changes you made, or reason for rejection…"></textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-approve" id="approveBtn">✓ Approve</button>
+        <button class="btn btn-reject" id="rejectBtn">✕ Reject</button>
+      </div>
+    </div>
+    <div id="actionFeedback"></div>
+  ` : '';
+
+  panel.innerHTML = `
+    <div class="d-header">
+      <div class="d-title">${escHtml(wazaLabel)}</div>
+      <div class="d-meta">
+        ${typeLabel} ${statusBadge}
+        <span>by <b>${escHtml(c.username)}</b></span>
+        <span>${timeAgo(c.created_at)}</span>
+        ${c.reviewed_at ? '<span>reviewed ' + timeAgo(c.reviewed_at) + '</span>' : ''}
+      </div>
+    </div>
+    ${fieldsHTML}
+    ${noteSection}
+    ${actionsHTML}
+  `;
+
+  // Track modifications on inputs
+  if (isPending) {
+    panel.querySelectorAll('input[data-field],textarea[data-field]').forEach(inp => {
+      const orig = inp.value;
+      inp.addEventListener('input', () => inp.classList.toggle('modified', inp.value !== orig));
+    });
+
+    panel.querySelector('#approveBtn')?.addEventListener('click', () => doAction(c, 'approve'));
+    panel.querySelector('#rejectBtn')?.addEventListener('click', () => doAction(c, 'reject'));
+  }
+}
+
+// ── Approve / Reject ─────────────────────────────────────────
+async function doAction(c, action) {
+  const panel = document.getElementById('detailPanel');
+  const note = panel.querySelector('#adminNote')?.value.trim() || null;
+  const feedback = panel.querySelector('#actionFeedback');
+
+  // Collect (possibly edited) payload from inputs
+  const inputs = panel.querySelectorAll('input[data-field],textarea[data-field]');
+  const payload = {};
+  inputs.forEach(inp => { if (inp.value.trim()) payload[inp.dataset.field] = inp.value.trim(); });
+
+  const btn = panel.querySelector(action === 'approve' ? '#approveBtn' : '#rejectBtn');
+  btn.disabled = true; btn.textContent = action === 'approve' ? 'Approving…' : 'Rejecting…';
+
+  let res;
+  try {
+    res = await api(`/api/admin/contributions/${c.id}/${action}`, 'POST', { payload, note });
+  } catch(e) {
+    res = { error: 'Network error' };
+  }
+
+  if (res.error) {
+    feedback.innerHTML = `<div class="feedback fail">${escHtml(res.error)}</div>`;
+    btn.disabled = false;
+    btn.textContent = action === 'approve' ? '✓ Approve' : '✕ Reject';
+    return;
+  }
+
+  feedback.innerHTML = `<div class="feedback ok">${action === 'approve' ? 'Approved and applied to database.' : 'Rejected.'}</div>`;
+  panel.querySelector('#approveBtn').disabled = true;
+  panel.querySelector('#rejectBtn').disabled = true;
+
+  // Reload queue after short delay
+  setTimeout(() => loadQueue(currentStatus), 900);
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
+  if (d > 0) return d + 'd ago';
+  if (h > 0) return h + 'h ago';
+  if (m > 0) return m + 'm ago';
+  return 'just now';
+}
+
+// ── Tab switching ─────────────────────────────────────────────
+document.querySelectorAll('.stab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    loadQueue(tab.dataset.status);
+  });
+});
+
+// ── Boot ──────────────────────────────────────────────────────
+if (!token) {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#e05555">Not authenticated — please sign in to the main app first.</div>';
+} else {
+  loadQueue('pending');
+}
+</script>
+</body>
+</html>

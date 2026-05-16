@@ -244,6 +244,46 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .cov-track{background:var(--bg3);border-radius:20px;height:6px;overflow:hidden}
 .cov-fill{height:100%;border-radius:20px;background:var(--accent2);transition:width .4s}
 
+/* ── Contributions ── */
+.contrib-item{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;background:var(--bg2)}
+.contrib-item .ci-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.contrib-type{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:10px}
+.ct-edit{background:#001a2a;color:#60b8f0;border:1px solid #004a7a}
+.ct-new{background:#2a1a00;color:#e8a030;border:1px solid #7a4a00}
+.contrib-status{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;margin-left:auto}
+.cs-pending{background:#2a2000;color:var(--amber);border:1px solid var(--amber)}
+.cs-approved{background:#002a10;color:var(--green);border:1px solid var(--green)}
+.cs-rejected{background:#2a0000;color:var(--red);border:1px solid var(--red)}
+.contrib-item .ci-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.contrib-item .ci-meta{font-size:12px;color:var(--text3)}
+.contrib-item .ci-note{font-size:12px;color:var(--text2);margin-top:6px;padding:6px 8px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--border)}
+
+/* ── Contribution modal ── */
+.cmodal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.cmodal{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
+.cmodal-header{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cmodal-header h2{font-size:16px;font-weight:600;color:var(--accent);flex:1}
+.cmodal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1}
+.cmodal-close:hover{color:var(--text1)}
+.cmodal-body{padding:20px;flex:1}
+.cfield{margin-bottom:12px}
+.cfield label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+.cfield input,.cfield textarea,.cfield select{width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;resize:vertical}
+.cfield input:focus,.cfield textarea:focus,.cfield select:focus{border-color:var(--accent)}
+.cfield .hint{font-size:11px;color:var(--text3);margin-top:3px}
+.cfield-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmodal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.cbtn{padding:9px 18px;border-radius:var(--r);border:none;font-size:14px;cursor:pointer;transition:all .12s}
+.cbtn-primary{background:var(--accent2);color:#fff}
+.cbtn-primary:hover{background:var(--accent)}
+.cbtn-primary:disabled{opacity:.5;cursor:default}
+.cbtn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.cbtn-ghost:hover{background:var(--bg2);color:var(--text1)}
+.cmodal-err{font-size:13px;color:var(--red);margin-top:8px;min-height:18px}
+.cmodal-ok{font-size:13px;color:var(--green);margin-top:8px}
+.suggest-btn{padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .12s}
+.suggest-btn:hover{border-color:var(--accent);color:var(--accent)}
+
 /* ── Modal ── */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:24px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
@@ -304,6 +344,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
       <span id="saveIndicator" style="font-size:12px;color:var(--green);opacity:0;transition:opacity .3s;white-space:nowrap">Saved ✓</span>
       <span id="usernameBadge" style="display:none;font-size:12px;color:var(--text2);padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px"></span>
+      <button class="btn" id="newWazaBtn" style="display:none">+ Submit Waza</button>
+      <a class="btn" id="adminLink" href="/admin" target="_blank" style="display:none;text-decoration:none">Admin</a>
       <button class="btn" id="logoutBtn">Sign out</button>
       <button class="btn" id="helpBtn">Help</button>
     </div>
@@ -348,10 +390,102 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <button class="dtab active" data-dtab="home">Home</button>
         <button class="dtab" data-dtab="mylist">My List</button>
         <button class="dtab" data-dtab="stats">Stats</button>
+        <button class="dtab" id="contribTab" data-dtab="contributions" style="display:none">Contributions</button>
       </div>
       <div id="dashHome"></div>
       <div id="dashMyList" style="display:none"></div>
       <div id="dashStats" style="display:none"></div>
+      <div id="dashContributions" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUGGEST EDIT MODAL -->
+<div id="suggestBg" class="cmodal-bg" style="display:none">
+  <div class="cmodal">
+    <div class="cmodal-header">
+      <h2>✏️ Suggest an Edit</h2>
+      <button class="cmodal-close" id="suggestClose">✕</button>
+    </div>
+    <div class="cmodal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Only fill in fields you want to change. Leave the rest blank.</p>
+      <div id="suggestWazaName" style="font-size:15px;font-weight:600;margin-bottom:16px;color:var(--accent)"></div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Name (Japanese)</label><input id="se-name_jp" type="text"></div>
+        <div class="cfield"><label>Name (English)</label><input id="se-name_en" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Literal translation</label><input id="se-name_en_literal" type="text"></div>
+        <div class="cfield"><label>Google Translate</label><input id="se-name_en_gtranslate" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Skill level</label><input id="se-tag" type="text" placeholder="e.g. Beginner"></div>
+        <div class="cfield"><label>Reference / lore</label><input id="se-reference" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Parent JP 0</label><input id="se-parent_jp0" type="text"></div>
+        <div class="cfield"><label>Parent EN 0</label><input id="se-parent_en0" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Parent JP 1</label><input id="se-parent_jp1" type="text"></div>
+        <div class="cfield"><label>Parent EN 1</label><input id="se-parent_en1" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Author (JP)</label><input id="se-author_jp" type="text"></div>
+        <div class="cfield"><label>Author (EN)</label><input id="se-author_en" type="text"></div>
+      </div>
+      <div class="cfield"><label>Video 1</label><input id="se-video0" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 2</label><input id="se-video1" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 3</label><input id="se-video2" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 4</label><input id="se-video3" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 5</label><input id="se-video4" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 6</label><input id="se-video5" type="url" placeholder="https://…"></div>
+      <div class="cmodal-err" id="se-err"></div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="se-submit">Submit suggestion</button>
+      <button class="cbtn cbtn-ghost" id="suggestCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW WAZA MODAL -->
+<div id="newWazaBg" class="cmodal-bg" style="display:none">
+  <div class="cmodal">
+    <div class="cmodal-header">
+      <h2>➕ Submit a new Waza</h2>
+      <button class="cmodal-close" id="newWazaClose">✕</button>
+    </div>
+    <div class="cmodal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Fill in what you know. Japanese name and at least one video are required.</p>
+      <div class="cfield-row">
+        <div class="cfield"><label>Name (Japanese) *</label><input id="nw-name_jp" type="text" placeholder="技名"></div>
+        <div class="cfield"><label>Name (English)</label><input id="nw-name_en" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Literal translation</label><input id="nw-name_en_literal" type="text"></div>
+        <div class="cfield"><label>Skill level</label><input id="nw-tag" type="text" placeholder="e.g. Beginner"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Parent JP 0</label><input id="nw-parent_jp0" type="text"></div>
+        <div class="cfield"><label>Parent EN 0</label><input id="nw-parent_en0" type="text"></div>
+      </div>
+      <div class="cfield-row">
+        <div class="cfield"><label>Author (JP)</label><input id="nw-author_jp" type="text"></div>
+        <div class="cfield"><label>Author (EN)</label><input id="nw-author_en" type="text"></div>
+      </div>
+      <div class="cfield"><label>Video 1 *</label><input id="nw-video0" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 2</label><input id="nw-video1" type="url" placeholder="https://…"></div>
+      <div class="cfield"><label>Video 3</label><input id="nw-video2" type="url" placeholder="https://…"></div>
+      <div class="cfield">
+        <label>Reference / notes</label>
+        <textarea id="nw-reference" rows="2" placeholder="Any context, lore, or source notes…"></textarea>
+      </div>
+      <div class="cmodal-err" id="nw-err"></div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="nw-submit">Submit Waza</button>
+      <button class="cbtn cbtn-ghost" id="newWazaCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -403,6 +537,7 @@ const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let myListView='card'; // 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
+let isAdmin=false;
 
 // ── localStorage ─────────────────────────────────────────────
 const LS_KEY='wl_local_prog';
@@ -434,6 +569,7 @@ document.getElementById('li-btn').onclick=async()=>{
   if(res.error){e.textContent=res.error;return;}
   token=res.token;localStorage.setItem('wl_token',token);
   currentUsername=res.user.username;localStorage.setItem('wl_username',currentUsername);
+  isAdmin=!!res.user.is_admin;
   initApp();
 };
 
@@ -458,6 +594,11 @@ async function initApp(){
   document.getElementById('logoutBtn').textContent=isGuest?'Sign in':'Sign out';
   const ub=document.getElementById('usernameBadge');
   if(!isGuest&&currentUsername){ub.textContent='@'+currentUsername;ub.style.display='';}else{ub.style.display='none';}
+  document.getElementById('adminLink').style.display=isAdmin?'':'none';
+  // Show contribution features only for logged-in non-guest users
+  const loggedIn=!isGuest&&!!token;
+  document.getElementById('newWazaBtn').style.display=loggedIn?'':'none';
+  document.getElementById('contribTab').style.display=loggedIn?'':'none';
   document.getElementById('countBar').textContent='Loading Waza…';
   const wazaRes=await api('/api/waza');
   wazaData=Array.isArray(wazaRes)?wazaRes:[];
@@ -748,7 +889,8 @@ function renderDetail(){
     +((w.author_jp||w.author_en)?sec('creator','Creator',
       '<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">'+(w.author_jp||'')+(w.author_en?' / '+w.author_en:'')+'</div></div>'):'')
 
-    +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>';
+    +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>'
+    +(!isGuest&&token?'<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>':'');
 
   panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
   panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
@@ -764,13 +906,15 @@ function renderDetail(){
   }));
   panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{filters.search=chip.dataset.parent;document.getElementById('searchInput').value=chip.dataset.parent;renderList();}));
   panel.querySelectorAll('.chip[data-id]').forEach(chip=>chip.addEventListener('click',()=>selectWaza(+chip.dataset.id)));
+  panel.querySelector('#suggestEditBtn')?.addEventListener('click',()=>openSuggestEdit(w));
 }
 
 // ── Dashboard ─────────────────────────────────────────────────
 function renderDashboard(){
   if(activeDTab==='home')renderDashHome();
   else if(activeDTab==='mylist')renderDashMyList();
-  else renderDashStats();
+  else if(activeDTab==='stats')renderDashStats();
+  else if(activeDTab==='contributions')renderDashContributions();
 }
 
 // Compact row for Home tab
@@ -1043,6 +1187,7 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
   document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
   document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
   document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
+  document.getElementById('dashContributions').style.display=activeDTab==='contributions'?'':'none';
   renderDashboard();
 }));
 
@@ -1079,6 +1224,110 @@ document.querySelectorAll('.ntab').forEach(tab=>tab.addEventListener('click',()=
   document.getElementById('dashboardView').style.display=t==='dashboard'?'block':'none';
   if(t==='dashboard')renderDashboard();
 }));
+
+// ── Contributions dashboard tab ───────────────────────────────
+async function renderDashContributions(){
+  const container=document.getElementById('dashContributions');
+  container.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px 0">Loading…</div>';
+  let contribs=[];
+  try{contribs=await api('/api/contributions/mine');}catch(e){container.innerHTML='<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>';return;}
+  if(!contribs.length){container.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">You haven\'t submitted any contributions yet.</div>';return;}
+  const statusLabel={pending:'Pending',approved:'Approved',rejected:'Rejected'};
+  container.innerHTML=contribs.map(c=>{
+    const payload=JSON.parse(c.payload||'{}');
+    const isNew=c.type==='new_waza';
+    const name=isNew?(payload.name_jp||'New Waza'):(c.waza_name_jp||'Waza #'+c.waza_id);
+    const fields=Object.keys(payload).filter(k=>!isNew||payload[k]);
+    const summary=isNew
+      ?'New waza: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+( fields.length-4)+' more':'')
+      :'Edited: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+(fields.length-4)+' more':'');
+    return'<div class="contrib-item">'
+      +'<div class="ci-header">'
+      +'<span class="contrib-type '+(isNew?'ct-new':'ct-edit')+'">'+(isNew?'New Waza':'Edit')+'</span>'
+      +'<span style="font-size:13px;font-weight:500">'+escHtml(name)+'</span>'
+      +'<span class="contrib-status cs-'+c.status+'">'+statusLabel[c.status]+'</span>'
+      +'</div>'
+      +'<div class="ci-meta" style="font-size:12px;color:var(--text3)">'+summary+'</div>'
+      +(c.admin_note?'<div class="ci-note">'+escHtml(c.admin_note)+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Suggest Edit modal ────────────────────────────────────────
+const SE_FIELDS=['name_jp','name_en','name_en_literal','name_en_gtranslate','tag','reference','parent_jp0','parent_en0','parent_jp1','parent_en1','author_jp','author_en','video0','video1','video2','video3','video4','video5'];
+
+function openSuggestEdit(w){
+  // Pre-fill with current values as placeholders
+  SE_FIELDS.forEach(f=>{
+    const el=document.getElementById('se-'+f);
+    if(el){el.value='';el.placeholder=w[f]||'';}
+  });
+  document.getElementById('suggestWazaName').textContent=w.name_jp||(w.name_en||'Waza #'+w.id);
+  document.getElementById('se-err').textContent='';
+  document.getElementById('suggestBg').style.display='flex';
+  document.getElementById('suggestBg').dataset.wazaId=w.id;
+}
+
+document.getElementById('suggestClose').addEventListener('click',()=>{document.getElementById('suggestBg').style.display='none';});
+document.getElementById('suggestCancel').addEventListener('click',()=>{document.getElementById('suggestBg').style.display='none';});
+document.getElementById('suggestBg').addEventListener('click',e=>{if(e.target===document.getElementById('suggestBg'))document.getElementById('suggestBg').style.display='none';});
+
+document.getElementById('se-submit').addEventListener('click',async()=>{
+  const wazaId=+document.getElementById('suggestBg').dataset.wazaId;
+  const payload={};
+  SE_FIELDS.forEach(f=>{const v=document.getElementById('se-'+f)?.value.trim();if(v)payload[f]=v;});
+  const errEl=document.getElementById('se-err');
+  if(!Object.keys(payload).length){errEl.textContent='Please fill in at least one field.';return;}
+  const btn=document.getElementById('se-submit');
+  btn.disabled=true;btn.textContent='Submitting…';
+  errEl.textContent='';
+  try{
+    const res=await api('/api/contributions','POST',{type:'edit',waza_id:wazaId,payload});
+    if(res.error){errEl.textContent=res.error;btn.disabled=false;btn.textContent='Submit suggestion';return;}
+    document.getElementById('suggestBg').style.display='none';
+    btn.disabled=false;btn.textContent='Submit suggestion';
+    // Flash feedback in detail panel
+    const fb=document.createElement('div');
+    fb.style.cssText='position:fixed;bottom:20px;right:20px;background:#002a10;color:#4caf82;border:1px solid #4caf82;border-radius:8px;padding:10px 16px;font-size:13px;z-index:300';
+    fb.textContent='Suggestion submitted — thank you!';
+    document.body.appendChild(fb);setTimeout(()=>fb.remove(),3000);
+  }catch(e){errEl.textContent='Network error. Please try again.';btn.disabled=false;btn.textContent='Submit suggestion';}
+});
+
+// ── New Waza modal ────────────────────────────────────────────
+const NW_FIELDS=['name_jp','name_en','name_en_literal','tag','parent_jp0','parent_en0','author_jp','author_en','video0','video1','video2','reference'];
+
+document.getElementById('newWazaBtn').addEventListener('click',()=>{
+  NW_FIELDS.forEach(f=>{const el=document.getElementById('nw-'+f);if(el)el.value='';});
+  document.getElementById('nw-err').textContent='';
+  document.getElementById('newWazaBg').style.display='flex';
+});
+document.getElementById('newWazaClose').addEventListener('click',()=>{document.getElementById('newWazaBg').style.display='none';});
+document.getElementById('newWazaCancel').addEventListener('click',()=>{document.getElementById('newWazaBg').style.display='none';});
+document.getElementById('newWazaBg').addEventListener('click',e=>{if(e.target===document.getElementById('newWazaBg'))document.getElementById('newWazaBg').style.display='none';});
+
+document.getElementById('nw-submit').addEventListener('click',async()=>{
+  const payload={};
+  NW_FIELDS.forEach(f=>{const v=document.getElementById('nw-'+f)?.value.trim();if(v)payload[f]=v;});
+  const errEl=document.getElementById('nw-err');
+  if(!payload.name_jp){errEl.textContent='Japanese name is required.';return;}
+  if(!payload.video0){errEl.textContent='At least one video link is required.';return;}
+  const btn=document.getElementById('nw-submit');
+  btn.disabled=true;btn.textContent='Submitting…';
+  errEl.textContent='';
+  try{
+    const res=await api('/api/contributions','POST',{type:'new_waza',payload});
+    if(res.error){errEl.textContent=res.error;btn.disabled=false;btn.textContent='Submit Waza';return;}
+    document.getElementById('newWazaBg').style.display='none';
+    btn.disabled=false;btn.textContent='Submit Waza';
+    const fb=document.createElement('div');
+    fb.style.cssText='position:fixed;bottom:20px;right:20px;background:#002a10;color:#4caf82;border:1px solid #4caf82;border-radius:8px;padding:10px 16px;font-size:13px;z-index:300';
+    fb.textContent='Waza submitted for review — thank you!';
+    document.body.appendChild(fb);setTimeout(()=>fb.remove(),3000);
+  }catch(e){errEl.textContent='Network error. Please try again.';btn.disabled=false;btn.textContent='Submit Waza';}
+});
 
 // ── Modal ─────────────────────────────────────────────────────
 document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('modalBg').style.display='flex';});
