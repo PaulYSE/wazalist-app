@@ -232,6 +232,12 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .crow .cren{font-size:12px;color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .crow .crshapes{display:flex;gap:2px;flex-shrink:0}
 
+/* ── Browse view toggle group ── */
+.view-toggle-group{display:flex}
+.view-toggle-group .btn{border-radius:0;border-right-width:0;font-size:15px;padding:5px 11px;line-height:1}
+.view-toggle-group .btn:first-child{border-radius:var(--r) 0 0 var(--r)}
+.view-toggle-group .btn:last-child{border-radius:0 var(--r) var(--r) 0;border-right-width:1px}
+
 /* ── Nav ── */
 .nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
 .ntab{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s}
@@ -332,9 +338,6 @@ select.active{border-color:var(--accent);color:var(--accent)}
     background:var(--bg1);
   }
   #detailContent{padding:20px;flex:1}
-
-  /* view toggle visible on mobile */
-  #browseViewToggle{display:inline-flex !important}
   .filter-row{gap:5px}
 }
 </style>
@@ -404,7 +407,11 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <button class="btn shape-filter-btn" data-si="3">♥</button>
       <button class="btn shape-filter-btn" data-si="4">★</button>
       <button class="btn shape-filter-btn" data-si="5">◆</button>
-      <button class="btn" id="browseViewToggle" style="display:none;margin-left:auto">Compact</button>
+      <div class="view-toggle-group" style="margin-left:auto" id="browseViewGroup">
+        <button class="btn" data-view="expanded" title="Cards">&#x2B1C;</button>
+        <button class="btn active" data-view="list" title="List">&#x25AC;</button>
+        <button class="btn" data-view="compact" title="Compact">&#x25A4;</button>
+      </div>
     </div>
     <div class="main">
       <div class="list-panel" id="listPanel">
@@ -574,7 +581,7 @@ const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let myListView='card'; // 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
-let browseListView='card'; // 'card' | 'compact' — mobile browse toggle
+let browseListView='list'; // 'expanded' | 'list' | 'compact'
 let isAdmin=false;
 
 // ── localStorage ─────────────────────────────────────────────
@@ -822,18 +829,18 @@ function renderList(){
   document.getElementById('countBar').textContent=filtered.length+' of '+wazaData.length+' Waza';
   const list=document.getElementById('wazaList');
   if(!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
-  if(browseListView==='compact'){
+
+  if(browseListView==='expanded'){
+    // My List expanded cards — jp name, en name, badges, shapes, video buttons
     list.innerHTML=filtered.map(w=>{
-      const p=getP(w.id);
-      const shapes=p.shapes||Array(6).fill(false);
-      return'<div class="crow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
-        +'<span class="crn">'+(w.name_jp||'—')+'</span>'
-        +'<span class="cren">'+dispName(w)+'</span>'
-        +'<span class="crshapes">'+shapePips(shapes)+'</span>'
-        +'</div>';
+      const item=expandedCard(w);
+      // Mark selected state on the wrapper
+      return item.replace('class="waza-card-expanded','class="waza-card-expanded'+(selectedId===w.id?' selected':''));
     }).join('');
-    list.querySelectorAll('.crow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
-  } else {
+    list.querySelectorAll('.waza-card-expanded').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+
+  } else if(browseListView==='list'){
+    // Original browse card — jp name, en name, badges row, shape pips below
     list.innerHTML=filtered.map(w=>{
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
@@ -847,6 +854,20 @@ function renderList(){
         +sp+'</div>';
     }).join('');
     list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+
+  } else {
+    // Compact drow — single line: jp name | en name | shapes flush right
+    list.innerHTML=filtered.map(w=>{
+      const p=getP(w.id);
+      const shapes=p.shapes||Array(6).fill(false);
+      const lb=p.like==='like'?' 👍':p.like==='dislike'?' 👎':'';
+      return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+        +'<span class="drn">'+(w.name_jp||'—')+'</span>'
+        +'<span class="drs">'+dispName(w)+lb+'</span>'
+        +(shapes.some(Boolean)?'<div class="shapes-row" style="margin-left:auto">'+shapePips(shapes)+'</div>':'')
+        +'</div>';
+    }).join('');
+    list.querySelectorAll('.drow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
   }
 }
 
@@ -863,10 +884,13 @@ document.getElementById('mobileBack').addEventListener('click',()=>{
   renderDetail();
 });
 
-document.getElementById('browseViewToggle').addEventListener('click',function(){
-  browseListView=browseListView==='card'?'compact':'card';
-  this.textContent=browseListView==='card'?'Compact':'Card';
-  renderList();
+// ── Browse view toggle group ──────────────────────────────────
+document.querySelectorAll('#browseViewGroup [data-view]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    browseListView=btn.dataset.view;
+    document.querySelectorAll('#browseViewGroup [data-view]').forEach(b=>b.classList.toggle('active',b===btn));
+    renderList();
+  });
 });
 
 // ── Render detail ─────────────────────────────────────────────
