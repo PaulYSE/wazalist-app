@@ -237,6 +237,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .view-toggle-group .btn{border-radius:0;border-right-width:0;font-size:15px;padding:5px 11px;line-height:1}
 .view-toggle-group .btn:first-child{border-radius:var(--r) 0 0 var(--r)}
 .view-toggle-group .btn:last-child{border-radius:0 var(--r) var(--r) 0;border-right-width:1px}
+/* shape filter buttons inside groups are slightly smaller emoji */
+#browseShapeGroup .btn,#mlShapeGroup .btn{font-size:13px;padding:5px 9px}
 
 /* ── Nav ── */
 .nav-tabs{display:flex;gap:4px;padding:0 16px;background:var(--bg0);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -400,13 +402,15 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
     </div>
     <div class="filter-row">
-      <button class="btn" id="filterShapeAll">All</button>
-      <button class="btn shape-filter-btn" data-si="0">●</button>
-      <button class="btn shape-filter-btn" data-si="1">▲</button>
-      <button class="btn shape-filter-btn" data-si="2">■</button>
-      <button class="btn shape-filter-btn" data-si="3">♥</button>
-      <button class="btn shape-filter-btn" data-si="4">★</button>
-      <button class="btn shape-filter-btn" data-si="5">◆</button>
+      <div class="view-toggle-group" id="browseShapeGroup">
+        <button class="btn" id="filterShapeAll">All</button>
+        <button class="btn shape-filter-btn" data-si="0">●</button>
+        <button class="btn shape-filter-btn" data-si="1">▲</button>
+        <button class="btn shape-filter-btn" data-si="2">■</button>
+        <button class="btn shape-filter-btn" data-si="3">♥</button>
+        <button class="btn shape-filter-btn" data-si="4">★</button>
+        <button class="btn shape-filter-btn" data-si="5">◆</button>
+      </div>
       <div class="view-toggle-group" style="margin-left:auto" id="browseViewGroup">
         <button class="btn" data-view="expanded" title="Cards">&#x2B1C;</button>
         <button class="btn active" data-view="list" title="List">&#x25AC;</button>
@@ -579,7 +583,7 @@ let currentUsername=localStorage.getItem('wl_username')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
-let myListView='card'; // 'card' | 'compact'
+let myListView='card'; // 'expanded' | 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
 let browseListView='list'; // 'expanded' | 'list' | 'compact'
 let isAdmin=false;
@@ -1093,8 +1097,7 @@ function compactRow(w){
 function updateMyListToolbarUI(){
   const cont=document.getElementById('dashMyList');
   if(!cont)return;
-  cont.querySelector('#mlViewCard')?.classList.toggle('active',myListView==='card');
-  cont.querySelector('#mlViewCompact')?.classList.toggle('active',myListView==='compact');
+  cont.querySelectorAll('#mlViewGroup [data-mlview]').forEach(b=>b.classList.toggle('active',b.dataset.mlview===myListView));
   cont.querySelector('#mlShapeAll')?.classList.toggle('active',myListShapes.every(Boolean));
   cont.querySelectorAll('.ml-shape-btn').forEach(btn=>{
     btn.classList.toggle('active',myListShapes[+btn.dataset.si]);
@@ -1107,17 +1110,39 @@ function renderDashMyList(){
 
   // Build toolbar
   const toolbar='<div class="mylist-toolbar">'
+    +'<div class="view-toggle-group" id="mlShapeGroup">'
     +'<button class="btn'+(myListShapes.every(Boolean)?' active':'')+'" id="mlShapeAll">All</button>'
     +SHAPES.map((s,i)=>'<button class="btn ml-shape-btn'+(myListShapes[i]?' active':'')+'" data-si="'+i+'">'+s+'</button>').join('')
+    +'</div>'
     +'<span class="mylist-count" id="mlCount">'+tracked.length+' Waza</span>'
-    +'<button class="btn" id="mlViewToggle">'+(myListView==='card'?'Compact':'Card')+'</button>'
+    +'<div class="view-toggle-group" id="mlViewGroup">'
+    +'<button class="btn'+(myListView==='expanded'?' active':'')+'" data-mlview="expanded" title="Cards">&#x2B1C;</button>'
+    +'<button class="btn'+(myListView==='card'?' active':'')+'" data-mlview="card" title="List">&#x25AC;</button>'
+    +'<button class="btn'+(myListView==='compact'?' active':'')+'" data-mlview="compact" title="Compact">&#x25A4;</button>'
+    +'</div>'
     +'</div>';
 
   let content='';
   if(tracked.length){
-    content=myListView==='compact'
-      ?'<div>'+tracked.map(compactRow).join('')+'</div>'
-      :tracked.map(expandedCard).join('');
+    if(myListView==='expanded'){
+      // Expanded: My List cards with video buttons
+      content=tracked.map(expandedCard).join('');
+    } else if(myListView==='card'){
+      // List: browse-style card (jp, en, badges, pips)
+      content=tracked.map(w=>{
+        const p=getP(w.id);const shapes=p.shapes||Array(6).fill(false);
+        const hasShape=shapes.some(Boolean);
+        const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+        const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
+        return'<div class="waza-card '+shapeClass(shapes)+'" data-id="'+w.id+'">'
+          +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+          +'<div class="nen">'+dispName(w)+'</div>'
+          +'<div class="badges">'+lb+'</div>'+sp+'</div>';
+      }).join('');
+    } else {
+      // Compact: single-line drow
+      content='<div>'+tracked.map(compactRow).join('')+'</div>';
+    }
   } else {
     content='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">'
       +(wazaData.filter(w=>{const p=getP(w.id);return p.like||(p.shapes&&p.shapes.some(Boolean));}).length
@@ -1128,8 +1153,15 @@ function renderDashMyList(){
 
   container.innerHTML=toolbar+content;
 
-  // Toolbar events
-  container.querySelector('#mlViewToggle').addEventListener('click',()=>{myListView=myListView==='card'?'compact':'card';renderDashMyList();});
+  // Toolbar events — view group
+  container.querySelectorAll('#mlViewGroup [data-mlview]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      myListView=btn.dataset.mlview;
+      container.querySelectorAll('#mlViewGroup [data-mlview]').forEach(b=>b.classList.toggle('active',b===btn));
+      renderDashMyList();
+    });
+  });
+  // Toolbar events — shape group
   container.querySelector('#mlShapeAll').addEventListener('click',()=>{
     myListShapes=Array(6).fill(!myListShapes.every(Boolean));
     renderDashMyList();
@@ -1150,8 +1182,7 @@ function renderDashMyList(){
     document.getElementById('dashboardView').style.display='none';
     selectWaza(+el.dataset.id);
   };
-  container.querySelectorAll('.waza-card-expanded').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
-  container.querySelectorAll('.crow').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
+  container.querySelectorAll('.waza-card-expanded,.waza-card,.crow').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
 }
 
 function timeAgo(iso){
