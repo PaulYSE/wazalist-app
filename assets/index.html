@@ -68,7 +68,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
 }
 
 /* ── Browse main ── */
-.main{display:flex;flex:1;overflow:hidden}
+.main{display:flex;flex:1;overflow:hidden;min-height:0}
 .list-panel{width:320px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg0)}
 .detail-panel{flex:1;overflow-y:auto;background:var(--bg1);padding:20px}
 .count-bar{padding:8px 12px;font-size:12px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg1)}
@@ -305,13 +305,37 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .mclosebtn{margin-top:20px;width:100%;padding:9px;background:var(--accent2);border:none;border-radius:var(--r);color:#fff;font-size:14px;cursor:pointer}
 
 @media(max-width:600px){
-  .main{flex-direction:column}
-  .list-panel{width:100%;max-height:45vh;border-right:none;border-bottom:1px solid var(--border)}
   .dstats{grid-template-columns:repeat(2,1fr)}
   .dgrid{grid-template-columns:1fr}
-  .mobile-back{display:flex !important}
-  .list-panel.detail-open{display:none}
-  .detail-panel{position:relative}
+
+  /* Browse: full-screen panels, no stacking */
+  .main{flex-direction:column;flex:1;position:relative;overflow:hidden}
+  .list-panel{
+    width:100%;position:absolute;inset:0;
+    max-height:none;border-right:none;
+    overflow-y:auto;
+  }
+  .detail-panel{
+    position:absolute;inset:0;
+    display:none;
+    padding:0;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  .main.waza-selected .list-panel{display:none}
+  .main.waza-selected .detail-panel{display:flex}
+
+  /* sticky back bar */
+  .mobile-back{
+    display:flex !important;
+    position:sticky;top:0;z-index:10;
+    background:var(--bg1);
+  }
+  #detailContent{padding:20px;flex:1}
+
+  /* view toggle visible on mobile */
+  #browseViewToggle{display:inline-flex !important}
+  .filter-row{gap:5px}
 }
 </style>
 </head>
@@ -380,6 +404,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
       <button class="btn shape-filter-btn" data-si="3">♥</button>
       <button class="btn shape-filter-btn" data-si="4">★</button>
       <button class="btn shape-filter-btn" data-si="5">◆</button>
+      <button class="btn" id="browseViewToggle" style="display:none;margin-left:auto">Compact</button>
     </div>
     <div class="main">
       <div class="list-panel" id="listPanel">
@@ -549,6 +574,7 @@ const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let myListView='card'; // 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
+let browseListView='card'; // 'card' | 'compact' — mobile browse toggle
 let isAdmin=false;
 
 // ── localStorage ─────────────────────────────────────────────
@@ -556,7 +582,7 @@ const LS_KEY='wl_local_prog';
 const LS_LEGEND='wl_shape_legend';
 const loadLocal=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}')}catch{return{}}};
 const saveLocal=d=>localStorage.setItem(LS_KEY,JSON.stringify(d));
-let shapeLegend=JSON.parse(localStorage.getItem(LS_LEGEND)||'["","","","","",""]'); // synced from server for logged-in users
+let shapeLegend=JSON.parse(localStorage.getItem(LS_LEGEND)||'["","","","","",""]');
 
 // ── API ──────────────────────────────────────────────────────
 const api=async(path,method='GET',body=null)=>{
@@ -623,14 +649,6 @@ async function initApp(){
         prog[p.waza_id]={shapes,like:p.like||null,updated_at:p.updated_at||null};
       });
     } catch(err){console.warn('Progress load error:',err);}
-    // Load shape legend from server
-    try{
-      const lr=await api('/api/legend');
-      if(lr&&Array.isArray(lr.legend)&&lr.legend.length===6){
-        shapeLegend=lr.legend;
-        localStorage.setItem(LS_LEGEND,JSON.stringify(shapeLegend));
-      }
-    }catch(e){console.warn('Legend load failed',e);}
   }
   renderList();renderDashboard();
 }
@@ -804,37 +822,51 @@ function renderList(){
   document.getElementById('countBar').textContent=filtered.length+' of '+wazaData.length+' Waza';
   const list=document.getElementById('wazaList');
   if(!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
-  list.innerHTML=filtered.map(w=>{
-    const p=getP(w.id);
-    const shapes=p.shapes||Array(6).fill(false);
-    const hasShape=shapes.some(Boolean);
-    const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-    const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
-    return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
-      +'<div class="njp">'+(w.name_jp||'—')+'</div>'
-      +'<div class="nen">'+dispName(w)+'</div>'
-      +'<div class="badges">'+lb+'</div>'
-      +sp+'</div>';
-  }).join('');
-  list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+  if(browseListView==='compact'){
+    list.innerHTML=filtered.map(w=>{
+      const p=getP(w.id);
+      const shapes=p.shapes||Array(6).fill(false);
+      return'<div class="crow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+        +'<span class="crn">'+(w.name_jp||'—')+'</span>'
+        +'<span class="cren">'+dispName(w)+'</span>'
+        +'<span class="crshapes">'+shapePips(shapes)+'</span>'
+        +'</div>';
+    }).join('');
+    list.querySelectorAll('.crow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+  } else {
+    list.innerHTML=filtered.map(w=>{
+      const p=getP(w.id);
+      const shapes=p.shapes||Array(6).fill(false);
+      const hasShape=shapes.some(Boolean);
+      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+      const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
+      return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+        +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+        +'<div class="nen">'+dispName(w)+'</div>'
+        +'<div class="badges">'+lb+'</div>'
+        +sp+'</div>';
+    }).join('');
+    list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
+  }
 }
 
 function selectWaza(id){
   selectedId=id;
   renderList();renderDetail();
-  // Mobile: hide list panel, show detail panel with back button
-  const isMobile=window.innerWidth<=600;
-  if(isMobile&&id!==null){
-    document.getElementById('listPanel').classList.add('detail-open');
-    document.getElementById('mobileBack').style.display='flex';
-  }
+  // Mobile: toggle .waza-selected on .main to show/hide panels
+  document.querySelector('.main').classList.toggle('waza-selected', id!==null);
 }
 
 document.getElementById('mobileBack').addEventListener('click',()=>{
   selectedId=null;
-  document.getElementById('listPanel').classList.remove('detail-open');
-  document.getElementById('mobileBack').style.display='none';
+  document.querySelector('.main').classList.remove('waza-selected');
   renderDetail();
+});
+
+document.getElementById('browseViewToggle').addEventListener('click',function(){
+  browseListView=browseListView==='card'?'compact':'card';
+  this.textContent=browseListView==='card'?'Compact':'Card';
+  renderList();
 });
 
 // ── Render detail ─────────────────────────────────────────────
@@ -1171,18 +1203,10 @@ function renderDashStats(){
   container.innerHTML=legendHTML+recentHTML+covHTML;
 
   // Legend inputs — save on change
-  let legendSaveTimer=null;
   container.querySelectorAll('.legend-input').forEach(inp=>{
     inp.addEventListener('input',()=>{
       shapeLegend[+inp.dataset.si]=inp.value;
       localStorage.setItem(LS_LEGEND,JSON.stringify(shapeLegend));
-      if(!isGuest&&token){
-        clearTimeout(legendSaveTimer);
-        legendSaveTimer=setTimeout(async()=>{
-          try{await api('/api/legend','POST',{legend:shapeLegend});}
-          catch(e){console.warn('Legend save failed',e);}
-        },600); // debounce — save 600ms after last keystroke
-      }
     });
   });
 
