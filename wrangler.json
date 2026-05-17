@@ -10,6 +10,12 @@
 			"database_name": "wazalist-db"
 		}
 	],
+	"kv_namespaces": [
+		{
+			"binding": "LIST_STORE",
+			"id": "654e5dbebaf243ccba0b98e2db32a9e9"
+		}
+  	],
 	"assets": {
 		"directory": "./assets"
 	},

@@ -151,6 +151,27 @@ export default {
 			return json({ success: true });
 		}
 
+		// ── List share (KV) ──────────────────────────────────────
+
+		// POST /api/list — store serialized list, keyed by SHA-256 hash
+		if (path === "/api/list" && request.method === "POST") {
+			const { key, data } = await request.json();
+			if (!/^[0-9a-f]{64}$/.test(key)) return err("Invalid key format");
+			if (typeof data !== "string" || data.length > 524288) return err("Payload too large or invalid");
+			try { JSON.parse(data); } catch { return err("Payload must be valid JSON"); }
+			await env.LIST_STORE.put(key, data, { expirationTtl: 60 * 60 * 24 * 90 });
+			return json({ success: true, key });
+		}
+
+		// GET /api/list?key=... — retrieve serialized list
+		if (path === "/api/list" && request.method === "GET") {
+			const key = url.searchParams.get("key") || "";
+			if (!/^[0-9a-f]{64}$/.test(key)) return err("Invalid key format");
+			const data = await env.LIST_STORE.get(key);
+			if (data === null) return err("List not found or expired", 404);
+			return json({ data });
+		}
+
 		// ── Contributions ─────────────────────────────────────────
 
 		// GET /api/contributions/mine

@@ -303,6 +303,27 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .suggest-btn{padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .12s}
 .suggest-btn:hover{border-color:var(--accent);color:var(--accent)}
 
+/* ── Compare tab ── */
+.cmp-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.cmp-select{padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;min-width:160px;max-width:260px}
+.cmp-select:focus{border-color:var(--accent)}
+.cmp-legend-strip{display:flex;gap:10px;flex-wrap:wrap;padding:8px 12px;background:var(--bg2);border-radius:var(--r);margin-bottom:14px;font-size:12px;color:var(--text3)}
+.cmp-legend-item{display:flex;align-items:center;gap:4px}
+.cmp-col-headers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:4px 0 8px;margin-bottom:4px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.cmp-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.cmp-row:hover .cmp-name-jp{color:var(--accent)}
+.cmp-name-jp{font-size:14px;font-weight:500;line-height:1.2}
+.cmp-name-en{font-size:11px;color:var(--text2)}
+.cmp-shapes-imported{display:flex;gap:3px;flex-wrap:wrap}
+.cmp-shapes-mine{display:flex;gap:4px;flex-wrap:wrap}
+.cmp-shape-btn{padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:14px;cursor:pointer;line-height:1;transition:all .12s}
+.cmp-shape-btn:hover{background:var(--bg3)}
+.cmp-shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
+
+/* ── Share / Import modals ── */
+.share-key{font-family:monospace;font-size:13px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);word-break:break-all;color:var(--text1);margin-bottom:10px;user-select:all;cursor:text}
+.share-url{font-size:12px;color:var(--text3);padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);word-break:break-all;margin-bottom:12px;user-select:all}
+
 /* ── Modal ── */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .modal{background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);padding:24px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
@@ -438,11 +459,14 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <button class="dtab active" data-dtab="home">Home</button>
         <button class="dtab" data-dtab="mylist">My List</button>
         <button class="dtab" data-dtab="stats">Stats</button>
+        <button class="dtab" data-dtab="compare">Compare</button>
         <button class="dtab" id="contribTab" data-dtab="contributions" style="display:none">Contributions</button>
+        <button class="btn" id="importListBtn" style="margin-left:auto;font-size:12px;padding:4px 10px">↓ Import List</button>
       </div>
       <div id="dashHome"></div>
       <div id="dashMyList" style="display:none"></div>
       <div id="dashStats" style="display:none"></div>
+      <div id="dashCompare" style="display:none"></div>
       <div id="dashContributions" style="display:none"></div>
     </div>
   </div>
@@ -534,6 +558,61 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div class="cmodal-footer">
       <button class="cbtn cbtn-primary" id="nw-submit">Submit Waza</button>
       <button class="cbtn cbtn-ghost" id="newWazaCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div id="exportBg" class="cmodal-bg" style="display:none">
+  <div class="cmodal" style="max-width:480px">
+    <div class="cmodal-header"><h2>↑ Export My List</h2><button class="cmodal-close" id="exportClose">✕</button></div>
+    <div class="cmodal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Share your marks and legend with others. Keys expire after 90 days.</p>
+      <div id="exportStatus" style="font-size:13px;color:var(--text3);margin-bottom:10px">Generating…</div>
+      <div id="exportKeyWrap" style="display:none">
+        <div class="share-key" id="exportKey"></div>
+        <div class="share-url" id="exportUrl"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="cbtn cbtn-primary" id="copyKeyBtn">Copy key</button>
+          <button class="cbtn cbtn-primary" id="copyLinkBtn">Copy link</button>
+        </div>
+      </div>
+      <div class="cmodal-err" id="exportErr"></div>
+    </div>
+    <div class="cmodal-footer"><button class="cbtn cbtn-ghost" id="exportCancel">Close</button></div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="importBg" class="cmodal-bg" style="display:none">
+  <div class="cmodal" style="max-width:440px">
+    <div class="cmodal-header"><h2>↓ Import a List</h2><button class="cmodal-close" id="importClose">✕</button></div>
+    <div class="cmodal-body">
+      <div class="cfield">
+        <label>Share key (64 hex characters)</label>
+        <input id="importKeyInput" type="text" placeholder="Paste key here…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="cmodal-err" id="importErr"></div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="importFetchBtn">Import</button>
+      <button class="cbtn cbtn-ghost" id="importCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME IMPORTED LIST MODAL -->
+<div id="nameImportBg" class="cmodal-bg" style="display:none">
+  <div class="cmodal" style="max-width:400px">
+    <div class="cmodal-header"><h2>Name this list</h2><button class="cmodal-close" id="nameImportClose">✕</button></div>
+    <div class="cmodal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Give this imported list a name so you can tell it apart from others.</p>
+      <div class="cfield"><label>List name</label><input id="importNameInput" type="text" maxlength="48"></div>
+      <div id="importDupWarning" style="display:none;font-size:12px;color:var(--amber);margin-top:6px">⚠ You already have a list with this key saved as "<span id="importDupName"></span>". Saving will overwrite it.</div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="importSaveBtn">Save</button>
+      <button class="cbtn cbtn-ghost" id="importNameCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -662,6 +741,7 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
+  _checkAutoImport();
 }
 if(token)initApp();
 
@@ -994,6 +1074,7 @@ function renderDashboard(){
   if(activeDTab==='home')renderDashHome();
   else if(activeDTab==='mylist')renderDashMyList();
   else if(activeDTab==='stats')renderDashStats();
+  else if(activeDTab==='compare')renderDashCompare();
   else if(activeDTab==='contributions')renderDashContributions();
 }
 
@@ -1061,13 +1142,17 @@ function renderDashHome(){
     // Marked List
     +'<div class="dsec2"><h3>Marked ('+shapedList.length+')</h3>'+(shapedList.length?shapedList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No marked Waza yet.</div>')+'</div>'
 
-    // Liked List
-    +(likedList.length?'<div class="dsec2"><h3>👍 Liked ('+likedList.length+')</h3>'+likedList.map(drow).join('')+'</div>':'');
+    // Export button + Liked List
+    +(likedList.length?'<div class="dsec2"><h3>👍 Liked ('+likedList.length+')</h3>'+likedList.map(drow).join('')+'</div>':'')
+    +'<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px">'
+    +'<button class="btn" id="exportListBtn">↑ Export My List</button>'
+    +'</div>';
 
     // Disliked List
     +(dislikedList.length?'<div class="dsec2"><h3>👎 Disliked ('+dislikedList.length+')</h3>'+dislikedList.map(drow).join('')+'</div>':'');
 
   attachDrowListeners('dashHome');
+  document.getElementById('exportListBtn')?.addEventListener('click',openExportModal);
 }
 
 function myListFiltered(){
@@ -1289,11 +1374,13 @@ function attachDrowListeners(id){
 
 // ── Dashboard sub-tabs ────────────────────────────────────────
 document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
+  if(!tab.dataset.dtab)return; // skip non-tab buttons like importListBtn
   document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
   activeDTab=tab.dataset.dtab;
   document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
   document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
   document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
+  document.getElementById('dashCompare').style.display=activeDTab==='compare'?'':'none';
   document.getElementById('dashContributions').style.display=activeDTab==='contributions'?'':'none';
   renderDashboard();
 }));
@@ -1435,6 +1522,271 @@ document.getElementById('nw-submit').addEventListener('click',async()=>{
     document.body.appendChild(fb);setTimeout(()=>fb.remove(),3000);
   }catch(e){errEl.textContent='Network error. Please try again.';btn.disabled=false;btn.textContent='Submit Waza';}
 });
+
+// ── List Share — localStorage ────────────────────────────────
+const LS_IMPORTED = 'wl_imported_lists';
+const loadImported = () => { try{return JSON.parse(localStorage.getItem(LS_IMPORTED)||'{}')}catch{return{}} };
+const saveImported = d => localStorage.setItem(LS_IMPORTED, JSON.stringify(d));
+let importedLists = loadImported(); // { [key]: { key, name, importedAt, legend, marks } }
+
+// Pending import data — held between fetch modal and name modal
+let _pendingImport = null;
+
+// ── List serialization ────────────────────────────────────────
+function serializeList(){
+  const marks = {};
+  Object.entries(prog).forEach(([id, p]) => {
+    const hasShape = p.shapes && p.shapes.some(Boolean);
+    if(hasShape || p.like) marks[+id] = { shapes: p.shapes||Array(6).fill(false), like: p.like||null };
+  });
+  return JSON.stringify({ v:1, legend: shapeLegend, marks });
+}
+
+async function hashList(serialized){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(serialized));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Export flow ───────────────────────────────────────────────
+async function openExportModal(){
+  const marks = Object.entries(prog).filter(([,p])=>(p.shapes&&p.shapes.some(Boolean))||p.like);
+  if(!marks.length){ showToast('Your list is empty — mark some Waza first.', 'amber'); return; }
+
+  document.getElementById('exportStatus').style.display='';
+  document.getElementById('exportStatus').textContent='Generating key…';
+  document.getElementById('exportKeyWrap').style.display='none';
+  document.getElementById('exportErr').textContent='';
+  document.getElementById('exportBg').style.display='flex';
+
+  try {
+    const data = serializeList();
+    const key = await hashList(data);
+    document.getElementById('exportStatus').textContent='Uploading…';
+    const res = await fetch('/api/list', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key,data}) });
+    const json = await res.json();
+    if(json.error){ document.getElementById('exportErr').textContent=json.error; document.getElementById('exportStatus').style.display='none'; return; }
+    document.getElementById('exportStatus').style.display='none';
+    document.getElementById('exportKey').textContent=key;
+    document.getElementById('exportUrl').textContent=location.origin+'/?import='+key;
+    document.getElementById('exportKeyWrap').style.display='';
+  } catch(e){
+    document.getElementById('exportErr').textContent='Upload failed. Please try again.';
+    document.getElementById('exportStatus').style.display='none';
+  }
+}
+
+document.getElementById('exportClose').addEventListener('click',()=>{document.getElementById('exportBg').style.display='none';});
+document.getElementById('exportCancel').addEventListener('click',()=>{document.getElementById('exportBg').style.display='none';});
+document.getElementById('exportBg').addEventListener('click',e=>{if(e.target===document.getElementById('exportBg'))document.getElementById('exportBg').style.display='none';});
+
+document.getElementById('copyKeyBtn').addEventListener('click',async()=>{
+  await navigator.clipboard.writeText(document.getElementById('exportKey').textContent);
+  document.getElementById('copyKeyBtn').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyKeyBtn').textContent='Copy key',1800);
+});
+document.getElementById('copyLinkBtn').addEventListener('click',async()=>{
+  await navigator.clipboard.writeText(document.getElementById('exportUrl').textContent);
+  document.getElementById('copyLinkBtn').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyLinkBtn').textContent='Copy link',1800);
+});
+
+// ── Import flow ───────────────────────────────────────────────
+function openImportModal(prefillKey=''){
+  document.getElementById('importKeyInput').value=prefillKey;
+  document.getElementById('importErr').textContent='';
+  document.getElementById('importBg').style.display='flex';
+  if(prefillKey) document.getElementById('importFetchBtn').click();
+}
+
+document.getElementById('importClose').addEventListener('click',()=>{document.getElementById('importBg').style.display='none';});
+document.getElementById('importCancel').addEventListener('click',()=>{document.getElementById('importBg').style.display='none';});
+document.getElementById('importBg').addEventListener('click',e=>{if(e.target===document.getElementById('importBg'))document.getElementById('importBg').style.display='none';});
+document.getElementById('importListBtn').addEventListener('click',()=>openImportModal());
+
+document.getElementById('importFetchBtn').addEventListener('click',async()=>{
+  const key = document.getElementById('importKeyInput').value.trim().toLowerCase();
+  const errEl = document.getElementById('importErr');
+  errEl.textContent='';
+  if(!/^[0-9a-f]{64}$/.test(key)){ errEl.textContent='Key must be 64 hex characters.'; return; }
+  const btn = document.getElementById('importFetchBtn');
+  btn.disabled=true; btn.textContent='Fetching…';
+  try {
+    const res = await fetch('/api/list?key='+key);
+    const json = await res.json();
+    btn.disabled=false; btn.textContent='Import';
+    if(json.error){ errEl.textContent = res.status===404 ? 'List not found — the key may have expired (keys last 90 days).' : json.error; return; }
+    let parsed;
+    try { parsed = JSON.parse(json.data); } catch { errEl.textContent='Invalid list data.'; return; }
+    if(!parsed.v||!parsed.marks){ errEl.textContent='Unrecognised list format.'; return; }
+    _pendingImport = { key, ...parsed };
+    document.getElementById('importBg').style.display='none';
+    // Open name modal
+    const now = new Date();
+    const defaultName = 'Imported List ' + now.toLocaleString('en',{month:'long',year:'numeric'});
+    document.getElementById('importNameInput').value = importedLists[key]?.name || defaultName;
+    const dupWarn = document.getElementById('importDupWarning');
+    const dupSpan = document.getElementById('importDupName');
+    if(importedLists[key]){ dupWarn.style.display=''; dupSpan.textContent=importedLists[key].name; }
+    else { dupWarn.style.display='none'; }
+    document.getElementById('nameImportBg').style.display='flex';
+  } catch(e){
+    btn.disabled=false; btn.textContent='Import';
+    errEl.textContent='Network error. Please try again.';
+  }
+});
+
+document.getElementById('nameImportClose').addEventListener('click',()=>{document.getElementById('nameImportBg').style.display='none';});
+document.getElementById('importNameCancel').addEventListener('click',()=>{document.getElementById('nameImportBg').style.display='none';});
+document.getElementById('importSaveBtn').addEventListener('click',()=>{
+  const name = document.getElementById('importNameInput').value.trim();
+  if(!name||!_pendingImport) return;
+  const { key, legend, marks } = _pendingImport;
+  importedLists[key] = { key, name, importedAt: new Date().toISOString(), legend: legend||Array(6).fill(''), marks: marks||{} };
+  saveImported(importedLists);
+  _pendingImport = null;
+  document.getElementById('nameImportBg').style.display='none';
+  showToast('List imported: '+name, 'green');
+  // Switch to Compare tab
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-dtab="compare"]').classList.add('active');
+  activeDTab='compare';
+  ['dashHome','dashMyList','dashStats','dashContributions'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('dashCompare').style.display='';
+  renderDashCompare();
+});
+
+// Check URL for ?import= key on load
+(()=>{
+  const importKey = new URL(location.href).searchParams.get('import');
+  if(importKey){ history.replaceState({},'',location.pathname); /* strip from URL */ window._autoImportKey=importKey; }
+})();
+
+// ── Compare tab ───────────────────────────────────────────────
+let compareSelectedKey = null;
+
+function renderDashCompare(){
+  const container = document.getElementById('dashCompare');
+  const keys = Object.keys(importedLists);
+
+  // Auto-select first if none selected or selection deleted
+  if(compareSelectedKey && !importedLists[compareSelectedKey]) compareSelectedKey=null;
+  if(!compareSelectedKey && keys.length) compareSelectedKey=keys[0];
+
+  const headerOpts = keys.map(k=>'<option value="'+escHtml(k)+'"'+(k===compareSelectedKey?' selected':'')+'>'+escHtml(importedLists[k].name)+'</option>').join('');
+  const selectHtml = '<select class="cmp-select" id="cmpSelect">'
+    +'<option value="">— select a list —</option>'
+    +headerOpts+'</select>';
+
+  const headerHtml = '<div class="cmp-header">'
+    +selectHtml
+    +(compareSelectedKey?'<button class="btn" id="cmpRemoveBtn" style="color:var(--red);border-color:var(--red)">Remove</button>':'')
+    +'<button class="btn" id="cmpImportBtn" style="margin-left:auto">↓ Import List</button>'
+    +'</div>';
+
+  if(!keys.length){
+    container.innerHTML=headerHtml+'<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
+    container.querySelector('#cmpImportBtn').addEventListener('click',()=>openImportModal());
+    return;
+  }
+
+  const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
+
+  // Legend strip for the imported list
+  let legendStrip = '';
+  if(imp && imp.legend && imp.legend.some(l=>l)){
+    legendStrip='<div class="cmp-legend-strip"><span style="margin-right:4px;font-weight:500;color:var(--text2)">Their legend:</span>'
+      +SHAPES.map((s,i)=>imp.legend[i]?'<span class="cmp-legend-item">'+s+' <span style="color:var(--text2)">'+escHtml(imp.legend[i])+'</span></span>':'').filter(Boolean).join('')
+      +'</div>';
+  }
+
+  // Rows: all waza IDs from imported marks, sorted by waza order
+  const importedIds = imp ? new Set(Object.keys(imp.marks).map(Number)) : new Set();
+  const rows = wazaData.filter(w=>importedIds.has(w.id));
+
+  const colHeaders='<div class="cmp-col-headers"><span>Waza</span><span>Their marks</span><span>Your marks</span></div>';
+
+  const rowsHtml = rows.map(w=>{
+    const importedMark = imp ? (imp.marks[w.id]||{shapes:Array(6).fill(false),like:null}) : {shapes:Array(6).fill(false),like:null};
+    const myP = getP(w.id);
+    const myShapes = myP.shapes||Array(6).fill(false);
+    const impShapes = importedMark.shapes||Array(6).fill(false);
+    const impLike = importedMark.like;
+    const impLikeBadge = impLike==='like'?'<span class="badge b-like" style="font-size:10px">👍</span>':impLike==='dislike'?'<span class="badge b-dislike" style="font-size:10px">👎</span>':'';
+    return'<div class="cmp-row" data-id="'+w.id+'">'
+      +'<div><div class="cmp-name-jp">'+(w.name_jp||'—')+'</div><div class="cmp-name-en">'+dispName(w)+'</div></div>'
+      +'<div class="cmp-shapes-imported">'+shapePips(impShapes)+impLikeBadge+'</div>'
+      +'<div class="cmp-shapes-mine">'
+        +SHAPES.map((s,i)=>'<button class="cmp-shape-btn'+(myShapes[i]?' on':'')+'" data-wid="'+w.id+'" data-si="'+i+'" title="'+(shapeLegend[i]||'Shape '+(i+1))+'">'+s+'</button>').join('')
+      +'</div>'
+      +'</div>';
+  }).join('');
+
+  const emptyRows = !rows.length ? '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">This list has no marks.</div>' : '';
+
+  container.innerHTML = headerHtml + legendStrip + (rows.length?colHeaders:'') + rowsHtml + emptyRows;
+
+  // Events
+  container.querySelector('#cmpSelect').addEventListener('change',e=>{
+    compareSelectedKey=e.target.value||null;
+    renderDashCompare();
+  });
+  container.querySelector('#cmpImportBtn').addEventListener('click',()=>openImportModal());
+  container.querySelector('#cmpRemoveBtn')?.addEventListener('click',()=>{
+    if(!compareSelectedKey)return;
+    const name = importedLists[compareSelectedKey].name;
+    if(!confirm('Remove "'+name+'" from your imported lists?'))return;
+    delete importedLists[compareSelectedKey];
+    saveImported(importedLists);
+    compareSelectedKey=null;
+    renderDashCompare();
+  });
+
+  // Shape buttons in compare view — call saveP (existing save path)
+  container.querySelectorAll('.cmp-shape-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const wid=+btn.dataset.wid, si=+btn.dataset.si;
+      const cur=getP(wid);
+      const ns=[...(cur.shapes||Array(6).fill(false))];
+      ns[si]=!ns[si];
+      saveP(wid,{shapes:ns}).then(()=>renderDashCompare());
+    });
+  });
+
+  // Row click — navigate to browse
+  container.querySelectorAll('.cmp-row').forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.classList.contains('cmp-shape-btn'))return;
+      document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+      document.querySelector('[data-tab="browse"]').classList.add('active');
+      document.getElementById('browseView').style.display='flex';
+      document.getElementById('dashboardView').style.display='none';
+      selectWaza(+el.dataset.id);
+    });
+  });
+}
+
+// ── Toast helper ─────────────────────────────────────────────
+function showToast(msg, color='green'){
+  const colors={green:['#002a10','#4caf82','#4caf82'],amber:['#2a1800','#e8a030','#e8a030'],red:['#2a0000','#e05555','#e05555']};
+  const [bg,fg,border]=colors[color]||colors.green;
+  const fb=document.createElement('div');
+  fb.style.cssText='position:fixed;bottom:20px;right:20px;background:'+bg+';color:'+fg+';border:1px solid '+border+';border-radius:8px;padding:10px 16px;font-size:13px;z-index:300;max-width:320px';
+  fb.textContent=msg;
+  document.body.appendChild(fb);setTimeout(()=>fb.remove(),3000);
+}
+
+// ── URL auto-import (fires after initApp loads wazaData) ──────
+const _origInitApp = initApp;
+// Monkey-patch: after wazaData loads, check for auto-import key
+const _checkAutoImport = ()=>{
+  if(window._autoImportKey){
+    const k=window._autoImportKey;
+    window._autoImportKey=null;
+    // Need to wait for app to be ready, then open import modal
+    setTimeout(()=>openImportModal(k),400);
+  }
+};
 
 // ── Modal ─────────────────────────────────────────────────────
 document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('modalBg').style.display='flex';});
