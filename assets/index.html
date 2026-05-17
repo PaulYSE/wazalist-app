@@ -425,15 +425,16 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div class="filter-row">
       <div class="view-toggle-group" id="browseShapeGroup">
         <button class="btn" id="filterShapeAll">All</button>
-        <button class="btn" id="filterShapeAny">Any ★</button>
         <button class="btn shape-filter-btn" data-si="0">●</button>
         <button class="btn shape-filter-btn" data-si="1">▲</button>
         <button class="btn shape-filter-btn" data-si="2">■</button>
         <button class="btn shape-filter-btn" data-si="3">♥</button>
         <button class="btn shape-filter-btn" data-si="4">★</button>
         <button class="btn shape-filter-btn" data-si="5">◆</button>
+        <button class="btn" id="filterShapeAny">Any</button>
       </div>
       <select id="exploreSortField">
+        <option value="default" selected>Default</option>
         <option value="name">Waza Name</option>
         <option value="likes">Likes</option>
       </select>
@@ -441,11 +442,11 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="asc">Asc</option>
         <option value="desc">Desc</option>
       </select>
-      <div class="view-toggle-group" style="margin-left:auto" id="browseViewGroup">
-        <button class="btn" data-view="expanded" title="Cards">&#x2B1C;</button>
-        <button class="btn active" data-view="list" title="List">&#x25AC;</button>
-        <button class="btn" data-view="compact" title="Compact">&#x25A4;</button>
-      </div>
+      <select id="browseViewSelect" style="margin-left:auto">
+        <option value="list" selected>List</option>
+        <option value="expanded">Cards</option>
+        <option value="compact">Compact</option>
+      </select>
     </div>
     <div class="main">
       <div class="list-panel" id="listPanel">
@@ -673,7 +674,7 @@ let wazaData=[], prog={}, selectedId=null, activeDTab='home';
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let exploreFilterAny=false; // true = show only waza with any mark (replaces My List)
-let exploreSortField='name'; // 'name' | 'likes'
+let exploreSortField='default'; // 'default' | 'name' | 'likes'
 let exploreSortOrder='asc';  // 'asc' | 'desc'
 let myListView='card'; // 'expanded' | 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
@@ -897,19 +898,21 @@ function filterWaza(){
     return true;
   });
   // Sort
-  results.sort((a,b)=>{
-    let cmp=0;
-    if(exploreSortField==='likes'){
-      const la=getP(a.id).like==='like'?1:0;
-      const lb=getP(b.id).like==='like'?1:0;
-      cmp=lb-la; // more likes first in asc
-    } else {
-      const na=(a.name_jp||dispName(a)||'').toLowerCase();
-      const nb=(b.name_jp||dispName(b)||'').toLowerCase();
-      cmp=na.localeCompare(nb,'ja');
-    }
-    return exploreSortOrder==='desc'?-cmp:cmp;
-  });
+  if(exploreSortField!=='default'){
+    results.sort((a,b)=>{
+      let cmp=0;
+      if(exploreSortField==='likes'){
+        const la=getP(a.id).like==='like'?1:0;
+        const lb=getP(b.id).like==='like'?1:0;
+        cmp=lb-la; // more likes first in asc
+      } else {
+        const na=(a.name_jp||dispName(a)||'').toLowerCase();
+        const nb=(b.name_jp||dispName(b)||'').toLowerCase();
+        cmp=na.localeCompare(nb,'ja');
+      }
+      return exploreSortOrder==='desc'?-cmp:cmp;
+    });
+  }
   return results;
 }
 
@@ -1002,12 +1005,9 @@ document.getElementById('mobileBack').addEventListener('click',()=>{
 });
 
 // ── Browse view toggle group ──────────────────────────────────
-document.querySelectorAll('#browseViewGroup [data-view]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    browseListView=btn.dataset.view;
-    document.querySelectorAll('#browseViewGroup [data-view]').forEach(b=>b.classList.toggle('active',b===btn));
-    renderList();
-  });
+document.getElementById('browseViewSelect').addEventListener('change',e=>{
+  browseListView=e.target.value;
+  renderList();
 });
 
 // ── Render detail ─────────────────────────────────────────────
@@ -1422,7 +1422,7 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
 
 function updateShapeFilterUI(){
-  document.getElementById('filterShapeAll').classList.toggle('active',!exploreFilterAny&&filters.shapes.every(v=>!v));
+  document.getElementById('filterShapeAll').classList.toggle('active',!exploreFilterAny&&filters.shapes.every(Boolean));
   document.getElementById('filterShapeAny').classList.toggle('active',exploreFilterAny);
   document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
     btn.classList.toggle('active',!exploreFilterAny&&filters.shapes[+btn.dataset.si]);
@@ -1431,7 +1431,8 @@ function updateShapeFilterUI(){
 
 document.getElementById('filterShapeAll').addEventListener('click',()=>{
   exploreFilterAny=false;
-  filters.shapes=Array(6).fill(false);
+  const anyOn=filters.shapes.some(Boolean);
+  filters.shapes=Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
   updateShapeFilterUI();renderList();
 });
 
