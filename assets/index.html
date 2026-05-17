@@ -413,7 +413,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
     </div>
   </div>
   <div class="nav-tabs">
-    <button class="ntab active" data-tab="browse">Browse</button>
+    <button class="ntab active" data-tab="browse">Explore</button>
     <button class="ntab" data-tab="dashboard">Dashboard</button>
   </div>
 
@@ -425,6 +425,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div class="filter-row">
       <div class="view-toggle-group" id="browseShapeGroup">
         <button class="btn" id="filterShapeAll">All</button>
+        <button class="btn" id="filterShapeAny">Any ★</button>
         <button class="btn shape-filter-btn" data-si="0">●</button>
         <button class="btn shape-filter-btn" data-si="1">▲</button>
         <button class="btn shape-filter-btn" data-si="2">■</button>
@@ -432,6 +433,14 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <button class="btn shape-filter-btn" data-si="4">★</button>
         <button class="btn shape-filter-btn" data-si="5">◆</button>
       </div>
+      <select id="exploreSortField">
+        <option value="name">Waza Name</option>
+        <option value="likes">Likes</option>
+      </select>
+      <select id="exploreSortOrder">
+        <option value="asc">Asc</option>
+        <option value="desc">Desc</option>
+      </select>
       <div class="view-toggle-group" style="margin-left:auto" id="browseViewGroup">
         <button class="btn" data-view="expanded" title="Cards">&#x2B1C;</button>
         <button class="btn active" data-view="list" title="List">&#x25AC;</button>
@@ -632,7 +641,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <ul>
       <li>Search by Japanese or English name.</li>
       <li>Filter by skill level, family group, or shape markers via dropdowns.</li>
-      <li>Quick-filter by <b>👍 Liked</b> button.</li>
+      <li>Use <b>Any ★</b> to show only Waza you have marked or liked (your personal list).</li>
+      <li>Sort by <b>Waza Name</b> or <b>Likes</b> in ascending or descending order.</li>
     </ul>
     <h3>Tracking</h3>
     <p>Use <b>shape markers</b> (● ▲ ■ ♥ ★ ◆) to track your Waza however you like — assign your own meaning to each shape.</p>
@@ -662,6 +672,9 @@ let currentUsername=localStorage.getItem('wl_username')||'';
 let wazaData=[], prog={}, selectedId=null, activeDTab='home';
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
+let exploreFilterAny=false; // true = show only waza with any mark (replaces My List)
+let exploreSortField='name'; // 'name' | 'likes'
+let exploreSortOrder='asc';  // 'asc' | 'desc'
 let myListView='card'; // 'expanded' | 'card' | 'compact'
 let myListShapes=Array(6).fill(false); // shape filters for My List
 let browseListView='list'; // 'expanded' | 'list' | 'compact'
@@ -863,7 +876,12 @@ const dispName=w=>w.name_en||w.name_en_literal||w.name_en_gtranslate||'(unnamed)
 function filterWaza(){
   const {search,shapes}=filters;
   const anyShapeActive=shapes.some(Boolean);
-  return wazaData.filter(w=>{
+  let results=wazaData.filter(w=>{
+    // "Any" mode: only show waza that have at least one mark
+    if(exploreFilterAny){
+      const p=getP(w.id);
+      if(!(p.like||(p.shapes&&p.shapes.some(Boolean))))return false;
+    }
     if(search){
       const isExact=search.startsWith('"')&&search.endsWith('"');
       const matchFn=isExact?matchesQuery:isFuzzyMatch;
@@ -878,6 +896,21 @@ function filterWaza(){
     }
     return true;
   });
+  // Sort
+  results.sort((a,b)=>{
+    let cmp=0;
+    if(exploreSortField==='likes'){
+      const la=getP(a.id).like==='like'?1:0;
+      const lb=getP(b.id).like==='like'?1:0;
+      cmp=lb-la; // more likes first in asc
+    } else {
+      const na=(a.name_jp||dispName(a)||'').toLowerCase();
+      const nb=(b.name_jp||dispName(b)||'').toLowerCase();
+      cmp=na.localeCompare(nb,'ja');
+    }
+    return exploreSortOrder==='desc'?-cmp:cmp;
+  });
+  return results;
 }
 
 // ── Shared helpers ────────────────────────────────────────────
@@ -1389,25 +1422,42 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
 
 function updateShapeFilterUI(){
-  const anyOn=filters.shapes.some(Boolean);
-  document.getElementById('filterShapeAll').classList.toggle('active',filters.shapes.every(Boolean));
+  document.getElementById('filterShapeAll').classList.toggle('active',!exploreFilterAny&&filters.shapes.every(v=>!v));
+  document.getElementById('filterShapeAny').classList.toggle('active',exploreFilterAny);
   document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
-    btn.classList.toggle('active',filters.shapes[+btn.dataset.si]);
+    btn.classList.toggle('active',!exploreFilterAny&&filters.shapes[+btn.dataset.si]);
   });
 }
 
 document.getElementById('filterShapeAll').addEventListener('click',()=>{
-  const anyOn=filters.shapes.some(Boolean);
-  filters.shapes=Array(6).fill(!anyOn); // if any are on, turn all off; otherwise turn all on
+  exploreFilterAny=false;
+  filters.shapes=Array(6).fill(false);
+  updateShapeFilterUI();renderList();
+});
+
+document.getElementById('filterShapeAny').addEventListener('click',()=>{
+  exploreFilterAny=!exploreFilterAny;
+  if(exploreFilterAny) filters.shapes=Array(6).fill(false); // clear specific filters when entering Any mode
   updateShapeFilterUI();renderList();
 });
 
 document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
+    exploreFilterAny=false; // specific shape filter exits Any mode
     const i=+btn.dataset.si;
     filters.shapes=filters.shapes.map((v,idx)=>idx===i?!v:v);
     updateShapeFilterUI();renderList();
   });
+});
+
+document.getElementById('exploreSortField').addEventListener('change',e=>{
+  exploreSortField=e.target.value;
+  renderList();
+});
+
+document.getElementById('exploreSortOrder').addEventListener('change',e=>{
+  exploreSortOrder=e.target.value;
+  renderList();
 });
 
 // ── Nav tabs ──────────────────────────────────────────────────
