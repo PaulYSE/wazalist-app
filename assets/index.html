@@ -44,12 +44,10 @@ a{color:var(--accent);text-decoration:none}
 .topbar h1{font-size:16px;font-weight:600;color:var(--accent);white-space:nowrap}
 .tagline{font-size:12px;color:var(--text3)}
 .guest-badge{font-size:11px;padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text3)}
-.search-row{display:flex;gap:8px;min-width:200px;padding:8px 16px;}
-#searchInput{flex:1;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
-#searchInput:focus{border-color:var(--accent)}
-
 /* ── Filter row ── */
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center}
+#searchInput{order:-1;width:100%;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
+#searchInput:focus{border-color:var(--accent)}
 select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;cursor:pointer}
 select.active{border-color:var(--accent);color:var(--accent)}
 .btn{padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
@@ -333,6 +331,29 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .modal ul{padding-left:18px}
 .mclosebtn{margin-top:20px;width:100%;padding:9px;background:var(--accent2);border:none;border-radius:var(--r);color:#fff;font-size:14px;cursor:pointer}
 
+/* ── Mobile topbar menu ── */
+.mob-menu-btn{display:none;width:32px;height:32px;padding:0;border-radius:var(--r);align-items:center;justify-content:center;font-size:20px;line-height:1}
+.mob-menu-dropdown{display:none;position:absolute;top:100%;right:0;min-width:160px;background:var(--bg1);border:1px solid var(--border);border-radius:var(--rl);z-index:150;box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden}
+.mob-menu-dropdown.open{display:block}
+.mob-menu-item{display:block;width:100%;padding:11px 16px;text-align:left;background:none;border:none;color:var(--text1);font-size:14px;cursor:pointer;font-family:inherit;text-decoration:none}
+.mob-menu-item:hover{background:var(--bg2)}
+.mob-menu-item.danger{color:var(--red)}
+.topbar-right{position:relative;margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ── Mobile filter sheet ── */
+.filter-sheet-btn{display:none;align-items:center;gap:6px;padding:7px 12px;font-size:13px;position:relative}
+.filter-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);position:absolute;top:4px;right:4px;display:none}
+.filter-dot.visible{display:block}
+.filter-sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:120}
+.filter-sheet-bg.open{display:block}
+.filter-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);border-radius:16px 16px 0 0;z-index:121;padding:0 0 env(safe-area-inset-bottom)}
+.filter-sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.filter-sheet-body{padding:16px}
+.filter-sheet-body .fs-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px}
+.filter-sheet-body .fs-row{margin-bottom:16px}
+.filter-sheet-body .fs-row:last-child{margin-bottom:0}
+.filter-sheet-body select{width:100%}
+
 @media(max-width:600px){
   .dstats{grid-template-columns:repeat(2,1fr)}
   .dgrid{grid-template-columns:1fr}
@@ -362,6 +383,17 @@ select.active{border-color:var(--accent);color:var(--accent)}
   }
   #detailContent{padding:20px;flex:1}
   .filter-row{gap:5px}
+  #searchInput{order:0;width:auto;flex:1}
+
+  /* Topbar: hide desktop buttons, show ⋮ */
+  .tagline{display:none}
+  .topbar-desktop{display:none !important}
+  .mob-menu-btn{display:flex}
+
+  /* Filter row: hide all controls, show Filters pill */
+  .filter-row .view-toggle-group,
+  .filter-row select{display:none}
+  .filter-sheet-btn{display:flex}
 }
 </style>
 </head>
@@ -400,16 +432,24 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <div style="display:flex;align-items:center;gap:8px">
       <h1>⛩ Wazalist</h1>
       <span class="tagline">Wotagei Skills Database</span>
-      
     </div>
-    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+    <div class="topbar-right">
       <span id="saveIndicator" style="font-size:12px;color:var(--green);opacity:0;transition:opacity .3s;white-space:nowrap">Saved ✓</span>
       <span class="guest-badge" id="guestBadge" style="display:none">Guest</span>
       <span id="usernameBadge" style="display:none;font-size:12px;color:var(--text2);padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px"></span>
-      <button class="btn" id="newWazaBtn" style="display:none">+ Submit Waza</button>
-      <a class="btn" id="adminLink" href="/admin" target="_blank" style="display:none;text-decoration:none">Admin</a>
-      <button class="btn" id="logoutBtn">Sign out</button>
-      <button class="btn help-circle" id="helpBtn" title="Guide">?</button>
+      <!-- Desktop buttons -->
+      <button class="btn topbar-desktop" id="newWazaBtn" style="display:none">+ Submit Waza</button>
+      <a class="btn topbar-desktop" id="adminLink" href="/admin" target="_blank" style="display:none;text-decoration:none">Admin</a>
+      <button class="btn topbar-desktop" id="logoutBtn">Sign out</button>
+      <button class="btn help-circle topbar-desktop" id="helpBtn" title="Guide">?</button>
+      <!-- Mobile ⋮ menu -->
+      <button class="btn mob-menu-btn" id="mobMenuBtn" aria-label="Menu">⋮</button>
+      <div class="mob-menu-dropdown" id="mobMenuDropdown">
+        <button class="mob-menu-item" id="mobHelpBtn">? Guide</button>
+        <button class="mob-menu-item" id="mobNewWazaBtn" style="display:none">+ Submit Waza</button>
+        <a class="mob-menu-item" id="mobAdminLink" href="/admin" target="_blank" style="display:none">Admin</a>
+        <button class="mob-menu-item danger" id="mobLogoutBtn">Sign out</button>
+      </div>
     </div>
   </div>
   <div class="nav-tabs">
@@ -419,10 +459,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
 
   <!-- BROWSE -->
   <div id="browseView" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
-    <div class="search-row">
-      <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
-    </div>
     <div class="filter-row">
+      <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
+      <button class="btn filter-sheet-btn" id="filterSheetBtn">⚙ Filters<span class="filter-dot" id="filterDot"></span></button>
       <div class="view-toggle-group" id="browseShapeGroup">
         <button class="btn" id="filterShapeAll">All</button>
         <button class="btn shape-filter-btn" data-si="0">●</button>
@@ -431,7 +470,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <button class="btn shape-filter-btn" data-si="3">♥</button>
         <button class="btn shape-filter-btn" data-si="4">★</button>
         <button class="btn shape-filter-btn" data-si="5">◆</button>
-        <button class="btn" id="filterShapeAny">Any</button>
+        <button class="btn" id="filterShapeAny">Any ★</button>
       </div>
       <select id="exploreSortField">
         <option value="default" selected>Default</option>
@@ -448,6 +487,51 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="compact">Compact</option>
       </select>
     </div>
+
+  <!-- FILTER BOTTOM SHEET (mobile) -->
+  <div class="filter-sheet-bg" id="filterSheetBg">
+    <div class="filter-sheet" id="filterSheet">
+      <div class="filter-sheet-handle"></div>
+      <div class="filter-sheet-body">
+        <div class="fs-row">
+          <div class="fs-label">Shape filter</div>
+          <div class="view-toggle-group" id="browseShapeGroupMob">
+            <button class="btn" id="filterShapeAllMob">All</button>
+            <button class="btn shape-filter-btn-mob" data-si="0">●</button>
+            <button class="btn shape-filter-btn-mob" data-si="1">▲</button>
+            <button class="btn shape-filter-btn-mob" data-si="2">■</button>
+            <button class="btn shape-filter-btn-mob" data-si="3">♥</button>
+            <button class="btn shape-filter-btn-mob" data-si="4">★</button>
+            <button class="btn shape-filter-btn-mob" data-si="5">◆</button>
+            <button class="btn" id="filterShapeAnyMob">Any ★</button>
+          </div>
+        </div>
+        <div class="fs-row">
+          <div class="fs-label">Sort by</div>
+          <select id="exploreSortFieldMob">
+            <option value="default" selected>Default</option>
+            <option value="name">Waza Name</option>
+            <option value="likes">Likes</option>
+          </select>
+        </div>
+        <div class="fs-row">
+          <div class="fs-label">Order</div>
+          <select id="exploreSortOrderMob">
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+          </select>
+        </div>
+        <div class="fs-row">
+          <div class="fs-label">Card style</div>
+          <select id="browseViewSelectMob">
+            <option value="list" selected>List</option>
+            <option value="expanded">Cards</option>
+            <option value="compact">Compact</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="main">
       <div class="list-panel" id="listPanel">
         <div class="count-bar" id="countBar">Loading…</div>
@@ -726,7 +810,8 @@ document.getElementById('rg-btn').onclick=async()=>{
   if(li.token){token=li.token;localStorage.setItem('wl_token',token);currentUsername=li.user.username;localStorage.setItem('wl_username',currentUsername);initApp();}
 };
 
-document.getElementById('logoutBtn').onclick=()=>{token='';isGuest=false;currentUsername='';localStorage.removeItem('wl_token');localStorage.removeItem('wl_username');location.reload();};
+const doLogout=()=>{token='';isGuest=false;currentUsername='';localStorage.removeItem('wl_token');localStorage.removeItem('wl_username');location.reload();};
+document.getElementById('logoutBtn').onclick=doLogout;
 
 // ── Init ─────────────────────────────────────────────────────
 async function initApp(){
@@ -734,12 +819,15 @@ async function initApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('guestBadge').style.display=isGuest?'':'none';
   document.getElementById('logoutBtn').textContent=isGuest?'Sign in':'Sign out';
+  document.getElementById('mobLogoutBtn').textContent=isGuest?'Sign in':'Sign out';
   const ub=document.getElementById('usernameBadge');
   if(!isGuest&&currentUsername){ub.textContent='@'+currentUsername;ub.style.display='';}else{ub.style.display='none';}
   document.getElementById('adminLink').style.display=isAdmin?'':'none';
+  document.getElementById('mobAdminLink').style.display=isAdmin?'':'none';
   // Show contribution features only for logged-in non-guest users
   const loggedIn=!isGuest&&!!token;
   document.getElementById('newWazaBtn').style.display=loggedIn?'':'none';
+  document.getElementById('mobNewWazaBtn').style.display=loggedIn?'':'none';
   document.getElementById('contribTab').style.display=loggedIn?'':'none';
   document.getElementById('countBar').textContent='Loading Waza…';
   const wazaRes=await api('/api/waza');
@@ -1422,11 +1510,21 @@ document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
 
 function updateShapeFilterUI(){
+  // Desktop
   document.getElementById('filterShapeAll').classList.toggle('active',!exploreFilterAny&&filters.shapes.every(Boolean));
   document.getElementById('filterShapeAny').classList.toggle('active',exploreFilterAny);
   document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
     btn.classList.toggle('active',!exploreFilterAny&&filters.shapes[+btn.dataset.si]);
   });
+  // Mobile sheet mirrors
+  document.getElementById('filterShapeAllMob').classList.toggle('active',!exploreFilterAny&&filters.shapes.every(Boolean));
+  document.getElementById('filterShapeAnyMob').classList.toggle('active',exploreFilterAny);
+  document.querySelectorAll('.shape-filter-btn-mob').forEach(btn=>{
+    btn.classList.toggle('active',!exploreFilterAny&&filters.shapes[+btn.dataset.si]);
+  });
+  // Filter dot: visible when any non-default filter is active
+  const hasFilter=exploreFilterAny||filters.shapes.some(Boolean)||exploreSortField!=='default'||exploreSortOrder!=='asc';
+  document.getElementById('filterDot').classList.toggle('visible',hasFilter);
 }
 
 document.getElementById('filterShapeAll').addEventListener('click',()=>{
@@ -1453,11 +1551,78 @@ document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
 
 document.getElementById('exploreSortField').addEventListener('change',e=>{
   exploreSortField=e.target.value;
-  renderList();
+  updateShapeFilterUI();renderList();
 });
 
 document.getElementById('exploreSortOrder').addEventListener('change',e=>{
   exploreSortOrder=e.target.value;
+  updateShapeFilterUI();renderList();
+});
+
+// ── Mobile ⋮ menu ─────────────────────────────────────────────
+const mobMenuBtn=document.getElementById('mobMenuBtn');
+const mobMenuDropdown=document.getElementById('mobMenuDropdown');
+mobMenuBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  mobMenuDropdown.classList.toggle('open');
+});
+document.addEventListener('click',()=>mobMenuDropdown.classList.remove('open'));
+mobMenuDropdown.addEventListener('click',e=>e.stopPropagation());
+
+document.getElementById('mobLogoutBtn').onclick=doLogout;
+document.getElementById('mobHelpBtn').onclick=()=>{
+  mobMenuDropdown.classList.remove('open');
+  document.getElementById('modalBg').style.display='flex';
+};
+document.getElementById('mobNewWazaBtn').onclick=()=>{
+  mobMenuDropdown.classList.remove('open');
+  openNewWazaModal();
+};
+
+// ── Mobile filter sheet ───────────────────────────────────────
+const filterSheetBg=document.getElementById('filterSheetBg');
+const filterSheet=document.getElementById('filterSheet');
+
+document.getElementById('filterSheetBtn').addEventListener('click',()=>{
+  filterSheetBg.classList.add('open');
+});
+filterSheetBg.addEventListener('click',e=>{
+  if(!filterSheet.contains(e.target))filterSheetBg.classList.remove('open');
+});
+
+// Mobile shape buttons — mirror state to/from shared filter state
+document.getElementById('filterShapeAllMob').addEventListener('click',()=>{
+  exploreFilterAny=false;
+  const anyOn=filters.shapes.some(Boolean);
+  filters.shapes=Array(6).fill(!anyOn);
+  updateShapeFilterUI();renderList();
+});
+document.getElementById('filterShapeAnyMob').addEventListener('click',()=>{
+  exploreFilterAny=!exploreFilterAny;
+  if(exploreFilterAny)filters.shapes=Array(6).fill(false);
+  updateShapeFilterUI();renderList();
+});
+document.querySelectorAll('.shape-filter-btn-mob').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    exploreFilterAny=false;
+    const i=+btn.dataset.si;
+    filters.shapes=filters.shapes.map((v,idx)=>idx===i?!v:v);
+    updateShapeFilterUI();renderList();
+  });
+});
+document.getElementById('exploreSortFieldMob').addEventListener('change',e=>{
+  exploreSortField=e.target.value;
+  document.getElementById('exploreSortField').value=e.target.value;
+  updateShapeFilterUI();renderList();
+});
+document.getElementById('exploreSortOrderMob').addEventListener('change',e=>{
+  exploreSortOrder=e.target.value;
+  document.getElementById('exploreSortOrder').value=e.target.value;
+  updateShapeFilterUI();renderList();
+});
+document.getElementById('browseViewSelectMob').addEventListener('change',e=>{
+  browseListView=e.target.value;
+  document.getElementById('browseViewSelect').value=e.target.value;
   renderList();
 });
 
@@ -1544,11 +1709,13 @@ document.getElementById('se-submit').addEventListener('click',async()=>{
 // ── New Waza modal ────────────────────────────────────────────
 const NW_FIELDS=['name_jp','name_en','name_en_literal','tag','parent_jp0','parent_en0','author_jp','author_en','video0','video1','video2','reference'];
 
-document.getElementById('newWazaBtn').addEventListener('click',()=>{
+function openNewWazaModal(){
   NW_FIELDS.forEach(f=>{const el=document.getElementById('nw-'+f);if(el)el.value='';});
   document.getElementById('nw-err').textContent='';
   document.getElementById('newWazaBg').style.display='flex';
-});
+}
+
+document.getElementById('newWazaBtn').addEventListener('click',openNewWazaModal);
 document.getElementById('newWazaClose').addEventListener('click',()=>{document.getElementById('newWazaBg').style.display='none';});
 document.getElementById('newWazaCancel').addEventListener('click',()=>{document.getElementById('newWazaBg').style.display='none';});
 document.getElementById('newWazaBg').addEventListener('click',e=>{if(e.target===document.getElementById('newWazaBg'))document.getElementById('newWazaBg').style.display='none';});
