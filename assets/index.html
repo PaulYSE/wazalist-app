@@ -496,7 +496,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <button class="btn shape-filter-btn" data-si="3">♥</button>
         <button class="btn shape-filter-btn" data-si="4">★</button>
         <button class="btn shape-filter-btn" data-si="5">◆</button>
-        <button class="btn" id="filterShapeAny">Any ★</button>
+        <button class="btn" id="filterShapeAny">Any</button>
       </div>
       <select id="exploreSortField">
         <option value="default" selected>Default</option>
@@ -504,8 +504,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="likes">Likes</option>
       </select>
       <select id="exploreSortOrder" disabled>
-        <option value="asc">Asc</option>
-        <option value="desc">Desc</option>
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
       </select>
       <select id="browseViewSelect" style="margin-left:auto">
         <option value="list" selected>List</option>
@@ -756,15 +756,15 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <h3>Browsing & filters</h3>
     <ul>
       <li>Search by Japanese or English name.</li>
-      <li>Filter by skill level, family group, or shape markers via dropdowns.</li>
+      <li>Filter by skill level, family group, or  via dropdowns.</li>
       <li>Use <b>Any ★</b> to show only Waza you have marked or liked (your personal list).</li>
       <li>Sort by <b>Waza Name</b> or <b>Likes</b> in ascending or descending order.</li>
     </ul>
     <h3>Tracking</h3>
-    <p>Use <b>shape markers</b> (● ▲ ■ ♥ ★ ◆) to track your Waza however you like — assign your own meaning to each shape.</p>
+    <p>Use <b>markings</b> (● ▲ ■ ♥ ★ ◆) to track your Waza however you like — assign your own meaning to each shape.</p>
     <h3>Like / Dislike</h3>
     <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
-    <h3>Shape markers</h3>
+    <h3>Markings</h3>
     <p>6 shapes (● ▲ ■ ♥ ★ ◆) per Waza. Toggle any combination — meaning is up to you.</p>
     <h3>Waza detail</h3>
     <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to reduce clutter.</p>
@@ -1086,7 +1086,8 @@ function renderList(){
       const hasShape=shapes.some(Boolean);
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
-        +(hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'<div></div>')
+        // +(hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'<div></div>')
+        +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
         +pill+'</div>';
       return'<div class="waza-card-expanded '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="wce-header">'
@@ -1105,8 +1106,8 @@ function renderList(){
       const hasShape=shapes.some(Boolean);
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
-        +(hasShape?'<div class="shapes-row">'+shapePips(shapes)+'</div>':'<div></div>')
-        // +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
+        // +(hasShape?'<div class="shapes-row">'+shapePips(shapes)+'</div>':'<div></div>')
+        +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
         +pill+'</div>';
       return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
@@ -1123,7 +1124,6 @@ function renderList(){
       return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<span class="drn">'+(w.name_jp||'—')+'</span>'
         +'<span class="drs">'+dispName(w)+'</span>'
-        // +(shapes.some(Boolean)?'<div class="shapes-row" style="flex-shrink:0">'+shapePips(shapes)+'</div>':'')
         +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
         +'</div>';
     }).join('');
@@ -1201,9 +1201,9 @@ function renderDetail(){
     +'</div></div>'
 
     // Shapes — not collapsible
-    +'<div class="dsec"><h3>Shape markers</h3>'
+    +'<div class="dsec"><h3>Markings</h3>'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'"'+savingAttr+' data-si="'+i+'" title="'+(shapeLegend[i]||'Shape '+(i+1))+'">'+s+'</button>').join('')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any shapes — meaning is up to you.</div></div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of Markings.</div></div>'
 
     // Videos — not collapsible
     +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
@@ -1362,7 +1362,7 @@ function renderDashStats(){
   const recent=wazaData
     .filter(w=>prog[w.id]&&prog[w.id].updated_at)
     .sort((a,b)=>new Date(prog[b.id].updated_at)-new Date(prog[a.id].updated_at))
-    .slice(0,10);
+    .slice(0,20);
   const recentHTML='<div class="dsec2"><h3>Recently updated</h3>'
     +(recent.length
       ? recent.map(w=>{
