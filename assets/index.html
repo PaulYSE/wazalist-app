@@ -143,6 +143,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
+.community-likes{display:flex;gap:8px;font-size:11px;color:var(--text3);margin-top:4px}
+.community-likes .cl-like{color:#60b8f0}
+.community-likes .cl-dislike{color:#e080a0}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
 .b-tag{background:#2a2040;color:#b3a8f0;border:1px solid #3d3560}
 
@@ -1034,6 +1037,16 @@ function videoButtons(w){
   }).join('')+'</div>';
 }
 
+// Community like count helper — uses w.like_count / w.dislike_count when available
+function communityLikesHtml(w){
+  const lc=w.like_count||0, dc=w.dislike_count||0;
+  if(!lc&&!dc)return'';
+  return'<div class="community-likes">'
+    +(lc?'<span class="cl-like">👍 '+lc+'</span>':'')
+    +(dc?'<span class="cl-dislike">👎 '+dc+'</span>':'')
+    +'</div>';
+}
+
 // ── Render browse list ────────────────────────────────────────
 function renderList(){
   const filtered=filterWaza();
@@ -1042,39 +1055,48 @@ function renderList(){
   if(!filtered.length){list.innerHTML='<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';return;}
 
   if(browseListView==='expanded'){
-    // My List expanded cards — jp name, en name, badges, shapes, video buttons
     list.innerHTML=filtered.map(w=>{
-      const item=expandedCard(w);
-      // Mark selected state on the wrapper
-      return item.replace('class="waza-card-expanded','class="waza-card-expanded'+(selectedId===w.id?' selected':''));
+      const p=getP(w.id);
+      const shapes=p.shapes||Array(6).fill(false);
+      const hasShape=shapes.some(Boolean);
+      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+      const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
+      const cl=communityLikesHtml(w);
+      return'<div class="waza-card-expanded '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
+        +'<div class="wce-header">'
+        +'<div class="njp">'+(w.name_jp||'—')+'</div>'
+        +'<div class="nen">'+dispName(w)+'</div>'
+        +'<div class="wce-badges">'+lb+'</div>'
+        +sp+cl+'</div>'
+        +videoButtons(w)
+        +'</div>';
     }).join('');
     list.querySelectorAll('.waza-card-expanded').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
 
   } else if(browseListView==='list'){
-    // Original browse card — jp name, en name, badges row, shape pips below
     list.innerHTML=filtered.map(w=>{
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
       const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
       const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
+      const cl=communityLikesHtml(w);
       return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
         +'<div class="badges">'+lb+'</div>'
-        +sp+'</div>';
+        +sp+cl+'</div>';
     }).join('');
     list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
 
   } else {
-    // Compact drow — single line: jp name | en name | shapes flush right
+    // Compact — no likes shown
     list.innerHTML=filtered.map(w=>{
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
-      const lb=p.like==='like'?' 👍':p.like==='dislike'?' 👎':'';
       return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<span class="drn">'+(w.name_jp||'—')+'</span>'
-        +'<span class="drs">'+dispName(w)+lb+'</span>'
+        +'<span class="drs">'+dispName(w)+'</span>'
         +(shapes.some(Boolean)?'<div class="shapes-row" style="margin-left:auto">'+shapePips(shapes)+'</div>':'')
         +'</div>';
     }).join('');
