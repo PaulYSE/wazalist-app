@@ -1084,7 +1084,7 @@ function renderList(){
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
-      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+      //const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
         +(hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'<div></div>')
@@ -1093,7 +1093,7 @@ function renderList(){
         +'<div class="wce-header">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
-        +'<div class="wce-badges">'+lb+'</div>'
+        //+'<div class="wce-badges">'+lb+'</div>'
         +bottomRow+'</div>'
         +videoButtons(w)
         +'</div>';
@@ -1105,7 +1105,7 @@ function renderList(){
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
-      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
+      //const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
         +(hasShape?'<div class="shapes-row">'+shapePips(shapes)+'</div>':'<div></div>')
@@ -1113,7 +1113,7 @@ function renderList(){
       return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
-        +'<div class="badges">'+lb+'</div>'
+        //+'<div class="badges">'+lb+'</div>'
         +bottomRow+'</div>';
     }).join('');
     list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
