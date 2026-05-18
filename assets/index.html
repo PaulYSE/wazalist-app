@@ -195,11 +195,18 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .prog-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 
 
-.like-row{display:flex;gap:8px;margin-top:6px}
-.like-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:14px;cursor:pointer;transition:all .12s;color:var(--text2)}
-.like-btn:hover{background:var(--bg3)}
-.like-btn.like-on{background:#001a2a;color:#60b8f0;border-color:#004a7a}
-.like-btn.dislike-on{background:#2a0010;color:#e080a0;border-color:#5a0020}
+/* ── Like pill ── */
+.like-pill-wrap{display:inline-flex;flex-direction:column;gap:5px;margin-top:8px}
+.like-pill{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.like-pill-half{display:flex;align-items:center;gap:6px;padding:7px 18px;font-size:13px;cursor:pointer;background:none;border:none;color:var(--text2);transition:background .12s,color .12s;font-family:inherit;white-space:nowrap}
+.like-pill-half:first-child{border-right:1px solid var(--border)}
+.like-pill-half:hover:not(:disabled){background:var(--bg3)}
+.like-pill-half .pill-count{font-size:11px;opacity:.7}
+.like-pill-half.like-on{background:#001a2a;color:#60b8f0}
+.like-pill-half.dislike-on{background:#2a0010;color:#e080a0}
+.like-pill-half:disabled{cursor:not-allowed;opacity:.5}
+.like-ratio-bar{height:3px;border-radius:2px;background:var(--bg3);overflow:hidden;width:100%}
+.like-ratio-fill{height:100%;background:#60b8f0;border-radius:2px;transition:width .3s}
 .shape-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s;line-height:1}
 .shape-btn:hover{background:var(--bg3)}
 .shape-btn.on{background:var(--bg3);border-color:var(--accent);color:var(--text1)}
@@ -1164,10 +1171,18 @@ function renderDetail(){
     '<div class="d-njp">'+(w.name_jp||'—')+'</div>'
     +'<div class="d-nen">'+dispName(w)+'</div>'
 
-    // Like/Dislike — not collapsible
-    +'<div class="dsec"><h3>Like / Dislike'+(isSaving?' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>':'')+'</h3><div class="like-row">'
-    +'<button class="like-btn'+(p.like==='like'?' like-on':'')+'"'+savingAttr+' id="likeBtn">👍 Like</button>'
-    +'<button class="like-btn'+(p.like==='dislike'?' dislike-on':'')+'"'+savingAttr+' id="dislikeBtn">👎 Dislike</button>'
+    // Like/Dislike pill
+    +'<div class="dsec"><h3>Community'+(isSaving?' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>':'')+'</h3>'
+    +((!token||isGuest)?'<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>':'')
+    +'<div class="like-pill-wrap">'
+    +'<div class="like-pill">'
+    +'<button class="like-pill-half'+(p.like==='like'?' like-on':'')+'"'+((!token||isGuest)||isSaving?' disabled':'')+' id="likeBtn">'
+    +'👍 <span class="pill-count">'+(w.like_count||0)+'</span></button>'
+    +'<button class="like-pill-half'+(p.like==='dislike'?' dislike-on':'')+'"'+((!token||isGuest)||isSaving?' disabled':'')+' id="dislikeBtn">'
+    +'👎 <span class="pill-count">'+(w.dislike_count||0)+'</span></button>'
+    +'</div>'
+    +(()=>{const lc=w.like_count||0,dc=w.dislike_count||0,tot=lc+dc;const pct=tot?Math.round(lc/tot*100):0;
+      return'<div class="like-ratio-bar"><div class="like-ratio-fill" style="width:'+pct+'%"></div></div>';})()
     +'</div></div>'
 
     // Shapes — not collapsible
