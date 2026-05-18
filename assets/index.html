@@ -865,7 +865,12 @@ async function saveP(id,patch){
     renderDetail(); // show spinning state immediately
     try {
       const res=await api('/api/progress','POST',{waza_id:id,shapes:JSON.stringify(prog[id].shapes),like:prog[id].like});
-      if(res.error)console.warn('Progress save failed:',res.error);
+      if(res.error){console.warn('Progress save failed:',res.error);}
+      else if(res.like_count!=null){
+        // Apply fresh aggregate counts back to wazaData so cards update immediately
+        const w=wazaData.find(x=>x.id===id);
+        if(w){w.like_count=res.like_count;w.dislike_count=res.dislike_count;}
+      }
     } catch(err){console.warn('Progress save error:',err);}
     savingIds.delete(id);
     renderList();renderDetail();renderDashboard();

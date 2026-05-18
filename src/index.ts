@@ -23,7 +23,15 @@ export default {
 
 		// ── Waza ──────────────────────────────────────────────────
 		if (path === "/api/waza") {
-			const { results } = await env.DB.prepare("SELECT * FROM waza").all();
+			const { results } = await env.DB.prepare(`
+				SELECT
+					w.*,
+					COALESCE(SUM(CASE WHEN p.like = 'like'    THEN 1 END), 0) AS like_count,
+					COALESCE(SUM(CASE WHEN p.like = 'dislike' THEN 1 END), 0) AS dislike_count
+				FROM waza w
+				LEFT JOIN progress p ON p.waza_id = w.id
+				GROUP BY w.id
+			`).all();
 			return json(results);
 		}
 
@@ -105,6 +113,10 @@ export default {
 				const { waza_id, shapes, like } = await request.json();
 				if (!waza_id) return err("waza_id is required");
 
+				// `like` is an account-only field — guests must not reach this,
+				// but strip it defensively if no authenticated session exists.
+				const likeValue = user ? (like ?? null) : null;
+
 				await env.DB.prepare(`
 					INSERT INTO progress (user_id, waza_id, shapes, like, updated_at)
 					VALUES (?, ?, ?, ?, datetime('now'))
@@ -113,10 +125,20 @@ export default {
 						like = excluded.like,
 						updated_at = datetime('now')
 				`)
-					.bind(user.id, waza_id, shapes ?? "[]", like ?? null)
+					.bind(user.id, waza_id, shapes ?? "[]", likeValue)
 					.run();
 
-				return json({ success: true });
+				// Return fresh aggregate counts for this waza so the frontend
+				// can update the displayed like_count/dislike_count immediately.
+				const counts = await env.DB.prepare(`
+					SELECT
+						COALESCE(SUM(CASE WHEN like = 'like'    THEN 1 END), 0) AS like_count,
+						COALESCE(SUM(CASE WHEN like = 'dislike' THEN 1 END), 0) AS dislike_count
+					FROM progress
+					WHERE waza_id = ?
+				`).bind(waza_id).first();
+
+				return json({ success: true, waza_id, ...counts });
 			}
 		}
 
