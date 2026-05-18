@@ -454,7 +454,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
   </div>
   <div class="nav-tabs">
     <button class="ntab active" data-tab="browse">Explore</button>
-    <button class="ntab" data-tab="dashboard">Dashboard</button>
+    <button class="ntab" data-tab="dashboard">Stats</button>
+    <button class="ntab" data-tab="compare">Compare</button>
+    <button class="ntab" data-tab="contribute">Contribute</button>
   </div>
 
   <!-- BROWSE -->
@@ -546,17 +548,24 @@ select.active{border-color:var(--accent);color:var(--accent)}
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- STATS -->
   <div id="dashboardView" style="display:none;flex:1;overflow:hidden">
     <div class="dash">
-      <div class="dash-tabs">
-        <button class="dtab active" data-dtab="stats">Stats</button>
-        <button class="dtab" data-dtab="compare">Compare</button>
-        <button class="dtab" id="contribTab" data-dtab="contributions" style="display:none">Contributions</button>
-      </div>
       <div id="dashStats"></div>
-      <div id="dashCompare" style="display:none"></div>
-      <div id="dashContributions" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div id="compareView" style="display:none;flex:1;overflow:hidden">
+    <div class="dash">
+      <div id="dashCompare"></div>
+    </div>
+  </div>
+
+  <!-- CONTRIBUTE -->
+  <div id="contributeView" style="display:none;flex:1;overflow:hidden">
+    <div class="dash">
+      <div id="contributeContent"></div>
     </div>
   </div>
 </div>
@@ -749,7 +758,7 @@ const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#
 
 let isGuest=false, token=localStorage.getItem('wl_token')||'';
 let currentUsername=localStorage.getItem('wl_username')||'';
-let wazaData=[], prog={}, selectedId=null, activeDTab='stats';
+let wazaData=[], prog={}, selectedId=null;
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let exploreFilterAny=false; // true = show only waza with any mark (replaces My List)
@@ -815,13 +824,10 @@ async function initApp(){
   document.getElementById('mobLogoutBtn').textContent=isGuest?'Sign in':'Sign out';
   const ub=document.getElementById('usernameBadge');
   if(!isGuest&&currentUsername){ub.textContent='@'+currentUsername;ub.style.display='';}else{ub.style.display='none';}
-  document.getElementById('adminLink').style.display=isAdmin?'':'none';
-  document.getElementById('mobAdminLink').style.display=isAdmin?'':'none';
-  // Show contribution features only for logged-in non-guest users
-  const loggedIn=!isGuest&&!!token;
-  document.getElementById('newWazaBtn').style.display=loggedIn?'':'none';
-  document.getElementById('mobNewWazaBtn').style.display=loggedIn?'':'none';
-  document.getElementById('contribTab').style.display=loggedIn?'':'none';
+  document.getElementById('adminLink').style.display='none';
+  document.getElementById('mobAdminLink').style.display='none';
+  document.getElementById('newWazaBtn').style.display='none';
+  document.getElementById('mobNewWazaBtn').style.display='none';
   document.getElementById('countBar').textContent='Loading Waza…';
   const wazaRes=await api('/api/waza');
   wazaData=Array.isArray(wazaRes)?wazaRes:[];
@@ -1183,12 +1189,85 @@ function renderDetail(){
   panel.querySelector('#suggestEditBtn')?.addEventListener('click',()=>openSuggestEdit(w));
 }
 
-// ── Dashboard ─────────────────────────────────────────────────
-function renderDashboard(){
-  if(activeDTab==='stats')renderDashStats();
-  else if(activeDTab==='compare')renderDashCompare();
-  else if(activeDTab==='contributions')renderDashContributions();
+// ── Navigation helper ─────────────────────────────────────────
+function navigateToBrowse(){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-tab="browse"]').classList.add('active');
+  document.getElementById('browseView').style.display='flex';
+  document.getElementById('dashboardView').style.display='none';
+  document.getElementById('compareView').style.display='none';
+  document.getElementById('contributeView').style.display='none';
 }
+
+// ── Contribute tab ────────────────────────────────────────────
+async function renderContribute(){
+  const container=document.getElementById('contributeContent');
+  const loggedIn=!isGuest&&!!token;
+
+  // Sign-in prompt for guests / logged-out users
+  const authPrompt=loggedIn?'':
+    '<div class="dsec2" style="text-align:center;padding:24px 0">'
+    +'<div style="font-size:28px;margin-bottom:8px">🔒</div>'
+    +'<div style="font-weight:600;margin-bottom:6px">Sign in to contribute</div>'
+    +'<div style="font-size:13px;color:var(--text3);margin-bottom:16px">You need an account to submit Waza or suggest edits.</div>'
+    +'<button class="btn" id="contribSignInBtn">Sign in / Register</button>'
+    +'</div>';
+
+  // Actions (only shown when logged in)
+  const actionsHTML=loggedIn?
+    '<div class="dsec2"><h3>Actions</h3>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:10px">'
+    +'<button class="btn" id="contribNewWazaBtn">+ Submit New Waza</button>'
+    +(isAdmin?'<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>':'')
+    +'</div></div>'
+    :'';
+
+  // Contributions history
+  let historyHTML='<div class="dsec2"><h3>Your contributions</h3>';
+  if(!loggedIn){
+    historyHTML+='<div style="color:var(--text3);font-size:13px;padding:8px 0">Sign in to see your contribution history.</div></div>';
+  } else {
+    historyHTML+='<div id="contribHistoryList"><div style="color:var(--text3);font-size:13px">Loading…</div></div></div>';
+  }
+
+  container.innerHTML=authPrompt+actionsHTML+historyHTML;
+
+  if(!loggedIn){
+    container.querySelector('#contribSignInBtn')?.addEventListener('click',doLogout); // doLogout triggers reload → auth screen
+    return;
+  }
+
+  container.querySelector('#contribNewWazaBtn')?.addEventListener('click',openNewWazaModal);
+
+  // Load history async
+  const histList=container.querySelector('#contribHistoryList');
+  try{
+    const contribs=await api('/api/contributions/mine');
+    if(!contribs.length){histList.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0">You haven\'t submitted any contributions yet.</div>';return;}
+    const statusLabel={pending:'Pending',approved:'Approved',rejected:'Rejected'};
+    histList.innerHTML=contribs.map(c=>{
+      const payload=JSON.parse(c.payload||'{}');
+      const isNew=c.type==='new_waza';
+      const name=isNew?(payload.name_jp||'New Waza'):(c.waza_name_jp||'Waza #'+c.waza_id);
+      const fields=Object.keys(payload).filter(k=>!isNew||payload[k]);
+      const summary=isNew
+        ?'New waza: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+(fields.length-4)+' more':'')
+        :'Edited: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+(fields.length-4)+' more':'');
+      return'<div class="contrib-item">'
+        +'<div class="ci-header">'
+        +'<span class="contrib-type '+(isNew?'ct-new':'ct-edit')+'">'+(isNew?'New Waza':'Edit')+'</span>'
+        +'<span style="font-size:13px;font-weight:500">'+escHtml(name)+'</span>'
+        +'<span class="contrib-status cs-'+c.status+'">'+statusLabel[c.status]+'</span>'
+        +'</div>'
+        +'<div class="ci-meta" style="font-size:12px;color:var(--text3)">'+summary+'</div>'
+        +(c.admin_note?'<div class="ci-note">'+escHtml(c.admin_note)+'</div>':'')
+        +'</div>';
+    }).join('');
+  }catch(e){histList.innerHTML='<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>';}
+}
+
+// ── Dashboard ─────────────────────────────────────────────────
+function renderDashboard(){renderDashStats();}
 
 function timeAgo(iso){
   if(!iso)return'—';
@@ -1202,13 +1281,11 @@ function timeAgo(iso){
 
 function renderDashStats(){
   let liked=0, disliked=0, shaped=0;
-  const shapeCounts=Array(6).fill(0);
   wazaData.forEach(w=>{
     const p=getP(w.id);
     if(p.like==='like') liked++;
     if(p.like==='dislike') disliked++;
     if(p.shapes&&p.shapes.some(Boolean)) shaped++;
-    if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});
   });
 
   // ── Overview cards ────────────────────────────────────────
@@ -1218,18 +1295,6 @@ function renderDashStats(){
     +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
     +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Marked</div></div>'
     +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;padding:0 0 4px">'
-    +'<button class="btn" id="exportListBtn">↑ Export My List</button>'
-    +'</div>';
-
-  // ── Shape legend editor ───────────────────────────────────
-  const legendHTML='<div class="dsec2"><h3>Shape legend</h3>'
-    +SHAPES.map((s,i)=>'<div class="legend-row">'
-      +'<span class="legend-shape">'+s+'</span>'
-      +'<input class="legend-input" data-si="'+i+'" type="text" maxlength="32" placeholder="Label this shape…" value="'+shapeLegend[i].replace(/"/g,'&quot;')+'">'
-      +'<span class="legend-count">'+shapeCounts[i]+' waza</span>'
-      +'</div>').join('')
     +'</div>';
 
   // ── Recently updated ──────────────────────────────────────
@@ -1278,38 +1343,15 @@ function renderDashStats(){
     +'</div>';
 
   const container=document.getElementById('dashStats');
-  container.innerHTML=overviewHTML+legendHTML+recentHTML+covHTML;
-
-  document.getElementById('exportListBtn').addEventListener('click',openExportModal);
-
-  container.querySelectorAll('.legend-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{
-      shapeLegend[+inp.dataset.si]=inp.value;
-      localStorage.setItem(LS_LEGEND,JSON.stringify(shapeLegend));
-    });
-  });
+  container.innerHTML=overviewHTML+recentHTML+covHTML;
 
   container.querySelectorAll('.recent-row').forEach(el=>{
     el.addEventListener('click',()=>{
-      document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-      document.querySelector('[data-tab="browse"]').classList.add('active');
-      document.getElementById('browseView').style.display='flex';
-      document.getElementById('dashboardView').style.display='none';
+      navigateToBrowse();
       selectWaza(+el.dataset.id);
     });
   });
 }
-
-// ── Dashboard sub-tabs ────────────────────────────────────────
-document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
-  if(!tab.dataset.dtab)return;
-  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
-  activeDTab=tab.dataset.dtab;
-  document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
-  document.getElementById('dashCompare').style.display=activeDTab==='compare'?'':'none';
-  document.getElementById('dashContributions').style.display=activeDTab==='contributions'?'':'none';
-  renderDashboard();
-}));
 
 // ── Filter events ─────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input',e=>{filters.search=e.target.value;renderList();});
@@ -1437,36 +1479,12 @@ document.querySelectorAll('.ntab').forEach(tab=>tab.addEventListener('click',()=
   const t=tab.dataset.tab;
   document.getElementById('browseView').style.display=t==='browse'?'flex':'none';
   document.getElementById('dashboardView').style.display=t==='dashboard'?'block':'none';
-  if(t==='dashboard')renderDashboard();
+  document.getElementById('compareView').style.display=t==='compare'?'block':'none';
+  document.getElementById('contributeView').style.display=t==='contribute'?'block':'none';
+  if(t==='dashboard')renderDashStats();
+  if(t==='compare')renderDashCompare();
+  if(t==='contribute')renderContribute();
 }));
-
-// ── Contributions dashboard tab ───────────────────────────────
-async function renderDashContributions(){
-  const container=document.getElementById('dashContributions');
-  container.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px 0">Loading…</div>';
-  let contribs=[];
-  try{contribs=await api('/api/contributions/mine');}catch(e){container.innerHTML='<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>';return;}
-  if(!contribs.length){container.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">You haven\'t submitted any contributions yet.</div>';return;}
-  const statusLabel={pending:'Pending',approved:'Approved',rejected:'Rejected'};
-  container.innerHTML=contribs.map(c=>{
-    const payload=JSON.parse(c.payload||'{}');
-    const isNew=c.type==='new_waza';
-    const name=isNew?(payload.name_jp||'New Waza'):(c.waza_name_jp||'Waza #'+c.waza_id);
-    const fields=Object.keys(payload).filter(k=>!isNew||payload[k]);
-    const summary=isNew
-      ?'New waza: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+( fields.length-4)+' more':'')
-      :'Edited: '+(fields.slice(0,4).join(', '))+(fields.length>4?' +'+(fields.length-4)+' more':'');
-    return'<div class="contrib-item">'
-      +'<div class="ci-header">'
-      +'<span class="contrib-type '+(isNew?'ct-new':'ct-edit')+'">'+(isNew?'New Waza':'Edit')+'</span>'
-      +'<span style="font-size:13px;font-weight:500">'+escHtml(name)+'</span>'
-      +'<span class="contrib-status cs-'+c.status+'">'+statusLabel[c.status]+'</span>'
-      +'</div>'
-      +'<div class="ci-meta" style="font-size:12px;color:var(--text3)">'+summary+'</div>'
-      +(c.admin_note?'<div class="ci-note">'+escHtml(c.admin_note)+'</div>':'')
-      +'</div>';
-  }).join('');
-}
 
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1668,12 +1686,13 @@ document.getElementById('importSaveBtn').addEventListener('click',()=>{
   _pendingImport = null;
   document.getElementById('nameImportBg').style.display='none';
   showToast('List imported: '+name, 'green');
-  // Switch to Compare tab
-  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
-  document.querySelector('[data-dtab="compare"]').classList.add('active');
-  activeDTab='compare';
-  ['dashStats','dashContributions'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('dashCompare').style.display='';
+  // Switch to Compare top-level tab
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-tab="compare"]').classList.add('active');
+  document.getElementById('browseView').style.display='none';
+  document.getElementById('dashboardView').style.display='none';
+  document.getElementById('contributeView').style.display='none';
+  document.getElementById('compareView').style.display='block';
   renderDashCompare();
 });
 
@@ -1689,6 +1708,18 @@ let compareSelectedKey = null;
 function renderDashCompare(){
   const container = document.getElementById('dashCompare');
   const keys = Object.keys(importedLists);
+
+  // ── My legend editor + export ─────────────────────────────
+  const shapeCounts=Array(6).fill(0);
+  wazaData.forEach(w=>{const p=getP(w.id);if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});});
+  const myLegendHTML='<div class="dsec2"><h3>My legend</h3>'
+    +SHAPES.map((s,i)=>'<div class="legend-row">'
+      +'<span class="legend-shape">'+s+'</span>'
+      +'<input class="legend-input" data-si="'+i+'" type="text" maxlength="32" placeholder="Label this shape…" value="'+shapeLegend[i].replace(/"/g,'&quot;')+'">'
+      +'<span class="legend-count">'+shapeCounts[i]+' waza</span>'
+      +'</div>').join('')
+    +'<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
+    +'</div>';
 
   // Auto-select first if none selected or selection deleted
   if(compareSelectedKey && !importedLists[compareSelectedKey]) compareSelectedKey=null;
@@ -1706,7 +1737,9 @@ function renderDashCompare(){
     +'</div>';
 
   if(!keys.length){
-    container.innerHTML=headerHtml+'<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
+    container.innerHTML=myLegendHTML+headerHtml+'<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
+    container.querySelector('#cmpExportBtn').addEventListener('click',openExportModal);
+    container.querySelectorAll('.legend-input').forEach(inp=>{inp.addEventListener('input',()=>{shapeLegend[+inp.dataset.si]=inp.value;localStorage.setItem(LS_LEGEND,JSON.stringify(shapeLegend));});});
     container.querySelector('#cmpImportBtn').addEventListener('click',()=>openImportModal());
     return;
   }
@@ -1745,7 +1778,10 @@ function renderDashCompare(){
 
   const emptyRows = !rows.length ? '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">This list has no marks.</div>' : '';
 
-  container.innerHTML = headerHtml + legendStrip + (rows.length?colHeaders:'') + rowsHtml + emptyRows;
+  container.innerHTML = myLegendHTML + headerHtml + legendStrip + (rows.length?colHeaders:'') + rowsHtml + emptyRows;
+
+  container.querySelector('#cmpExportBtn').addEventListener('click',openExportModal);
+  container.querySelectorAll('.legend-input').forEach(inp=>{inp.addEventListener('input',()=>{shapeLegend[+inp.dataset.si]=inp.value;localStorage.setItem(LS_LEGEND,JSON.stringify(shapeLegend));});});
 
   // Events
   container.querySelector('#cmpSelect').addEventListener('change',e=>{
@@ -1779,10 +1815,7 @@ function renderDashCompare(){
   container.querySelectorAll('.cmp-row').forEach(el=>{
     el.addEventListener('click',e=>{
       if(e.target.classList.contains('cmp-shape-btn'))return;
-      document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-      document.querySelector('[data-tab="browse"]').classList.add('active');
-      document.getElementById('browseView').style.display='flex';
-      document.getElementById('dashboardView').style.display='none';
+      navigateToBrowse();
       selectWaza(+el.dataset.id);
     });
   });
