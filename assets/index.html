@@ -550,16 +550,11 @@ select.active{border-color:var(--accent);color:var(--accent)}
   <div id="dashboardView" style="display:none;flex:1;overflow:hidden">
     <div class="dash">
       <div class="dash-tabs">
-        <button class="dtab active" data-dtab="home">Home</button>
-        <button class="dtab" data-dtab="mylist">My List</button>
-        <button class="dtab" data-dtab="stats">Stats</button>
+        <button class="dtab active" data-dtab="stats">Stats</button>
         <button class="dtab" data-dtab="compare">Compare</button>
         <button class="dtab" id="contribTab" data-dtab="contributions" style="display:none">Contributions</button>
-        <button class="btn" id="importListBtn" style="margin-left:auto;font-size:12px;padding:4px 10px">↓ Import List</button>
       </div>
-      <div id="dashHome"></div>
-      <div id="dashMyList" style="display:none"></div>
-      <div id="dashStats" style="display:none"></div>
+      <div id="dashStats"></div>
       <div id="dashCompare" style="display:none"></div>
       <div id="dashContributions" style="display:none"></div>
     </div>
@@ -739,9 +734,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to reduce clutter.</p>
     <h3>Dashboard</h3>
     <ul>
-      <li><b>Home</b> — overview of your marked and liked Waza.</li>
-      <li><b>My List</b> — expanded cards for all your tracked Waza, with video buttons directly on each card.</li>
-      <li><b>Stats</b> — detailed breakdown of your progress.</li>
+      <li><b>Stats</b> — overview counts, shape legend editor, recently updated Waza, and coverage by family.</li>
+      <li><b>Compare</b> — import and compare another user's list side-by-side with your marks.</li>
+      <li><b>Contributions</b> — history of edits and new Waza you've submitted (logged-in users).</li>
     </ul>
     <button class="mclosebtn" id="closeModal">Got it!</button>
   </div>
@@ -754,14 +749,12 @@ const platColor = {yt:'#ff0000',bili:'#00a1d6',tw:'#1da1f2',nico:'#e6007b',fb:'#
 
 let isGuest=false, token=localStorage.getItem('wl_token')||'';
 let currentUsername=localStorage.getItem('wl_username')||'';
-let wazaData=[], prog={}, selectedId=null, activeDTab='home';
+let wazaData=[], prog={}, selectedId=null, activeDTab='stats';
 const savingIds=new Set(); // waza IDs currently being saved
 let filters={search:'',shapes:Array(6).fill(false)};
 let exploreFilterAny=false; // true = show only waza with any mark (replaces My List)
 let exploreSortField='default'; // 'default' | 'name' | 'likes'
 let exploreSortOrder='asc';  // 'asc' | 'desc'
-let myListView='card'; // 'expanded' | 'card' | 'compact'
-let myListShapes=Array(6).fill(false); // shape filters for My List
 let browseListView='list'; // 'expanded' | 'list' | 'compact'
 let isAdmin=false;
 
@@ -1192,203 +1185,9 @@ function renderDetail(){
 
 // ── Dashboard ─────────────────────────────────────────────────
 function renderDashboard(){
-  if(activeDTab==='home')renderDashHome();
-  else if(activeDTab==='mylist')renderDashMyList();
-  else if(activeDTab==='stats')renderDashStats();
+  if(activeDTab==='stats')renderDashStats();
   else if(activeDTab==='compare')renderDashCompare();
   else if(activeDTab==='contributions')renderDashContributions();
-}
-
-// Compact row for Home tab
-function drow(w){
-  const p=getP(w.id);
-  const shapes=p.shapes||Array(6).fill(false);
-  const hasShape=shapes.some(Boolean);
-  const lb=p.like==='like'?'<span class="badge b-like" style="font-size:11px">👍</span>':p.like==='dislike'?'<span class="badge b-dislike" style="font-size:11px">👎</span>':'';
-  return'<div class="drow '+shapeClass(shapes)+'" data-id="'+w.id+'" style="border-radius:4px;padding-left:6px">'
-    +'<span class="drn">'+(w.name_jp||'—')+'</span>'
-    +'<span class="drs">'+dispName(w)+'</span>'
-    +lb
-    +(hasShape?'<div class="shapes-row" style="margin-left:auto">'+shapePips(shapes)+'</div>':'')
-    +'</div>';
-}
-
-// Expanded card for My List tab
-function expandedCard(w){
-  const p=getP(w.id);
-  const shapes=p.shapes||Array(6).fill(false);
-  const hasShape=shapes.some(Boolean);
-  const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-  const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
-  return'<div class="waza-card-expanded '+shapeClass(shapes)+'" data-id="'+w.id+'">'
-    +'<div class="wce-header">'
-    +'<div class="njp">'+(w.name_jp||'—')+'</div>'
-    +'<div class="nen">'+dispName(w)+'</div>'
-    +'<div class="wce-badges">'+lb+'</div>'
-    +sp+'</div>'
-    +videoButtons(w)
-    +'</div>';
-}
-
-function renderDashHome(){
-  const shapedList=wazaData.filter(w=>getP(w.id).shapes&&getP(w.id).shapes.some(Boolean));
-  const likedList=wazaData.filter(w=>getP(w.id).like==='like');
-  const dislikedList=wazaData.filter(w=>getP(w.id).like==='dislike');
-
-  // Calculate counts
-  let liked=0, disliked=0, shaped=0;
-  const shapeCounts=Array(6).fill(0);
-  wazaData.forEach(w=>{
-    const p=getP(w.id);
-    if(p.like==='like') liked++;
-    if(p.like==='dislike') disliked++;
-    if(p.shapes&&p.shapes.some(Boolean)) shaped++;
-    if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});
-  });
-
-  document.getElementById('dashHome').innerHTML=
-    // Overview
-    '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">'
-    +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
-    +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
-    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shapedList.length+'</div><div class="l">Marked</div></div>'
-    +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
-    +'</div>'
-
-    // Mark Usage
-    +'<div class="dsec2"><h3>Marker Usage</h3>'
-    +SHAPES.map((s,i)=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+s+'</span><span style="font-size:13px;color:var(--text2)">'+shapeCounts[i]+' Waza</span></div>').join('')
-    +'</div>'
-
-    // Marked List
-    +'<div class="dsec2"><h3>Marked ('+shapedList.length+')</h3>'+(shapedList.length?shapedList.map(drow).join(''):'<div style="color:var(--text3);font-size:13px;padding:8px 0">No marked Waza yet.</div>')+'</div>'
-
-    // Export button + Liked List
-    +(likedList.length?'<div class="dsec2"><h3>👍 Liked ('+likedList.length+')</h3>'+likedList.map(drow).join('')+'</div>':'')
-    +'<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px">'
-    +'<button class="btn" id="exportListBtn">↑ Export My List</button>'
-    +'</div>';
-
-    // Disliked List
-    +(dislikedList.length?'<div class="dsec2"><h3>👎 Disliked ('+dislikedList.length+')</h3>'+dislikedList.map(drow).join('')+'</div>':'');
-
-  attachDrowListeners('dashHome');
-  document.getElementById('exportListBtn')?.addEventListener('click',openExportModal);
-}
-
-function myListFiltered(){
-  const anyOn=myListShapes.some(Boolean);
-  return wazaData.filter(w=>{
-    const p=getP(w.id);
-    if(!(p.like||(p.shapes&&p.shapes.some(Boolean))))return false;
-    if(anyOn){
-      const ws=p.shapes||Array(6).fill(false);
-      if(!myListShapes.every((on,i)=>!on||ws[i]))return false;
-    }
-    return true;
-  });
-}
-
-function compactRow(w){
-  const p=getP(w.id);
-  const shapes=p.shapes||Array(6).fill(false);
-  const sc=shapeClass(shapes);
-  return'<div class="crow '+(sc||'')+'" data-id="'+w.id+'">'
-    +'<span class="crn">'+(w.name_jp||'—')+'</span>'
-    +'<span class="cren">'+dispName(w)+'</span>'
-    +'<span class="crshapes">'+shapePips(shapes)+'</span>'
-    +'</div>';
-}
-
-function updateMyListToolbarUI(){
-  const cont=document.getElementById('dashMyList');
-  if(!cont)return;
-  cont.querySelectorAll('#mlViewGroup [data-mlview]').forEach(b=>b.classList.toggle('active',b.dataset.mlview===myListView));
-  cont.querySelector('#mlShapeAll')?.classList.toggle('active',myListShapes.every(Boolean));
-  cont.querySelectorAll('.ml-shape-btn').forEach(btn=>{
-    btn.classList.toggle('active',myListShapes[+btn.dataset.si]);
-  });
-}
-
-function renderDashMyList(){
-  const tracked=myListFiltered();
-  const container=document.getElementById('dashMyList');
-
-  // Build toolbar
-  const toolbar='<div class="mylist-toolbar">'
-    +'<div class="view-toggle-group" id="mlShapeGroup">'
-    +'<button class="btn'+(myListShapes.every(Boolean)?' active':'')+'" id="mlShapeAll">All</button>'
-    +SHAPES.map((s,i)=>'<button class="btn ml-shape-btn'+(myListShapes[i]?' active':'')+'" data-si="'+i+'">'+s+'</button>').join('')
-    +'</div>'
-    +'<span class="mylist-count" id="mlCount">'+tracked.length+' Waza</span>'
-    +'<div class="view-toggle-group" id="mlViewGroup">'
-    +'<button class="btn'+(myListView==='expanded'?' active':'')+'" data-mlview="expanded" title="Cards">&#x2B1C;</button>'
-    +'<button class="btn'+(myListView==='card'?' active':'')+'" data-mlview="card" title="List">&#x25AC;</button>'
-    +'<button class="btn'+(myListView==='compact'?' active':'')+'" data-mlview="compact" title="Compact">&#x25A4;</button>'
-    +'</div>'
-    +'</div>';
-
-  let content='';
-  if(tracked.length){
-    if(myListView==='expanded'){
-      // Expanded: My List cards with video buttons
-      content=tracked.map(expandedCard).join('');
-    } else if(myListView==='card'){
-      // List: browse-style card (jp, en, badges, pips)
-      content=tracked.map(w=>{
-        const p=getP(w.id);const shapes=p.shapes||Array(6).fill(false);
-        const hasShape=shapes.some(Boolean);
-        const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-        const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
-        return'<div class="waza-card '+shapeClass(shapes)+'" data-id="'+w.id+'">'
-          +'<div class="njp">'+(w.name_jp||'—')+'</div>'
-          +'<div class="nen">'+dispName(w)+'</div>'
-          +'<div class="badges">'+lb+'</div>'+sp+'</div>';
-      }).join('');
-    } else {
-      // Compact: single-line drow
-      content='<div>'+tracked.map(compactRow).join('')+'</div>';
-    }
-  } else {
-    content='<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">'
-      +(wazaData.filter(w=>{const p=getP(w.id);return p.like||(p.shapes&&p.shapes.some(Boolean));}).length
-        ?'No Waza match the active shape filters.'
-        :'No tracked Waza yet. Like or shape-mark Waza to see them here.')
-      +'</div>';
-  }
-
-  container.innerHTML=toolbar+content;
-
-  // Toolbar events — view group
-  container.querySelectorAll('#mlViewGroup [data-mlview]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      myListView=btn.dataset.mlview;
-      container.querySelectorAll('#mlViewGroup [data-mlview]').forEach(b=>b.classList.toggle('active',b===btn));
-      renderDashMyList();
-    });
-  });
-  // Toolbar events — shape group
-  container.querySelector('#mlShapeAll').addEventListener('click',()=>{
-    myListShapes=Array(6).fill(!myListShapes.every(Boolean));
-    renderDashMyList();
-  });
-  container.querySelectorAll('.ml-shape-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const i=+btn.dataset.si;
-      myListShapes=myListShapes.map((v,idx)=>idx===i?!v:v);
-      renderDashMyList();
-    });
-  });
-
-  // Card click → browse
-  const clickHandler=el=>{
-    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-    document.querySelector('[data-tab="browse"]').classList.add('active');
-    document.getElementById('browseView').style.display='flex';
-    document.getElementById('dashboardView').style.display='none';
-    selectWaza(+el.dataset.id);
-  };
-  container.querySelectorAll('.waza-card-expanded,.waza-card,.crow').forEach(el=>el.addEventListener('click',()=>clickHandler(el)));
 }
 
 function timeAgo(iso){
@@ -1402,10 +1201,29 @@ function timeAgo(iso){
 }
 
 function renderDashStats(){
+  let liked=0, disliked=0, shaped=0;
   const shapeCounts=Array(6).fill(0);
-  wazaData.forEach(w=>{const p=getP(w.id);if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});});
+  wazaData.forEach(w=>{
+    const p=getP(w.id);
+    if(p.like==='like') liked++;
+    if(p.like==='dislike') disliked++;
+    if(p.shapes&&p.shapes.some(Boolean)) shaped++;
+    if(p.shapes)p.shapes.forEach((on,i)=>{if(on)shapeCounts[i]++;});
+  });
 
-  // ── Shape legend ──────────────────────────────────────────
+  // ── Overview cards ────────────────────────────────────────
+  const overviewHTML=
+    '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">'
+    +'<div class="scard"><div class="n" style="color:#60b8f0">'+liked+'</div><div class="l">👍 Liked</div></div>'
+    +'<div class="scard"><div class="n" style="color:#e080a0">'+disliked+'</div><div class="l">👎 Disliked</div></div>'
+    +'<div class="scard"><div class="n" style="color:var(--accent)">'+shaped+'</div><div class="l">Marked</div></div>'
+    +'<div class="scard"><div class="n">'+wazaData.length+'</div><div class="l">Total Waza</div></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;padding:0 0 4px">'
+    +'<button class="btn" id="exportListBtn">↑ Export My List</button>'
+    +'</div>';
+
+  // ── Shape legend editor ───────────────────────────────────
   const legendHTML='<div class="dsec2"><h3>Shape legend</h3>'
     +SHAPES.map((s,i)=>'<div class="legend-row">'
       +'<span class="legend-shape">'+s+'</span>'
@@ -1414,7 +1232,7 @@ function renderDashStats(){
       +'</div>').join('')
     +'</div>';
 
-  // ── Recently updated ─────────────────────────────────────
+  // ── Recently updated ──────────────────────────────────────
   const recent=wazaData
     .filter(w=>prog[w.id]&&prog[w.id].updated_at)
     .sort((a,b)=>new Date(prog[b.id].updated_at)-new Date(prog[a.id].updated_at))
@@ -1444,7 +1262,6 @@ function renderDashStats(){
       if(p.like||(p.shapes&&p.shapes.some(Boolean)))families[fam].touched++;
     });
   });
-  // also count waza with no parent under "Uncategorised"
   const noFamily=wazaData.filter(w=>!w.parent_en0&&!w.parent_en1);
   if(noFamily.length){
     families['Uncategorised']={total:noFamily.length,touched:noFamily.filter(w=>{const p=getP(w.id);return p.like||(p.shapes&&p.shapes.some(Boolean));}).length};
@@ -1461,9 +1278,10 @@ function renderDashStats(){
     +'</div>';
 
   const container=document.getElementById('dashStats');
-  container.innerHTML=legendHTML+recentHTML+covHTML;
+  container.innerHTML=overviewHTML+legendHTML+recentHTML+covHTML;
 
-  // Legend inputs — save on change
+  document.getElementById('exportListBtn').addEventListener('click',openExportModal);
+
   container.querySelectorAll('.legend-input').forEach(inp=>{
     inp.addEventListener('input',()=>{
       shapeLegend[+inp.dataset.si]=inp.value;
@@ -1471,7 +1289,6 @@ function renderDashStats(){
     });
   });
 
-  // Recent rows — navigate to waza
   container.querySelectorAll('.recent-row').forEach(el=>{
     el.addEventListener('click',()=>{
       document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
@@ -1483,23 +1300,11 @@ function renderDashStats(){
   });
 }
 
-function attachDrowListeners(id){
-  document.querySelectorAll('#'+id+' .drow').forEach(el=>el.addEventListener('click',()=>{
-    document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-    document.querySelector('[data-tab="browse"]').classList.add('active');
-    document.getElementById('browseView').style.display='flex';
-    document.getElementById('dashboardView').style.display='none';
-    selectWaza(+el.dataset.id);
-  }));
-}
-
 // ── Dashboard sub-tabs ────────────────────────────────────────
 document.querySelectorAll('.dtab').forEach(tab=>tab.addEventListener('click',()=>{
-  if(!tab.dataset.dtab)return; // skip non-tab buttons like importListBtn
+  if(!tab.dataset.dtab)return;
   document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
   activeDTab=tab.dataset.dtab;
-  document.getElementById('dashHome').style.display=activeDTab==='home'?'':'none';
-  document.getElementById('dashMyList').style.display=activeDTab==='mylist'?'':'none';
   document.getElementById('dashStats').style.display=activeDTab==='stats'?'':'none';
   document.getElementById('dashCompare').style.display=activeDTab==='compare'?'':'none';
   document.getElementById('dashContributions').style.display=activeDTab==='contributions'?'':'none';
@@ -1819,7 +1624,6 @@ function openImportModal(prefillKey=''){
 document.getElementById('importClose').addEventListener('click',()=>{document.getElementById('importBg').style.display='none';});
 document.getElementById('importCancel').addEventListener('click',()=>{document.getElementById('importBg').style.display='none';});
 document.getElementById('importBg').addEventListener('click',e=>{if(e.target===document.getElementById('importBg'))document.getElementById('importBg').style.display='none';});
-document.getElementById('importListBtn').addEventListener('click',()=>openImportModal());
 
 document.getElementById('importFetchBtn').addEventListener('click',async()=>{
   const key = document.getElementById('importKeyInput').value.trim().toLowerCase();
@@ -1868,7 +1672,7 @@ document.getElementById('importSaveBtn').addEventListener('click',()=>{
   document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
   document.querySelector('[data-dtab="compare"]').classList.add('active');
   activeDTab='compare';
-  ['dashHome','dashMyList','dashStats','dashContributions'].forEach(id=>document.getElementById(id).style.display='none');
+  ['dashStats','dashContributions'].forEach(id=>document.getElementById(id).style.display='none');
   document.getElementById('dashCompare').style.display='';
   renderDashCompare();
 });
