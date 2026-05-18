@@ -143,9 +143,15 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .waza-card .njp{font-size:15px;font-weight:500}
 .waza-card .nen{font-size:12px;color:var(--text2);margin-top:1px}
 .waza-card .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
-.community-likes{display:flex;gap:8px;font-size:11px;color:var(--text3);margin-top:4px}
-.community-likes .cl-like{color:#60b8f0}
-.community-likes .cl-dislike{color:#e080a0}
+/* card bottom row: shapes left, mini like-pill right */
+.card-bottom-row{display:flex;align-items:center;justify-content:space-between;margin-top:5px;gap:6px;min-width:0}
+.card-bottom-row .shapes-row{flex:1;min-width:0}
+/* mini like pill on cards */
+.card-like-pill{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid var(--border);background:var(--bg3);flex-shrink:0}
+.card-like-pill span{padding:2px 8px;font-size:11px;color:var(--text3);white-space:nowrap}
+.card-like-pill span:first-child{border-right:1px solid var(--border)}
+.card-like-pill span.like-on{background:#001a2a;color:#60b8f0}
+.card-like-pill span.dislike-on{background:#2a0010;color:#e080a0}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
 .b-tag{background:#2a2040;color:#b3a8f0;border:1px solid #3d3560}
 
@@ -223,10 +229,17 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .scard .l{font-size:11px;color:var(--text3);margin-top:2px}
 .dsec2{margin-bottom:20px}
 .dsec2 h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
-.drow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
+/* ── Mini like pill (list + card views) ── */
+.mini-pill{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid var(--border);background:var(--bg3);font-size:11px;flex-shrink:0}
+.mini-pill-half{display:flex;align-items:center;gap:3px;padding:2px 8px;color:var(--text3);transition:background .12s,color .12s}
+.mini-pill-half:first-child{border-right:1px solid var(--border)}
+.mini-pill-half.like-on{background:#001a2a;color:#60b8f0}
+.mini-pill-half.dislike-on{background:#2a0010;color:#e080a0}
+
+.drow{display:flex;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border);cursor:pointer}
 .drow:hover .drn{color:var(--accent)}
-.drn{font-size:14px}
-.drs{font-size:12px;color:var(--text2);flex-shrink:0}
+.drn{font-size:14px;flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drs{font-size:12px;color:var(--text2);flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stat-bar-wrap{margin-bottom:12px}
 .stat-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px}
 .stat-bar-track{background:var(--bg3);border-radius:20px;height:8px;overflow:hidden}
@@ -1049,13 +1062,13 @@ function videoButtons(w){
   }).join('')+'</div>';
 }
 
-// Community like count helper — uses w.like_count / w.dislike_count when available
-function communityLikesHtml(w){
+// Mini like/dislike pill for list/card views
+function cardLikePill(w,p){
   const lc=w.like_count||0, dc=w.dislike_count||0;
-  if(!lc&&!dc)return'';
-  return'<div class="community-likes">'
-    +(lc?'<span class="cl-like">👍 '+lc+'</span>':'')
-    +(dc?'<span class="cl-dislike">👎 '+dc+'</span>':'')
+  if(!lc&&!dc&&p.like===null)return'';
+  return'<div class="card-like-pill">'
+    +'<span class="'+(p.like==='like'?'like-on':'')+'">'+'👍 '+lc+'</span>'
+    +'<span class="'+(p.like==='dislike'?'dislike-on':'')+'">'+'👎 '+dc+'</span>'
     +'</div>';
 }
 
@@ -1072,14 +1085,16 @@ function renderList(){
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
       const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-      const sp=hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'';
-      const cl=communityLikesHtml(w);
+      const pill=cardLikePill(w,p);
+      const bottomRow='<div class="card-bottom-row">'
+        +(hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'<div></div>')
+        +pill+'</div>';
       return'<div class="waza-card-expanded '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="wce-header">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
         +'<div class="wce-badges">'+lb+'</div>'
-        +sp+cl+'</div>'
+        +bottomRow+'</div>'
         +videoButtons(w)
         +'</div>';
     }).join('');
@@ -1091,25 +1106,27 @@ function renderList(){
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
       const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
-      const sp=hasShape?'<div class="shapes-row" style="margin-top:4px">'+shapePips(shapes)+'</div>':'';
-      const cl=communityLikesHtml(w);
+      const pill=cardLikePill(w,p);
+      const bottomRow='<div class="card-bottom-row">'
+        +(hasShape?'<div class="shapes-row">'+shapePips(shapes)+'</div>':'<div></div>')
+        +pill+'</div>';
       return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
         +'<div class="badges">'+lb+'</div>'
-        +sp+cl+'</div>';
+        +bottomRow+'</div>';
     }).join('');
     list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
 
   } else {
-    // Compact — no likes shown
+    // Compact — no likes, equal truncating names
     list.innerHTML=filtered.map(w=>{
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<span class="drn">'+(w.name_jp||'—')+'</span>'
         +'<span class="drs">'+dispName(w)+'</span>'
-        +(shapes.some(Boolean)?'<div class="shapes-row" style="margin-left:auto">'+shapePips(shapes)+'</div>':'')
+        +(shapes.some(Boolean)?'<div class="shapes-row" style="flex-shrink:0">'+shapePips(shapes)+'</div>':'')
         +'</div>';
     }).join('');
     list.querySelectorAll('.drow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
