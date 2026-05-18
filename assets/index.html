@@ -49,6 +49,7 @@ a{color:var(--accent);text-decoration:none}
 #searchInput{order:-1;width:100%;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
 #searchInput:focus{border-color:var(--accent)}
 select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;cursor:pointer}
+select:disabled{opacity:0.35;cursor:not-allowed;pointer-events:none}
 select.active{border-color:var(--accent);color:var(--accent)}
 .btn{padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg3);color:var(--text1)}
@@ -479,7 +480,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="name">Waza Name</option>
         <option value="likes">Likes</option>
       </select>
-      <select id="exploreSortOrder">
+      <select id="exploreSortOrder" disabled>
         <option value="asc">Asc</option>
         <option value="desc">Desc</option>
       </select>
@@ -518,7 +519,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
         </div>
         <div class="fs-row">
           <div class="fs-label">Order</div>
-          <select id="exploreSortOrderMob">
+          <select id="exploreSortOrderMob" disabled>
             <option value="asc">Asc</option>
             <option value="desc">Desc</option>
           </select>
@@ -530,6 +531,9 @@ select.active{border-color:var(--accent);color:var(--accent)}
             <option value="expanded">Cards</option>
             <option value="compact">Compact</option>
           </select>
+        </div>
+        <div class="fs-row">
+          <button class="btn" id="filterSheetConfirm" style="width:100%;padding:10px;font-size:14px">Apply filters</button>
         </div>
       </div>
     </div>
@@ -1398,11 +1402,15 @@ document.querySelectorAll('.shape-filter-btn').forEach(btn=>{
 
 document.getElementById('exploreSortField').addEventListener('change',e=>{
   exploreSortField=e.target.value;
+  const isDefault=exploreSortField==='default';
+  document.getElementById('exploreSortOrder').disabled=isDefault;
+  document.getElementById('exploreSortOrderMob').disabled=isDefault;
   updateShapeFilterUI();renderList();
 });
 
 document.getElementById('exploreSortOrder').addEventListener('change',e=>{
   exploreSortOrder=e.target.value;
+  document.getElementById('exploreSortOrderMob').value=e.target.value;
   updateShapeFilterUI();renderList();
 });
 
@@ -1437,39 +1445,50 @@ filterSheetBg.addEventListener('click',e=>{
   if(!filterSheet.contains(e.target))filterSheetBg.classList.remove('open');
 });
 
-// Mobile shape buttons — mirror state to/from shared filter state
+// Mobile shape buttons — stage only, applied on Confirm
 document.getElementById('filterShapeAllMob').addEventListener('click',()=>{
   exploreFilterAny=false;
   const anyOn=filters.shapes.some(Boolean);
   filters.shapes=Array(6).fill(!anyOn);
-  updateShapeFilterUI();renderList();
+  updateShapeFilterUI();
 });
 document.getElementById('filterShapeAnyMob').addEventListener('click',()=>{
   exploreFilterAny=!exploreFilterAny;
   if(exploreFilterAny)filters.shapes=Array(6).fill(false);
-  updateShapeFilterUI();renderList();
+  updateShapeFilterUI();
 });
 document.querySelectorAll('.shape-filter-btn-mob').forEach(btn=>{
   btn.addEventListener('click',()=>{
     exploreFilterAny=false;
     const i=+btn.dataset.si;
     filters.shapes=filters.shapes.map((v,idx)=>idx===i?!v:v);
-    updateShapeFilterUI();renderList();
+    updateShapeFilterUI();
   });
 });
 document.getElementById('exploreSortFieldMob').addEventListener('change',e=>{
-  exploreSortField=e.target.value;
-  document.getElementById('exploreSortField').value=e.target.value;
-  updateShapeFilterUI();renderList();
+  const isDefault=e.target.value==='default';
+  document.getElementById('exploreSortOrderMob').disabled=isDefault;
 });
-document.getElementById('exploreSortOrderMob').addEventListener('change',e=>{
-  exploreSortOrder=e.target.value;
-  document.getElementById('exploreSortOrder').value=e.target.value;
-  updateShapeFilterUI();renderList();
-});
-document.getElementById('browseViewSelectMob').addEventListener('change',e=>{
-  browseListView=e.target.value;
-  document.getElementById('browseViewSelect').value=e.target.value;
+document.getElementById('exploreSortOrderMob').addEventListener('change',()=>{});
+document.getElementById('browseViewSelectMob').addEventListener('change',()=>{});
+
+document.getElementById('filterSheetConfirm').addEventListener('click',()=>{
+  // Read staged values from mob selects
+  const newSortField=document.getElementById('exploreSortFieldMob').value;
+  const newSortOrder=document.getElementById('exploreSortOrderMob').value;
+  const newView=document.getElementById('browseViewSelectMob').value;
+  // Apply to state + sync desktop controls
+  exploreSortField=newSortField;
+  exploreSortOrder=newSortOrder;
+  browseListView=newView;
+  document.getElementById('exploreSortField').value=newSortField;
+  const isDefault=newSortField==='default';
+  document.getElementById('exploreSortOrder').disabled=isDefault;
+  document.getElementById('exploreSortOrder').value=newSortOrder;
+  document.getElementById('browseViewSelect').value=newView;
+  // Close sheet and re-render
+  filterSheetBg.classList.remove('open');
+  updateShapeFilterUI();
   renderList();
 });
 
