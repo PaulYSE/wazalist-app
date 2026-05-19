@@ -2075,11 +2075,13 @@ function renderDashCompare(){
     const myP = getP(w.id);
     const myShapes = myP.shapes||Array(6).fill(false);
     const impShapes = importedMark.shapes||Array(6).fill(false);
-    const impLike = importedMark.like;
-    const impLikeBadge = impLike==='like'?'<span class="badge b-like" style="font-size:10px">👍</span>':impLike==='dislike'?'<span class="badge b-dislike" style="font-size:10px">👎</span>':'';
+    // const impLike = importedMark.like;
+    // const impLikeBadge = impLike==='like'?'<span class="badge b-like" style="font-size:10px">👍</span>':impLike==='dislike'?'<span class="badge b-dislike" style="font-size:10px">👎</span>':'';
     return'<div class="cmp-row" data-id="'+w.id+'">'
       +'<div><div class="cmp-name-jp">'+(w.name_jp||'—')+'</div><div class="cmp-name-en">'+dispName(w)+'</div></div>'
-      +'<div class="cmp-shapes-imported">'+shapePips(impShapes)+impLikeBadge+'</div>'
+      +'<div class="cmp-shapes-imported">'+shapePips(impShapes)
+        // +impLikeBadge
+        +'</div>'
       +'<div class="cmp-shapes-mine">'
         +SHAPES.map((s,i)=>'<button class="cmp-shape-btn'+(myShapes[i]?' on':'')+'" data-wid="'+w.id+'" data-si="'+i+'" title="'+(shapeLegend[i]||'Shape '+(i+1))+'">'+s+'</button>').join('')
       +'</div>'
