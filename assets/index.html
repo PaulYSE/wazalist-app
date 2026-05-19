@@ -1633,8 +1633,8 @@ function startPlaceholderRotation(){
 
   // Cycle: show a waza name for a beat, then return to default, repeat
   let phase = 0; // 0 = show default, 1 = show waza name
-  const WAZA_DISPLAY_MS   = 2800;
-  const DEFAULT_DISPLAY_MS = 1800;
+  const WAZA_DISPLAY_MS   = 4000;
+  const DEFAULT_DISPLAY_MS = 2500;
 
   function tick(){
     if(phase === 0){
@@ -1649,7 +1649,7 @@ function startPlaceholderRotation(){
   }
 
   // Don't start immediately — give a short pause after load
-  input._phTimer = setTimeout(tick, 2200);
+  input._phTimer = setTimeout(tick, 5000);
 
   // Rebuild pool if wazaData ever grows (contributions approved etc.)
   input._rebuildPool = () => { pool = buildPool(); };
