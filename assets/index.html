@@ -194,9 +194,22 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .dfield .val{font-size:14px}
 .chip{display:inline-block;padding:3px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;margin:3px}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
-.vlinks{display:flex;flex-direction:column;gap:6px}
-.vlink{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text1);text-decoration:none;transition:all .12s}
-.vlink:hover{border-color:var(--accent);background:var(--bg3)}
+/* ── Video references ── */
+.vlinks{display:flex;flex-direction:column;gap:8px}
+.vlink-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg2)}
+.vlink-row{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:13px;color:var(--text1)}
+.vlink-row a{color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.vlink-row a:hover{color:var(--accent)}
+.vlink-row .vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
+.vlink-row .vlink-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.vlink-row .ext-link{font-size:12px;color:var(--text3);flex-shrink:0;padding:2px 4px}
+.vlink-row .ext-link:hover{color:var(--accent)}
+.play-btn{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);font-size:12px;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all .12s;white-space:nowrap}
+.play-btn:hover{border-color:var(--accent);color:var(--text1)}
+.play-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.embed-wrap{display:none;border-top:1px solid var(--border);background:#000;position:relative;padding-top:56.25%}
+.embed-wrap.open{display:block}
+.embed-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 .vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
 .prog-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 
@@ -756,7 +769,7 @@ select.active{border-color:var(--accent);color:var(--accent)}
     <h3>Browsing & filters</h3>
     <ul>
       <li>Search by Japanese or English name.</li>
-      <li>Filter by skill level, family group, or  via dropdowns.</li>
+      <li>Filter by skill level, family group, or markings via dropdowns.</li>
       <li>Use <b>Any ★</b> to show only Waza you have marked or liked (your personal list).</li>
       <li>Sort by <b>Waza Name</b> or <b>Likes</b> in ascending or descending order.</li>
     </ul>
@@ -1050,7 +1063,26 @@ function platform(url){
   return'other';
 }
 
-// Build video buttons for expanded cards
+// Embed URL resolver — returns null for platforms with no iframe support
+function embedUrl(url){
+  if(!url)return null;
+  // YouTube
+  let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  if(m)return'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0&modestbranding=1';
+  // Bilibili BV
+  m=url.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
+  if(m)return'https://player.bilibili.com/player.html?bvid='+m[1]+'&high_quality=1&danmaku=0';
+  // Bilibili av
+  m=url.match(/bilibili\.com\/video\/av(\d+)/i);
+  if(m)return'https://player.bilibili.com/player.html?aid='+m[1]+'&high_quality=1&danmaku=0';
+  // NicoNico
+  m=url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)((?:sm|nm|so)\d+)/);
+  if(m)return'https://embed.nicovideo.jp/watch/'+m[1]+'?oldScript=1&referer=&from=0&allowProgrammaticFullScreen=1';
+  return null;
+}
+
+// Per-session embed cache: wazaId → array of resolved video objects
+const embedCache=new Map();
 function videoButtons(w){
   const vids=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
   if(!vids.length)return'';
@@ -1084,15 +1116,16 @@ function renderList(){
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
+      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
-        // +(hasShape?'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>':'<div></div>')
-        +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
+        +'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>'
         +pill+'</div>';
       return'<div class="waza-card-expanded '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="wce-header">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
+        +'<div class="wce-badges">'+lb+'</div>'
         +bottomRow+'</div>'
         +videoButtons(w)
         +'</div>';
@@ -1104,14 +1137,15 @@ function renderList(){
       const p=getP(w.id);
       const shapes=p.shapes||Array(6).fill(false);
       const hasShape=shapes.some(Boolean);
+      const lb=p.like==='like'?'<span class="badge b-like">👍</span>':p.like==='dislike'?'<span class="badge b-dislike">👎</span>':'';
       const pill=cardLikePill(w,p);
       const bottomRow='<div class="card-bottom-row">'
-        // +(hasShape?'<div class="shapes-row">'+shapePips(shapes)+'</div>':'<div></div>')
-        +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
+        +'<div class="shapes-row wce-shapes">'+shapePips(shapes)+'</div>'
         +pill+'</div>';
       return'<div class="waza-card '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<div class="njp">'+(w.name_jp||'—')+'</div>'
         +'<div class="nen">'+dispName(w)+'</div>'
+        +'<div class="badges">'+lb+'</div>'
         +bottomRow+'</div>';
     }).join('');
     list.querySelectorAll('.waza-card').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -1124,7 +1158,7 @@ function renderList(){
       return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<span class="drn">'+(w.name_jp||'—')+'</span>'
         +'<span class="drs">'+dispName(w)+'</span>'
-        +'<div class="shapes-row">'+shapePips(shapes)+'</div>'
+        +(shapes.some(Boolean)?'<div class="shapes-row" style="flex-shrink:0">'+shapePips(shapes)+'</div>':'')
         +'</div>';
     }).join('');
     list.querySelectorAll('.drow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
@@ -1132,9 +1166,10 @@ function renderList(){
 }
 
 function selectWaza(id){
+  // Stop any currently playing embeds before switching
+  document.querySelectorAll('.embed-wrap.open iframe').forEach(f=>{f.src='';});
   selectedId=id;
   renderList();renderDetail();
-  // Mobile: toggle .waza-selected on .main to show/hide panels
   document.querySelector('.main').classList.toggle('waza-selected', id!==null);
 }
 
@@ -1162,8 +1197,28 @@ function renderDetail(){
   const shapes=p.shapes||Array(6).fill(false);
 
   const vids=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
-  const videoHTML=vids.length
-    ?vids.map((v,i)=>{const pl=platform(v);return'<a class="vlink" href="'+v+'" target="_blank" rel="noopener"><div class="vico" style="background:'+platColor[pl]+'">'+(i+1)+'</div><span>'+platLabel[pl]+'</span><span style="margin-left:auto;font-size:12px;color:var(--text3)">↗</span></a>';}).join('')
+
+  // Resolve embed URLs — use cache if available, otherwise compute locally
+  if(!embedCache.has(w.id)){
+    embedCache.set(w.id, vids.map(v=>({url:v, pl:platform(v), eurl:embedUrl(v)})));
+  }
+  const resolvedVids=embedCache.get(w.id);
+
+  const videoHTML=resolvedVids.length
+    ? resolvedVids.map((v,i)=>{
+        const canEmbed=!!v.eurl;
+        return'<div class="vlink-item" data-vi="'+i+'">'
+          +'<div class="vlink-row">'
+          +'<a href="'+v.url+'" target="_blank" rel="noopener">'
+          +'<div class="vico" style="background:'+platColor[v.pl]+'">'+(i+1)+'</div>'
+          +'<span class="vlink-title">'+platLabel[v.pl]+' '+(i+1)+'</span>'
+          +'</a>'
+          +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
+          +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play</button>':'')
+          +'</div>'
+          +(canEmbed?'<div class="embed-wrap" data-vi="'+i+'"></div>':'')
+          +'</div>';
+      }).join('')
     :'<div style="color:var(--text3);font-size:13px">No video references</div>';
 
   const siblings=wazaData.filter(x=>x.id!==w.id&&((w.parent_en0&&(x.parent_en0===w.parent_en0||x.parent_en1===w.parent_en0))||(w.parent_en1&&(x.parent_en0===w.parent_en1||x.parent_en1===w.parent_en1)))).slice(0,12);
@@ -1203,7 +1258,7 @@ function renderDetail(){
     // Shapes — not collapsible
     +'<div class="dsec"><h3>Markings</h3>'
     +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+SHAPES.map((s,i)=>'<button class="shape-btn'+(shapes[i]?' on':'')+'"'+savingAttr+' data-si="'+i+'" title="'+(shapeLegend[i]||'Shape '+(i+1))+'">'+s+'</button>').join('')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of Markings.</div></div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of markings — meaning is up to you.</div></div>'
 
     // Videos — not collapsible
     +'<div class="dsec"><h3>Video references</h3><div class="vlinks">'+videoHTML+'</div></div>'
@@ -1233,11 +1288,37 @@ function renderDetail(){
     +'<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">'+sibHTML+'</div></div>'
     +(!isGuest&&token?'<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>':'');
 
-  panel.querySelector('#likeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
-  panel.querySelector('#dislikeBtn').addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
+  panel.querySelector('#likeBtn')?.addEventListener('click',()=>saveP(w.id,{like:p.like==='like'?null:'like'}));
+  panel.querySelector('#dislikeBtn')?.addEventListener('click',()=>saveP(w.id,{like:p.like==='dislike'?null:'dislike'}));
   panel.querySelectorAll('.shape-btn').forEach(btn=>btn.addEventListener('click',()=>{
     const ns=[...shapes];ns[+btn.dataset.si]=!ns[+btn.dataset.si];saveP(w.id,{shapes:ns});
   }));
+
+  // ── Play button toggle — lazy-load iframe on first expand ──
+  panel.querySelectorAll('.play-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const vi=+btn.dataset.vi;
+      const wrap=panel.querySelector(`.embed-wrap[data-vi="${vi}"]`);
+      const isOpen=wrap.classList.toggle('open');
+      btn.classList.toggle('active',isOpen);
+      btn.textContent=isOpen?'■ Stop':'▶ Play';
+      // Inject iframe src only on first open (lazy load)
+      if(isOpen&&!wrap.querySelector('iframe')){
+        const v=resolvedVids[vi];
+        const iframe=document.createElement('iframe');
+        iframe.src=v.eurl;
+        iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen=true;
+        wrap.appendChild(iframe);
+      }
+      // Pause by clearing src when closing (stops audio/video)
+      if(!isOpen){
+        const iframe=wrap.querySelector('iframe');
+        if(iframe)iframe.src='';
+      }
+    });
+  });
   // Collapsible toggles
   panel.querySelectorAll('.dsec-toggle').forEach(el=>el.addEventListener('click',()=>{
     const key=el.dataset.key;
