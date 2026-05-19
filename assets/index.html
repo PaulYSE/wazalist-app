@@ -46,7 +46,7 @@ a{color:var(--accent);text-decoration:none}
 .guest-badge{font-size:11px;padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text3)}
 /* ── Filter row ── */
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center}
-#searchInput{order:-1;width:100%;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none}
+#searchInput{order:-1;width:100%;padding:7px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:14px;outline:none;transition:opacity .25s}
 #searchInput:focus{border-color:var(--accent)}
 select{padding:5px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;cursor:pointer}
 select:disabled{opacity:0.35;cursor:not-allowed;pointer-events:none}
@@ -890,6 +890,7 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
+  startPlaceholderRotation();
   _checkAutoImport();
 }
 if(token)initApp();
@@ -1578,6 +1579,73 @@ function renderDashStats(){
       selectWaza(+el.dataset.id);
     });
   });
+}
+
+// ── Rotating search placeholder ───────────────────────────────
+const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
+
+function startPlaceholderRotation(){
+  const input = document.getElementById('searchInput');
+  if(!input) return;
+
+  // Build a flat pool of name strings from name_jp and name_en only
+  function buildPool(){
+    const pool = [];
+    wazaData.forEach(w => {
+      if(w.name_jp && w.name_jp.trim()) pool.push(w.name_jp.trim());
+      if(w.name_en && w.name_en.trim()) pool.push(w.name_en.trim());
+    });
+    return pool;
+  }
+
+  let pool = buildPool();
+  let lastPicked = '';
+
+  function pickRandom(){
+    if(!pool.length) return PLACEHOLDER_DEFAULT;
+    // Avoid repeating the same name twice in a row
+    let candidates = pool.filter(n => n !== lastPicked);
+    if(!candidates.length) candidates = pool;
+    const name = candidates[Math.floor(Math.random() * candidates.length)];
+    lastPicked = name;
+    return name;
+  }
+
+  function setPlaceholder(text){
+    // Fade out, swap, fade in — only when input is empty and unfocused
+    if(input.value || document.activeElement === input){
+      input.placeholder = text;
+      return;
+    }
+    input.style.opacity = '0';
+    setTimeout(() => {
+      input.placeholder = text;
+      input.style.opacity = '1';
+    }, 250);
+  }
+
+  // Cycle: show a waza name for a beat, then return to default, repeat
+  let phase = 0; // 0 = show default, 1 = show waza name
+  const WAZA_DISPLAY_MS   = 2800;
+  const DEFAULT_DISPLAY_MS = 1800;
+
+  function tick(){
+    if(phase === 0){
+      setPlaceholder(pickRandom());
+      phase = 1;
+      input._phTimer = setTimeout(tick, WAZA_DISPLAY_MS);
+    } else {
+      setPlaceholder(PLACEHOLDER_DEFAULT);
+      phase = 0;
+      input._phTimer = setTimeout(tick, DEFAULT_DISPLAY_MS);
+    }
+  }
+
+  // Don't start immediately — give a short pause after load
+  input._phTimer = setTimeout(tick, 2200);
+
+  // Rebuild pool if wazaData ever grows (contributions approved etc.)
+  input._rebuildPool = () => { pool = buildPool(); };
 }
 
 // ── Filter events ─────────────────────────────────────────────
