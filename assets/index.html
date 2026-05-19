@@ -201,7 +201,12 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .vlink-row a{color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .vlink-row a:hover{color:var(--accent)}
 .vlink-row .vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
-.vlink-row .vlink-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.vlink-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.vlink-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.vlink-author{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vlink-title.loading{opacity:.45}
+@keyframes vlink-shimmer{0%{opacity:.3}50%{opacity:.55}100%{opacity:.3}}
+.vlink-title.loading{animation:vlink-shimmer 1.4s ease-in-out infinite}
 .vlink-row .ext-link{font-size:12px;color:var(--text3);flex-shrink:0;padding:2px 4px}
 .vlink-row .ext-link:hover{color:var(--accent)}
 .play-btn{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);font-size:12px;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all .12s;white-space:nowrap}
@@ -1083,6 +1088,72 @@ function embedUrl(url){
 
 // Per-session embed cache: wazaId → array of resolved video objects
 const embedCache=new Map();
+
+// Per-session oEmbed metadata cache: url → { title, author } | 'pending' | 'failed'
+const oembedCache=new Map();
+
+// oEmbed endpoint resolvers — returns a fetch URL or null if unsupported
+function oembedEndpoint(url){
+  if(!url)return null;
+  // YouTube
+  if(/youtu\.be|youtube\.com/.test(url))
+    return'https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json';
+  // NicoNico
+  if(/nicovideo\.jp|nico\.ms/.test(url))
+    return'https://noembed.com/embed?url='+encodeURIComponent(url);
+  // Bilibili — no public oEmbed; noembed covers some
+  if(/bilibili\.com|b23\.tv/.test(url))
+    return'https://noembed.com/embed?url='+encodeURIComponent(url);
+  // Twitter/X — noembed
+  if(/twitter\.com|x\.com/.test(url))
+    return'https://noembed.com/embed?url='+encodeURIComponent(url);
+  return null;
+}
+
+// Fetch oEmbed for a single URL and update all matching DOM spans in the detail panel
+async function fetchOembed(url){
+  if(oembedCache.has(url))return;
+  oembedCache.set(url,'pending');
+  const endpoint=oembedEndpoint(url);
+  if(!endpoint){oembedCache.set(url,'failed');applyOembedToDOM(url);return;}
+  try{
+    const r=await fetch(endpoint,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const meta={title:d.title||'',author:d.author_name||''};
+    oembedCache.set(url,meta);
+  }catch{
+    oembedCache.set(url,'failed');
+  }
+  applyOembedToDOM(url);
+}
+
+// Update the DOM spans for a specific URL after metadata arrives
+function applyOembedToDOM(url){
+  const meta=oembedCache.get(url);
+  if(!meta||meta==='pending')return;
+  document.querySelectorAll('.vlink-title[data-url]').forEach(el=>{
+    if(el.dataset.url!==url)return;
+    if(meta==='failed'){el.classList.remove('loading');return;}
+    el.textContent=meta.title||el.textContent;
+    el.classList.remove('loading');
+    const authorEl=el.closest('.vlink-meta')?.querySelector('.vlink-author');
+    if(authorEl&&meta.author)authorEl.textContent=meta.author;
+  });
+}
+
+// Kick off oEmbed fetches for all videos of a waza (called after renderDetail)
+function prefetchOembeds(vids){
+  vids.forEach(v=>{
+    const cached=oembedCache.get(v.url);
+    if(cached&&cached!=='pending'){
+      // Already have data — apply immediately (DOM was just rebuilt)
+      applyOembedToDOM(v.url);
+    } else {
+      fetchOembed(v.url);
+    }
+  });
+}
 function videoButtons(w){
   const vids=[w.video0,w.video1,w.video2,w.video3,w.video4,w.video5].filter(v=>v&&v.trim()&&v!=='0');
   if(!vids.length)return'';
@@ -1203,11 +1274,22 @@ function renderDetail(){
   const videoHTML=resolvedVids.length
     ? resolvedVids.map((v,i)=>{
         const canEmbed=!!v.eurl;
+        const hasMeta=oembedEndpoint(v.url)!==null;
+        const cached=oembedCache.get(v.url);
+        const isLoading=hasMeta&&(!cached||cached==='pending');
+        const titleText=(cached&&cached!=='pending'&&cached!=='failed'&&cached.title)
+          ? cached.title
+          : platLabel[v.pl]+' '+(i+1);
+        const authorText=(cached&&cached!=='pending'&&cached!=='failed'&&cached.author)
+          ? cached.author : '';
         return'<div class="vlink-item" data-vi="'+i+'">'
           +'<div class="vlink-row">'
           +'<a href="'+v.url+'" target="_blank" rel="noopener">'
           +'<div class="vico" style="background:'+platColor[v.pl]+'">'+(i+1)+'</div>'
-          +'<span class="vlink-title">'+platLabel[v.pl]+' '+(i+1)+'</span>'
+          +'<div class="vlink-meta">'
+          +'<span class="vlink-title'+(isLoading?' loading':'')+'" data-url="'+escHtml(v.url)+'">'+escHtml(titleText)+'</span>'
+          +(authorText?'<span class="vlink-author">'+escHtml(authorText)+'</span>':'<span class="vlink-author"></span>')
+          +'</div>'
           +'</a>'
           +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
           +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play</button>':'')
@@ -1299,22 +1381,26 @@ function renderDetail(){
       const isOpen=wrap.classList.toggle('open');
       btn.classList.toggle('active',isOpen);
       btn.textContent=isOpen?'■ Stop':'▶ Play';
-      // Inject iframe src only on first open (lazy load)
-      if(isOpen&&!wrap.querySelector('iframe')){
-        const v=resolvedVids[vi];
-        const iframe=document.createElement('iframe');
-        iframe.src=v.eurl;
-        iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen=true;
-        wrap.appendChild(iframe);
-      }
-      // Pause by clearing src when closing (stops audio/video)
-      if(!isOpen){
+      if(isOpen){
+        // Lazy-create iframe on first open; restore src on subsequent opens
+        let iframe=wrap.querySelector('iframe');
+        if(!iframe){
+          iframe=document.createElement('iframe');
+          iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+          iframe.allowFullscreen=true;
+          wrap.appendChild(iframe);
+        }
+        // Always (re)set src when opening — covers both first open and re-open after close
+        iframe.src=resolvedVids[vi].eurl;
+      } else {
+        // Clear src to stop playback when closing
         const iframe=wrap.querySelector('iframe');
         if(iframe)iframe.src='';
       }
     });
   });
+  // Kick off oEmbed prefetch for all videos (progressive — updates DOM as results arrive)
+  prefetchOembeds(resolvedVids);
   // Collapsible toggles
   panel.querySelectorAll('.dsec-toggle').forEach(el=>el.addEventListener('click',()=>{
     const key=el.dataset.key;
