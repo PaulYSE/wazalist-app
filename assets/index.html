@@ -1072,28 +1072,51 @@ function platform(url){
   return'other';
 }
 
+// Helper: extract timestamp from URL (handles ?t=90, &t=90, #t=1m30s)
+function extractTimestamp(url) {
+  // Seconds format: ?t=90 or &t=90s
+  let m = url.match(/(?:\?|&)t=(\d+)s?/);
+  if (m) return parseInt(m[1]);
+  
+  // Minutes:seconds format: ?t=1m30s or &t=2m
+  m = url.match(/(?:\?|&)t=(?:(\d+)m)?(\d+)s?/);
+  if (m) {
+    const min = m[1] ? parseInt(m[1]) : 0;
+    const sec = m[2] ? parseInt(m[2]) : 0;
+    return min * 60 + sec;
+  }
+  return null;
+}
+
 // Embed URL resolver — returns null for platforms with no iframe support
 function embedUrl(url){
   if(!url)return null;
+
+  // Handle timestamp for URLs that support it (YouTube, Bilibili)
+  const timestamp = extractTimestamp(url);
+
   // YouTube
   let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
-  if(m){  
-    let timestamp = '';
-    const tsMatch = url.match(/(?:\?|&)t=(\d+)s?/);
-    if (tsMatch) {
-      timestamp = '&start=' + tsMatch[1];
-    }
-    return'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0&modestbranding=1' + timestamp;
-  }  
+  if(m)return'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0&modestbranding=1' + (timestamp ? '&start=' + timestamp : '');
   // Bilibili BV
   m=url.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
-  if(m)return'https://player.bilibili.com/player.html?bvid='+m[1]+'&high_quality=1&danmaku=0';
+  if(m)return'https://player.bilibili.com/player.html?bvid='+m[1]+'&high_quality=1&danmaku=0'+ (timestamp ? '&t=' + timestamp : '');
   // Bilibili av
   m=url.match(/bilibili\.com\/video\/av(\d+)/i);
-  if(m)return'https://player.bilibili.com/player.html?aid='+m[1]+'&high_quality=1&danmaku=0';
+  if(m)return'https://player.bilibili.com/player.html?aid='+m[1]+'&high_quality=1&danmaku=0'+ (timestamp ? '&t=' + timestamp : '');
   // NicoNico
   m=url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)((?:sm|nm|so)\d+)/);
-  if(m)return'https://embed.nicovideo.jp/watch/'+m[1]+'?oldScript=1&referer=&from=0&allowProgrammaticFullScreen=1';
+  if(m){
+    let embed='https://embed.nicovideo.jp/watch/'+m[1]+'?oldScript=1&referer=&from=0&allowProgrammaticFullScreen=1';
+    if(timestamp)embed = embed.replace('&from=0', '&from=' + timestamp); 
+    return embed;
+  }
+  // Twitter/X
+  m = url.match(/twitter\.com\/(\w+)\/status\/(\d+)/);
+  if(m) return 'https://fxtwitter.com/' + m[1] + '/status/' + m[2];
+  // X
+  m = url.match(/x\.com\/(\w+)\/status\/(\d+)/);
+  if(m) return 'https://fixupx.com/' + m[1] + '/status/' + m[2];
   return null;
 }
 
