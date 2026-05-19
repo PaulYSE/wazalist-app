@@ -198,10 +198,10 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .vlinks{display:flex;flex-direction:column;gap:8px}
 .vlink-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--bg2)}
 .vlink-row{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:13px;color:var(--text1)}
-.vlink-row a{color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.vlink-row a{color:var(--text1);text-decoration:none;display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:0}
 .vlink-row a:hover{color:var(--accent)}
 .vlink-row .vico{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
-.vlink-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.vlink-meta{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:1px}
 .vlink-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
 .vlink-author{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vlink-title.loading{opacity:.45}
@@ -408,11 +408,14 @@ select.active{border-color:var(--accent);color:var(--accent)}
     overflow-y:auto;
   }
   .detail-panel{
-    position:absolute;inset:0;
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
     display:none;
     padding:0;
     flex-direction:column;
     overflow-y:auto;
+    z-index:50;
+    background:var(--bg1);
   }
   .main.waza-selected .list-panel{display:none}
   .main.waza-selected .detail-panel{display:flex}
@@ -1225,7 +1228,7 @@ function renderList(){
       return'<div class="drow '+shapeClass(shapes)+(selectedId===w.id?' selected':'')+'" data-id="'+w.id+'">'
         +'<span class="drn">'+(w.name_jp||'—')+'</span>'
         +'<span class="drs">'+dispName(w)+'</span>'
-        +(shapes.some(Boolean)?'<div class="shapes-row" style="flex-shrink:0">'+shapePips(shapes)+'</div>':'')
+        +'<div class="shapes-row" style="flex-shrink:0">'+shapePips(shapes)+'</div>'
         +'</div>';
     }).join('');
     list.querySelectorAll('.drow').forEach(el=>el.addEventListener('click',()=>selectWaza(+el.dataset.id)));
