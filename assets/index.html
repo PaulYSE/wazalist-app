@@ -1077,7 +1077,14 @@ function embedUrl(url){
   if(!url)return null;
   // YouTube
   let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
-  if(m)return'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0&modestbranding=1';
+  if(m){  
+    let timestamp = '';
+    const tsMatch = url.match(/(?:\?|&)t=(\d+)s?/);
+    if (tsMatch) {
+      timestamp = '&start=' + tsMatch[1];
+    }
+    return'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0&modestbranding=1' + timestamp;
+  }  
   // Bilibili BV
   m=url.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
   if(m)return'https://player.bilibili.com/player.html?bvid='+m[1]+'&high_quality=1&danmaku=0';
