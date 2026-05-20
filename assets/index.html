@@ -214,7 +214,14 @@ select.active{border-color:var(--accent);color:var(--accent)}
 .vlink-title.loading{opacity:.45}
 @keyframes vlink-shimmer{0%{opacity:.3}50%{opacity:.55}100%{opacity:.3}}
 .vlink-title.loading{animation:vlink-shimmer 1.4s ease-in-out infinite}
-.vlink-row .ext-link{font-size:12px;color:var(--text3);flex-shrink:0;padding:2px 4px}
+.vlink-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.vlink-row .ext-link{font-size:12px;color:var(--text3);flex-shrink:0;padding:2px 4px;margin-left:8px;}
 .vlink-row .ext-link:hover{color:var(--accent)}
 .play-btn{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);font-size:12px;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all .12s;white-space:nowrap}
 .play-btn:hover{border-color:var(--accent);color:var(--text1)}
@@ -1348,10 +1355,12 @@ function renderDetail(){
           +(authorText?'<span class="vlink-author">'+escHtml(authorText)+'</span>':'<span class="vlink-author"></span>')
           +'</div>'
           +'</a>'
+          +'<div class="vlink-actions">'  // ← New wrapper
           +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play In-App</button>':'')
           +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
           +'</div>'
           +(canEmbed?'<div class="embed-wrap" data-vi="'+i+'"></div>':'')
+          + '</div>'
           +'</div>';
       }).join('')
     :'<div style="color:var(--text3);font-size:13px">No video references</div>';
