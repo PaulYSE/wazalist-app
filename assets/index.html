@@ -899,6 +899,14 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
+  // Check for ?waza= in URL (from shared links or back navigation)
+  const wazaParam = new URL(location.href).searchParams.get('waza');
+  if (wazaParam) {
+    const id = parseInt(wazaParam);
+    if (wazaData.some(w => w.id === id)) {
+      selectWaza(id);
+    }
+  }
   startWazaPlaceholderRotation();
   _checkAutoImport();
 }
@@ -1277,12 +1285,22 @@ function selectWaza(id){
   selectedId=id;
   renderList();renderDetail();
   document.querySelector('.main').classList.toggle('waza-selected', id!==null);
+
+  // Push history state so back button closes detail instead of exiting app
+  if (id !== null) {
+    const w = wazaData.find(x => x.id === id);
+    const slug = w && w.name_jp 
+      ? encodeURIComponent(w.name_jp.trim()) 
+      : id;
+    
+    const url = new URL(location.href);
+    url.searchParams.set('waza', slug);
+    history.pushState({ wazaOpen: true, wazaId: id }, '', url);
+  }
 }
 
 document.getElementById('mobileBack').addEventListener('click',()=>{
-  selectedId=null;
-  document.querySelector('.main').classList.remove('waza-selected');
-  renderDetail();
+  closeDetailPanel();
 });
 
 // ── Browse view toggle group ──────────────────────────────────
@@ -1330,8 +1348,8 @@ function renderDetail(){
           +(authorText?'<span class="vlink-author">'+escHtml(authorText)+'</span>':'<span class="vlink-author"></span>')
           +'</div>'
           +'</a>'
+          +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play In-App</button>':'')
           +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
-          +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play</button>':'')
           +'</div>'
           +(canEmbed?'<div class="embed-wrap" data-vi="'+i+'"></div>':'')
           +'</div>';
@@ -1450,6 +1468,18 @@ function renderDetail(){
   panel.querySelectorAll('.chip[data-parent]').forEach(chip=>chip.addEventListener('click',()=>{filters.search=chip.dataset.parent;document.getElementById('searchInput').value=chip.dataset.parent;renderList();}));
   panel.querySelectorAll('.chip[data-id]').forEach(chip=>chip.addEventListener('click',()=>selectWaza(+chip.dataset.id)));
   panel.querySelector('#suggestEditBtn')?.addEventListener('click',()=>openSuggestEdit(w));
+}
+
+// ── History popstate handler to support back button closing detail view ──
+function closeDetailPanel(){
+  // Stop any playing embeds
+  document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
+  selectedId=null;
+  renderList();renderDetail();
+  document.querySelector('.main').classList.remove('waza-selected');
+  
+  // Remove the history entry we added
+  history.back(); 
 }
 
 // ── Navigation helper ─────────────────────────────────────────
@@ -2267,6 +2297,11 @@ const _checkAutoImport = ()=>{
 document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('modalBg').style.display='flex';});
 document.getElementById('closeModal').addEventListener('click',()=>{document.getElementById('modalBg').style.display='none';});
 document.getElementById('modalBg').addEventListener('click',e=>{if(e.target===document.getElementById('modalBg'))document.getElementById('modalBg').style.display='none';});
+
+// ── Popstate ─────────────────────────────────────── 
+window.addEventListener('popstate', e => {
+  if (e.state && e.state.wazaOpen && selectedId !== null){closeDetailPanel();}
+});
 </script>
 </body>
 </html>
