@@ -529,8 +529,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <option value="desc">Descending</option>
       </select>
       <select id="browseViewSelect" style="margin-left:auto">
-        <option value="list" selected>List</option>
-        <option value="expanded">Cards</option>
+        <option value="list">List</option>
+        <option value="expanded" selected>Cards</option>
         <option value="compact">Compact</option>
       </select>
     </div>
@@ -571,8 +571,8 @@ select.active{border-color:var(--accent);color:var(--accent)}
         <div class="fs-row">
           <div class="fs-label">Card style</div>
           <select id="browseViewSelectMob">
-            <option value="list" selected>List</option>
-            <option value="expanded">Cards</option>
+            <option value="list">List</option>
+            <option value="expanded" selected>Cards</option>
             <option value="compact">Compact</option>
           </select>
         </div>
@@ -812,7 +812,7 @@ let filters={search:'',shapes:Array(6).fill(false)};
 let exploreFilterAny=false; // true = show only waza with any mark (replaces My List)
 let exploreSortField='default'; // 'default' | 'name' | 'likes'
 let exploreSortOrder='asc';  // 'asc' | 'desc'
-let browseListView='expanded'; // 'expanded' | 'list' | 'compact'
+let browseListView='expanded'; // 'expanded' | 'list' | 'compact' — default: Cards
 let isAdmin=false;
 
 // ── localStorage ─────────────────────────────────────────────
@@ -1111,12 +1111,7 @@ function embedUrl(url){
     if(timestamp)embed = embed.replace('&from=0', '&from=' + timestamp); 
     return embed;
   }
-  // Twitter/X
-  m = url.match(/twitter\.com\/(\w+)\/status\/(\d+)/);
-  if(m) return 'https://fxtwitter.com/' + m[1] + '/status/' + m[2];
-  // X
-  m = url.match(/x\.com\/(\w+)\/status\/(\d+)/);
-  if(m) return 'https://fixupx.com/' + m[1] + '/status/' + m[2];
+  // Twitter/X — no iframe embed support; links open externally via the ↗ button
   return null;
 }
 
@@ -1656,8 +1651,8 @@ function startPlaceholderRotation(){
 
   // Cycle: show a waza name for a beat, then return to default, repeat
   let phase = 0; // 0 = show default, 1 = show waza name
-  const WAZA_DISPLAY_MS   = 4000;
-  const DEFAULT_DISPLAY_MS = 2500;
+  const WAZA_DISPLAY_MS   = 8000;
+  const DEFAULT_DISPLAY_MS = 5000;
 
   function tick(){
     if(phase === 0){
@@ -1671,8 +1666,8 @@ function startPlaceholderRotation(){
     }
   }
 
-  // Don't start immediately — give a short pause after load
-  input._phTimer = setTimeout(tick, 5000);
+  // Don't start immediately — give a longer pause after load
+  input._phTimer = setTimeout(tick, 10000);
 
   // Rebuild pool if wazaData ever grows (contributions approved etc.)
   input._rebuildPool = () => { pool = buildPool(); };
