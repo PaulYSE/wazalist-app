@@ -38,6 +38,13 @@ a{color:var(--accent);text-decoration:none}
 .adivider hr{flex:1;border:none;border-top:1px solid var(--border)}
 .adivider span{font-size:12px;color:var(--text3)}
 
+/* ── Rotating Placeholders ── */ 
+#searchInput::placeholder{color:var(--text3);transition:color 0.5s;}
+#searchInput.ph-fade::placeholder{color: rgba(106, 104, 128, 0);}
+#li-username::placeholder{color:var(--text3);transition:color 0.5s;}
+#li-username.ph-fade::placeholder{color: rgba(106, 104, 128, 0);}
+#li-password::placeholder{color:var(--text3);transition:color 0.5s;}
+
 /* ── Layout ── */
 #app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg1);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
@@ -865,6 +872,8 @@ document.getElementById('logoutBtn').onclick=doLogout;
 
 // ── Init ─────────────────────────────────────────────────────
 async function initApp(){
+  // Stop username placeholder rotation if it's running
+  stopUsernamePlaceholderRotation();
   document.getElementById('authWrap').style.display='none';
   document.getElementById('app').style.display='flex';
   document.getElementById('guestBadge').style.display=isGuest?'':'none';
@@ -890,10 +899,11 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
-  startPlaceholderRotation();
+  startWazaPlaceholderRotation();
   _checkAutoImport();
 }
 if(token)initApp();
+else startUsernamePlaceholderRotation();
 
 // ── Progress helpers ─────────────────────────────────────────
 const emptyP=()=>({shapes:Array(6).fill(false),like:null});
@@ -1643,11 +1653,11 @@ function startUsernamePlaceholderRotation() {
       input.placeholder = text;
       return;
     }
-    input.style.opacity = '0';
+    input.classList.add('ph-fade');
     setTimeout(() => {
       input.placeholder = text;
-      input.style.opacity = '1';
-    }, 250);
+      input.classList.remove('ph-fade');
+    }, 150);
   }
 
   // Cycle: show a waza name for a beat, then return to default, repeat
@@ -1671,10 +1681,18 @@ function startUsernamePlaceholderRotation() {
   input._phTimer = setTimeout(tick, 5000);
 }
 
+function stopUsernamePlaceholderRotation() {
+  const input = document.getElementById('li-username');
+  if (!input) return;
+
+  clearTimeout(input._phTimer);
+  input.placeholder = USERNAME_PLACEHOLDER;
+}
+
 // ── Rotating search placeholder ───────────────────────────────
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 
-function startPlaceholderRotation(){
+function startWazaPlaceholderRotation(){
   const input = document.getElementById('searchInput');
   if(!input) return;
 
@@ -1707,11 +1725,11 @@ function startPlaceholderRotation(){
       input.placeholder = text;
       return;
     }
-    input.style.opacity = '0';
+    input.classList.add('ph-fade');
     setTimeout(() => {
       input.placeholder = text;
-      input.style.opacity = '1';
-    }, 250);
+      input.classList.remove('ph-fade');
+    }, 150);
   }
 
   // Cycle: show a waza name for a beat, then return to default, repeat
