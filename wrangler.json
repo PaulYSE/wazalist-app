@@ -2,12 +2,6 @@
 	"compatibility_date": "2025-10-08",
 	"main": "src/index.ts",
 	"name": "wazalist-app",
-	"rules": [
-		{
-			"type": "/favicon.ico",
-			"glob": "/favicon.ico"
-		}
-	],
 	"upload_source_maps": true,
 	"d1_databases": [
 		{
@@ -23,7 +17,8 @@
 		}
   	],
 	"assets": {
-		"directory": "./assets"
+		"directory": "./assets",
+		"binding": "ASSETS"
 	},
 	"observability": {
 		"enabled": true
