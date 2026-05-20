@@ -890,6 +890,7 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
+  startUsernamePlaceholderRotation();
   startPlaceholderRotation();
   _checkAutoImport();
 }
@@ -1606,6 +1607,71 @@ function renderDashStats(){
   });
 }
 
+// ── Rotating username placeholder ───────────────────────────────
+const USERNAME_PLACEHOLDER_POOL = [
+  'Ikigaijin', 'Dorufin', 'ToraHii', 'TigerFire', 'Legal Name',
+  'PenSpinGod', 'GlowstickKing', 'MajiLover', 'WazaWizard',
+  'OshiMaster', 'KusaPlayer', 'TigerDance', 'MelonPan',
+  'UltraSolo', 'WotageiWarlord', 'SaltedFish', 'BakaSenpai',
+  'Legend27', 'NamelessWaza', 'ChikaIdol', 'GachiKoi',
+  'JustBrowsing', 'NotARobot', 'DefinitelyHuman', 'GuestDesu',
+  'Oshihen',
+];
+const USERNAME_PLACEHOLDER = 'Enter your username…';
+
+let usernamePlaceholderInterval = null;
+let usernamePlaceholderIndex = 0;
+
+function startUsernamePlaceholderRotation() {
+  const input = document.getElementById('li-username');
+  if (!input) return;
+
+  let lastPicked = '';
+
+  function pickRandom(){
+    if(!USERNAME_PLACEHOLDER_POOL.length) return USERNAME_PLACEHOLDER;
+    // Avoid repeating the same name twice in a row
+    let candidates = USERNAME_PLACEHOLDER_POOL.filter(n => n !== lastPicked);
+    if(!candidates.length) candidates = USERNAME_PLACEHOLDER_POOL;
+    const name = candidates[Math.floor(Math.random() * candidates.length)];
+    lastPicked = name;
+    return name;
+  }
+
+  function setPlaceholder(text){
+    // Fade out, swap, fade in — only when input is empty and unfocused
+    if(input.value || document.activeElement === input){
+      input.placeholder = text;
+      return;
+    }
+    input.style.opacity = '0';
+    setTimeout(() => {
+      input.placeholder = text;
+      input.style.opacity = '1';
+    }, 250);
+  }
+
+  // Cycle: show a waza name for a beat, then return to default, repeat
+  let phase = 0; // 0 = show default, 1 = show waza name
+  const USER_DISPLAY_MS   = 4000;
+  const DEFAULT_DISPLAY_MS = 2500;
+
+  function tick(){
+    if(phase === 0){
+      setPlaceholder(pickRandom());
+      phase = 1;
+      input._phTimer = setTimeout(tick, USER_DISPLAY_MS);
+    } else {
+      setPlaceholder(USERNAME_PLACEHOLDER);
+      phase = 0;
+      input._phTimer = setTimeout(tick, DEFAULT_DISPLAY_MS);
+    }
+  }
+
+  // Don't start immediately — give a longer pause after load
+  input._phTimer = setTimeout(tick, 5000);
+}
+
 // ── Rotating search placeholder ───────────────────────────────
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 
@@ -1651,8 +1717,8 @@ function startPlaceholderRotation(){
 
   // Cycle: show a waza name for a beat, then return to default, repeat
   let phase = 0; // 0 = show default, 1 = show waza name
-  const WAZA_DISPLAY_MS   = 8000;
-  const DEFAULT_DISPLAY_MS = 5000;
+  const WAZA_DISPLAY_MS   = 4000;
+  const DEFAULT_DISPLAY_MS = 2500;
 
   function tick(){
     if(phase === 0){
@@ -1667,7 +1733,7 @@ function startPlaceholderRotation(){
   }
 
   // Don't start immediately — give a longer pause after load
-  input._phTimer = setTimeout(tick, 10000);
+  input._phTimer = setTimeout(tick, 5000);
 
   // Rebuild pool if wazaData ever grows (contributions approved etc.)
   input._rebuildPool = () => { pool = buildPool(); };
