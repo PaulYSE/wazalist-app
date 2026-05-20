@@ -830,6 +830,7 @@ const api=async(path,method='GET',body=null)=>{
 };
 
 // ── Auth ─────────────────────────────────────────────────────
+startUsernamePlaceholderRotation();
 document.getElementById('toReg').onclick=()=>{document.getElementById('loginBox').style.display='none';document.getElementById('regBox').style.display='';};
 document.getElementById('toLi').onclick=()=>{document.getElementById('regBox').style.display='none';document.getElementById('loginBox').style.display='';};
 
@@ -890,7 +891,6 @@ async function initApp(){
     } catch(err){console.warn('Progress load error:',err);}
   }
   renderList();renderDashboard();
-  startUsernamePlaceholderRotation();
   startPlaceholderRotation();
   _checkAutoImport();
 }
