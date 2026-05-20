@@ -1359,8 +1359,8 @@ function renderDetail(){
           +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play In-App</button>':'')
           +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
           +'</div>'
+          +'</div>'
           +(canEmbed?'<div class="embed-wrap" data-vi="'+i+'"></div>':'')
-          + '</div>'
           +'</div>';
       }).join('')
     :'<div style="color:var(--text3);font-size:13px">No video references</div>';
