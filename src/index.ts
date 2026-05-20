@@ -1,7 +1,7 @@
 import { renderHtml } from "./renderHtml";
 import { renderAdmin } from "./renderAdmin";
 import { hashPassword, generateToken, getUserFromSession } from "./auth";
-import { favicon } from "../assets/favicon.ico";
+import favicon from "../assets/favicon.ico";
 
 const json = (data: unknown, status = 200) =>
 	new Response(JSON.stringify(data), {
