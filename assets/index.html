@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wazalist</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#0f0f14;color:#e8e6f0;min-height:100vh}
@@ -1356,7 +1357,7 @@ function renderDetail(){
           +'</div>'
           +'</a>'
           +'<div class="vlink-actions">'  // ← New wrapper
-          +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Play In-App</button>':'')
+          +(canEmbed?'<button class="play-btn" data-vi="'+i+'">▶ Open In-App Player</button>':'')
           +'<a class="ext-link" href="'+v.url+'" target="_blank" rel="noopener" title="Open in new tab">↗</a>'
           +'</div>'
           +'</div>'
@@ -1446,7 +1447,7 @@ function renderDetail(){
       const wrap=panel.querySelector(`.embed-wrap[data-vi="${vi}"]`);
       const isOpen=wrap.classList.toggle('open');
       btn.classList.toggle('active',isOpen);
-      btn.textContent=isOpen?'■ Stop':'▶ Play';
+      btn.textContent=isOpen?'■ Close In-App Player':'▶ Open In-App Player';
       if(isOpen){
         // Lazy-create iframe on first open; restore src on subsequent opens
         let iframe=wrap.querySelector('iframe');
