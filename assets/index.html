@@ -1422,7 +1422,7 @@ function renderDetail(){
       +(w.reference?'<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">'+w.reference+'</div></div>':'')
       +'</div>'):'')
 
-    +((w.parent_jp0||w.parent_jp1)?sec('parents','Parent techniques (prerequisites)',
+    +((w.parent_jp0||w.parent_en0||w.parent_jp1||w.parent_en1)?sec('parents','Parent techniques (prerequisites)',
       (w.parent_jp0?'<span class="chip" data-parent="'+w.parent_en0+'">'+w.parent_jp0+(w.parent_en0?' ('+w.parent_en0+')':'')+'</span>':'')
       +(w.parent_jp1?'<span class="chip" data-parent="'+w.parent_en1+'">'+w.parent_jp1+(w.parent_en1?' ('+w.parent_en1+')':'')+'</span>':'')):'')
 
