@@ -3121,14 +3121,27 @@
     const savingIds = new Set(); // waza IDs currently being saved
     let filters = { search: '', shapes: Array(6).fill(false) };
     let exploreFilterAny = false; // true = show only waza with any mark (replaces My List)
-    let exploreSortField = 'default'; // 'default' | 'name' | 'likes'
-    let exploreSortOrder = 'asc';  // 'asc' | 'desc'
+    
+    // Load sort preferences from localStorage
+    const loadSortPrefs = () => { 
+      try { 
+        const prefs = JSON.parse(localStorage.getItem('wl_sort_prefs') || '{}');
+        return { field: prefs.field || 'default', order: prefs.order || 'asc' };
+      } catch { 
+        return { field: 'default', order: 'asc' };
+      }
+    };
+    const savedSort = loadSortPrefs();
+    let exploreSortField = savedSort.field; // 'default' | 'name' | 'likes'
+    let exploreSortOrder = savedSort.order;  // 'asc' | 'desc'
+    
     let browseListView = 'expanded'; // 'expanded' | 'list' | 'compact' — default: Cards
     let isAdmin = false;
 
     // ── localStorage ─────────────────────────────────────────────
     const LS_KEY = 'wl_local_prog';
     const LS_LEGEND = 'wl_shape_legend';
+    const LS_SORT = 'wl_sort_prefs';
     const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} } };
     const saveLocal = d => localStorage.setItem(LS_KEY, JSON.stringify(d));
     let shapeLegend = JSON.parse(localStorage.getItem(LS_LEGEND) || '["","","","","",""]');
@@ -3203,6 +3216,16 @@
         } catch (err) { console.warn('Progress load error:', err); }
       }
       renderList(); renderDashboard();
+      
+      // Sync sort dropdowns with loaded preferences
+      document.getElementById('exploreSortField').value = exploreSortField;
+      document.getElementById('exploreSortFieldMob').value = exploreSortField;
+      document.getElementById('exploreSortOrder').value = exploreSortOrder;
+      document.getElementById('exploreSortOrderMob').value = exploreSortOrder;
+      const isDefault = exploreSortField === 'default';
+      document.getElementById('exploreSortOrder').disabled = isDefault;
+      document.getElementById('exploreSortOrderMob').disabled = isDefault;
+      
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
       if (wazaParam) {
@@ -4168,12 +4191,16 @@
       const isDefault = exploreSortField === 'default';
       document.getElementById('exploreSortOrder').disabled = isDefault;
       document.getElementById('exploreSortOrderMob').disabled = isDefault;
+      // Save to localStorage
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
       updateShapeFilterUI(); renderList();
     });
 
     document.getElementById('exploreSortOrder').addEventListener('change', e => {
       exploreSortOrder = e.target.value;
       document.getElementById('exploreSortOrderMob').value = e.target.value;
+      // Save to localStorage
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
       updateShapeFilterUI(); renderList();
     });
 
@@ -4249,6 +4276,8 @@
       document.getElementById('exploreSortOrder').disabled = isDefault;
       document.getElementById('exploreSortOrder').value = newSortOrder;
       document.getElementById('browseViewSelect').value = newView;
+      // Save to localStorage
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
       // Close sheet and re-render
       filterSheetBg.classList.remove('open');
       updateShapeFilterUI();
