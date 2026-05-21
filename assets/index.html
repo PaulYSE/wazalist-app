@@ -1393,6 +1393,8 @@
 
     /* ── Dashboard ── */
     .dash {
+      display: flex;
+      flex-direction: column;
       padding: 16px;
       height: 100%;
       overflow-y: auto
@@ -2292,11 +2294,17 @@
 
     /* ── Text import panel ── */
     .ti-panel { display: none }
-    .ti-panel.active { display: block }
+    .ti-panel.active { 
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0
+    }
 
     .ti-textarea {
       width: 100%;
       min-height: 160px;
+      flex: 1;
       padding: 10px 12px;
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -5198,7 +5206,7 @@
     }
 
     function renderTiInput(prefill) {
-      return '<div>'
+      return '<div style="display:flex;flex-direction:column;height:100%">'
         + '<div class="dsec2"><h3>Import from your own list</h3></div>'
         + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Any labels wrapped in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are automatically detected as categories — use them as section headers or inline per entry.</p>'
         + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nAny bracket style works:\n[Learning]\nDouble Rainbow\nMix\n\n{Performance Ready}\nNami\n\n(Want to Learn) Hyper Mix"></textarea>'
