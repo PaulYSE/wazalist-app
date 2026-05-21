@@ -3598,6 +3598,14 @@
       renderList(); renderDetail();
       document.querySelector('.main').classList.toggle('waza-selected', id !== null);
 
+      // Scroll detail panel to top when opening a new waza
+      if (id !== null) {
+        const detailPanel = document.getElementById('detailPanel');
+        if (detailPanel) {
+          detailPanel.scrollTop = 0;
+        }
+      }
+
       // Push history state so back button closes detail instead of exiting app
       if (id !== null) {
         const w = wazaData.find(x => x.id === id);
