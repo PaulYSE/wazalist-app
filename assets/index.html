@@ -2644,6 +2644,25 @@
       position: relative
     }
 
+    .view-style-toggle-mobile {
+      display: none;
+      gap: 4px;
+      margin-left: 4px
+    }
+
+    .view-style-btn {
+      padding: 7px 10px;
+      font-size: 16px;
+      line-height: 1;
+      min-width: 36px
+    }
+
+    .view-style-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent)
+    }
+
     .filter-dot {
       width: 7px;
       height: 7px;
@@ -2809,6 +2828,10 @@
       .filter-sheet-btn {
         display: flex
       }
+
+      .view-style-toggle-mobile {
+        display: flex
+      }
     }
   </style>
 </head>
@@ -2895,6 +2918,12 @@
         <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
         <button class="btn filter-sheet-btn" id="filterSheetBtn">⚙ Filters<span class="filter-dot"
             id="filterDot"></span></button>
+        <!-- Mobile view style quick toggle -->
+        <div class="view-style-toggle-mobile" id="viewStyleToggleMobile">
+          <button class="btn view-style-btn" data-view="list" title="List view">☰</button>
+          <button class="btn view-style-btn active" data-view="expanded" title="Cards view">⊞</button>
+          <button class="btn view-style-btn" data-view="compact" title="Compact view">≣</button>
+        </div>
         <div class="view-toggle-group" id="browseShapeGroup">
           <button class="btn" id="filterShapeAll">All</button>
           <button class="btn shape-filter-btn" data-si="0">●</button>
@@ -3331,6 +3360,10 @@
       // Sync view style dropdowns with loaded preference
       document.getElementById('browseViewSelect').value = browseListView;
       document.getElementById('browseViewSelectMob').value = browseListView;
+      // Sync mobile view style toggle buttons
+      document.querySelectorAll('.view-style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === browseListView);
+      });
       
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
@@ -3759,6 +3792,23 @@
       // Save to localStorage
       localStorage.setItem('wl_view_style', browseListView);
       renderList();
+    });
+
+    // ── Mobile view style toggle buttons ───────────────────────────
+    document.querySelectorAll('.view-style-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        browseListView = view;
+        // Save to localStorage
+        localStorage.setItem('wl_view_style', browseListView);
+        // Update active state
+        document.querySelectorAll('.view-style-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Sync with desktop and mobile selects
+        document.getElementById('browseViewSelect').value = view;
+        document.getElementById('browseViewSelectMob').value = view;
+        renderList();
+      });
     });
 
     // ── Render detail ─────────────────────────────────────────────
