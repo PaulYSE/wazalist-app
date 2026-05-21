@@ -4775,14 +4775,17 @@
       }
 
       // ── Actions ──────────────────────────────────────────────────
+      let previewBannerHtml = '';
       let actionsHtml = '';
+      
       if (_tiPreviewMode) {
-        // In preview mode - show confirm/cancel buttons
-        actionsHtml = '<div class="ti-actions">'
-          + '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:12px">'
+        // In preview mode - show banner at top and commit/cancel buttons at bottom
+        previewBannerHtml = '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:16px">'
           + '<p style="font-size:13px;color:var(--accent);margin-bottom:8px">✨ <b>Preview Mode:</b> Auto-labels have been applied to the markings below.</p>'
           + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked shapes. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
-          + '</div>'
+          + '</div>';
+        
+        actionsHtml = '<div class="ti-actions">'
           + '<button class="cbtn cbtn-primary" id="tiCommitBtn">✓ Commit Markings to Database</button>'
           + '<button class="cbtn cbtn-ghost" id="tiClearPreviewBtn">✕ Clear Preview</button>'
           + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
@@ -4796,7 +4799,7 @@
           + '</div>';
       }
 
-      container.innerHTML = unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !_tiPreviewMode ? autoMapHtml : '') + actionsHtml;
+      container.innerHTML = previewBannerHtml + unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !_tiPreviewMode ? autoMapHtml : '') + actionsHtml;
 
       // Manual shape toggles
       container.querySelectorAll('.ti-manual-shapes .cmp-shape-btn').forEach(btn => {
@@ -4850,10 +4853,9 @@
         }
         _tiPreviewMode = true;
         renderTextImport();
-        // Scroll to the matched section
+        // Scroll to top where preview banner is
         setTimeout(() => {
-          const header = container.querySelector('.ti-section-head');
-          if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       });
 
