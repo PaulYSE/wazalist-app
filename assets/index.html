@@ -3373,9 +3373,10 @@
         results.sort((a, b) => {
           let cmp = 0;
           if (exploreSortField === 'likes') {
-            const la = getP(a.id).like === 'like' ? 1 : 0;
-            const lb = getP(b.id).like === 'like' ? 1 : 0;
-            cmp = lb - la; // more likes first in asc
+            // Sort by total like count (aggregate from all users)
+            const la = a.like_count || 0;
+            const lb = b.like_count || 0;
+            cmp = la - lb; // ascending: least likes first (1, 2, 3...)
           } else {
             const na = (a.name_jp || dispName(a) || '').toLowerCase();
             const nb = (b.name_jp || dispName(b) || '').toLowerCase();
