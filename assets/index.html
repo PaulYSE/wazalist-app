@@ -2305,28 +2305,10 @@
       flex-shrink: 0
     }
 
-    .ti-cat-learning {
-      background: #001a2a;
-      color: #60b8f0;
-      border: 1px solid #004a7a
-    }
-
-    .ti-cat-perf {
-      background: #002a10;
-      color: var(--green);
-      border: 1px solid var(--green)
-    }
-
-    .ti-cat-relearn {
-      background: #2a0010;
-      color: #e080a0;
-      border: 1px solid #5a0020
-    }
-
-    .ti-cat-want {
-      background: #2a2000;
-      color: var(--amber);
-      border: 1px solid var(--amber)
+    .ti-cat-dynamic {
+      background: #1a1a2e;
+      color: var(--accent);
+      border: 1px solid var(--accent2)
     }
 
     .ti-manual-shapes {
@@ -4614,48 +4596,62 @@
 
     // ── Text Import ───────────────────────────────────────────────
     // State for the text-import sub-tab
-    let _tiMatched = [];       // [{waza, rawLine, category, manualShapes}]
-    let _tiUnmatched = [];     // [rawLine]
+    let _tiMatched = [];        // [{waza, rawLine, category, manualShapes}]
+    let _tiUnmatched = [];      // [rawLine]
     let _tiParsed = false;
-    let _tiAutoMapping = {     // category → shape index (-1 = none)
-      learning: 0,    // ●
-      perf: 1,        // ▲
-      relearn: 2,     // ■
-      want: 3         // ♥
-    };
+    let _tiFoundLabels = [];    // ordered unique label strings found in the text e.g. "[Learning]", "(WIP)", "{Done}"
+    let _tiAutoMapping = {};    // { [labelStr]: shapeIndex (-1 = none) }
+    let _tiLabelNames = {};     // { [labelStr]: displayName } — user-editable
 
-    const TI_CATEGORIES = {
-      learning: { label: '[Learning]', cssClass: 'ti-cat-learning' },
-      perf:     { label: '[Performance Ready]', cssClass: 'ti-cat-perf' },
-      relearn:  { label: '[Need to relearn]', cssClass: 'ti-cat-relearn' },
-      want:     { label: '[Want to Learn]', cssClass: 'ti-cat-want' }
-    };
+    // Matches any [...], {...}, (...) encapsulation on a line
+    // Returns array of matched token strings (with brackets), e.g. ["[Learning]", "(WIP)"]
+    function extractEncapsulations(line) {
+      const matches = [];
+      const re = /\[([^\[\]]+)\]|\{([^{}]+)\}|\(([^()]+)\)/g;
+      let m;
+      while ((m = re.exec(line)) !== null) matches.push(m[0]);
+      return matches;
+    }
 
-    function detectCategory(line) {
-      const lower = line.toLowerCase();
-      if (lower.includes('[learning]')) return 'learning';
-      if (lower.includes('[performance ready]')) return 'perf';
-      if (lower.includes('[need to relearn]')) return 'relearn';
-      if (lower.includes('[want to learn]')) return 'want';
+    // Strip ALL encapsulated tokens from a line to get the bare waza name
+    function stripAllLabels(line) {
+      return line.replace(/\[([^\[\]]+)\]|\{([^{}]+)\}|\(([^()]+)\)/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    // Detect which known label(s) appear on this line; returns first match or null
+    function detectLabelOnLine(line) {
+      const tokens = extractEncapsulations(line);
+      for (const tok of tokens) {
+        if (_tiFoundLabels.includes(tok)) return tok;
+      }
       return null;
     }
 
-    function stripCategoryTag(line) {
-      return line.replace(/\[(learning|performance ready|need to relearn|want to learn)\]/gi, '').trim();
+    // Collect all unique labels across the entire text
+    function collectLabels(rawText) {
+      const seen = new Set();
+      const ordered = [];
+      rawText.split('\n').forEach(line => {
+        extractEncapsulations(line.trim()).forEach(tok => {
+          const key = tok.toLowerCase();
+          if (!seen.has(key)) { seen.add(key); ordered.push(tok); }
+        });
+      });
+      return ordered;
     }
 
     function findWazaForLine(line) {
-      const cleaned = stripCategoryTag(line).trim();
+      const cleaned = stripAllLabels(line);
       if (!cleaned) return null;
       const norm = normalizeForSearch(cleaned);
-      // Try exact match first (jp or en)
+      // Exact match first
       let hit = wazaData.find(w =>
         normalizeForSearch(w.name_jp || '') === norm ||
         normalizeForSearch(w.name_en || '') === norm ||
         normalizeForSearch(w.name_en_literal || '') === norm
       );
       if (hit) return hit;
-      // Then substring / fuzzy
+      // Fuzzy
       hit = wazaData.find(w =>
         isFuzzyMatch(w.name_jp, cleaned) ||
         isFuzzyMatch(w.name_en, cleaned) ||
@@ -4665,26 +4661,43 @@
     }
 
     function parseTextImport(rawText) {
+      // 1. Collect all unique labels in document order
+      _tiFoundLabels = collectLabels(rawText);
+
+      // 2. Seed _tiAutoMapping for new labels (preserve existing assignments)
+      _tiFoundLabels.forEach((lbl, i) => {
+        if (_tiAutoMapping[lbl] === undefined) _tiAutoMapping[lbl] = i < 6 ? i : -1;
+      });
+
+      // 3. Seed _tiLabelNames for new labels (default = inner text without brackets)
+      _tiFoundLabels.forEach(lbl => {
+        if (_tiLabelNames[lbl] === undefined) {
+          _tiLabelNames[lbl] = lbl.slice(1, -1); // strip outer bracket pair
+        }
+      });
+
+      // 4. Parse lines
       const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-      let currentCat = null;
+      let currentLabel = null;
       _tiMatched = [];
       _tiUnmatched = [];
 
       lines.forEach(line => {
-        // Check if this line is PURELY a category header
-        const cleaned = stripCategoryTag(line);
-        if (!cleaned) {
-          // pure header line — update running category
-          currentCat = detectCategory(line);
+        const stripped = stripAllLabels(line);
+        const lineLabel = detectLabelOnLine(line);
+
+        if (!stripped) {
+          // Pure label header line — update running context
+          if (lineLabel) currentLabel = lineLabel;
           return;
         }
-        // Line has content — detect inline category tag too
-        const inlineCat = detectCategory(line);
-        const effectiveCat = inlineCat || currentCat;
+
+        // Effective label: inline takes priority over running context
+        const effectiveLabel = lineLabel || currentLabel;
 
         const waza = findWazaForLine(line);
         if (waza) {
-          _tiMatched.push({ waza, rawLine: line, category: effectiveCat, manualShapes: Array(6).fill(false) });
+          _tiMatched.push({ waza, rawLine: line, category: effectiveLabel, manualShapes: Array(6).fill(false) });
         } else {
           _tiUnmatched.push(line);
         }
@@ -4701,19 +4714,23 @@
         return;
       }
 
-      // Results view
-      const hasCategories = _tiMatched.some(m => m.category);
+      const hasCategories = _tiFoundLabels.length > 0 && _tiMatched.some(m => m.category);
+
+      // ── Unmatched section ────────────────────────────────────────
       const unmatchedHtml = _tiUnmatched.length
         ? '<div class="ti-section-head"><span>Not found in database</span><span class="ti-badge ti-badge-miss">' + _tiUnmatched.length + '</span></div>'
           + _tiUnmatched.map(l => '<div class="ti-unmatched-row"><span class="ti-raw">' + escHtml(l) + '</span><span style="font-size:11px;color:var(--text3)">No match</span></div>').join('')
         : '';
 
+      // ── Matched rows ─────────────────────────────────────────────
       const matchedHeaderHtml = '<div class="ti-section-head"><span>Matched waza</span><span class="ti-badge ti-badge-ok">' + _tiMatched.length + '</span></div>';
 
-      // Manual import rows — show shape toggles per waza
       const matchedRowsHtml = _tiMatched.map((item, idx) => {
-        const catMeta = item.category ? TI_CATEGORIES[item.category] : null;
-        const catBadge = catMeta ? '<span class="ti-match-row ti-category-badge ' + catMeta.cssClass + '">' + escHtml(catMeta.label) + '</span>' : '';
+        const lbl = item.category;
+        const dispLbl = lbl ? (_tiLabelNames[lbl] || lbl) : null;
+        const catBadge = dispLbl
+          ? '<span class="ti-match-row ti-category-badge ti-cat-dynamic">' + escHtml(dispLbl) + '</span>'
+          : '';
         const shapesBtns = SHAPES.map((s, si) =>
           '<button class="cmp-shape-btn' + (item.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
         ).join('');
@@ -4726,28 +4743,39 @@
           + '</div>';
       }).join('');
 
-      // Auto-mapping configurator (only if categories detected)
+      // ── Auto-mapping section (legend-style) ───────────────────────
       let autoMapHtml = '';
       if (hasCategories) {
-        const mapRows = Object.entries(TI_CATEGORIES).map(([catKey, catMeta]) => {
-          const assigned = _tiAutoMapping[catKey];
+        const mapRows = _tiFoundLabels.map((lbl, li) => {
+          const assigned = _tiAutoMapping[lbl] !== undefined ? _tiAutoMapping[lbl] : -1;
+          const dispName_ = _tiLabelNames[lbl] !== undefined ? _tiLabelNames[lbl] : lbl.slice(1, -1);
           const shapeBtns = SHAPES.map((s, si) =>
-            '<button class="ti-map-shape-btn' + (assigned === si ? ' on' : '') + '" data-cat="' + catKey + '" data-si="' + si + '">' + s + '</button>'
+            '<button class="ti-map-shape-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
           ).join('');
-          return '<div class="ti-map-row"><span class="ti-map-label"><span class="ti-badge ti-category-badge ' + catMeta.cssClass + '">' + escHtml(catMeta.label) + '</span></span>'
+          return '<div class="legend-row">'
+            + '<span class="legend-shape" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
+            + '<input class="legend-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
             + '<div class="ti-map-shapes">' + shapeBtns + '</div>'
             + '</div>';
         }).join('');
 
+        const wazaCountPerLabel = {};
+        _tiFoundLabels.forEach(l => { wazaCountPerLabel[l] = _tiMatched.filter(m => m.category === l).length; });
+        const countsNote = _tiFoundLabels.map(l =>
+          '<span style="font-size:11px;color:var(--text3)">' + escHtml(_tiLabelNames[l] || l.slice(1,-1)) + ': ' + wazaCountPerLabel[l] + ' waza</span>'
+        ).join(' &nbsp;·&nbsp; ');
+
         autoMapHtml = '<div class="ti-auto-mapping">'
-          + '<h4>Auto-import: map categories to shapes</h4>'
-          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Choose which shape each category maps to. Click a shape to assign it, click again to unassign.</p>'
+          + '<h4>Auto-import: map labels to shapes</h4>'
+          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which shape each maps to. Click a shape to assign, click again to unassign.</p>'
+          + '<div style="margin-bottom:10px;line-height:2">' + countsNote + '</div>'
           + mapRows
           + '</div>';
       }
 
+      // ── Actions ──────────────────────────────────────────────────
       const actionsHtml = '<div class="ti-actions">'
-        + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Auto Import with Category Mapping</button>' : '')
+        + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Auto Import with Label Mapping</button>' : '')
         + '<button class="cbtn cbtn-primary" id="tiManualImportBtn">✓ Apply Manual Markings</button>'
         + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
         + '</div>';
@@ -4764,13 +4792,33 @@
         });
       });
 
+      // Label name inputs
+      container.querySelectorAll('.ti-label-name-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          _tiLabelNames[inp.dataset.lbl] = inp.value;
+          // Update badges in matched rows without full re-render
+          container.querySelectorAll('.ti-match-row').forEach(row => {
+            const idx2 = +row.dataset.idx;
+            if (isNaN(idx2)) return;
+            const item = _tiMatched[idx2];
+            if (item && item.category === inp.dataset.lbl) {
+              const badge = row.querySelector('.ti-cat-dynamic');
+              if (badge) badge.textContent = inp.value || inp.dataset.lbl.slice(1,-1);
+            }
+          });
+        });
+      });
+
       // Auto-map shape selectors
       container.querySelectorAll('.ti-map-shape-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const cat = btn.dataset.cat, si = +btn.dataset.si;
-          _tiAutoMapping[cat] = _tiAutoMapping[cat] === si ? -1 : si;
-          // Re-render mapping section only
-          renderTextImport();
+          const lbl = btn.dataset.lbl, si = +btn.dataset.si;
+          _tiAutoMapping[lbl] = _tiAutoMapping[lbl] === si ? -1 : si;
+          // Update only the shape buttons in this row
+          const row = btn.closest('.legend-row');
+          row.querySelectorAll('.ti-map-shape-btn').forEach((b, bsi) => {
+            b.classList.toggle('on', _tiAutoMapping[lbl] === bsi);
+          });
         });
       });
 
@@ -4778,7 +4826,7 @@
       container.querySelector('#tiAutoImportBtn')?.addEventListener('click', async () => {
         let count = 0;
         for (const item of _tiMatched) {
-          const si = item.category != null ? _tiAutoMapping[item.category] : -1;
+          const si = item.category != null ? (_tiAutoMapping[item.category] !== undefined ? _tiAutoMapping[item.category] : -1) : -1;
           const shapes = Array(6).fill(false);
           if (si >= 0) shapes[si] = true;
           const cur = getP(item.waza.id);
@@ -4789,6 +4837,7 @@
         }
         showToast('Auto-imported ' + count + ' waza markings!', 'green');
         _tiParsed = false;
+        _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
         renderTextImport();
       });
 
@@ -4807,6 +4856,7 @@
         if (count) {
           showToast('Applied markings to ' + count + ' waza!', 'green');
           _tiParsed = false;
+          _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
           renderTextImport();
         } else {
           showToast('No shapes were toggled on — toggle at least one shape per waza.', 'amber');
@@ -4816,6 +4866,7 @@
       // Reset
       container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
         _tiParsed = false;
+        _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
         renderTextImport();
       });
     }
@@ -4823,14 +4874,11 @@
     function renderTiInput(prefill) {
       return '<div>'
         + '<div class="dsec2"><h3>Import from your own list</h3></div>'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). The importer will match them against the database, then let you assign markings.</p>'
-        + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nExample:\nDouble Rainbow\nMix\nNami\n\nOr with category labels:\n[Learning]\nDouble Rainbow\nMix\n[Performance Ready]\nNami">' + escHtml(prefill) + '</textarea>'
-        + '<div class="ti-hint">Supported category labels (optional): '
-        + '<code>[Learning]</code> <code>[Performance Ready]</code> <code>[Need to relearn]</code> <code>[Want to Learn]</code>. '
-        + 'Place them on their own line as section headers, or inline on the same line as a waza name.'
-        + '</div>'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Any labels wrapped in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are automatically detected as categories — use them as section headers or inline per entry.</p>'
+        + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nAny bracket style works:\n[Learning]\nDouble Rainbow\nMix\n\n{Performance Ready}\nNami\n\n(Want to Learn) Hyper Mix"></textarea>'
+        + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
         + '<div style="margin-top:12px;display:flex;gap:8px">'
-        + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List →</button>'
+        + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
         + '</div>'
         + '</div>';
     }
