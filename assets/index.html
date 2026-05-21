@@ -3135,13 +3135,15 @@
     let exploreSortField = savedSort.field; // 'default' | 'name' | 'likes'
     let exploreSortOrder = savedSort.order;  // 'asc' | 'desc'
     
-    let browseListView = 'expanded'; // 'expanded' | 'list' | 'compact' — default: Cards
+    // Load view style preference from localStorage
+    let browseListView = localStorage.getItem('wl_view_style') || 'expanded'; // 'expanded' | 'list' | 'compact' — default: Cards
     let isAdmin = false;
 
     // ── localStorage ─────────────────────────────────────────────
     const LS_KEY = 'wl_local_prog';
     const LS_LEGEND = 'wl_shape_legend';
     const LS_SORT = 'wl_sort_prefs';
+    const LS_VIEW = 'wl_view_style';
     const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} } };
     const saveLocal = d => localStorage.setItem(LS_KEY, JSON.stringify(d));
     let shapeLegend = JSON.parse(localStorage.getItem(LS_LEGEND) || '["","","","","",""]');
@@ -3225,6 +3227,10 @@
       const isDefault = exploreSortField === 'default';
       document.getElementById('exploreSortOrder').disabled = isDefault;
       document.getElementById('exploreSortOrderMob').disabled = isDefault;
+      
+      // Sync view style dropdowns with loaded preference
+      document.getElementById('browseViewSelect').value = browseListView;
+      document.getElementById('browseViewSelectMob').value = browseListView;
       
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
@@ -3650,6 +3656,8 @@
     // ── Browse view toggle group ──────────────────────────────────
     document.getElementById('browseViewSelect').addEventListener('change', e => {
       browseListView = e.target.value;
+      // Save to localStorage
+      localStorage.setItem('wl_view_style', browseListView);
       renderList();
     });
 
@@ -4278,6 +4286,7 @@
       document.getElementById('browseViewSelect').value = newView;
       // Save to localStorage
       localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
+      localStorage.setItem('wl_view_style', browseListView);
       // Close sheet and re-render
       filterSheetBg.classList.remove('open');
       updateShapeFilterUI();
