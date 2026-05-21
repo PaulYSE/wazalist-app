@@ -1869,6 +1869,10 @@
       border-bottom: 1px solid var(--border)
     }
 
+    .cov-row-zero {
+      opacity: 0.4
+    }
+
     .cov-label {
       display: flex;
       justify-content: space-between;
@@ -4089,29 +4093,31 @@
     }
 
     function renderDashStats() {
-      let liked = 0, disliked = 0, shaped = 0;
+      let shaped = 0;
       wazaData.forEach(w => {
         const p = getP(w.id);
-        if (p.like === 'like') liked++;
-        if (p.like === 'dislike') disliked++;
         if (p.shapes && p.shapes.some(Boolean)) shaped++;
       });
 
-      // ── Overview cards ────────────────────────────────────────
+      // ── Overview cards (only marked and total) ────────────────
       const overviewHTML =
-        '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">'
-        + '<div class="scard"><div class="n" style="color:#60b8f0">' + liked + '</div><div class="l">👍 Liked</div></div>'
-        + '<div class="scard"><div class="n" style="color:#e080a0">' + disliked + '</div><div class="l">👎 Disliked</div></div>'
+        '<div class="dstats" style="grid-template-columns:repeat(2,1fr)">'
         + '<div class="scard"><div class="n" style="color:var(--accent)">' + shaped + '</div><div class="l">Marked</div></div>'
         + '<div class="scard"><div class="n">' + wazaData.length + '</div><div class="l">Total Waza</div></div>'
         + '</div>';
 
-      // ── Recently updated ──────────────────────────────────────
+      // ── Recently updated (past year) ──────────────────────────
+      const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
       const recent = wazaData
-        .filter(w => prog[w.id] && prog[w.id].updated_at)
-        .sort((a, b) => new Date(prog[b.id].updated_at) - new Date(prog[a.id].updated_at))
-        .slice(0, 20);
-      const recentHTML = '<div class="dsec2"><h3>Recently updated</h3>'
+        .filter(w => {
+          const p = prog[w.id];
+          if (!p || !p.updated_at) return false;
+          const updatedTime = new Date(p.updated_at).getTime();
+          return updatedTime >= oneYearAgo;
+        })
+        .sort((a, b) => new Date(prog[b.id].updated_at) - new Date(prog[a.id].updated_at));
+      
+      const recentHTML = '<div class="dsec2"><h3>Recent activity (past year)</h3>'
         + (recent.length
           ? recent.map(w => {
             const p = getP(w.id);
@@ -4123,10 +4129,10 @@
               + '<span class="recent-time">' + timeAgo(p.updated_at) + '</span>'
               + '</div>';
           }).join('')
-          : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No activity yet.</div>')
+          : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No activity in the past year.</div>')
         + '</div>';
 
-      // ── Coverage by family ────────────────────────────────────
+      // ── Coverage by family (sorted by % completion) ───────────
       const families = {};
       wazaData.forEach(w => {
         [w.parent_en0, w.parent_en1].filter(Boolean).forEach(fam => {
@@ -4140,11 +4146,20 @@
       if (noFamily.length) {
         families['Uncategorised'] = { total: noFamily.length, touched: noFamily.filter(w => { const p = getP(w.id); return p.like || (p.shapes && p.shapes.some(Boolean)); }).length };
       }
-      const famEntries = Object.entries(families).sort((a, b) => b[1].total - a[1].total);
+      
+      // Sort by coverage percentage (descending), then by total count
+      const famEntries = Object.entries(families).sort((a, b) => {
+        const pctA = a[1].total ? (a[1].touched / a[1].total) : 0;
+        const pctB = b[1].total ? (b[1].touched / b[1].total) : 0;
+        if (pctB !== pctA) return pctB - pctA; // Higher % first
+        return b[1].total - a[1].total; // Then by total count
+      });
+      
       const covHTML = '<div class="dsec2"><h3>Coverage by family</h3>'
         + famEntries.map(([fam, { total, touched }]) => {
           const pct = total ? Math.round(touched / total * 100) : 0;
-          return '<div class="cov-row">'
+          const hasZeroCoverage = touched === 0;
+          return '<div class="cov-row' + (hasZeroCoverage ? ' cov-row-zero' : '') + '">'
             + '<div class="cov-label"><span>' + fam + '</span><span style="color:var(--text3)">' + touched + ' / ' + total + '</span></div>'
             + '<div class="cov-track"><div class="cov-fill" style="width:' + pct + '%"></div></div>'
             + '</div>';
