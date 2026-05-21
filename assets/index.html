@@ -2647,27 +2647,27 @@
       display: none;
       align-items: center;
       gap: 6px;
-      padding: 7px 12px;
-      font-size: 13px;
-      position: relative
-    }
-
-    .view-style-toggle-mobile {
-      display: none;
-      gap: 4px;
-      margin-left: 4px
-    }
-
-    .view-style-btn {
       padding: 7px 10px;
       font-size: 16px;
-      line-height: 1;
-      min-width: 36px
+      position: relative;
+      min-width: auto
     }
 
-    .view-style-btn.active {
-      background: var(--accent);
-      color: white;
+    .view-style-select-mobile {
+      display: none;
+      padding: 7px 10px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text1);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 90px
+    }
+
+    .view-style-select-mobile:focus {
       border-color: var(--accent)
     }
 
@@ -2837,8 +2837,8 @@
         display: flex
       }
 
-      .view-style-toggle-mobile {
-        display: flex
+      .view-style-select-mobile {
+        display: block
       }
     }
   </style>
@@ -2924,14 +2924,14 @@
     <div id="browseView" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
       <div class="filter-row">
         <input id="searchInput" type="search" placeholder="Search Waza by name (JP / EN)…" autocomplete="off">
-        <button class="btn filter-sheet-btn" id="filterSheetBtn">⚙ Filters<span class="filter-dot"
+        <button class="btn filter-sheet-btn" id="filterSheetBtn">⚙<span class="filter-dot"
             id="filterDot"></span></button>
-        <!-- Mobile view style quick toggle -->
-        <div class="view-style-toggle-mobile" id="viewStyleToggleMobile">
-          <button class="btn view-style-btn" data-view="list" title="List view">☰</button>
-          <button class="btn view-style-btn active" data-view="expanded" title="Cards view">⊞</button>
-          <button class="btn view-style-btn" data-view="compact" title="Compact view">≣</button>
-        </div>
+        <!-- Mobile view style dropdown -->
+        <select class="view-style-select-mobile" id="viewStyleSelectMobile">
+          <option value="list">List</option>
+          <option value="expanded" selected>Cards</option>
+          <option value="compact">Compact</option>
+        </select>
         <div class="view-toggle-group" id="browseShapeGroup">
           <button class="btn" id="filterShapeAll">All</button>
           <button class="btn shape-filter-btn" data-si="0">●</button>
@@ -3368,10 +3368,9 @@
       // Sync view style dropdowns with loaded preference
       document.getElementById('browseViewSelect').value = browseListView;
       document.getElementById('browseViewSelectMob').value = browseListView;
-      // Sync mobile view style toggle buttons
-      document.querySelectorAll('.view-style-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === browseListView);
-      });
+      // Sync mobile view style dropdown
+      const mobileViewSelect = document.getElementById('viewStyleSelectMobile');
+      if (mobileViewSelect) mobileViewSelect.value = browseListView;
       
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
@@ -3802,21 +3801,15 @@
       renderList();
     });
 
-    // ── Mobile view style toggle buttons ───────────────────────────
-    document.querySelectorAll('.view-style-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const view = btn.dataset.view;
-        browseListView = view;
-        // Save to localStorage
-        localStorage.setItem('wl_view_style', browseListView);
-        // Update active state
-        document.querySelectorAll('.view-style-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        // Sync with desktop and mobile selects
-        document.getElementById('browseViewSelect').value = view;
-        document.getElementById('browseViewSelectMob').value = view;
-        renderList();
-      });
+    // ── Mobile view style dropdown ─────────────────────────────────
+    document.getElementById('viewStyleSelectMobile')?.addEventListener('change', e => {
+      browseListView = e.target.value;
+      // Save to localStorage
+      localStorage.setItem('wl_view_style', browseListView);
+      // Sync with desktop and mobile filter sheet selects
+      document.getElementById('browseViewSelect').value = browseListView;
+      document.getElementById('browseViewSelectMob').value = browseListView;
+      renderList();
     });
 
     // ── Render detail ─────────────────────────────────────────────
