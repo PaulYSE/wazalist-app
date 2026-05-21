@@ -2598,44 +2598,136 @@
       line-height: 1
     }
 
-    .mob-menu-dropdown {
+    /* Slideover overlay */
+    .mob-menu-overlay {
       display: none;
-      position: absolute;
-      top: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
       right: 0;
-      min-width: 160px;
-      background: var(--bg1);
-      border: 1px solid var(--border);
-      border-radius: var(--rl);
-      z-index: 150;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
-      overflow: hidden
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s ease
     }
 
-    .mob-menu-dropdown.open {
-      display: block
+    .mob-menu-overlay.open {
+      display: block;
+      opacity: 1
+    }
+
+    /* Slideover panel */
+    .mob-menu-slideover {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 280px;
+      max-width: 85vw;
+      height: 100vh;
+      background: var(--bg1);
+      border-left: 1px solid var(--border);
+      z-index: 201;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto
+    }
+
+    .mob-menu-slideover.open {
+      right: 0
+    }
+
+    /* Menu header */
+    .mob-menu-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg0)
+    }
+
+    .mob-menu-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text1)
+    }
+
+    .mob-menu-close {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s
+    }
+
+    .mob-menu-close:hover {
+      background: var(--bg2);
+      color: var(--text1)
+    }
+
+    /* Menu sections */
+    .mob-menu-section {
+      padding: 12px 0
+    }
+
+    .mob-menu-section:not(:last-child) {
+      border-bottom: 1px solid var(--border)
+    }
+
+    .mob-menu-section-title {
+      padding: 8px 20px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text3);
+      font-weight: 600
     }
 
     .mob-menu-item {
-      display: block;
+      display: flex;
+      align-items: center;
       width: 100%;
-      padding: 11px 16px;
+      padding: 14px 20px;
       text-align: left;
       background: none;
       border: none;
       color: var(--text1);
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       font-family: inherit;
-      text-decoration: none
+      text-decoration: none;
+      transition: background 0.15s;
+      gap: 12px
     }
 
     .mob-menu-item:hover {
       background: var(--bg2)
     }
 
+    .mob-menu-item.active {
+      background: var(--bg2);
+      color: var(--accent);
+      font-weight: 500
+    }
+
     .mob-menu-item.danger {
       color: var(--red)
+    }
+
+    .mob-menu-item-icon {
+      font-size: 18px;
+      width: 20px;
+      text-align: center
     }
 
     .topbar-right {
@@ -2747,6 +2839,11 @@
     }
 
     @media(max-width:600px) {
+      /* Hide nav-tabs on mobile - navigation is in slideover menu */
+      .nav-tabs {
+        display: none
+      }
+
       .dstats {
         grid-template-columns: repeat(2, 1fr)
       }
@@ -2909,14 +3006,61 @@
         <button class="btn help-circle topbar-desktop" id="helpBtn" title="Guide">?</button>
         <!-- Mobile ⋮ menu -->
         <button class="btn mob-menu-btn" id="mobMenuBtn" aria-label="Menu">⋮</button>
-        <div class="mob-menu-dropdown" id="mobMenuDropdown">
-          <button class="mob-menu-item" id="mobHelpBtn">? Guide</button>
-          <button class="mob-menu-item" id="mobNewWazaBtn" style="display:none">+ Submit Waza</button>
-          <a class="mob-menu-item" id="mobAdminLink" href="/admin" target="_blank" style="display:none">Admin</a>
-          <button class="mob-menu-item danger" id="mobLogoutBtn">Sign out</button>
-        </div>
       </div>
     </div>
+
+    <!-- Mobile slideover menu -->
+    <div class="mob-menu-overlay" id="mobMenuOverlay"></div>
+    <div class="mob-menu-slideover" id="mobMenuSlideover">
+      <div class="mob-menu-header">
+        <h3>Menu</h3>
+        <button class="mob-menu-close" id="mobMenuClose" aria-label="Close">×</button>
+      </div>
+      
+      <div class="mob-menu-section">
+        <div class="mob-menu-section-title">Navigation</div>
+        <button class="mob-menu-item" data-menu-tab="browse">
+          <span class="mob-menu-item-icon">🔍</span>
+          <span>Explore</span>
+        </button>
+        <button class="mob-menu-item" data-menu-tab="dashboard">
+          <span class="mob-menu-item-icon">📊</span>
+          <span>Stats</span>
+        </button>
+        <button class="mob-menu-item" data-menu-tab="compare">
+          <span class="mob-menu-item-icon">⚖️</span>
+          <span>Compare</span>
+        </button>
+        <button class="mob-menu-item" data-menu-tab="contribute">
+          <span class="mob-menu-item-icon">✏️</span>
+          <span>Contribute</span>
+        </button>
+      </div>
+
+      <div class="mob-menu-section">
+        <div class="mob-menu-section-title">More</div>
+        <button class="mob-menu-item" id="mobHelpBtn">
+          <span class="mob-menu-item-icon">?</span>
+          <span>Guide</span>
+        </button>
+        <button class="mob-menu-item" id="mobNewWazaBtn" style="display:none">
+          <span class="mob-menu-item-icon">+</span>
+          <span>Submit Waza</span>
+        </button>
+        <a class="mob-menu-item" id="mobAdminLink" href="/admin" target="_blank" style="display:none">
+          <span class="mob-menu-item-icon">⚙️</span>
+          <span>Admin</span>
+        </a>
+      </div>
+
+      <div class="mob-menu-section">
+        <button class="mob-menu-item danger" id="mobLogoutBtn">
+          <span class="mob-menu-item-icon">→</span>
+          <span>Sign out</span>
+        </button>
+      </div>
+    </div>
+
     <div class="nav-tabs">
       <button class="ntab active" data-tab="browse">Explore</button>
       <button class="ntab" data-tab="dashboard">Stats</button>
@@ -3338,7 +3482,10 @@
       document.getElementById('app').style.display = 'flex';
       document.getElementById('guestBadge').style.display = isGuest ? '' : 'none';
       document.getElementById('logoutBtn').textContent = isGuest ? 'Sign in' : 'Sign out';
-      document.getElementById('mobLogoutBtn').textContent = isGuest ? 'Sign in' : 'Sign out';
+      const mobLogoutBtn = document.getElementById('mobLogoutBtn');
+      mobLogoutBtn.innerHTML = isGuest 
+        ? '<span class="mob-menu-item-icon">←</span><span>Sign in</span>'
+        : '<span class="mob-menu-item-icon">→</span><span>Sign out</span>';
       const ub = document.getElementById('usernameBadge');
       if (!isGuest && currentUsername) { ub.textContent = '@' + currentUsername; ub.style.display = ''; } else { ub.style.display = 'none'; }
       document.getElementById('adminLink').style.display = 'none';
@@ -4380,21 +4527,58 @@
 
     // ── Mobile ⋮ menu ─────────────────────────────────────────────
     const mobMenuBtn = document.getElementById('mobMenuBtn');
-    const mobMenuDropdown = document.getElementById('mobMenuDropdown');
+    const mobMenuOverlay = document.getElementById('mobMenuOverlay');
+    const mobMenuSlideover = document.getElementById('mobMenuSlideover');
+    const mobMenuClose = document.getElementById('mobMenuClose');
+    
+    const openMobMenu = () => {
+      mobMenuOverlay.classList.add('open');
+      mobMenuSlideover.classList.add('open');
+      // Update active state for current tab
+      updateMobMenuActiveState();
+    };
+    
+    const closeMobMenu = () => {
+      mobMenuOverlay.classList.remove('open');
+      mobMenuSlideover.classList.remove('open');
+    };
+    
+    const updateMobMenuActiveState = () => {
+      const currentTab = document.querySelector('.ntab.active')?.dataset.tab;
+      document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
+        item.classList.toggle('active', item.dataset.menuTab === currentTab);
+      });
+    };
+    
     mobMenuBtn.addEventListener('click', e => {
       e.stopPropagation();
-      mobMenuDropdown.classList.toggle('open');
+      openMobMenu();
     });
-    document.addEventListener('click', () => mobMenuDropdown.classList.remove('open'));
-    mobMenuDropdown.addEventListener('click', e => e.stopPropagation());
+    
+    mobMenuOverlay.addEventListener('click', closeMobMenu);
+    mobMenuClose.addEventListener('click', closeMobMenu);
+    
+    // Navigation items in slideover
+    document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
+      item.addEventListener('click', () => {
+        const tab = item.dataset.menuTab;
+        document.querySelector(`.ntab[data-tab="${tab}"]`)?.click();
+        closeMobMenu();
+      });
+    });
 
-    document.getElementById('mobLogoutBtn').onclick = doLogout;
+    document.getElementById('mobLogoutBtn').onclick = () => {
+      closeMobMenu();
+      doLogout();
+    };
+    
     document.getElementById('mobHelpBtn').onclick = () => {
-      mobMenuDropdown.classList.remove('open');
+      closeMobMenu();
       document.getElementById('modalBg').style.display = 'flex';
     };
+    
     document.getElementById('mobNewWazaBtn').onclick = () => {
-      mobMenuDropdown.classList.remove('open');
+      closeMobMenu();
       openNewWazaModal();
     };
 
@@ -4470,6 +4654,8 @@
       if (t === 'dashboard') renderDashStats();
       if (t === 'compare') { const activeCstab = document.querySelector('.cmp-stab.active')?.dataset?.cstab || 'lists'; if (activeCstab === 'textimport') renderTextImport(); else renderDashCompare(); }
       if (t === 'contribute') renderContribute();
+      // Update mobile menu active state
+      if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
     }));
 
     function escHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
