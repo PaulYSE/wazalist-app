@@ -2161,6 +2161,247 @@
       color: var(--text1)
     }
 
+    /* ── Compare sub-tabs ── */
+    .cmp-subtabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .cmp-stab {
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      transition: all .12s;
+      font-family: inherit
+    }
+
+    .cmp-stab:hover { color: var(--text1) }
+
+    .cmp-stab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent)
+    }
+
+    /* ── Text import panel ── */
+    .ti-panel { display: none }
+    .ti-panel.active { display: block }
+
+    .ti-textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 10px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text1);
+      font-size: 13px;
+      font-family: inherit;
+      line-height: 1.6;
+      outline: none;
+      resize: vertical
+    }
+
+    .ti-textarea:focus { border-color: var(--accent) }
+
+    .ti-hint {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 6px;
+      line-height: 1.6
+    }
+
+    .ti-hint code {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 11px;
+      color: var(--text2)
+    }
+
+    .ti-section-head {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      padding: 10px 0 6px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .ti-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 600
+    }
+
+    .ti-badge-ok {
+      background: #002a10;
+      color: var(--green);
+      border: 1px solid var(--green)
+    }
+
+    .ti-badge-miss {
+      background: #2a1800;
+      color: var(--amber);
+      border: 1px solid var(--amber)
+    }
+
+    .ti-unmatched-row {
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .ti-unmatched-row .ti-raw {
+      flex: 1;
+      font-style: italic
+    }
+
+    .ti-match-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .ti-match-row .ti-names { min-width: 0 }
+
+    .ti-match-row .ti-njp {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.2
+    }
+
+    .ti-match-row .ti-nen {
+      font-size: 11px;
+      color: var(--text2)
+    }
+
+    .ti-match-row .ti-category-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0
+    }
+
+    .ti-cat-learning {
+      background: #001a2a;
+      color: #60b8f0;
+      border: 1px solid #004a7a
+    }
+
+    .ti-cat-perf {
+      background: #002a10;
+      color: var(--green);
+      border: 1px solid var(--green)
+    }
+
+    .ti-cat-relearn {
+      background: #2a0010;
+      color: #e080a0;
+      border: 1px solid #5a0020
+    }
+
+    .ti-cat-want {
+      background: #2a2000;
+      color: var(--amber);
+      border: 1px solid var(--amber)
+    }
+
+    .ti-manual-shapes {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .ti-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border)
+    }
+
+    .ti-auto-mapping {
+      margin-top: 14px;
+      padding: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r)
+    }
+
+    .ti-auto-mapping h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .ti-map-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap
+    }
+
+    .ti-map-label {
+      font-size: 12px;
+      color: var(--text2);
+      min-width: 110px;
+      flex-shrink: 0
+    }
+
+    .ti-map-shapes {
+      display: flex;
+      gap: 4px
+    }
+
+    .ti-map-shape-btn {
+      padding: 3px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text2);
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1;
+      transition: all .12s
+    }
+
+    .ti-map-shape-btn:hover { background: var(--bg2) }
+
+    .ti-map-shape-btn.on {
+      border-color: var(--accent);
+      color: var(--text1);
+      background: var(--bg2)
+    }
+
     /* ── Share / Import modals ── */
     .share-key {
       font-family: monospace;
@@ -2673,7 +2914,12 @@
     <!-- COMPARE -->
     <div id="compareView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
-        <div id="dashCompare"></div>
+        <div class="cmp-subtabs">
+          <button class="cmp-stab active" data-cstab="lists">↕ Lists</button>
+          <button class="cmp-stab" data-cstab="textimport">📋 Text Import</button>
+        </div>
+        <div id="dashCompare" class="ti-panel active"></div>
+        <div id="dashTextImport" class="ti-panel"></div>
       </div>
     </div>
 
@@ -4011,7 +4257,7 @@
       document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
       document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
       if (t === 'dashboard') renderDashStats();
-      if (t === 'compare') renderDashCompare();
+      if (t === 'compare') { const activeCstab = document.querySelector('.cmp-stab.active')?.dataset?.cstab || 'lists'; if (activeCstab === 'textimport') renderTextImport(); else renderDashCompare(); }
       if (t === 'contribute') renderContribute();
     }));
 
@@ -4351,6 +4597,253 @@
         });
       });
     }
+
+
+    // ── Compare sub-tab switching ─────────────────────────────────
+    document.querySelectorAll('.cmp-stab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cmp-stab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.cstab;
+        document.getElementById('dashCompare').classList.toggle('active', tab === 'lists');
+        document.getElementById('dashTextImport').classList.toggle('active', tab === 'textimport');
+        if (tab === 'textimport') renderTextImport();
+        if (tab === 'lists') renderDashCompare();
+      });
+    });
+
+    // ── Text Import ───────────────────────────────────────────────
+    // State for the text-import sub-tab
+    let _tiMatched = [];       // [{waza, rawLine, category, manualShapes}]
+    let _tiUnmatched = [];     // [rawLine]
+    let _tiParsed = false;
+    let _tiAutoMapping = {     // category → shape index (-1 = none)
+      learning: 0,    // ●
+      perf: 1,        // ▲
+      relearn: 2,     // ■
+      want: 3         // ♥
+    };
+
+    const TI_CATEGORIES = {
+      learning: { label: '[Learning]', cssClass: 'ti-cat-learning' },
+      perf:     { label: '[Performance Ready]', cssClass: 'ti-cat-perf' },
+      relearn:  { label: '[Need to relearn]', cssClass: 'ti-cat-relearn' },
+      want:     { label: '[Want to Learn]', cssClass: 'ti-cat-want' }
+    };
+
+    function detectCategory(line) {
+      const lower = line.toLowerCase();
+      if (lower.includes('[learning]')) return 'learning';
+      if (lower.includes('[performance ready]')) return 'perf';
+      if (lower.includes('[need to relearn]')) return 'relearn';
+      if (lower.includes('[want to learn]')) return 'want';
+      return null;
+    }
+
+    function stripCategoryTag(line) {
+      return line.replace(/\[(learning|performance ready|need to relearn|want to learn)\]/gi, '').trim();
+    }
+
+    function findWazaForLine(line) {
+      const cleaned = stripCategoryTag(line).trim();
+      if (!cleaned) return null;
+      const norm = normalizeForSearch(cleaned);
+      // Try exact match first (jp or en)
+      let hit = wazaData.find(w =>
+        normalizeForSearch(w.name_jp || '') === norm ||
+        normalizeForSearch(w.name_en || '') === norm ||
+        normalizeForSearch(w.name_en_literal || '') === norm
+      );
+      if (hit) return hit;
+      // Then substring / fuzzy
+      hit = wazaData.find(w =>
+        isFuzzyMatch(w.name_jp, cleaned) ||
+        isFuzzyMatch(w.name_en, cleaned) ||
+        isFuzzyMatch(w.name_en_literal, cleaned)
+      );
+      return hit || null;
+    }
+
+    function parseTextImport(rawText) {
+      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+      let currentCat = null;
+      _tiMatched = [];
+      _tiUnmatched = [];
+
+      lines.forEach(line => {
+        // Check if this line is PURELY a category header
+        const cleaned = stripCategoryTag(line);
+        if (!cleaned) {
+          // pure header line — update running category
+          currentCat = detectCategory(line);
+          return;
+        }
+        // Line has content — detect inline category tag too
+        const inlineCat = detectCategory(line);
+        const effectiveCat = inlineCat || currentCat;
+
+        const waza = findWazaForLine(line);
+        if (waza) {
+          _tiMatched.push({ waza, rawLine: line, category: effectiveCat, manualShapes: Array(6).fill(false) });
+        } else {
+          _tiUnmatched.push(line);
+        }
+      });
+      _tiParsed = true;
+    }
+
+    function renderTextImport() {
+      const container = document.getElementById('dashTextImport');
+
+      if (!_tiParsed) {
+        container.innerHTML = renderTiInput('');
+        bindTiInputEvents(container);
+        return;
+      }
+
+      // Results view
+      const hasCategories = _tiMatched.some(m => m.category);
+      const unmatchedHtml = _tiUnmatched.length
+        ? '<div class="ti-section-head"><span>Not found in database</span><span class="ti-badge ti-badge-miss">' + _tiUnmatched.length + '</span></div>'
+          + _tiUnmatched.map(l => '<div class="ti-unmatched-row"><span class="ti-raw">' + escHtml(l) + '</span><span style="font-size:11px;color:var(--text3)">No match</span></div>').join('')
+        : '';
+
+      const matchedHeaderHtml = '<div class="ti-section-head"><span>Matched waza</span><span class="ti-badge ti-badge-ok">' + _tiMatched.length + '</span></div>';
+
+      // Manual import rows — show shape toggles per waza
+      const matchedRowsHtml = _tiMatched.map((item, idx) => {
+        const catMeta = item.category ? TI_CATEGORIES[item.category] : null;
+        const catBadge = catMeta ? '<span class="ti-match-row ti-category-badge ' + catMeta.cssClass + '">' + escHtml(catMeta.label) + '</span>' : '';
+        const shapesBtns = SHAPES.map((s, si) =>
+          '<button class="cmp-shape-btn' + (item.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
+        ).join('');
+        return '<div class="ti-match-row" data-idx="' + idx + '">'
+          + '<div class="ti-names"><div class="ti-njp">' + escHtml(item.waza.name_jp || '—') + '</div>'
+          + '<div class="ti-nen">' + escHtml(dispName(item.waza)) + '</div>'
+          + (catBadge ? '<div style="margin-top:4px">' + catBadge + '</div>' : '')
+          + '</div>'
+          + '<div class="ti-manual-shapes">' + shapesBtns + '</div>'
+          + '</div>';
+      }).join('');
+
+      // Auto-mapping configurator (only if categories detected)
+      let autoMapHtml = '';
+      if (hasCategories) {
+        const mapRows = Object.entries(TI_CATEGORIES).map(([catKey, catMeta]) => {
+          const assigned = _tiAutoMapping[catKey];
+          const shapeBtns = SHAPES.map((s, si) =>
+            '<button class="ti-map-shape-btn' + (assigned === si ? ' on' : '') + '" data-cat="' + catKey + '" data-si="' + si + '">' + s + '</button>'
+          ).join('');
+          return '<div class="ti-map-row"><span class="ti-map-label"><span class="ti-badge ti-category-badge ' + catMeta.cssClass + '">' + escHtml(catMeta.label) + '</span></span>'
+            + '<div class="ti-map-shapes">' + shapeBtns + '</div>'
+            + '</div>';
+        }).join('');
+
+        autoMapHtml = '<div class="ti-auto-mapping">'
+          + '<h4>Auto-import: map categories to shapes</h4>'
+          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Choose which shape each category maps to. Click a shape to assign it, click again to unassign.</p>'
+          + mapRows
+          + '</div>';
+      }
+
+      const actionsHtml = '<div class="ti-actions">'
+        + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Auto Import with Category Mapping</button>' : '')
+        + '<button class="cbtn cbtn-primary" id="tiManualImportBtn">✓ Apply Manual Markings</button>'
+        + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
+        + '</div>';
+
+      container.innerHTML = unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories ? autoMapHtml : '') + actionsHtml;
+
+      // Manual shape toggles
+      container.querySelectorAll('.ti-manual-shapes .cmp-shape-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = +btn.dataset.idx, si = +btn.dataset.si;
+          _tiMatched[idx].manualShapes[si] = !_tiMatched[idx].manualShapes[si];
+          btn.classList.toggle('on', _tiMatched[idx].manualShapes[si]);
+        });
+      });
+
+      // Auto-map shape selectors
+      container.querySelectorAll('.ti-map-shape-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cat = btn.dataset.cat, si = +btn.dataset.si;
+          _tiAutoMapping[cat] = _tiAutoMapping[cat] === si ? -1 : si;
+          // Re-render mapping section only
+          renderTextImport();
+        });
+      });
+
+      // Auto import
+      container.querySelector('#tiAutoImportBtn')?.addEventListener('click', async () => {
+        let count = 0;
+        for (const item of _tiMatched) {
+          const si = item.category != null ? _tiAutoMapping[item.category] : -1;
+          const shapes = Array(6).fill(false);
+          if (si >= 0) shapes[si] = true;
+          const cur = getP(item.waza.id);
+          const merged = [...(cur.shapes || Array(6).fill(false))];
+          shapes.forEach((v, i) => { if (v) merged[i] = true; });
+          await saveP(item.waza.id, { shapes: merged });
+          count++;
+        }
+        showToast('Auto-imported ' + count + ' waza markings!', 'green');
+        _tiParsed = false;
+        renderTextImport();
+      });
+
+      // Manual import
+      container.querySelector('#tiManualImportBtn')?.addEventListener('click', async () => {
+        let count = 0;
+        for (const item of _tiMatched) {
+          if (item.manualShapes.some(Boolean)) {
+            const cur = getP(item.waza.id);
+            const merged = [...(cur.shapes || Array(6).fill(false))];
+            item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
+            await saveP(item.waza.id, { shapes: merged });
+            count++;
+          }
+        }
+        if (count) {
+          showToast('Applied markings to ' + count + ' waza!', 'green');
+          _tiParsed = false;
+          renderTextImport();
+        } else {
+          showToast('No shapes were toggled on — toggle at least one shape per waza.', 'amber');
+        }
+      });
+
+      // Reset
+      container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
+        _tiParsed = false;
+        renderTextImport();
+      });
+    }
+
+    function renderTiInput(prefill) {
+      return '<div>'
+        + '<div class="dsec2"><h3>Import from your own list</h3></div>'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). The importer will match them against the database, then let you assign markings.</p>'
+        + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nExample:\nDouble Rainbow\nMix\nNami\n\nOr with category labels:\n[Learning]\nDouble Rainbow\nMix\n[Performance Ready]\nNami">' + escHtml(prefill) + '</textarea>'
+        + '<div class="ti-hint">Supported category labels (optional): '
+        + '<code>[Learning]</code> <code>[Performance Ready]</code> <code>[Need to relearn]</code> <code>[Want to Learn]</code>. '
+        + 'Place them on their own line as section headers, or inline on the same line as a waza name.'
+        + '</div>'
+        + '<div style="margin-top:12px;display:flex;gap:8px">'
+        + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List →</button>'
+        + '</div>'
+        + '</div>';
+    }
+
+    function bindTiInputEvents(container) {
+      container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
+        const text = container.querySelector('#tiPasteArea')?.value || '';
+        if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
+        parseTextImport(text);
+        renderTextImport();
+      });
+    }
+
 
     // ── Toast helper ─────────────────────────────────────────────
     function showToast(msg, color = 'green') {
