@@ -4998,6 +4998,81 @@
         bindTiInputEvents(container);
         return;
       }
+      
+      // ── Excel color mapping mode ──────────────────────────────────
+      if (_tiParsed === 'excel' && Object.keys(_tiExcelColors).length > 1) {
+        const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
+        
+        if (colorKeys.length > 0) {
+          const colorMappingHtml = '<div>'
+            + '<div class="dsec2"><h3>📊 Excel Colors Detected</h3></div>'
+            + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Map each color to a proficiency level:</p>'
+            + '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">'
+            + colorKeys.map(colorHex => {
+              const wazaCount = _tiExcelColors[colorHex].length;
+              const rgb = hexToRgb(colorHex);
+              const colorDisplay = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+              return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">'
+                + '<div style="width:40px;height:40px;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
+                + '<div style="flex:1">'
+                + '<div style="font-size:13px;font-weight:500">' + wazaCount + ' waza</div>'
+                + '<div style="font-size:11px;color:var(--text3)">' + colorHex + '</div>'
+                + '</div>'
+                + '<select class="color-shape-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
+                + '<option value="-1">No marking</option>'
+                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '</option>').join('')
+                + '</select>'
+                + '</div>';
+            }).join('')
+            + '</div>'
+            + '<div style="display:flex;gap:8px">'
+            + '<button class="cbtn cbtn-primary" id="tiApplyColorMapBtn">Apply Color Mapping →</button>'
+            + '<button class="cbtn cbtn-ghost" id="tiCancelExcelBtn">← Cancel</button>'
+            + '</div>'
+            + '</div>';
+          
+          container.innerHTML = colorMappingHtml;
+          
+          // Bind color mapping events
+          container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', () => {
+            // Read mappings
+            container.querySelectorAll('.color-shape-map').forEach(select => {
+              const color = select.dataset.color;
+              const shapeIdx = parseInt(select.value);
+              _tiColorMapping[color] = shapeIdx;
+            });
+            
+            // Apply color mappings to matched waza
+            _tiMatched.forEach(item => {
+              // Find which color this waza belongs to
+              for (const [color, wazaNames] of Object.entries(_tiExcelColors)) {
+                if (wazaNames.includes(item.rawLine)) {
+                  const shapeIdx = _tiColorMapping[color];
+                  if (shapeIdx >= 0) {
+                    item.manualShapes = Array(6).fill(false);
+                    item.manualShapes[shapeIdx] = true;
+                    item.category = shapeLegend[shapeIdx] || `Shape ${shapeIdx + 1}`;
+                  }
+                  break;
+                }
+              }
+            });
+            
+            _tiParsed = true; // Switch to normal mode
+            _tiPreviewMode = true; // Enable preview mode
+            renderTextImport();
+          });
+          
+          container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
+            _tiParsed = false;
+            _tiExcelColors = {};
+            _tiColorMapping = {};
+            renderTextImport();
+          });
+          
+          return;
+        }
+      }
 
       const hasCategories = _tiFoundLabels.length > 0 && _tiMatched.some(m => m.category);
 
@@ -5216,22 +5291,132 @@
     function renderTiInput(prefill) {
       return '<div style="display:flex;flex-direction:column;height:100%">'
         + '<div class="dsec2"><h3>Import from your own list</h3></div>'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Any labels wrapped in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are automatically detected as categories — use them as section headers or inline per entry.</p>'
+        
+        // Method 1: Excel Upload
+        + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px">'
+        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📊 Method 1: Upload Excel File (Recommended)</div>'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to proficiency levels.</p>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<input type="file" id="tiFileInput" accept=".xlsx,.xls" style="display:none">'
+        + '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>'
+        + '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>'
+        + '</div>'
+        + '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>'
+        + '</div>'
+        
+        // Divider
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
+        + '<span style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Or</span>'
+        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
+        + '</div>'
+        
+        // Method 2: Text Paste
+        + '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'
+        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📋 Method 2: Paste Text</div>'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>'
         + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nAny bracket style works:\n[Learning]\nDouble Rainbow\nMix\n\n{Performance Ready}\nNami\n\n(Want to Learn) Hyper Mix"></textarea>'
         + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
         + '<div style="margin-top:12px;display:flex;gap:8px">'
         + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
         + '</div>'
+        + '</div>'
+        
         + '</div>';
     }
 
     function bindTiInputEvents(container) {
+      // Text paste handler
       container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
         const text = container.querySelector('#tiPasteArea')?.value || '';
         if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
         parseTextImport(text);
         renderTextImport();
       });
+      
+      // Excel file upload handlers
+      const fileInput = container.querySelector('#tiFileInput');
+      const fileBtn = container.querySelector('#tiFileBtn');
+      const fileName = container.querySelector('#tiFileName');
+      
+      fileBtn?.addEventListener('click', () => fileInput?.click());
+      
+      fileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        fileName.textContent = file.name;
+        fileName.style.color = 'var(--text1)';
+        
+        try {
+          await parseExcelFile(file);
+          renderTextImport();
+        } catch (err) {
+          console.error('Excel parse error:', err);
+          showToast('Error reading Excel file. Please try text paste instead.', 'red');
+        }
+      });
+    }
+    
+    // Excel parsing with cell color detection
+    let _tiExcelColors = {}; // { colorHex: [wazaNames] }
+    let _tiColorMapping = {}; // { colorHex: shapeIndex }
+    
+    function hexToRgb(hex) {
+      // Remove # if present and handle 6-digit hex
+      hex = hex.replace('#', '');
+      if (hex.length === 8) hex = hex.substring(0, 6); // Remove alpha if present
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return { r, g, b };
+    }
+    
+    async function parseExcelFile(file) {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const range = XLSX.utils.decode_range(firstSheet['!ref']);
+      
+      _tiExcelColors = {};
+      const allLines = [];
+      
+      // Read cells with color information
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
+          const cell = firstSheet[cellAddr];
+          
+          if (!cell || !cell.v) continue;
+          
+          const text = String(cell.v).trim();
+          if (!text) continue;
+          
+          // Extract fill color (if any)
+          let fillColor = 'FFFFFF'; // default white
+          if (cell.s && cell.s.fgColor && cell.s.fgColor.rgb) {
+            fillColor = cell.s.fgColor.rgb;
+          } else if (cell.s && cell.s.bgColor && cell.s.bgColor.rgb) {
+            fillColor = cell.s.bgColor.rgb;
+          }
+          
+          // Group by color
+          if (!_tiExcelColors[fillColor]) _tiExcelColors[fillColor] = [];
+          _tiExcelColors[fillColor].push(text);
+          allLines.push(text);
+        }
+      }
+      
+      // If we detected colors other than white, show color mapping UI
+      const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
+      if (colorKeys.length > 0) {
+        // Parse the text to match waza
+        parseTextImport(allLines.join('\n'));
+        _tiParsed = 'excel'; // Special mode for color mapping
+      } else {
+        // No colors detected, treat as regular text import
+        parseTextImport(allLines.join('\n'));
+      }
     }
 
 
