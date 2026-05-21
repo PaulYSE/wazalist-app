@@ -3722,8 +3722,14 @@
           + '</div>') : '')
 
         + ((w.parent_jp0 || w.parent_en0 || w.parent_jp1 || w.parent_en1) ? sec('parents', 'Parent techniques (prerequisites)',
-            (w.parent_jp0 || w.parent_en0 ? '<span class="chip" data-parent="' + w.parent_en0 + '">' + (w.parent_jp0 ? w.parent_jp0 : '') + (w.parent_en0 ? ' (' + w.parent_en0 + ')' : '') + '</span>' : '')
-            + (w.parent_jp1 || w.parent_en1 ? '<span class="chip" data-parent="' + w.parent_en1 + '">' + (w.parent_jp1 ? w.parent_jp1 : '') + (w.parent_en1 ? ' (' + w.parent_en1 + ')' : '') + '</span>' : '')) : ''
+            (w.parent_jp0 || w.parent_en0 ? (() => {
+              const parent = wazaData.find(x => (w.parent_en0 && (x.name_en === w.parent_en0 || x.name_en_literal === w.parent_en0)) || (w.parent_jp0 && x.name_jp === w.parent_jp0));
+              return '<span class="chip" ' + (parent ? 'data-id="' + parent.id + '"' : 'data-parent="' + w.parent_en0 + '"') + '>' + (w.parent_jp0 ? w.parent_jp0 : '') + (w.parent_en0 ? ' (' + w.parent_en0 + ')' : '') + '</span>';
+            })() : '')
+            + (w.parent_jp1 || w.parent_en1 ? (() => {
+              const parent = wazaData.find(x => (w.parent_en1 && (x.name_en === w.parent_en1 || x.name_en_literal === w.parent_en1)) || (w.parent_jp1 && x.name_jp === w.parent_jp1));
+              return '<span class="chip" ' + (parent ? 'data-id="' + parent.id + '"' : 'data-parent="' + w.parent_en1 + '"') + '>' + (w.parent_jp1 ? w.parent_jp1 : '') + (w.parent_en1 ? ' (' + w.parent_en1 + ')' : '') + '</span>';
+            })() : '')) : ''
           )
 
         + ((w.author_jp || w.author_en) ? sec('creator', 'Creator',
