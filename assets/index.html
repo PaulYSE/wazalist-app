@@ -3206,9 +3206,17 @@
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
       if (wazaParam) {
+        // Try parsing as numeric ID first
         const id = parseInt(wazaParam);
-        if (wazaData.some(w => w.id === id)) {
+        if (!isNaN(id) && wazaData.some(w => w.id === id)) {
           selectWaza(id);
+        } else {
+          // Try matching by Japanese name slug
+          const decodedSlug = decodeURIComponent(wazaParam);
+          const match = wazaData.find(w => w.name_jp && w.name_jp.trim() === decodedSlug);
+          if (match) {
+            selectWaza(match.id);
+          }
         }
       }
       startWazaPlaceholderRotation();
@@ -3793,8 +3801,10 @@
       renderList(); renderDetail();
       document.querySelector('.main').classList.remove('waza-selected');
 
-      // Remove the history entry we added
-      history.back();
+      // Clean up URL without creating history entry
+      const url = new URL(location.href);
+      url.searchParams.delete('waza');
+      history.replaceState(null, '', url);
     }
 
     // ── Navigation helper ─────────────────────────────────────────
@@ -4986,7 +4996,16 @@
 
     // ── Popstate ─────────────────────────────────────── 
     window.addEventListener('popstate', e => {
-      if (e.state && e.state.wazaOpen && selectedId !== null) { closeDetailPanel(); }
+      // When user presses back button, check if we should close the detail panel
+      // e.state will be null when going back to the initial page state
+      // or won't have wazaOpen when going back from the detail view
+      if (selectedId !== null && (!e.state || !e.state.wazaOpen)) {
+        // User pressed back while detail panel is open - close it
+        document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
+        selectedId = null;
+        renderList(); renderDetail();
+        document.querySelector('.main').classList.remove('waza-selected');
+      }
     });
   </script>
 </body>
