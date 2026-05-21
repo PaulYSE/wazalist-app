@@ -1734,6 +1734,19 @@
       border-color: var(--accent)
     }
 
+    .legend-text {
+      flex: 1;
+      padding: 5px 8px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text1);
+      font-size: 13px;
+      min-height: 30px;
+      display: flex;
+      align-items: center
+    }
+
     .legend-count {
       font-size: 12px;
       color: var(--text3);
@@ -4566,11 +4579,25 @@
 
       const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
 
-      // Legend strip for the imported list
-      let legendStrip = '';
-      if (imp && imp.legend && imp.legend.some(l => l)) {
-        legendStrip = '<div class="cmp-legend-strip"><span style="margin-right:4px;font-weight:500;color:var(--text2)">Their legend:</span>'
-          + SHAPES.map((s, i) => imp.legend[i] ? '<span class="cmp-legend-item">' + s + ' <span style="color:var(--text2)">' + escHtml(imp.legend[i]) + '</span></span>' : '').filter(Boolean).join('')
+      // Legend display for the imported list - using same row format as "My legend"
+      let importedLegendHTML = '';
+      if (imp && imp.legend) {
+        // Count how many waza use each shape in the imported list
+        const impShapeCounts = Array(6).fill(0);
+        if (imp.marks) {
+          Object.values(imp.marks).forEach(mark => {
+            if (mark.shapes) {
+              mark.shapes.forEach((on, i) => { if (on) impShapeCounts[i]++; });
+            }
+          });
+        }
+        
+        importedLegendHTML = '<div class="dsec2"><h3>Their legend</h3>'
+          + SHAPES.map((s, i) => '<div class="legend-row">'
+            + '<span class="legend-shape">' + s + '</span>'
+            + '<div class="legend-text">' + (imp.legend[i] ? escHtml(imp.legend[i]) : '<span style="color:var(--text3);font-style:italic">Unlabeled</span>') + '</div>'
+            + '<span class="legend-count">' + impShapeCounts[i] + ' waza</span>'
+            + '</div>').join('')
           + '</div>';
       }
 
@@ -4600,7 +4627,7 @@
 
       const emptyRows = !rows.length ? '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">This list has no marks.</div>' : '';
 
-      container.innerHTML = myLegendHTML + headerHtml + legendStrip + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
+      container.innerHTML = myLegendHTML + headerHtml + importedLegendHTML + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
 
       container.querySelector('#cmpExportBtn').addEventListener('click', openExportModal);
       container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLegend[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LEGEND, JSON.stringify(shapeLegend)); }); });
