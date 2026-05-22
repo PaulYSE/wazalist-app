@@ -5725,6 +5725,21 @@
   overflow-y: auto;
   box-sizing: border-box;
 }
+/* Show scrollbar for onboarding slides */
+.ob-slide::-webkit-scrollbar {
+  width: 8px;
+}
+.ob-slide::-webkit-scrollbar-track {
+  background: var(--bg0);
+  border-radius: 4px;
+}
+.ob-slide::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.ob-slide::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
 
 .ob-slide-icon { font-size: 38px; line-height: 1; }
 .ob-slide-title {
@@ -5996,7 +6011,7 @@
           </div>
           <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
           <div class="ob-demo ob-search-demo">
-            <input type="text" id="obSearchInput" placeholder="Try typing: thudersnake" autocomplete="off" spellcheck="false">
+            <input type="text" id="obSearchInput" placeholder="Try typing: doublemix" autocomplete="off" spellcheck="false">
             <div class="ob-search-results" id="obSearchResults">
               <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing above to see fuzzy matching in action…</div>
             </div>
@@ -6017,13 +6032,11 @@
                 <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;border-left:3px solid var(--accent);display:flex;align-items:center;gap:8px">
                   <span style="font-size:14px;font-weight:500">サンダースネーク</span>
                   <span style="font-size:12px;color:var(--text2)">Thundersnake</span>
-                  <span style="margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560">Advanced</span>
-                  <span style="font-size:11px;color:var(--text3)">● ■</span>
+                  <span style="margin-left:auto;font-size:11px;color:var(--text3)">● ■</span>
                 </div>
                 <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;gap:8px">
                   <span style="font-size:14px;font-weight:500">アマテラス</span>
                   <span style="font-size:12px;color:var(--text2)">Amaterasu</span>
-                  <span style="margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560">Expert</span>
                 </div>
               </div>
             </div>
@@ -6034,7 +6047,7 @@
               <div style="border-radius:8px;border:1px solid var(--border);overflow:hidden;background:hsl(200,44%,8.5%)">
                 <div style="padding:10px 12px 8px;border-left:3px solid hsl(200,70%,57%)">
                   <div style="font-size:14px;font-weight:600;margin-bottom:2px">サンダースネーク</div>
-                  <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Thundersnake · <span style="color:#b3a8f0">Advanced</span></div>
+                  <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Thundersnake</div>
                   <div style="display:flex;gap:4px;margin-bottom:6px">
                     <span style="font-size:12px;opacity:1">●</span>
                     <span style="font-size:12px;opacity:.2">▲</span>
@@ -6058,17 +6071,15 @@
               <div style="display:flex;flex-direction:column;gap:0">
                 <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px 5px 0 0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
                   <span style="font-weight:500">サンダースネーク</span><span style="color:var(--text2);font-size:12px">Thundersnake</span>
-                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Advanced</span>
-                  <span style="font-size:11px;color:var(--text3)">● ■</span>
+                  <span style="font-size:11px;color:var(--text1);margin-left:auto">● ■</span>
                 </div>
                 <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
                   <span style="font-weight:500">アマテラス</span><span style="color:var(--text2);font-size:12px">Amaterasu</span>
-                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Expert</span>
-                  <span style="font-size:11px;color:var(--text3)">▲</span>
+                  <span style="font-size:11px;color:var(--text1);margin-left:auto">▲</span>
                 </div>
                 <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0 0 5px 5px;display:flex;align-items:center;gap:6px;font-size:13px">
                   <span style="font-weight:500">ムラマサ</span><span style="color:var(--text2);font-size:12px">Muramasa</span>
-                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Intermediate</span>
+                  <span style="font-size:11px;color:var(--text1);margin-left:auto">♥ ★</span>
                 </div>
               </div>
             </div>
@@ -6096,9 +6107,12 @@
             Label each shape however suits your learning style — or use the suggested template below. You can rename them anytime.
           </div>
           <div class="ob-demo">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
               <span style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)">Your labels</span>
-              <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
+              <div style="display:flex;gap:6px">
+                <button id="obClearAll" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='var(--bg3)';this.style.color='var(--text1)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--text2)'">Clear All</button>
+                <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
+              </div>
             </div>
             <div class="ob-legend" id="obLegendPreview">
               <!-- rows built by JS -->
@@ -6169,17 +6183,29 @@
     { jp:'サンダースネーク', en:'Thundersnake',  alias:['thundersnake','thunder snake','thudersnake','thundrsnake','sandaasuneeku'] },
     { jp:'アマテラス',       en:'Amaterasu',     alias:['amaterasu','amaterazu','amateraasu','amateras'] },
     { jp:'ムラマサ',         en:'Muramasa',      alias:['muramasa','muramasaa','murmasa','muramaza'] },
+    { jp:'ダブルミックス',   en:'Double Mix',    alias:['double mix','daburu mikkusu','doublemix','dubble mix','doble mix'] },
     { jp:'ハイパーミックス', en:'Hyper Mix',     alias:['hyper mix','haipaa mikkusu','hypermix','hiper mix'] },
     { jp:'サイリウム',       en:'Cyalume',       alias:['cyalume','sairium','sairyuumu','lightstick'] },
   ];
 
+  // Marking demo names
+  const DEMO_NAMES = [
+    { jp:'サンダースネーク', en:'Thundersnake' },
+    { jp:'アマテラス', en:'Amaterasu' },
+    { jp:'ムラマサ', en:'Muramasa' },
+    { jp:'ミセスナルシッサ', en:'Mrs Narcissa' },
+    { jp:'ロマンス', en:'Romance' },
+  ];
+
   let currentSlide = 0;
   let chosenStyle = localStorage.getItem('wl_view_style') || 'expanded';
-  // Demo shape state: [wazaIndex][shapeIndex]
+  // Demo shape state: [wazaIndex][shapeIndex] - combined markings to show they're not mutually exclusive
   const demoShapes = [
-    [true,false,false,false,false,false],
-    [false,true,false,false,false,false],
-    [false,false,false,false,false,false],
+    [true,false,true,false,false,false],  // Thundersnake: ● ■
+    [false,true,false,false,false,false], // Amaterasu: ▲
+    [false,false,false,true,true,false],  // Muramasa: ♥ ★
+    [true,true,false,false,false,false],  // Mrs Narcissa: ● ▲
+    [false,false,true,true,false,false],  // Romance: ■ ♥
   ];
   // Legend inputs state
   const legendValues = ['','','','','',''];
@@ -6220,14 +6246,18 @@
     if (currentSlide === 3) initStyleDemo();
     if (currentSlide === 5) {
       buildLegendPreview();
-      // Bind the inline "Use template" button
+      // Bind the "Use template" button
       const tplBtn = document.getElementById('obUseTemplate');
       if (tplBtn) {
         tplBtn.onclick = () => {
           applyTemplate();
-          // Fill in the legend inputs with template values
-          const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
-          inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
+        };
+      }
+      // Bind the "Clear All" button
+      const clearBtn = document.getElementById('obClearAll');
+      if (clearBtn) {
+        clearBtn.onclick = () => {
+          clearAllLegend();
         };
       }
     }
@@ -6318,7 +6348,7 @@
   }
 
   function autoTypeDemo(input) {
-    const phrase = 'thudersnake';
+    const phrase = 'doublemix';
     let i = 0;
     function type() {
       if (input !== document.getElementById('obSearchInput')) return; // slide changed
@@ -6400,18 +6430,15 @@
   }
 
   // ── Marking demo (slide 4) ────────────────────────────────────
-  const DEMO_NAMES = [
-    { jp:'サンダースネーク', en:'Thundersnake' },
-    { jp:'アマテラス', en:'Amaterasu' },
-    { jp:'ムラマサ', en:'Muramasa' },
-  ];
   function buildMarkingDemo() {
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
     container.innerHTML = '';
     DEMO_NAMES.forEach((w, wi) => {
       const row = document.createElement('div');
-      row.className = 'ob-waza-row' + (wi === 0 ? ' marked' : wi === 1 ? ' marked2' : '');
+      const anyOn = demoShapes[wi].some(Boolean);
+      const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
+      row.className = 'ob-waza-row' + colorClass;
       row.id = 'obWazaRow' + wi;
       row.innerHTML = `<span class="wname"><b>${w.jp}</b> <span style="color:var(--text2);font-size:12px">${w.en}</span></span><div class="ob-shape-btns" id="obShapeBtns${wi}"></div>`;
       container.appendChild(row);
@@ -6433,7 +6460,9 @@
 
   function updateMarkingRowStyle(wi, row) {
     const anyOn = demoShapes[wi].some(Boolean);
-    row.className = 'ob-waza-row' + (anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '');
+    // Use modulo to cycle through color variations for 5 rows
+    const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
+    row.className = 'ob-waza-row' + colorClass;
   }
 
   // ── Legend preview (slide 5) ──────────────────────────────────
@@ -6477,6 +6506,20 @@
     localStorage.setItem('wl_shape_legend', JSON.stringify(TEMPLATE));
     if (window.shapeLegend) { TEMPLATE.forEach((v, i) => { window.shapeLegend[i] = v; }); }
     if (typeof renderDashboard === 'function') renderDashboard();
+    // Update the preview inputs
+    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+    inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
+  }
+
+  // ── Clear all legend labels ───────────────────────────────────
+  function clearAllLegend() {
+    const emptyLegend = ['','','','','',''];
+    localStorage.setItem('wl_shape_legend', JSON.stringify(emptyLegend));
+    if (window.shapeLegend) { emptyLegend.forEach((v, i) => { window.shapeLegend[i] = v; }); }
+    if (typeof renderDashboard === 'function') renderDashboard();
+    // Update the preview inputs
+    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+    inputs.forEach(inp => { inp.value = ''; });
   }
 
   // ── Style pill clicks ─────────────────────────────────────────
