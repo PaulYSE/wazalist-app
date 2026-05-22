@@ -5647,6 +5647,895 @@
       }
     });
   </script>
+<!-- ══════════════════════════════════════════════════
+     WAZALIST ONBOARDING OVERLAY
+     Inject this block anywhere before </body>
+══════════════════════════════════════════════════ -->
+<style>
+/* ── Onboarding overlay ── */
+#wlOnboarding {
+  position: fixed; inset: 0;
+  background: rgba(6,5,12,0.92);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; transition: opacity .35s ease;
+}
+#wlOnboarding.ob-visible { opacity: 1; }
+#wlOnboarding.ob-hidden { opacity: 0; pointer-events: none; }
+
+.ob-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 520px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(124,111,247,.15);
+  position: relative;
+}
+
+/* Progress dots */
+.ob-progress {
+  display: flex; gap: 6px; align-items: center;
+  padding: 18px 24px 0;
+  flex-shrink: 0;
+}
+.ob-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+  transition: background .25s, transform .25s;
+}
+.ob-dot.active {
+  background: var(--accent);
+  transform: scale(1.4);
+}
+.ob-dot.done { background: var(--accent2); }
+
+/* Close button */
+.ob-close {
+  margin-left: auto;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.ob-close:hover { background: var(--bg2); color: var(--text1); }
+
+/* Slides viewport */
+.ob-viewport {
+  flex: 1; overflow: hidden; position: relative;
+  min-height: 0;
+}
+.ob-slides {
+  display: flex;
+  transition: transform .38s cubic-bezier(.4,0,.2,1);
+  height: 100%;
+}
+.ob-slide {
+  min-width: 100%; padding: 24px;
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.ob-slide-icon { font-size: 38px; line-height: 1; }
+.ob-slide-title {
+  font-size: 22px; font-weight: 700; color: var(--text1);
+  line-height: 1.25;
+}
+.ob-slide-title span { color: var(--accent); }
+.ob-slide-sub {
+  font-size: 14px; color: var(--text2); line-height: 1.55;
+}
+.ob-slide-note {
+  font-size: 12px; color: var(--text3); font-style: italic;
+}
+
+/* Demo area */
+.ob-demo {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-top: 4px;
+}
+
+/* Fuzzy search demo */
+.ob-search-demo input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 14px; outline: none;
+  transition: border-color .15s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.ob-search-demo input:focus { border-color: var(--accent); }
+.ob-search-results {
+  margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
+  min-height: 56px;
+}
+.ob-result-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 6px;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .18s, transform .18s;
+}
+.ob-result-row.show { opacity: 1; transform: none; }
+.ob-result-jp { font-weight: 600; color: var(--text1); }
+.ob-result-en { color: var(--text2); font-size: 12px; }
+.ob-match-badge {
+  margin-left: auto; font-size: 10px; padding: 2px 7px;
+  border-radius: 10px; background: #1a1040; color: var(--accent);
+  border: 1px solid var(--accent2); white-space: nowrap;
+}
+.ob-no-results { font-size: 13px; color: var(--text3); padding: 4px 0; }
+
+/* Card style demo */
+.ob-style-demo { display: flex; flex-direction: column; gap: 8px; }
+.ob-style-pill {
+  padding: 10px 14px;
+  border-radius: var(--r);
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+}
+.ob-style-pill:hover { background: var(--bg2); }
+.ob-style-pill.selected {
+  border-color: var(--accent);
+  background: rgba(124,111,247,.08);
+}
+.ob-style-pill .sp-label {
+  font-size: 12px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+}
+.ob-style-pill.selected .sp-label { color: var(--accent); }
+/* List style preview */
+.sp-list-row { display: flex; align-items: center; gap: 8px; }
+.sp-list-row .jp { font-size: 14px; font-weight: 500; }
+.sp-list-row .en { font-size: 12px; color: var(--text2); }
+.sp-list-row .tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #2a2040; color: #b3a8f0; border:1px solid #3d3560; margin-left: auto; }
+/* Card style preview */
+.sp-card-inner { border-radius: 6px; background: var(--bg2); padding: 8px 10px; }
+.sp-card-inner .jp { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.sp-card-inner .en { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.sp-card-inner .shapes { display: flex; gap: 4px; }
+.sp-card-inner .sh { font-size: 13px; opacity: .22; }
+.sp-card-inner .sh.on { opacity: 1; }
+/* Compact style preview */
+.sp-compact-row {
+  display: flex; gap: 6px; align-items: center;
+  font-size: 13px; flex-wrap: wrap;
+}
+.sp-compact-row .jp2 { font-weight: 500; }
+.sp-compact-row .en2 { color: var(--text2); font-size: 12px; }
+.sp-compact-row .tag2 { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #2a2040; color: #b3a8f0; border:1px solid #3d3560; }
+
+/* Shape marking demo */
+.ob-marking-demo { display: flex; flex-direction: column; gap: 8px; }
+.ob-waza-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: var(--r);
+  background: var(--bg0); border: 1px solid var(--border);
+}
+.ob-waza-row .wname { font-size: 13px; font-weight: 500; flex: 1; }
+.ob-shape-btns { display: flex; gap: 4px; }
+.ob-shape-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+  flex-shrink: 0;
+}
+.ob-shape-btn:hover { border-color: var(--accent); color: var(--text1); }
+.ob-shape-btn.on {
+  background: rgba(124,111,247,.15);
+  border-color: var(--accent);
+  color: var(--text1);
+}
+/* marking highlight tint on rows */
+.ob-waza-row.marked {
+  background: hsl(200,44%,8.5%);
+  border-left: 3px solid hsl(200,70%,57%);
+}
+.ob-waza-row.marked2 {
+  background: hsl(45,44%,8.5%);
+  border-left: 3px solid hsl(45,70%,57%);
+}
+
+/* Legend / "you decide" slide */
+.ob-legend { display: flex; flex-direction: column; gap: 6px; }
+.ob-legend-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; border-radius: var(--r);
+  background: var(--bg0); border: 1px solid var(--border);
+}
+.ob-legend-shape { font-size: 16px; width: 22px; text-align: center; }
+.ob-legend-input {
+  flex: 1; padding: 4px 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text1); font-size: 13px;
+  outline: none; font-family: inherit;
+}
+.ob-legend-input:focus { border-color: var(--accent); }
+
+/* Template slide */
+.ob-template { display: flex; flex-direction: column; gap: 6px; }
+.ob-tpl-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: var(--r);
+  background: var(--bg0); border: 1px solid var(--border);
+}
+.ob-tpl-shape { font-size: 15px; width: 20px; text-align: center; }
+.ob-tpl-label { font-size: 13px; color: var(--text2); }
+
+/* Footer / buttons */
+.ob-footer {
+  padding: 16px 24px 20px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  background: var(--bg1);
+  flex-shrink: 0;
+}
+.ob-btn {
+  padding: 9px 18px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+.ob-btn:hover { background: var(--bg3); color: var(--text1); }
+.ob-btn-primary {
+  background: var(--accent2);
+  border-color: var(--accent);
+  color: #fff;
+  margin-left: auto;
+}
+.ob-btn-primary:hover { background: var(--accent); }
+.ob-btn-green {
+  background: #002a10;
+  border-color: var(--green);
+  color: var(--green);
+}
+.ob-btn-green:hover { background: #003d18; }
+
+/* Slide-in animation for demo items */
+@keyframes obFadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:none; }
+}
+.ob-animate { animation: obFadeUp .3s ease forwards; }
+</style>
+
+<!-- Onboarding HTML -->
+<div id="wlOnboarding" style="display:none">
+  <div class="ob-card">
+
+    <!-- Progress dots + close -->
+    <div class="ob-progress">
+      <div class="ob-dot active" id="obDot0"></div>
+      <div class="ob-dot" id="obDot1"></div>
+      <div class="ob-dot" id="obDot2"></div>
+      <div class="ob-dot" id="obDot3"></div>
+      <div class="ob-dot" id="obDot4"></div>
+      <div class="ob-dot" id="obDot5"></div>
+      <div class="ob-dot" id="obDot6"></div>
+      <div class="ob-dot" id="obDot7"></div>
+      <button class="ob-close" id="obClose" title="Skip onboarding">✕</button>
+    </div>
+
+    <!-- Slides viewport -->
+    <div class="ob-viewport">
+      <div class="ob-slides" id="obSlides">
+
+        <!-- SLIDE 0: Welcome -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">⛩</div>
+          <div class="ob-slide-title">Welcome to <span>Wazalist</span></div>
+          <div class="ob-slide-sub">
+            Your personal database for Wotagei techniques — browse every Waza, track your learning, and build your own list.
+          </div>
+          <div class="ob-slide-sub" style="color:var(--text3);font-size:13px">
+            This quick tour covers the key features. It takes about 60 seconds.
+          </div>
+        </div>
+
+        <!-- SLIDE 1: Explore tab -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">🔍</div>
+          <div class="ob-slide-title">Explore all <span>Waza</span></div>
+          <div class="ob-slide-sub">
+            Use the <b>Explore</b> tab to search the full database. Every Waza has its Japanese name, English translation, skill level, parent techniques, and reference videos.
+          </div>
+          <div class="ob-demo" style="padding:10px 12px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Browse panel</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px;border-left:3px solid var(--accent)">
+                <span style="font-weight:600">ダブルレインボー</span> <span style="color:var(--text2);font-size:12px">· Double Rainbow</span>
+              </div>
+              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
+                <span style="font-weight:600">ミックス</span> <span style="color:var(--text2);font-size:12px">· Mix</span>
+              </div>
+              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
+                <span style="font-weight:600">ナミ</span> <span style="color:var(--text2);font-size:12px">· Nami</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: Fuzzy search -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">💬</div>
+          <div class="ob-slide-title">Can't write in <span>Japanese?</span></div>
+          <div class="ob-slide-sub">
+            No problem — search in English or Romaji. Minor spelling mistakes are handled automatically.
+          </div>
+          <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
+          <div class="ob-demo ob-search-demo">
+            <input type="text" id="obSearchInput" placeholder="Try typing: dubble renbow" autocomplete="off" spellcheck="false">
+            <div class="ob-search-results" id="obSearchResults">
+              <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing above to see fuzzy matching in action…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: Card style -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">🃏</div>
+          <div class="ob-slide-title">Choose a <span>card style</span></div>
+          <div class="ob-slide-sub">Pick how Waza are displayed in the list. You can change this anytime.</div>
+          <div class="ob-slide-note">This can be changed anytime in the filter bar.</div>
+          <div class="ob-style-demo" id="obStyleDemo">
+
+            <!-- List style -->
+            <div class="ob-style-pill" data-style="list">
+              <div class="sp-label">List</div>
+              <div class="sp-list-row">
+                <div class="jp">ダブルレインボー</div>
+                <div class="en">Double Rainbow</div>
+                <div class="tag">Advanced</div>
+              </div>
+            </div>
+
+            <!-- Card style (default) -->
+            <div class="ob-style-pill selected" data-style="expanded">
+              <div class="sp-label">Cards ✓ (default)</div>
+              <div class="sp-card-inner">
+                <div class="jp">ダブルレインボー</div>
+                <div class="en">Double Rainbow · Advanced</div>
+                <div class="shapes">
+                  <span class="sh on">●</span>
+                  <span class="sh">▲</span>
+                  <span class="sh on">■</span>
+                  <span class="sh">♥</span>
+                  <span class="sh">★</span>
+                  <span class="sh">◆</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compact style -->
+            <div class="ob-style-pill" data-style="compact">
+              <div class="sp-label">Compact</div>
+              <div class="sp-compact-row">
+                <span class="jp2">ダブルレインボー</span>
+                <span class="en2">Double Rainbow</span>
+                <span class="tag2">Advanced</span>
+                <span style="margin-left:auto;font-size:12px;color:var(--text3)">● ■</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SLIDE 4: Markings demo -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">🏷️</div>
+          <div class="ob-slide-title">Build your <span>Wazalist</span></div>
+          <div class="ob-slide-sub">
+            Use the 6 shape markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off — try it below!
+          </div>
+          <div class="ob-demo ob-marking-demo" id="obMarkingDemo">
+            <!-- rows built by JS -->
+          </div>
+        </div>
+
+        <!-- SLIDE 5: You decide -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">✍️</div>
+          <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
+          <div class="ob-slide-sub">
+            Label each shape however suits your learning style. Names are saved to your account.
+          </div>
+          <div class="ob-demo">
+            <div class="ob-legend" id="obLegendPreview">
+              <!-- rows built by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: Template or custom -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">📋</div>
+          <div class="ob-slide-title">Use a <span>template</span> or start fresh?</div>
+          <div class="ob-slide-sub">
+            Here's a suggested marking template — a simple learning tracker. You can rename any shape later.
+          </div>
+          <div class="ob-demo">
+            <div class="ob-template">
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">●</span><span class="ob-tpl-label">Want to Learn</span></div>
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">▲</span><span class="ob-tpl-label">Learning</span></div>
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">■</span><span class="ob-tpl-label">Complete</span></div>
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">♥</span><span class="ob-tpl-label">My Favourite Waza</span></div>
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">★</span><span class="ob-tpl-label">Forgot</span></div>
+              <div class="ob-tpl-row"><span class="ob-tpl-shape">◆</span><span class="ob-tpl-label" style="color:var(--text3);font-style:italic">(your own label)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: Import -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">📥</div>
+          <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
+          <div class="ob-slide-sub">
+            Already have a list? Import it instantly. Excel files with coloured cells are supported, as well as plain text paste.
+          </div>
+          <div class="ob-slide-note">Excel and text import supported — colours are detected automatically.</div>
+          <div class="ob-demo" style="display:flex;flex-direction:column;gap:8px;padding:14px">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
+              <span style="font-size:18px">📊</span>
+              <div>
+                <div style="font-size:13px;font-weight:600">Excel Upload</div>
+                <div style="font-size:12px;color:var(--text3)">Cell colours detected automatically</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
+              <span style="font-size:18px">📋</span>
+              <div>
+                <div style="font-size:13px;font-weight:600">Paste Text</div>
+                <div style="font-size:12px;color:var(--text3)">Labels in [brackets] auto-detected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ob-slides -->
+    </div><!-- /ob-viewport -->
+
+    <!-- Footer buttons -->
+    <div class="ob-footer" id="obFooter">
+      <!-- dynamically populated -->
+    </div>
+
+  </div><!-- /ob-card -->
+</div><!-- /wlOnboarding -->
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Config ────────────────────────────────────────────────────
+  const OB_KEY = 'wl_onboarding_done';
+  const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
+  const SHAPES_OB = ['●','▲','■','♥','★','◆'];
+  const SLIDE_COUNT = 8;
+
+  // Fake waza data for demo purposes
+  const DEMO_WAZA = [
+    { jp:'ダブルレインボー', en:'Double Rainbow',   alias:['double rainbow','daburu reinbo','dbl rainbow','double renbow','dubble renbow'] },
+    { jp:'ミックス',         en:'Mix',              alias:['mix','mikkusu','miks'] },
+    { jp:'ナミ',             en:'Nami',             alias:['nami','wave'] },
+    { jp:'ハイパーミックス', en:'Hyper Mix',        alias:['hyper mix','haipaa mikkusu','hypermix','hiper mix'] },
+    { jp:'サイリウム',       en:'Cyalume',          alias:['cyalume','sairium','sairyuumu','lightstick'] },
+  ];
+
+  let currentSlide = 0;
+  let chosenStyle = localStorage.getItem('wl_view_style') || 'expanded';
+  // Demo shape state: [wazaIndex][shapeIndex]
+  const demoShapes = [
+    [true,false,false,false,false,false],
+    [false,true,false,false,false,false],
+    [false,false,false,false,false,false],
+  ];
+  // Legend inputs state
+  const legendValues = ['','','','','',''];
+
+  // ── Show / hide ───────────────────────────────────────────────
+  function showOnboarding() {
+    const el = document.getElementById('wlOnboarding');
+    el.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { el.classList.add('ob-visible'); });
+    });
+    buildMarkingDemo();
+    buildLegendPreview();
+    renderSlide(0);
+  }
+
+  function closeOnboarding() {
+    const el = document.getElementById('wlOnboarding');
+    el.classList.remove('ob-visible');
+    el.classList.add('ob-hidden');
+    setTimeout(() => { el.style.display = 'none'; }, 350);
+    localStorage.setItem(OB_KEY, '1');
+  }
+
+  // ── Slide navigation ──────────────────────────────────────────
+  function goToSlide(n) {
+    currentSlide = Math.max(0, Math.min(SLIDE_COUNT - 1, n));
+    document.getElementById('obSlides').style.transform = `translateX(-${currentSlide * 100}%)`;
+    // Progress dots
+    for (let i = 0; i < SLIDE_COUNT; i++) {
+      const dot = document.getElementById('obDot' + i);
+      if (!dot) continue;
+      dot.className = 'ob-dot' + (i === currentSlide ? ' active' : (i < currentSlide ? ' done' : ''));
+    }
+    renderFooter();
+    // Slide-specific init
+    if (currentSlide === 2) initSearchDemo();
+    if (currentSlide === 3) initStyleDemo();
+  }
+
+  function renderSlide(n) { goToSlide(n); }
+
+  // ── Footer buttons ────────────────────────────────────────────
+  function renderFooter() {
+    const footer = document.getElementById('obFooter');
+    footer.innerHTML = '';
+
+    if (currentSlide === 3) {
+      // Card style slide — 3 choice buttons
+      ['List','Cards','Compact'].forEach((label, i) => {
+        const styles = ['list','expanded','compact'];
+        const btn = document.createElement('button');
+        btn.className = 'ob-btn' + (chosenStyle === styles[i] ? ' ob-btn-primary' : '');
+        btn.textContent = label;
+        btn.onclick = () => {
+          chosenStyle = styles[i];
+          localStorage.setItem('wl_view_style', chosenStyle);
+          // sync main app select if present
+          const sel = document.getElementById('browseViewSelect');
+          const selMob = document.getElementById('browseViewSelectMob');
+          if (sel) sel.value = chosenStyle;
+          if (selMob) selMob.value = chosenStyle;
+          // re-render browseListView
+          if (typeof browseListView !== 'undefined') { window.browseListView = chosenStyle; }
+          renderFooter();
+          updateStyleDemo();
+        };
+        footer.appendChild(btn);
+      });
+      // Next
+      const next = mkNextBtn();
+      footer.appendChild(next);
+
+    } else if (currentSlide === 6) {
+      // Template slide — "Use template" or "Skip"
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'ob-btn';
+      skipBtn.textContent = 'Skip';
+      skipBtn.onclick = () => goToSlide(currentSlide + 1);
+
+      const useBtn = document.createElement('button');
+      useBtn.className = 'ob-btn ob-btn-green';
+      useBtn.textContent = '✓ Use template';
+      useBtn.onclick = () => {
+        applyTemplate();
+        goToSlide(currentSlide + 1);
+      };
+
+      footer.appendChild(skipBtn);
+      footer.appendChild(useBtn);
+
+    } else if (currentSlide === 7) {
+      // Import slide — "Import" or "Skip" / finish
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'ob-btn';
+      skipBtn.textContent = "I'll set up later";
+      skipBtn.onclick = () => closeOnboarding();
+
+      const importBtn = document.createElement('button');
+      importBtn.className = 'ob-btn ob-btn-primary';
+      importBtn.textContent = '📥 Import now';
+      importBtn.onclick = () => {
+        closeOnboarding();
+        // Open the text-import compare tab
+        setTimeout(() => {
+          const cmpTab = document.querySelector('[data-tab="compare"]') || document.querySelector('[data-cstab="textimport"]');
+          // Navigate to compare/import view
+          const navCmp = document.querySelector('.nav-tab[data-tab="compare"]') || document.querySelector('[data-tab="compare"]');
+          if (navCmp) navCmp.click();
+          setTimeout(() => {
+            const tiTab = document.querySelector('[data-cstab="textimport"]');
+            if (tiTab) tiTab.click();
+          }, 200);
+        }, 400);
+      };
+
+      footer.appendChild(skipBtn);
+      footer.appendChild(importBtn);
+
+    } else {
+      // Default: Next button
+      footer.appendChild(mkNextBtn());
+    }
+  }
+
+  function mkNextBtn() {
+    const btn = document.createElement('button');
+    btn.className = 'ob-btn ob-btn-primary';
+    btn.style.marginLeft = 'auto';
+    btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
+    btn.onclick = () => goToSlide(currentSlide + 1);
+    return btn;
+  }
+
+  // ── Fuzzy search demo (slide 2) ───────────────────────────────
+  let searchTimer = null;
+  function initSearchDemo() {
+    const input = document.getElementById('obSearchInput');
+    const resultsEl = document.getElementById('obSearchResults');
+    const hint = document.getElementById('obSearchHint');
+    if (!input) return;
+    input.value = '';
+    if (hint) hint.style.display = '';
+    resultsEl.innerHTML = '<div class="ob-no-results" id="obSearchHint">Start typing above to see fuzzy matching in action…</div>';
+
+    input.oninput = () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => runSearchDemo(input.value), 120);
+    };
+    // Auto-type demo
+    autoTypeDemo(input);
+  }
+
+  function autoTypeDemo(input) {
+    const phrase = 'dubble renbow';
+    let i = 0;
+    function type() {
+      if (input !== document.getElementById('obSearchInput')) return; // slide changed
+      if (document.getElementById('obSearchInput') !== document.activeElement) {
+        if (i < phrase.length) {
+          input.value = phrase.slice(0, ++i);
+          input.dispatchEvent(new Event('input'));
+          setTimeout(type, 90 + Math.random() * 60);
+        }
+      }
+    }
+    setTimeout(type, 800);
+  }
+
+  function runSearchDemo(query) {
+    const resultsEl = document.getElementById('obSearchResults');
+    if (!resultsEl) return;
+    if (!query.trim()) {
+      resultsEl.innerHTML = '<div class="ob-no-results" id="obSearchHint">Start typing above to see fuzzy matching in action…</div>';
+      return;
+    }
+    const q = query.toLowerCase().trim();
+    const matches = DEMO_WAZA.filter(w => {
+      if (w.en.toLowerCase().includes(q)) return true;
+      if (w.jp.includes(query)) return true;
+      return w.alias.some(a => fuzzyMatch(a, q));
+    });
+
+    if (!matches.length) {
+      resultsEl.innerHTML = '<div class="ob-no-results">No matches found — try a different spelling</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = '';
+    matches.forEach((w, idx) => {
+      const row = document.createElement('div');
+      row.className = 'ob-result-row';
+      const isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
+      row.innerHTML = `<span class="ob-result-jp">${w.jp}</span><span class="ob-result-en">${w.en}</span><span class="ob-match-badge">${isExact ? 'match' : 'fuzzy match'}</span>`;
+      resultsEl.appendChild(row);
+      setTimeout(() => row.classList.add('show'), idx * 60);
+    });
+  }
+
+  function fuzzyMatch(text, query) {
+    // simple sliding-window edit-distance check
+    if (text.includes(query)) return true;
+    const words = query.split(' ');
+    const twords = text.split(' ');
+    return words.every(qw => twords.some(tw => editDistance(tw, qw) <= Math.max(1, Math.floor(qw.length / 3))));
+  }
+
+  function editDistance(a, b) {
+    const dp = Array.from({length: b.length + 1}, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let prev = i;
+      for (let j = 1; j <= b.length; j++) {
+        const temp = dp[j];
+        dp[j] = a[i-1] === b[j-1] ? dp[j-1] : 1 + Math.min(dp[j-1], dp[j], prev);
+        prev = temp;
+      }
+    }
+    return dp[b.length];
+  }
+
+  // ── Card style demo (slide 3) ─────────────────────────────────
+  function initStyleDemo() { updateStyleDemo(); }
+  function updateStyleDemo() {
+    document.querySelectorAll('.ob-style-pill').forEach(p => {
+      p.classList.toggle('selected', p.dataset.style === chosenStyle);
+      const lbl = p.querySelector('.sp-label');
+      if (lbl) {
+        const isSelected = p.dataset.style === chosenStyle;
+        const names = {list:'List',expanded:'Cards',compact:'Compact'};
+        lbl.textContent = names[p.dataset.style] + (isSelected ? ' ✓ (selected)' : '');
+      }
+    });
+    renderFooter();
+  }
+
+  // ── Marking demo (slide 4) ────────────────────────────────────
+  const DEMO_NAMES = [
+    { jp:'ダブルレインボー', en:'Double Rainbow' },
+    { jp:'ミックス', en:'Mix' },
+    { jp:'ナミ', en:'Nami' },
+  ];
+  function buildMarkingDemo() {
+    const container = document.getElementById('obMarkingDemo');
+    if (!container) return;
+    container.innerHTML = '';
+    DEMO_NAMES.forEach((w, wi) => {
+      const row = document.createElement('div');
+      row.className = 'ob-waza-row' + (wi === 0 ? ' marked' : wi === 1 ? ' marked2' : '');
+      row.id = 'obWazaRow' + wi;
+      row.innerHTML = `<span class="wname"><b>${w.jp}</b> <span style="color:var(--text2);font-size:12px">${w.en}</span></span><div class="ob-shape-btns" id="obShapeBtns${wi}"></div>`;
+      container.appendChild(row);
+      const btns = row.querySelector('#obShapeBtns' + wi);
+      SHAPES_OB.forEach((sh, si) => {
+        const btn = document.createElement('button');
+        btn.className = 'ob-shape-btn' + (demoShapes[wi][si] ? ' on' : '');
+        btn.textContent = sh;
+        btn.title = sh;
+        btn.onclick = () => {
+          demoShapes[wi][si] = !demoShapes[wi][si];
+          btn.classList.toggle('on', demoShapes[wi][si]);
+          updateMarkingRowStyle(wi, row);
+        };
+        btns.appendChild(btn);
+      });
+    });
+  }
+
+  function updateMarkingRowStyle(wi, row) {
+    const anyOn = demoShapes[wi].some(Boolean);
+    row.className = 'ob-waza-row' + (anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '');
+  }
+
+  // ── Legend preview (slide 5) ──────────────────────────────────
+  function buildLegendPreview() {
+    const container = document.getElementById('obLegendPreview');
+    if (!container) return;
+    container.innerHTML = '';
+    // Load existing legend from app
+    let existing = ['','','','','',''];
+    try { existing = JSON.parse(localStorage.getItem('wl_shape_legend') || '["","","","","",""]'); } catch {}
+    SHAPES_OB.forEach((sh, i) => {
+      const row = document.createElement('div');
+      row.className = 'ob-legend-row';
+      row.innerHTML = `<span class="ob-legend-shape">${sh}</span>`;
+      const inp = document.createElement('input');
+      inp.className = 'ob-legend-input';
+      inp.type = 'text';
+      inp.maxLength = 32;
+      inp.placeholder = 'Label this shape…';
+      inp.value = existing[i] || legendValues[i] || '';
+      inp.oninput = () => {
+        legendValues[i] = inp.value;
+        saveLegend();
+      };
+      row.appendChild(inp);
+      container.appendChild(row);
+    });
+  }
+
+  function saveLegend() {
+    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+    const vals = Array.from(inputs).map(i => i.value.trim());
+    localStorage.setItem('wl_shape_legend', JSON.stringify(vals));
+    // Sync with app's shapeLegend if it exists
+    if (window.shapeLegend) { vals.forEach((v, i) => { window.shapeLegend[i] = v; }); }
+    if (typeof renderDashboard === 'function') renderDashboard();
+  }
+
+  // ── Apply template ────────────────────────────────────────────
+  function applyTemplate() {
+    localStorage.setItem('wl_shape_legend', JSON.stringify(TEMPLATE));
+    if (window.shapeLegend) { TEMPLATE.forEach((v, i) => { window.shapeLegend[i] = v; }); }
+    if (typeof renderDashboard === 'function') renderDashboard();
+  }
+
+  // ── Style pill clicks ─────────────────────────────────────────
+  document.querySelectorAll('.ob-style-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      chosenStyle = p.dataset.style;
+      localStorage.setItem('wl_view_style', chosenStyle);
+      const sel = document.getElementById('browseViewSelect');
+      const selMob = document.getElementById('browseViewSelectMob');
+      if (sel) sel.value = chosenStyle;
+      if (selMob) selMob.value = chosenStyle;
+      updateStyleDemo();
+    });
+  });
+
+  // ── Close button ──────────────────────────────────────────────
+  document.getElementById('obClose').onclick = closeOnboarding;
+
+  // ── Trigger: show after new account registration ──────────────
+  // We patch the register flow: after initApp() is called following register,
+  // check a flag set by the register button.
+  function patchRegister() {
+    const rgBtn = document.getElementById('rg-btn');
+    if (!rgBtn) { setTimeout(patchRegister, 300); return; }
+    const originalOnclick = rgBtn.onclick;
+    rgBtn.addEventListener('click', function() {
+      window._wlJustRegistered = true;
+    }, true); // capture phase so it fires before existing handler
+  }
+
+  // Patch initApp to show onboarding when _wlJustRegistered is true
+  function patchInitApp() {
+    if (typeof initApp !== 'function') { setTimeout(patchInitApp, 100); return; }
+    const _orig = initApp;
+    window.initApp = async function() {
+      await _orig.apply(this, arguments);
+      if (window._wlJustRegistered) {
+        window._wlJustRegistered = false;
+        if (!localStorage.getItem(OB_KEY)) {
+          setTimeout(showOnboarding, 600);
+        }
+      }
+    };
+  }
+
+  // Also expose a manual trigger for testing
+  window.showWazaOnboarding = showOnboarding;
+
+  // ── Init ──────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    patchRegister();
+    patchInitApp();
+  });
+  // If DOM is already ready
+  if (document.readyState !== 'loading') {
+    patchRegister();
+    patchInitApp();
+  }
+
+})();
+</script>
+
 </body>
 
 </html>
