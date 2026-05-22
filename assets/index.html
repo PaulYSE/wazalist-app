@@ -5945,7 +5945,6 @@
       <div class="ob-dot" id="obDot4"></div>
       <div class="ob-dot" id="obDot5"></div>
       <div class="ob-dot" id="obDot6"></div>
-      <div class="ob-dot" id="obDot7"></div>
       <button class="ob-close" id="obClose" title="Skip onboarding">✕</button>
     </div>
 
@@ -5976,13 +5975,13 @@
             <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Browse panel</div>
             <div style="display:flex;flex-direction:column;gap:5px">
               <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px;border-left:3px solid var(--accent)">
-                <span style="font-weight:600">ダブルレインボー</span> <span style="color:var(--text2);font-size:12px">· Double Rainbow</span>
+                <span style="font-weight:600">サンダースネーク</span> <span style="color:var(--text2);font-size:12px">· Thundersnake</span>
               </div>
               <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
-                <span style="font-weight:600">ミックス</span> <span style="color:var(--text2);font-size:12px">· Mix</span>
+                <span style="font-weight:600">アマテラス</span> <span style="color:var(--text2);font-size:12px">· Amaterasu</span>
               </div>
               <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
-                <span style="font-weight:600">ナミ</span> <span style="color:var(--text2);font-size:12px">· Nami</span>
+                <span style="font-weight:600">ムラマサ</span> <span style="color:var(--text2);font-size:12px">· Muramasa</span>
               </div>
             </div>
           </div>
@@ -5997,7 +5996,7 @@
           </div>
           <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
           <div class="ob-demo ob-search-demo">
-            <input type="text" id="obSearchInput" placeholder="Try typing: dubble renbow" autocomplete="off" spellcheck="false">
+            <input type="text" id="obSearchInput" placeholder="Try typing: thudersnake" autocomplete="off" spellcheck="false">
             <div class="ob-search-results" id="obSearchResults">
               <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing above to see fuzzy matching in action…</div>
             </div>
@@ -6008,33 +6007,47 @@
         <div class="ob-slide">
           <div class="ob-slide-icon">🃏</div>
           <div class="ob-slide-title">Choose a <span>card style</span></div>
-          <div class="ob-slide-sub">Pick how Waza are displayed in the list. You can change this anytime.</div>
-          <div class="ob-slide-note">This can be changed anytime in the filter bar.</div>
+          <div class="ob-slide-sub">Click a style to select it. You can change this anytime in the filter bar.</div>
           <div class="ob-style-demo" id="obStyleDemo">
 
             <!-- List style -->
             <div class="ob-style-pill" data-style="list">
               <div class="sp-label">List</div>
-              <div class="sp-list-row">
-                <div class="jp">ダブルレインボー</div>
-                <div class="en">Double Rainbow</div>
-                <div class="tag">Advanced</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;border-left:3px solid var(--accent);display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;font-weight:500">サンダースネーク</span>
+                  <span style="font-size:12px;color:var(--text2)">Thundersnake</span>
+                  <span style="margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560">Advanced</span>
+                  <span style="font-size:11px;color:var(--text3)">● ■</span>
+                </div>
+                <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;font-weight:500">アマテラス</span>
+                  <span style="font-size:12px;color:var(--text2)">Amaterasu</span>
+                  <span style="margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560">Expert</span>
+                </div>
               </div>
             </div>
 
             <!-- Card style (default) -->
             <div class="ob-style-pill selected" data-style="expanded">
               <div class="sp-label">Cards ✓ (default)</div>
-              <div class="sp-card-inner">
-                <div class="jp">ダブルレインボー</div>
-                <div class="en">Double Rainbow · Advanced</div>
-                <div class="shapes">
-                  <span class="sh on">●</span>
-                  <span class="sh">▲</span>
-                  <span class="sh on">■</span>
-                  <span class="sh">♥</span>
-                  <span class="sh">★</span>
-                  <span class="sh">◆</span>
+              <div style="border-radius:8px;border:1px solid var(--border);overflow:hidden;background:hsl(200,44%,8.5%)">
+                <div style="padding:10px 12px 8px;border-left:3px solid hsl(200,70%,57%)">
+                  <div style="font-size:14px;font-weight:600;margin-bottom:2px">サンダースネーク</div>
+                  <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Thundersnake · <span style="color:#b3a8f0">Advanced</span></div>
+                  <div style="display:flex;gap:4px;margin-bottom:6px">
+                    <span style="font-size:12px;opacity:1">●</span>
+                    <span style="font-size:12px;opacity:.2">▲</span>
+                    <span style="font-size:12px;opacity:1">■</span>
+                    <span style="font-size:12px;opacity:.2">♥</span>
+                    <span style="font-size:12px;opacity:.2">★</span>
+                    <span style="font-size:12px;opacity:.2">◆</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;padding:6px 12px 8px;border-top:1px solid var(--border);background:rgba(0,0,0,.15)">
+                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#ff0000;display:inline-block"></span>YouTube</span>
+                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#00a1d6;display:inline-block"></span>Bilibili</span>
+                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#1da1f2;display:inline-block"></span>Twitter/X</span>
                 </div>
               </div>
             </div>
@@ -6042,11 +6055,21 @@
             <!-- Compact style -->
             <div class="ob-style-pill" data-style="compact">
               <div class="sp-label">Compact</div>
-              <div class="sp-compact-row">
-                <span class="jp2">ダブルレインボー</span>
-                <span class="en2">Double Rainbow</span>
-                <span class="tag2">Advanced</span>
-                <span style="margin-left:auto;font-size:12px;color:var(--text3)">● ■</span>
+              <div style="display:flex;flex-direction:column;gap:0">
+                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px 5px 0 0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
+                  <span style="font-weight:500">サンダースネーク</span><span style="color:var(--text2);font-size:12px">Thundersnake</span>
+                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Advanced</span>
+                  <span style="font-size:11px;color:var(--text3)">● ■</span>
+                </div>
+                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
+                  <span style="font-weight:500">アマテラス</span><span style="color:var(--text2);font-size:12px">Amaterasu</span>
+                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Expert</span>
+                  <span style="font-size:11px;color:var(--text3)">▲</span>
+                </div>
+                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0 0 5px 5px;display:flex;align-items:center;gap:6px;font-size:13px">
+                  <span style="font-weight:500">ムラマサ</span><span style="color:var(--text2);font-size:12px">Muramasa</span>
+                  <span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#2a2040;color:#b3a8f0;border:1px solid #3d3560;margin-left:auto">Intermediate</span>
+                </div>
               </div>
             </div>
 
@@ -6065,40 +6088,36 @@
           </div>
         </div>
 
-        <!-- SLIDE 5: You decide -->
+        <!-- SLIDE 5: Label markings + template -->
         <div class="ob-slide">
           <div class="ob-slide-icon">✍️</div>
           <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
           <div class="ob-slide-sub">
-            Label each shape however suits your learning style. Names are saved to your account.
+            Label each shape however suits your learning style — or use the suggested template below. You can rename them anytime.
           </div>
           <div class="ob-demo">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)">Your labels</span>
+              <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
+            </div>
             <div class="ob-legend" id="obLegendPreview">
               <!-- rows built by JS -->
             </div>
           </div>
-        </div>
-
-        <!-- SLIDE 6: Template or custom -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">📋</div>
-          <div class="ob-slide-title">Use a <span>template</span> or start fresh?</div>
-          <div class="ob-slide-sub">
-            Here's a suggested marking template — a simple learning tracker. You can rename any shape later.
-          </div>
-          <div class="ob-demo">
-            <div class="ob-template">
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">●</span><span class="ob-tpl-label">Want to Learn</span></div>
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">▲</span><span class="ob-tpl-label">Learning</span></div>
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">■</span><span class="ob-tpl-label">Complete</span></div>
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">♥</span><span class="ob-tpl-label">My Favourite Waza</span></div>
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">★</span><span class="ob-tpl-label">Forgot</span></div>
-              <div class="ob-tpl-row"><span class="ob-tpl-shape">◆</span><span class="ob-tpl-label" style="color:var(--text3);font-style:italic">(your own label)</span></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-top:0">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Suggested template</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">●</span><span style="color:var(--text2)">Want to Learn</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">▲</span><span style="color:var(--text2)">Learning</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">■</span><span style="color:var(--text2)">Complete</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">♥</span><span style="color:var(--text2)">My Favourite Waza</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">★</span><span style="color:var(--text2)">Forgot</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">◆</span><span style="color:var(--text3);font-style:italic">(your own label)</span></div>
             </div>
           </div>
         </div>
 
-        <!-- SLIDE 7: Import -->
+        <!-- SLIDE 6: Import -->
         <div class="ob-slide">
           <div class="ob-slide-icon">📥</div>
           <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
@@ -6143,15 +6162,15 @@
   const OB_KEY = 'wl_onboarding_done';
   const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
-  const SLIDE_COUNT = 8;
+  const SLIDE_COUNT = 7;
 
   // Fake waza data for demo purposes
   const DEMO_WAZA = [
-    { jp:'ダブルレインボー', en:'Double Rainbow',   alias:['double rainbow','daburu reinbo','dbl rainbow','double renbow','dubble renbow'] },
-    { jp:'ミックス',         en:'Mix',              alias:['mix','mikkusu','miks'] },
-    { jp:'ナミ',             en:'Nami',             alias:['nami','wave'] },
-    { jp:'ハイパーミックス', en:'Hyper Mix',        alias:['hyper mix','haipaa mikkusu','hypermix','hiper mix'] },
-    { jp:'サイリウム',       en:'Cyalume',          alias:['cyalume','sairium','sairyuumu','lightstick'] },
+    { jp:'サンダースネーク', en:'Thundersnake',  alias:['thundersnake','thunder snake','thudersnake','thundrsnake','sandaasuneeku'] },
+    { jp:'アマテラス',       en:'Amaterasu',     alias:['amaterasu','amaterazu','amateraasu','amateras'] },
+    { jp:'ムラマサ',         en:'Muramasa',      alias:['muramasa','muramasaa','murmasa','muramaza'] },
+    { jp:'ハイパーミックス', en:'Hyper Mix',     alias:['hyper mix','haipaa mikkusu','hypermix','hiper mix'] },
+    { jp:'サイリウム',       en:'Cyalume',       alias:['cyalume','sairium','sairyuumu','lightstick'] },
   ];
 
   let currentSlide = 0;
@@ -6199,6 +6218,19 @@
     // Slide-specific init
     if (currentSlide === 2) initSearchDemo();
     if (currentSlide === 3) initStyleDemo();
+    if (currentSlide === 5) {
+      buildLegendPreview();
+      // Bind the inline "Use template" button
+      const tplBtn = document.getElementById('obUseTemplate');
+      if (tplBtn) {
+        tplBtn.onclick = () => {
+          applyTemplate();
+          // Fill in the legend inputs with template values
+          const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+          inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
+        };
+      }
+    }
   }
 
   function renderSlide(n) { goToSlide(n); }
@@ -6208,66 +6240,29 @@
     const footer = document.getElementById('obFooter');
     footer.innerHTML = '';
 
-    if (currentSlide === 3) {
-      // Card style slide — 3 choice buttons
-      ['List','Cards','Compact'].forEach((label, i) => {
-        const styles = ['list','expanded','compact'];
-        const btn = document.createElement('button');
-        btn.className = 'ob-btn' + (chosenStyle === styles[i] ? ' ob-btn-primary' : '');
-        btn.textContent = label;
-        btn.onclick = () => {
-          chosenStyle = styles[i];
-          localStorage.setItem('wl_view_style', chosenStyle);
-          // sync main app select if present
-          const sel = document.getElementById('browseViewSelect');
-          const selMob = document.getElementById('browseViewSelectMob');
-          if (sel) sel.value = chosenStyle;
-          if (selMob) selMob.value = chosenStyle;
-          // re-render browseListView
-          if (typeof browseListView !== 'undefined') { window.browseListView = chosenStyle; }
-          renderFooter();
-          updateStyleDemo();
-        };
-        footer.appendChild(btn);
-      });
-      // Next
+    // Back button (all slides except first)
+    if (currentSlide > 0) {
+      const backBtn = document.createElement('button');
+      backBtn.className = 'ob-btn';
+      backBtn.textContent = '← Back';
+      backBtn.onclick = () => goToSlide(currentSlide - 1);
+      footer.appendChild(backBtn);
+    }
+
+    if (currentSlide === 5) {
+      // Combined legend + template slide — "Skip" or "Next"
       const next = mkNextBtn();
       footer.appendChild(next);
 
     } else if (currentSlide === 6) {
-      // Template slide — "Use template" or "Skip"
-      const skipBtn = document.createElement('button');
-      skipBtn.className = 'ob-btn';
-      skipBtn.textContent = 'Skip';
-      skipBtn.onclick = () => goToSlide(currentSlide + 1);
-
-      const useBtn = document.createElement('button');
-      useBtn.className = 'ob-btn ob-btn-green';
-      useBtn.textContent = '✓ Use template';
-      useBtn.onclick = () => {
-        applyTemplate();
-        goToSlide(currentSlide + 1);
-      };
-
-      footer.appendChild(skipBtn);
-      footer.appendChild(useBtn);
-
-    } else if (currentSlide === 7) {
-      // Import slide — "Import" or "Skip" / finish
-      const skipBtn = document.createElement('button');
-      skipBtn.className = 'ob-btn';
-      skipBtn.textContent = "I'll set up later";
-      skipBtn.onclick = () => closeOnboarding();
-
+      // Import slide — "Skip" or "Import now"
       const importBtn = document.createElement('button');
       importBtn.className = 'ob-btn ob-btn-primary';
+      importBtn.style.marginLeft = 'auto';
       importBtn.textContent = '📥 Import now';
       importBtn.onclick = () => {
         closeOnboarding();
-        // Open the text-import compare tab
         setTimeout(() => {
-          const cmpTab = document.querySelector('[data-tab="compare"]') || document.querySelector('[data-cstab="textimport"]');
-          // Navigate to compare/import view
           const navCmp = document.querySelector('.nav-tab[data-tab="compare"]') || document.querySelector('[data-tab="compare"]');
           if (navCmp) navCmp.click();
           setTimeout(() => {
@@ -6277,11 +6272,19 @@
         }, 400);
       };
 
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'ob-btn ob-btn-primary';
+      skipBtn.style.marginLeft = currentSlide > 0 ? '0' : 'auto';
+      skipBtn.textContent = "I'll set up later";
+      skipBtn.onclick = () => closeOnboarding();
+      // Push skip to right if no back button
+      if (currentSlide === 0) skipBtn.style.marginLeft = 'auto';
+
       footer.appendChild(skipBtn);
       footer.appendChild(importBtn);
 
     } else {
-      // Default: Next button
+      // Default: Next button pushed to right
       footer.appendChild(mkNextBtn());
     }
   }
@@ -6315,7 +6318,7 @@
   }
 
   function autoTypeDemo(input) {
-    const phrase = 'dubble renbow';
+    const phrase = 'thudersnake';
     let i = 0;
     function type() {
       if (input !== document.getElementById('obSearchInput')) return; // slide changed
@@ -6398,9 +6401,9 @@
 
   // ── Marking demo (slide 4) ────────────────────────────────────
   const DEMO_NAMES = [
-    { jp:'ダブルレインボー', en:'Double Rainbow' },
-    { jp:'ミックス', en:'Mix' },
-    { jp:'ナミ', en:'Nami' },
+    { jp:'サンダースネーク', en:'Thundersnake' },
+    { jp:'アマテラス', en:'Amaterasu' },
+    { jp:'ムラマサ', en:'Muramasa' },
   ];
   function buildMarkingDemo() {
     const container = document.getElementById('obMarkingDemo');
