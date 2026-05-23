@@ -2523,68 +2523,6 @@
       user-select: all
     }
 
-    /* ── Modal ── */
-    .mbg {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100
-    }
-
-    .modal {
-      background: var(--bg1);
-      border: 1px solid var(--border);
-      border-radius: var(--rl);
-      padding: 24px;
-      max-width: 520px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto
-    }
-
-    .modal h2 {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 16px
-    }
-
-    .modal h3 {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text2);
-      margin: 14px 0 6px;
-      text-transform: uppercase;
-      letter-spacing: .5px
-    }
-
-    .modal p,
-    .modal li {
-      font-size: 14px;
-      color: var(--text2);
-      line-height: 1.7;
-      margin-bottom: 4px
-    }
-
-    .modal ul {
-      padding-left: 18px
-    }
-
-    .mclosebtn {
-      margin-top: 20px;
-      width: 100%;
-      padding: 9px;
-      background: var(--accent2);
-      border: none;
-      border-radius: var(--r);
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer
-    }
-
     /* ── Mobile topbar menu ── */
     .mob-menu-btn {
       display: none;
@@ -3360,45 +3298,6 @@
         <button class="cbtn cbtn-primary" id="importSaveBtn">Save</button>
         <button class="cbtn cbtn-ghost" id="importNameCancel">Cancel</button>
       </div>
-    </div>
-  </div>
-
-  <!-- GUIDE -->
-  <div id="modalBg" class="mbg" style="display:none">
-    <div class="modal">
-      <h2>⛩ Wazalist — User Guide</h2>
-      <h3>What is this?</h3>
-      <p>Wazalist is a reference database of wotagei Waza. Browse all entries, watch reference videos, and track your
-        learning progress.</p>
-      <h3>Guest vs account</h3>
-      <ul>
-        <li><b>Guest</b> — all data saved locally in your browser on this device only.</li>
-        <li><b>Account</b> — progress syncs across devices.</li>
-      </ul>
-      <h3>Browsing & filters</h3>
-      <ul>
-        <li>Search by Japanese or English name.</li>
-        <li>Filter by skill level, family group, or markings via dropdowns.</li>
-        <li>Use <b>Any ★</b> to show only Waza you have marked or liked (your personal list).</li>
-        <li>Sort by <b>Waza Name</b> or <b>Likes</b> in ascending or descending order.</li>
-      </ul>
-      <h3>Tracking</h3>
-      <p>Use <b>markings</b> (● ▲ ■ ♥ ★ ◆) to track your Waza however you like — assign your own meaning to each shape.
-      </p>
-      <h3>Like / Dislike</h3>
-      <p>👍 Like or 👎 Dislike any Waza. Mutually exclusive.</p>
-      <h3>Markings</h3>
-      <p>6 shapes (● ▲ ■ ♥ ★ ◆) per Waza. Toggle any combination — meaning is up to you.</p>
-      <h3>Waza detail</h3>
-      <p>Click any Waza to open its detail panel. The Names, Classification, and Reference sections can be collapsed to
-        reduce clutter.</p>
-      <h3>Dashboard</h3>
-      <ul>
-        <li><b>Stats</b> — overview counts, shape legend editor, recently updated Waza, and coverage by family.</li>
-        <li><b>Compare</b> — import and compare another user's list side-by-side with your marks.</li>
-        <li><b>Contributions</b> — history of edits and new Waza you've submitted (logged-in users).</li>
-      </ul>
-      <button class="mclosebtn" id="closeModal">Got it!</button>
     </div>
   </div>
 
@@ -4573,11 +4472,6 @@
     document.getElementById('mobLogoutBtn').onclick = () => {
       closeMobMenu();
       doLogout();
-    };
-    
-    document.getElementById('mobHelpBtn').onclick = () => {
-      closeMobMenu();
-      document.getElementById('modalBg').style.display = 'flex';
     };
     
     document.getElementById('mobNewWazaBtn').onclick = () => {
@@ -5958,8 +5852,6 @@
       closeMobMenu(); 
       if (typeof showWazaOnboarding === 'function') showWazaOnboarding(); 
     });
-    document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('modalBg').style.display = 'none'; });
-    document.getElementById('modalBg').addEventListener('click', e => { if (e.target === document.getElementById('modalBg')) document.getElementById('modalBg').style.display = 'none'; });
 
     // ── Popstate ─────────────────────────────────────── 
     window.addEventListener('popstate', e => {
