@@ -3533,12 +3533,12 @@
       // Check for ?waza= in URL (from shared links or back navigation)
       const wazaParam = new URL(location.href).searchParams.get('waza');
       if (wazaParam) {
-        // Try parsing as numeric ID first
+        // Parse as numeric ID (primary format)
         const id = parseInt(wazaParam);
         if (!isNaN(id) && wazaData.some(w => w.id === id)) {
           selectWaza(id);
         } else {
-          // Try matching by Japanese name slug
+          // Backward compatibility: try matching by Japanese name slug
           const decodedSlug = decodeURIComponent(wazaParam);
           const match = wazaData.find(w => w.name_jp && w.name_jp.trim() === decodedSlug);
           if (match) {
@@ -3936,13 +3936,8 @@
 
       // Push history state so back button closes detail instead of exiting app
       if (id !== null) {
-        const w = wazaData.find(x => x.id === id);
-        const slug = w && w.name_jp
-          ? encodeURIComponent(w.name_jp.trim())
-          : id;
-
         const url = new URL(location.href);
-        url.searchParams.set('waza', slug);
+        url.searchParams.set('waza', id); // Use ID directly as slug
         history.pushState({ wazaOpen: true, wazaId: id }, '', url);
       }
     }
