@@ -5832,24 +5832,19 @@
 .ob-style-pill .drow:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
 .ob-style-pill .drow:not(:first-child):not(:last-child) { border-radius: 0; }
 
-/* Shape marking demo - use real app's cmp-shape-btn class */
-.ob-marking-demo { display: flex; flex-direction: column; gap: 8px; }
-.ob-waza-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; border-radius: var(--r);
-  background: var(--bg0); border: 1px solid var(--border);
+/* Shape marking demo - use real app's drow (compact) style + cmp-shape-btn */
+.ob-marking-demo { 
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
 }
-.ob-waza-row .wname { font-size: 13px; font-weight: 500; flex: 1; }
-/* Use cmp-shapes-mine container from main app */
-.ob-waza-row .cmp-shapes-mine { display: flex; gap: 4px; }
-/* marking highlight tint on rows */
-.ob-waza-row.marked {
-  background: hsl(200,44%,8.5%);
-  border-left: 3px solid hsl(200,70%,57%);
+/* drow styling is already in main app CSS - just add container wrapper */
+.ob-marking-demo .drow {
+  cursor: default; /* disable hover pointer in demo */
 }
-.ob-waza-row.marked2 {
-  background: hsl(45,44%,8.5%);
-  border-left: 3px solid hsl(45,70%,57%);
+.ob-marking-demo .drow:last-child {
+  border-bottom: none; /* remove border on last item */
 }
 
 /* Legend / "you decide" slide */
@@ -6304,11 +6299,32 @@
       resultsEl.innerHTML = '<div class="ob-no-results" id="obSearchHint">Start typing above to see fuzzy matching in action…</div>';
       return;
     }
-    const q = query.toLowerCase().trim();
+    
+    // Use real app search functions - check if they're available
+    const hasRealFunctions = typeof isFuzzyMatch === 'function' && typeof matchesQuery === 'function';
+    
     const matches = DEMO_WAZA.filter(w => {
-      if (w.en.toLowerCase().includes(q)) return true;
-      if (w.jp.includes(query)) return true;
-      return w.alias.some(a => fuzzyMatch(a, q));
+      if (hasRealFunctions) {
+        // Use real app's search logic - check all searchable fields
+        // Check exact match first (fast path)
+        if (matchesQuery(w.jp, query)) return true;
+        if (matchesQuery(w.en, query)) return true;
+        if (w.alias && w.alias.some(a => matchesQuery(a, query))) return true;
+        
+        // Then check fuzzy match
+        if (isFuzzyMatch(w.jp, query)) return true;
+        if (isFuzzyMatch(w.en, query)) return true;
+        if (w.alias && w.alias.some(a => isFuzzyMatch(a, query))) return true;
+        
+        return false;
+      } else {
+        // Fallback to simple matching if real functions not available
+        const q = query.toLowerCase().trim();
+        if (w.en.toLowerCase().includes(q)) return true;
+        if (w.jp.includes(query)) return true;
+        if (w.alias && w.alias.some(a => a.toLowerCase().includes(q))) return true;
+        return false;
+      }
     });
 
     if (!matches.length) {
@@ -6320,7 +6336,17 @@
     matches.forEach((w, idx) => {
       const row = document.createElement('div');
       row.className = 'drow'; // Use actual list row class from main app
-      const isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
+      
+      // Determine if it's exact or fuzzy match using real app logic
+      let isExact = false;
+      if (hasRealFunctions) {
+        isExact = matchesQuery(w.jp, query) || 
+                  matchesQuery(w.en, query) || 
+                  (w.alias && w.alias.some(a => matchesQuery(a, query)));
+      } else {
+        const q = query.toLowerCase().trim();
+        isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
+      }
       
       // Use actual wazalist list row structure
       row.innerHTML = `
@@ -6334,27 +6360,6 @@
       // Stagger animation
       setTimeout(() => row.classList.add('show'), idx * 60);
     });
-  }
-
-  function fuzzyMatch(text, query) {
-    // simple sliding-window edit-distance check
-    if (text.includes(query)) return true;
-    const words = query.split(' ');
-    const twords = text.split(' ');
-    return words.every(qw => twords.some(tw => editDistance(tw, qw) <= Math.max(1, Math.floor(qw.length / 3))));
-  }
-
-  function editDistance(a, b) {
-    const dp = Array.from({length: b.length + 1}, (_, i) => i);
-    for (let i = 1; i <= a.length; i++) {
-      let prev = i;
-      for (let j = 1; j <= b.length; j++) {
-        const temp = dp[j];
-        dp[j] = a[i-1] === b[j-1] ? dp[j-1] : 1 + Math.min(dp[j-1], dp[j], prev);
-        prev = temp;
-      }
-    }
-    return dp[b.length];
   }
 
   // ── Card style demo (slide 3) ─────────────────────────────────
@@ -6475,26 +6480,36 @@
     
     // Get shapeLegend if available from main app
     const legend = window.shapeLegend || TEMPLATE;
+    const SHAPES = ['●','▲','■','♥','★','◆'];
+    
+    // Helper: generate shape class from bitmask (same as main app)
+    const shapeClass = shapes => {
+      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+      return mask ? 'sh-' + mask : '';
+    };
     
     container.innerHTML = '';
     DEMO_WAZA.forEach((w, wi) => {
       const row = document.createElement('div');
-      const anyOn = demoShapes[wi].some(Boolean);
-      const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
-      row.className = 'ob-waza-row' + colorClass;
-      row.id = 'obWazaRow' + wi;
+      const shapes = demoShapes[wi];
       
-      // Use real app's structure: wname + cmp-shapes-mine container
-      const shapesHTML = '<div class="cmp-shapes-mine">'
-        + SHAPES_OB.map((sh, si) => 
-            '<button class="cmp-shape-btn' + (demoShapes[wi][si] ? ' on' : '') + '" '
+      // Use real drow structure with shape tint classes
+      row.className = 'drow ' + shapeClass(shapes);
+      
+      // Structure: drn (JP name) + drs (EN name) + cmp-shapes-mine (buttons)
+      const shapesHTML = '<div class="cmp-shapes-mine" style="flex-shrink:0">'
+        + SHAPES.map((sh, si) => 
+            '<button class="cmp-shape-btn' + (shapes[si] ? ' on' : '') + '" '
             + 'data-wid="' + wi + '" data-si="' + si + '" '
             + 'title="' + (legend[si] || 'Shape ' + (si + 1)) + '">'
             + sh + '</button>'
           ).join('')
         + '</div>';
       
-      row.innerHTML = `<span class="wname"><b>${w.jp}</b> <span style="color:var(--text2);font-size:12px">${w.en}</span></span>${shapesHTML}`;
+      row.innerHTML = '<span class="drn">' + w.jp + '</span>'
+        + '<span class="drs">' + w.en + '</span>'
+        + shapesHTML;
+      
       container.appendChild(row);
       
       // Attach click handlers to shape buttons
@@ -6504,18 +6519,14 @@
           const si = +btn.dataset.si;
           demoShapes[wid][si] = !demoShapes[wid][si];
           btn.classList.toggle('on', demoShapes[wid][si]);
-          updateMarkingRowStyle(wid, row);
+          // Update row's shape class for color tinting
+          row.className = 'drow ' + shapeClass(demoShapes[wid]);
         });
       });
     });
   }
-
-  function updateMarkingRowStyle(wi, row) {
-    const anyOn = demoShapes[wi].some(Boolean);
-    // Use modulo to cycle through color variations for 5 rows
-    const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
-    row.className = 'ob-waza-row' + colorClass;
-  }
+  
+  // Remove updateMarkingRowStyle - no longer needed with drow structure
 
   // ── Legend preview (slide 5) ──────────────────────────────────
   function buildLegendPreview() {
