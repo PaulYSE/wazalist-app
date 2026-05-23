@@ -5733,6 +5733,10 @@
   box-sizing: border-box;
 }
 /* Show scrollbar for onboarding slides */
+.ob-slide {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border) var(--bg0); /* Firefox: thumb track */
+}
 .ob-slide::-webkit-scrollbar {
   width: 8px;
 }
@@ -6089,6 +6093,9 @@
   const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 7;
+  
+  // Session flag - only show auto-onboarding once per session after registration
+  let hasShownOnboardingThisSession = false;
 
   // Demo waza data - used for both search and marking demos
   const DEMO_WAZA = [
@@ -6153,6 +6160,7 @@
     buildMarkingDemo();
     buildLegendPreview();
     renderSlide(0);
+    hasShownOnboardingThisSession = true;
   }
 
   function closeOnboarding() {
@@ -6160,7 +6168,7 @@
     el.classList.remove('ob-visible');
     el.classList.add('ob-hidden');
     setTimeout(() => { el.style.display = 'none'; }, 350);
-    localStorage.setItem(OB_KEY, '1');
+    // Don't set localStorage - allow reopening via Guide button anytime
   }
 
   // ── Slide navigation ──────────────────────────────────────────
@@ -6671,7 +6679,8 @@
       await _orig.apply(this, arguments);
       if (window._wlJustRegistered) {
         window._wlJustRegistered = false;
-        if (!localStorage.getItem(OB_KEY)) {
+        // Show onboarding once per session after registration
+        if (!hasShownOnboardingThisSession) {
           setTimeout(showOnboarding, 600);
         }
       }
