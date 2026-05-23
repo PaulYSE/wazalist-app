@@ -2177,7 +2177,7 @@
       border-color: var(--accent)
     }
 
-    .cmp-legend-strip {
+    .cmp-labels-strip {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -2189,7 +2189,7 @@
       color: var(--text3)
     }
 
-    .cmp-legend-item {
+    .cmp-labels-item {
       display: flex;
       align-items: center;
       gap: 4px
@@ -3244,7 +3244,7 @@
         <h2>↑ Export My List</h2><button class="cmodal-close" id="exportClose">✕</button>
       </div>
       <div class="cmodal-body">
-        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Share your marks and legend with others. Keys
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Share your marks and labels with others. Keys
           expire after 90 days.</p>
         <div id="exportStatus" style="font-size:13px;color:var(--text3);margin-bottom:10px">Generating…</div>
         <div id="exportKeyWrap" style="display:none">
@@ -4641,7 +4641,7 @@
     const LS_IMPORTED = 'wl_imported_lists';
     const loadImported = () => { try { return JSON.parse(localStorage.getItem(LS_IMPORTED) || '{}') } catch { return {} } };
     const saveImported = d => localStorage.setItem(LS_IMPORTED, JSON.stringify(d));
-    let importedLists = loadImported(); // { [key]: { key, name, importedAt, legend, marks } }
+    let importedLists = loadImported(); // { [key]: { key, name, importedAt, labels, marks } }
 
     // Pending import data — held between fetch modal and name modal
     let _pendingImport = null;
@@ -4653,7 +4653,7 @@
         const hasMarking = p.markings && p.markings.some(Boolean);
         if (hasMarking || p.like) marks[+id] = { markings: p.markings || Array(6).fill(false), like: p.like || null };
       });
-      return JSON.stringify({ v: 1, legend: markingLabels, marks });
+      return JSON.stringify({ v: 1, labels: markingLabels, marks });
     }
 
     async function hashList(serialized) {
@@ -4753,8 +4753,8 @@
     document.getElementById('importSaveBtn').addEventListener('click', () => {
       const name = document.getElementById('importNameInput').value.trim();
       if (!name || !_pendingImport) return;
-      const { key, legend, marks } = _pendingImport;
-      importedLists[key] = { key, name, importedAt: new Date().toISOString(), legend: legend || Array(6).fill(''), marks: marks || {} };
+      const { key, labels, marks } = _pendingImport;
+      importedLists[key] = { key, name, importedAt: new Date().toISOString(), labels: labels || Array(6).fill(''), marks: marks || {} };
       saveImported(importedLists);
       _pendingImport = null;
       document.getElementById('nameImportBg').style.display = 'none';
@@ -4799,14 +4799,14 @@
         + '</div>';
 
       if (!keys.length) {
-        // No imported lists - show simple legend
+        // No imported lists - show simple labels
         const markingCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) markingCounts[i]++; }); });
-        const simpleLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
-          + SHAPES.map((s, i) => '<div class="legend-row">'
-            + '<span class="legend-marking">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="legend-count">' + markingCounts[i] + ' waza</span>'
+        const simpleLabelsHTML = '<div class="dsec2"><h3>My labels</h3>'
+          + SHAPES.map((s, i) => '<div class="labels-row">'
+            + '<span class="labels-marking">' + s + '</span>'
+            + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+            + '<span class="labels-count">' + markingCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
@@ -4819,7 +4819,7 @@
 
       const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
 
-      // Combined legend - shows both imported and user's legend in one table
+      // Combined labels - shows both imported and user's labels in one table
       let combinedLabelsHTML = '';
       if (imp) {
         // Count markings for both imported list and user's list
@@ -4848,35 +4848,35 @@
           + SHAPES.map((s, i) => {
               const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
               const myLabel = markingLabels[i] || '';
-              return '<div class="legend-row">'
-                + '<span class="legend-marking">' + s + '</span>'
-                + '<div class="legend-combined">'
-                  + '<div class="legend-stacked">'
-                    + '<div class="legend-imported" title="Their label">' 
+              return '<div class="labels-row">'
+                + '<span class="labels-marking">' + s + '</span>'
+                + '<div class="labels-combined">'
+                  + '<div class="labels-stacked">'
+                    + '<div class="labels-imported" title="Their label">' 
                       + (impLabel ? escHtml(impLabel) : '<span style="color:var(--text3);font-style:italic">Unlabeled</span>') 
                     + '</div>'
-                    + '<div class="legend-divider"></div>'
-                    + '<input class="legend-input-bottom" data-si="' + i + '" type="text" maxlength="32" placeholder="Your label…" value="' + myLabel.replace(/"/g, '&quot;') + '" title="Your label">'
+                    + '<div class="labels-divider"></div>'
+                    + '<input class="labels-input-bottom" data-si="' + i + '" type="text" maxlength="32" placeholder="Your label…" value="' + myLabel.replace(/"/g, '&quot;') + '" title="Your label">'
                   + '</div>'
                 + '</div>'
-                + '<div class="legend-count-stacked">'
-                  + '<div class="legend-count-top" title="Their marks">' + impMarkingCounts[i] + '</div>'
-                  + '<div class="legend-count-divider"></div>'
-                  + '<div class="legend-count-bottom" title="Your marks">' + myMarkingCounts[i] + '</div>'
+                + '<div class="labels-count-stacked">'
+                  + '<div class="labels-count-top" title="Their marks">' + impMarkingCounts[i] + '</div>'
+                  + '<div class="labels-count-divider"></div>'
+                  + '<div class="labels-count-bottom" title="Your marks">' + myMarkingCounts[i] + '</div>'
                 + '</div>'
                 + '</div>';
             }).join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
       } else {
-        // No imported list selected - show only user's legend
+        // No imported list selected - show only user's labels
         const myMarkingCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; }); });
-        combinedLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
-          + SHAPES.map((s, i) => '<div class="legend-row">'
-            + '<span class="legend-marking">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="legend-count">' + myMarkingCounts[i] + ' waza</span>'
+        combinedLabelsHTML = '<div class="dsec2"><h3>My labels</h3>'
+          + SHAPES.map((s, i) => '<div class="labels-row">'
+            + '<span class="labels-marking">' + s + '</span>'
+            + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+            + '<span class="labels-count">' + myMarkingCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
@@ -4986,7 +4986,7 @@
     const HEADER_KEYWORDS = [
       'basic waza', 'learn first', 'learn after', 'useful to learn',
       'fundamental', 'advanced', 'optional', 'niche', 'recommended',
-      'legend', 'completed', 'forgot', 'learning', 'want to learn',
+      'labels', 'completed', 'forgot', 'learning', 'want to learn',
       'videos', 'channels', 'wazaren', 'tutorial', 'compilation',
       'insert name here', '>>>'
     ];
@@ -5506,7 +5506,7 @@
           + '</div>';
       }).join('');
 
-      // ── Auto-mapping section (legend-style) ───────────────────────
+      // ── Auto-mapping section (labels-style) ───────────────────────
       let autoMapHtml = '';
       if (hasCategories) {
         const mapRows = _tiFoundLabels.map((lbl, li) => {
@@ -5515,9 +5515,9 @@
           const markingBtns = SHAPES.map((s, si) =>
             '<button class="ti-map-marking-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
           ).join('');
-          return '<div class="legend-row">'
-            + '<span class="legend-marking" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
-            + '<input class="legend-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
+          return '<div class="labels-row">'
+            + '<span class="labels-marking" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
+            + '<input class="labels-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
             + '<div class="ti-map-markings">' + markingBtns + '</div>'
             + '</div>';
         }).join('');
@@ -6085,20 +6085,20 @@
 }
 
 /* Labels / "you decide" slide */
-.ob-legend { display: flex; flex-direction: column; gap: 6px; }
-.ob-legend-row {
+.ob-labels { display: flex; flex-direction: column; gap: 6px; }
+.ob-labels-row {
   display: flex; align-items: center; gap: 10px;
   padding: 6px 10px; border-radius: var(--r);
   background: var(--bg0); border: 1px solid var(--border);
 }
-.ob-legend-marking { font-size: 16px; width: 22px; text-align: center; }
-.ob-legend-input {
+.ob-labels-marking { font-size: 16px; width: 22px; text-align: center; }
+.ob-labels-input {
   flex: 1; padding: 4px 8px;
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: 6px; color: var(--text1); font-size: 13px;
   outline: none; font-family: inherit;
 }
-.ob-legend-input:focus { border-color: var(--accent); }
+.ob-labels-input:focus { border-color: var(--accent); }
 
 /* Template slide */
 .ob-template { display: flex; flex-direction: column; gap: 6px; }
@@ -6252,7 +6252,7 @@
                 <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
               </div>
             </div>
-            <div class="ob-legend" id="obLabelsPreview">
+            <div class="ob-labels" id="obLabelsPreview">
               <!-- rows built by JS -->
             </div>
           </div>
@@ -6369,7 +6369,7 @@
     [false,false,true,true,false,false],  // Romance: ■ ♥
   ];
   // Labels inputs state
-  const legendValues = ['','','','','',''];
+  const labelsValues = ['','','','','',''];
 
   // ── Show / hide ───────────────────────────────────────────────
   function showOnboarding() {
@@ -6443,7 +6443,7 @@
     }
 
     if (currentSlide === 5) {
-      // Combined legend + template slide — "Skip" or "Next"
+      // Combined labels + template slide — "Skip" or "Next"
       const next = mkNextBtn();
       footer.appendChild(next);
 
@@ -6772,7 +6772,7 @@
     if (!container) return;
     
     // Get markingLabels if available from main app
-    const legend = window.markingLabels || TEMPLATE;
+    const labels = window.markingLabels || TEMPLATE;
     const SHAPES = ['●','▲','■','♥','★','◆'];
     
     // Helper: generate marking class from bitmask (same as main app)
@@ -6826,21 +6826,21 @@
     const container = document.getElementById('obLabelsPreview');
     if (!container) return;
     container.innerHTML = '';
-    // Load existing legend from app
+    // Load existing labels from app
     let existing = ['','','','','',''];
     try { existing = JSON.parse(localStorage.getItem('wl_marking_labels') || '["","","","","",""]'); } catch {}
     SHAPES_OB.forEach((sh, i) => {
       const row = document.createElement('div');
-      row.className = 'ob-legend-row';
-      row.innerHTML = `<span class="ob-legend-marking">${sh}</span>`;
+      row.className = 'ob-labels-row';
+      row.innerHTML = `<span class="ob-labels-marking">${sh}</span>`;
       const inp = document.createElement('input');
-      inp.className = 'ob-legend-input';
+      inp.className = 'ob-labels-input';
       inp.type = 'text';
       inp.maxLength = 32;
       inp.placeholder = 'Label this marking…';
-      inp.value = existing[i] || legendValues[i] || '';
+      inp.value = existing[i] || labelsValues[i] || '';
       inp.oninput = () => {
-        legendValues[i] = inp.value;
+        labelsValues[i] = inp.value;
         saveLabels();
       };
       row.appendChild(inp);
@@ -6849,7 +6849,7 @@
   }
 
   function saveLabels() {
-    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     const vals = Array.from(inputs).map(i => i.value.trim());
     localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
     // Sync with app's markingLabels if it exists
@@ -6863,18 +6863,18 @@
     if (window.markingLabels) { TEMPLATE.forEach((v, i) => { window.markingLabels[i] = v; }); }
     if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
-    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
   }
 
-  // ── Clear all legend labels ───────────────────────────────────
+  // ── Clear all labels labels ───────────────────────────────────
   function clearAllLabels() {
     const emptyLabels = ['','','','','',''];
     localStorage.setItem('wl_marking_labels', JSON.stringify(emptyLabels));
     if (window.markingLabels) { emptyLabels.forEach((v, i) => { window.markingLabels[i] = v; }); }
     if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
-    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach(inp => { inp.value = ''; });
   }
 
