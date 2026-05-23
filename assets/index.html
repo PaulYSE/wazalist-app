@@ -5770,6 +5770,17 @@
   margin-top: 4px;
 }
 
+/* Browse demo list - uses real waza-card components */
+#obBrowseList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#obBrowseList .waza-card {
+  pointer-events: none; /* disable clicking in demo */
+  cursor: default;
+}
+
 /* Fuzzy search demo */
 .ob-search-demo input {
   width: 100%;
@@ -5954,18 +5965,10 @@
           <div class="ob-slide-sub">
             Use the <b>Explore</b> tab to search the full database. Every Waza has its Japanese name, English translation, skill level, parent techniques, and reference videos.
           </div>
-          <div class="ob-demo" style="padding:10px 12px">
+          <div class="ob-demo" id="obBrowseDemo">
             <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Browse panel</div>
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px;border-left:3px solid var(--accent)">
-                <span style="font-weight:600">サンダースネーク</span> <span style="color:var(--text2);font-size:12px">· Thundersnake</span>
-              </div>
-              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
-                <span style="font-weight:600">アマテラス</span> <span style="color:var(--text2);font-size:12px">· Amaterasu</span>
-              </div>
-              <div style="padding:7px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;font-size:13px">
-                <span style="font-weight:600">ムラマサ</span> <span style="color:var(--text2);font-size:12px">· Muramasa</span>
-              </div>
+            <div id="obBrowseList">
+              <!-- Real waza-card components built by JS -->
             </div>
           </div>
         </div>
@@ -6146,6 +6149,7 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(() => { el.classList.add('ob-visible'); });
     });
+    buildBrowseDemo();
     buildMarkingDemo();
     buildLegendPreview();
     renderSlide(0);
@@ -6255,6 +6259,65 @@
     btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
     btn.onclick = () => goToSlide(currentSlide + 1);
     return btn;
+  }
+
+  // ── Browse demo (slide 1) ─────────────────────────────────────
+  function buildBrowseDemo() {
+    const container = document.getElementById('obBrowseList');
+    if (!container) return;
+    
+    // Get real app helper functions if available
+    const hasRealFunctions = typeof shapePips === 'function' && 
+                             typeof shapeClass === 'function' &&
+                             typeof SHAPES !== 'undefined';
+    
+    // Local fallback helpers if real functions not available
+    const localShapePips = shapes => {
+      const SHAPES_LOCAL = ['●','▲','■','♥','★','◆'];
+      return SHAPES_LOCAL.map((s, i) => 
+        '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '">' + s + '</span>'
+      ).join('');
+    };
+    
+    const localShapeClass = shapes => {
+      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+      return mask ? 'sh-' + mask : '';
+    };
+    
+    const localCardLikePill = (likeCount, dislikeCount) => {
+      if (!likeCount && !dislikeCount) return '';
+      return '<div class="card-like-pill">'
+        + '<span>👍 ' + likeCount + '</span>'
+        + '<span>👎 ' + dislikeCount + '</span>'
+        + '</div>';
+    };
+    
+    // Choose which functions to use
+    const shapePipsFunc = hasRealFunctions ? shapePips : localShapePips;
+    const shapeClassFunc = hasRealFunctions ? shapeClass : localShapeClass;
+    
+    // Use first 3 demo waza with preset shapes
+    const demoItems = [
+      { waza: DEMO_WAZA[0], shapes: [true, false, true, false, false, false], likes: 2, dislikes: 0 },  // Thundersnake: ● ■
+      { waza: DEMO_WAZA[1], shapes: [false, true, false, false, false, false], likes: 1, dislikes: 0 }, // Amaterasu: ▲
+      { waza: DEMO_WAZA[2], shapes: [false, false, false, true, true, false], likes: 3, dislikes: 1 },  // Muramasa: ♥ ★
+    ];
+    
+    // Build real waza-card components (same structure as main app's list view)
+    container.innerHTML = demoItems.map(item => {
+      const w = item.waza;
+      const shapes = item.shapes;
+      const pill = localCardLikePill(item.likes, item.dislikes);
+      
+      const bottomRow = '<div class="card-bottom-row">'
+        + '<div class="shapes-row wce-shapes">' + shapePipsFunc(shapes) + '</div>'
+        + pill + '</div>';
+      
+      return '<div class="waza-card ' + shapeClassFunc(shapes) + '">'
+        + '<div class="njp">' + w.jp + '</div>'
+        + '<div class="nen">' + w.en + '</div>'
+        + bottomRow + '</div>';
+    }).join('');
   }
 
   // ── Fuzzy search demo (slide 2) ───────────────────────────────
