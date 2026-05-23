@@ -364,7 +364,7 @@
     }
 
     /* ── Waza cards (browse list) ── */
-    .waza-card {
+    .waza-list {
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
@@ -372,468 +372,468 @@
       border-left: 3px solid transparent
     }
 
-    .waza-card:hover {
+    .waza-list:hover {
       filter: brightness(1.08)
     }
 
-    .waza-card.selected {
+    .waza-list.selected {
       outline: 1px solid var(--accent)
     }
 
     /* Shape tints — unique color per combination bitmask (bits 0-5 = ● ▲ ■ ♥ ★ ◆, mask 1-63) */
-    .waza-card.sh-1,
-    .waza-card-expanded.sh-1,
-    .drow.sh-1 {
+    .waza-list.sh-1,
+    .waza-list.sh-1,
+    .waza-compact.sh-1 {
       background: hsl(200, 44%, 8.5%);
       border-left-color: hsl(200, 70%, 57%)
     }
 
-    .waza-card.sh-2,
-    .waza-card-expanded.sh-2,
-    .drow.sh-2 {
+    .waza-list.sh-2,
+    .waza-list.sh-2,
+    .waza-compact.sh-2 {
       background: hsl(45, 44%, 8.5%);
       border-left-color: hsl(45, 70%, 57%)
     }
 
-    .waza-card.sh-3,
-    .waza-card-expanded.sh-3,
-    .drow.sh-3 {
+    .waza-list.sh-3,
+    .waza-list.sh-3,
+    .waza-compact.sh-3 {
       background: hsl(123, 48%, 9.0%);
       border-left-color: hsl(123, 70%, 59%)
     }
 
-    .waza-card.sh-4,
-    .waza-card-expanded.sh-4,
-    .drow.sh-4 {
+    .waza-list.sh-4,
+    .waza-list.sh-4,
+    .waza-compact.sh-4 {
       background: hsl(280, 44%, 8.5%);
       border-left-color: hsl(280, 70%, 57%)
     }
 
-    .waza-card.sh-5,
-    .waza-card-expanded.sh-5,
-    .drow.sh-5 {
+    .waza-list.sh-5,
+    .waza-list.sh-5,
+    .waza-compact.sh-5 {
       background: hsl(240, 48%, 9.0%);
       border-left-color: hsl(240, 70%, 59%)
     }
 
-    .waza-card.sh-6,
-    .waza-card-expanded.sh-6,
-    .drow.sh-6 {
+    .waza-list.sh-6,
+    .waza-list.sh-6,
+    .waza-compact.sh-6 {
       background: hsl(343, 48%, 9.0%);
       border-left-color: hsl(343, 70%, 59%)
     }
 
-    .waza-card.sh-7,
-    .waza-card-expanded.sh-7,
-    .drow.sh-7 {
+    .waza-list.sh-7,
+    .waza-list.sh-7,
+    .waza-compact.sh-7 {
       background: hsl(265, 52%, 9.5%);
       border-left-color: hsl(265, 70%, 61%)
     }
 
-    .waza-card.sh-8,
-    .waza-card-expanded.sh-8,
-    .drow.sh-8 {
+    .waza-list.sh-8,
+    .waza-list.sh-8,
+    .waza-compact.sh-8 {
       background: hsl(330, 44%, 8.5%);
       border-left-color: hsl(330, 70%, 57%)
     }
 
-    .waza-card.sh-9,
-    .waza-card-expanded.sh-9,
-    .drow.sh-9 {
+    .waza-list.sh-9,
+    .waza-list.sh-9,
+    .waza-compact.sh-9 {
       background: hsl(265, 48%, 9.0%);
       border-left-color: hsl(265, 70%, 59%)
     }
 
-    .waza-card.sh-10,
-    .waza-card-expanded.sh-10,
-    .drow.sh-10 {
+    .waza-list.sh-10,
+    .waza-list.sh-10,
+    .waza-compact.sh-10 {
       background: hsl(7, 48%, 9.0%);
       border-left-color: hsl(7, 70%, 59%)
     }
 
-    .waza-card.sh-11,
-    .waza-card-expanded.sh-11,
-    .drow.sh-11 {
+    .waza-list.sh-11,
+    .waza-list.sh-11,
+    .waza-compact.sh-11 {
       background: hsl(348, 52%, 9.5%);
       border-left-color: hsl(348, 70%, 61%)
     }
 
-    .waza-card.sh-12,
-    .waza-card-expanded.sh-12,
-    .drow.sh-12 {
+    .waza-list.sh-12,
+    .waza-list.sh-12,
+    .waza-compact.sh-12 {
       background: hsl(305, 48%, 9.0%);
       border-left-color: hsl(305, 70%, 59%)
     }
 
-    .waza-card.sh-13,
-    .waza-card-expanded.sh-13,
-    .drow.sh-13 {
+    .waza-list.sh-13,
+    .waza-list.sh-13,
+    .waza-compact.sh-13 {
       background: hsl(273, 52%, 9.5%);
       border-left-color: hsl(273, 70%, 61%)
     }
 
-    .waza-card.sh-14,
-    .waza-card-expanded.sh-14,
-    .drow.sh-14 {
+    .waza-list.sh-14,
+    .waza-list.sh-14,
+    .waza-compact.sh-14 {
       background: hsl(336, 52%, 9.5%);
       border-left-color: hsl(336, 70%, 61%)
     }
 
-    .waza-card.sh-15,
-    .waza-card-expanded.sh-15,
-    .drow.sh-15 {
+    .waza-list.sh-15,
+    .waza-list.sh-15,
+    .waza-compact.sh-15 {
       background: hsl(306, 56%, 10.0%);
       border-left-color: hsl(306, 70%, 63%)
     }
 
-    .waza-card.sh-16,
-    .waza-card-expanded.sh-16,
-    .drow.sh-16 {
+    .waza-list.sh-16,
+    .waza-list.sh-16,
+    .waza-compact.sh-16 {
       background: hsl(80, 44%, 8.5%);
       border-left-color: hsl(80, 70%, 57%)
     }
 
-    .waza-card.sh-17,
-    .waza-card-expanded.sh-17,
-    .drow.sh-17 {
+    .waza-list.sh-17,
+    .waza-list.sh-17,
+    .waza-compact.sh-17 {
       background: hsl(140, 48%, 9.0%);
       border-left-color: hsl(140, 70%, 59%)
     }
 
-    .waza-card.sh-18,
-    .waza-card-expanded.sh-18,
-    .drow.sh-18 {
+    .waza-list.sh-18,
+    .waza-list.sh-18,
+    .waza-compact.sh-18 {
       background: hsl(63, 48%, 9.0%);
       border-left-color: hsl(63, 70%, 59%)
     }
 
-    .waza-card.sh-19,
-    .waza-card-expanded.sh-19,
-    .drow.sh-19 {
+    .waza-list.sh-19,
+    .waza-list.sh-19,
+    .waza-compact.sh-19 {
       background: hsl(93, 52%, 9.5%);
       border-left-color: hsl(93, 70%, 61%)
     }
 
-    .waza-card.sh-20,
-    .waza-card-expanded.sh-20,
-    .drow.sh-20 {
+    .waza-list.sh-20,
+    .waza-list.sh-20,
+    .waza-compact.sh-20 {
       background: hsl(360, 48%, 9.0%);
       border-left-color: hsl(360, 70%, 59%)
     }
 
-    .waza-card.sh-21,
-    .waza-card-expanded.sh-21,
-    .drow.sh-21 {
+    .waza-list.sh-21,
+    .waza-list.sh-21,
+    .waza-compact.sh-21 {
       background: hsl(210, 52%, 9.5%);
       border-left-color: hsl(210, 70%, 61%)
     }
 
-    .waza-card.sh-22,
-    .waza-card-expanded.sh-22,
-    .drow.sh-22 {
+    .waza-list.sh-22,
+    .waza-list.sh-22,
+    .waza-compact.sh-22 {
       background: hsl(34, 52%, 9.5%);
       border-left-color: hsl(34, 70%, 61%)
     }
 
-    .waza-card.sh-23,
-    .waza-card-expanded.sh-23,
-    .drow.sh-23 {
+    .waza-list.sh-23,
+    .waza-list.sh-23,
+    .waza-compact.sh-23 {
       background: hsl(73, 56%, 10.0%);
       border-left-color: hsl(73, 70%, 63%)
     }
 
-    .waza-card.sh-24,
-    .waza-card-expanded.sh-24,
-    .drow.sh-24 {
+    .waza-list.sh-24,
+    .waza-list.sh-24,
+    .waza-compact.sh-24 {
       background: hsl(25, 48%, 9.0%);
       border-left-color: hsl(25, 70%, 59%)
     }
 
-    .waza-card.sh-25,
-    .waza-card-expanded.sh-25,
-    .drow.sh-25 {
+    .waza-list.sh-25,
+    .waza-list.sh-25,
+    .waza-compact.sh-25 {
       background: hsl(55, 52%, 9.5%);
       border-left-color: hsl(55, 70%, 61%)
     }
 
-    .waza-card.sh-26,
-    .waza-card-expanded.sh-26,
-    .drow.sh-26 {
+    .waza-list.sh-26,
+    .waza-list.sh-26,
+    .waza-compact.sh-26 {
       background: hsl(34, 52%, 9.5%);
       border-left-color: hsl(34, 70%, 61%)
     }
 
-    .waza-card.sh-27,
-    .waza-card-expanded.sh-27,
-    .drow.sh-27 {
+    .waza-list.sh-27,
+    .waza-list.sh-27,
+    .waza-compact.sh-27 {
       background: hsl(46, 56%, 10.0%);
       border-left-color: hsl(46, 70%, 63%)
     }
 
-    .waza-card.sh-28,
-    .waza-card-expanded.sh-28,
-    .drow.sh-28 {
+    .waza-list.sh-28,
+    .waza-list.sh-28,
+    .waza-compact.sh-28 {
       background: hsl(338, 52%, 9.5%);
       border-left-color: hsl(338, 70%, 61%)
     }
 
-    .waza-card.sh-29,
-    .waza-card-expanded.sh-29,
-    .drow.sh-29 {
+    .waza-list.sh-29,
+    .waza-list.sh-29,
+    .waza-compact.sh-29 {
       background: hsl(288, 56%, 10.0%);
       border-left-color: hsl(288, 70%, 63%)
     }
 
-    .waza-card.sh-30,
-    .waza-card-expanded.sh-30,
-    .drow.sh-30 {
+    .waza-list.sh-30,
+    .waza-list.sh-30,
+    .waza-compact.sh-30 {
       background: hsl(6, 56%, 10.0%);
       border-left-color: hsl(6, 70%, 63%)
     }
 
-    .waza-card.sh-31,
-    .waza-card-expanded.sh-31,
-    .drow.sh-31 {
+    .waza-list.sh-31,
+    .waza-list.sh-31,
+    .waza-compact.sh-31 {
       background: hsl(352, 60%, 10.5%);
       border-left-color: hsl(352, 70%, 65%)
     }
 
-    .waza-card.sh-32,
-    .waza-card-expanded.sh-32,
-    .drow.sh-32 {
+    .waza-list.sh-32,
+    .waza-list.sh-32,
+    .waza-compact.sh-32 {
       background: hsl(170, 44%, 8.5%);
       border-left-color: hsl(170, 70%, 57%)
     }
 
-    .waza-card.sh-33,
-    .waza-card-expanded.sh-33,
-    .drow.sh-33 {
+    .waza-list.sh-33,
+    .waza-list.sh-33,
+    .waza-compact.sh-33 {
       background: hsl(185, 48%, 9.0%);
       border-left-color: hsl(185, 70%, 59%)
     }
 
-    .waza-card.sh-34,
-    .waza-card-expanded.sh-34,
-    .drow.sh-34 {
+    .waza-list.sh-34,
+    .waza-list.sh-34,
+    .waza-compact.sh-34 {
       background: hsl(108, 48%, 9.0%);
       border-left-color: hsl(108, 70%, 59%)
     }
 
-    .waza-card.sh-35,
-    .waza-card-expanded.sh-35,
-    .drow.sh-35 {
+    .waza-list.sh-35,
+    .waza-list.sh-35,
+    .waza-compact.sh-35 {
       background: hsl(156, 52%, 9.5%);
       border-left-color: hsl(156, 70%, 61%)
     }
 
-    .waza-card.sh-36,
-    .waza-card-expanded.sh-36,
-    .drow.sh-36 {
+    .waza-list.sh-36,
+    .waza-list.sh-36,
+    .waza-compact.sh-36 {
       background: hsl(225, 48%, 9.0%);
       border-left-color: hsl(225, 70%, 59%)
     }
 
-    .waza-card.sh-37,
-    .waza-card-expanded.sh-37,
-    .drow.sh-37 {
+    .waza-list.sh-37,
+    .waza-list.sh-37,
+    .waza-compact.sh-37 {
       background: hsl(213, 52%, 9.5%);
       border-left-color: hsl(213, 70%, 61%)
     }
 
-    .waza-card.sh-38,
-    .waza-card-expanded.sh-38,
-    .drow.sh-38 {
+    .waza-list.sh-38,
+    .waza-list.sh-38,
+    .waza-compact.sh-38 {
       background: hsl(225, 52%, 9.5%);
       border-left-color: hsl(225, 70%, 61%)
     }
 
-    .waza-card.sh-39,
-    .waza-card-expanded.sh-39,
-    .drow.sh-39 {
+    .waza-list.sh-39,
+    .waza-list.sh-39,
+    .waza-compact.sh-39 {
       background: hsl(203, 56%, 10.0%);
       border-left-color: hsl(203, 70%, 63%)
     }
 
-    .waza-card.sh-40,
-    .waza-card-expanded.sh-40,
-    .drow.sh-40 {
+    .waza-list.sh-40,
+    .waza-list.sh-40,
+    .waza-compact.sh-40 {
       background: hsl(250, 48%, 9.0%);
       border-left-color: hsl(250, 70%, 59%)
     }
 
-    .waza-card.sh-41,
-    .waza-card-expanded.sh-41,
-    .drow.sh-41 {
+    .waza-list.sh-41,
+    .waza-list.sh-41,
+    .waza-compact.sh-41 {
       background: hsl(212, 52%, 9.5%);
       border-left-color: hsl(212, 70%, 61%)
     }
 
-    .waza-card.sh-42,
-    .waza-card-expanded.sh-42,
-    .drow.sh-42 {
+    .waza-list.sh-42,
+    .waza-list.sh-42,
+    .waza-compact.sh-42 {
       background: hsl(33, 52%, 9.5%);
       border-left-color: hsl(33, 70%, 61%)
     }
 
-    .waza-card.sh-43,
-    .waza-card-expanded.sh-43,
-    .drow.sh-43 {
+    .waza-list.sh-43,
+    .waza-list.sh-43,
+    .waza-compact.sh-43 {
       background: hsl(174, 56%, 10.0%);
       border-left-color: hsl(174, 70%, 63%)
     }
 
-    .waza-card.sh-44,
-    .waza-card-expanded.sh-44,
-    .drow.sh-44 {
+    .waza-list.sh-44,
+    .waza-list.sh-44,
+    .waza-compact.sh-44 {
       background: hsl(272, 52%, 9.5%);
       border-left-color: hsl(272, 70%, 61%)
     }
 
-    .waza-card.sh-45,
-    .waza-card-expanded.sh-45,
-    .drow.sh-45 {
+    .waza-list.sh-45,
+    .waza-list.sh-45,
+    .waza-compact.sh-45 {
       background: hsl(242, 56%, 10.0%);
       border-left-color: hsl(242, 70%, 63%)
     }
 
-    .waza-card.sh-46,
-    .waza-card-expanded.sh-46,
-    .drow.sh-46 {
+    .waza-list.sh-46,
+    .waza-list.sh-46,
+    .waza-compact.sh-46 {
       background: hsl(322, 56%, 10.0%);
       border-left-color: hsl(322, 70%, 63%)
     }
 
-    .waza-card.sh-47,
-    .waza-card-expanded.sh-47,
-    .drow.sh-47 {
+    .waza-list.sh-47,
+    .waza-list.sh-47,
+    .waza-compact.sh-47 {
       background: hsl(259, 60%, 10.5%);
       border-left-color: hsl(259, 70%, 65%)
     }
 
-    .waza-card.sh-48,
-    .waza-card-expanded.sh-48,
-    .drow.sh-48 {
+    .waza-list.sh-48,
+    .waza-list.sh-48,
+    .waza-compact.sh-48 {
       background: hsl(125, 48%, 9.0%);
       border-left-color: hsl(125, 70%, 59%)
     }
 
-    .waza-card.sh-49,
-    .waza-card-expanded.sh-49,
-    .drow.sh-49 {
+    .waza-list.sh-49,
+    .waza-list.sh-49,
+    .waza-compact.sh-49 {
       background: hsl(155, 52%, 9.5%);
       border-left-color: hsl(155, 70%, 61%)
     }
 
-    .waza-card.sh-50,
-    .waza-card-expanded.sh-50,
-    .drow.sh-50 {
+    .waza-list.sh-50,
+    .waza-list.sh-50,
+    .waza-compact.sh-50 {
       background: hsl(93, 52%, 9.5%);
       border-left-color: hsl(93, 70%, 61%)
     }
 
-    .waza-card.sh-51,
-    .waza-card-expanded.sh-51,
-    .drow.sh-51 {
+    .waza-list.sh-51,
+    .waza-list.sh-51,
+    .waza-compact.sh-51 {
       background: hsl(124, 56%, 10.0%);
       border-left-color: hsl(124, 70%, 63%)
     }
 
-    .waza-card.sh-52,
-    .waza-card-expanded.sh-52,
-    .drow.sh-52 {
+    .waza-list.sh-52,
+    .waza-list.sh-52,
+    .waza-compact.sh-52 {
       background: hsl(165, 52%, 9.5%);
       border-left-color: hsl(165, 70%, 61%)
     }
 
-    .waza-card.sh-53,
-    .waza-card-expanded.sh-53,
-    .drow.sh-53 {
+    .waza-list.sh-53,
+    .waza-list.sh-53,
+    .waza-compact.sh-53 {
       background: hsl(186, 56%, 10.0%);
       border-left-color: hsl(186, 70%, 63%)
     }
 
-    .waza-card.sh-54,
-    .waza-card-expanded.sh-54,
-    .drow.sh-54 {
+    .waza-list.sh-54,
+    .waza-list.sh-54,
+    .waza-compact.sh-54 {
       background: hsl(85, 56%, 10.0%);
       border-left-color: hsl(85, 70%, 63%)
     }
 
-    .waza-card.sh-55,
-    .waza-card-expanded.sh-55,
-    .drow.sh-55 {
+    .waza-list.sh-55,
+    .waza-list.sh-55,
+    .waza-compact.sh-55 {
       background: hsl(148, 60%, 10.5%);
       border-left-color: hsl(148, 70%, 65%)
     }
 
-    .waza-card.sh-56,
-    .waza-card-expanded.sh-56,
-    .drow.sh-56 {
+    .waza-list.sh-56,
+    .waza-list.sh-56,
+    .waza-compact.sh-56 {
       background: hsl(85, 52%, 9.5%);
       border-left-color: hsl(85, 70%, 61%)
     }
 
-    .waza-card.sh-57,
-    .waza-card-expanded.sh-57,
-    .drow.sh-57 {
+    .waza-list.sh-57,
+    .waza-list.sh-57,
+    .waza-compact.sh-57 {
       background: hsl(160, 56%, 10.0%);
       border-left-color: hsl(160, 70%, 63%)
     }
 
-    .waza-card.sh-58,
-    .waza-card-expanded.sh-58,
-    .drow.sh-58 {
+    .waza-list.sh-58,
+    .waza-list.sh-58,
+    .waza-compact.sh-58 {
       background: hsl(61, 56%, 10.0%);
       border-left-color: hsl(61, 70%, 63%)
     }
 
-    .waza-card.sh-59,
-    .waza-card-expanded.sh-59,
-    .drow.sh-59 {
+    .waza-list.sh-59,
+    .waza-list.sh-59,
+    .waza-compact.sh-59 {
       background: hsl(100, 60%, 10.5%);
       border-left-color: hsl(100, 70%, 65%)
     }
 
-    .waza-card.sh-60,
-    .waza-card-expanded.sh-60,
-    .drow.sh-60 {
+    .waza-list.sh-60,
+    .waza-list.sh-60,
+    .waza-compact.sh-60 {
       background: hsl(305, 56%, 10.0%);
       border-left-color: hsl(305, 70%, 63%)
     }
 
-    .waza-card.sh-61,
-    .waza-card-expanded.sh-61,
-    .drow.sh-61 {
+    .waza-list.sh-61,
+    .waza-list.sh-61,
+    .waza-compact.sh-61 {
       background: hsl(223, 60%, 10.5%);
       border-left-color: hsl(223, 70%, 65%)
     }
 
-    .waza-card.sh-62,
-    .waza-card-expanded.sh-62,
-    .drow.sh-62 {
+    .waza-list.sh-62,
+    .waza-list.sh-62,
+    .waza-compact.sh-62 {
       background: hsl(22, 60%, 10.5%);
       border-left-color: hsl(22, 70%, 65%)
     }
 
-    .waza-card.sh-63,
-    .waza-card-expanded.sh-63,
-    .drow.sh-63 {
+    .waza-list.sh-63,
+    .waza-list.sh-63,
+    .waza-compact.sh-63 {
       background: hsl(96, 64%, 11.0%);
       border-left-color: hsl(96, 70%, 67%)
     }
 
-    .waza-card .njp {
+    .waza-list .njp {
       font-size: 15px;
       font-weight: 500
     }
 
-    .waza-card .nen {
+    .waza-list .nen {
       font-size: 12px;
       color: var(--text2);
       margin-top: 1px
     }
 
-    .waza-card .badges {
+    .waza-list .badges {
       display: flex;
       gap: 4px;
       flex-wrap: wrap;
@@ -932,7 +932,7 @@
     }
 
     /* ── Expanded waza card (My List) ── */
-    .waza-card-expanded {
+    .waza-list {
       border-radius: var(--r);
       border: 1px solid var(--border);
       margin-bottom: 10px;
@@ -941,7 +941,7 @@
       transition: filter .12s
     }
 
-    .waza-card-expanded:hover {
+    .waza-list:hover {
       filter: brightness(1.06)
     }
 
@@ -1502,7 +1502,7 @@
       color: #e080a0
     }
 
-    .drow {
+    .waza-compact {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -1511,7 +1511,7 @@
       cursor: pointer
     }
 
-    .drow:hover .drn {
+    .waza-compact:hover .drn {
       color: var(--accent)
     }
 
@@ -2961,7 +2961,7 @@
           <span class="mob-menu-item-icon">🔍</span>
           <span>Explore</span>
         </button>
-        <button class="mob-menu-item" data-menu-tab="dashboard">
+        <button class="mob-menu-item" data-menu-tab="stats">
           <span class="mob-menu-item-icon">📊</span>
           <span>Stats</span>
         </button>
@@ -2969,7 +2969,7 @@
           <span class="mob-menu-item-icon">⚖️</span>
           <span>Compare</span>
         </button>
-        <button class="mob-menu-item" data-menu-tab="importlist">
+        <button class="mob-menu-item" data-menu-tab="import">
           <span class="mob-menu-item-icon">📋</span>
           <span>Import List</span>
         </button>
@@ -3005,9 +3005,9 @@
 
     <div class="nav-tabs">
       <button class="ntab active" data-tab="browse">Explore</button>
-      <button class="ntab" data-tab="dashboard">Stats</button>
+      <button class="ntab" data-tab="stats">Stats</button>
       <button class="ntab" data-tab="compare">Compare</button>
-      <button class="ntab" data-tab="importlist">Import List</button>
+      <button class="ntab" data-tab="import">Import List</button>
       <button class="ntab" data-tab="contribute">Contribute</button>
     </div>
 
@@ -3033,12 +3033,12 @@
           <button class="btn shape-filter-btn" data-si="5">◆</button>
           <button class="btn" id="filterShapeAny">Any</button>
         </div>
-        <select id="exploreSortField">
+        <select id="browseSortField">
           <option value="default" selected>Default</option>
           <option value="name">Waza Name</option>
           <option value="likes">Likes</option>
         </select>
-        <select id="exploreSortOrder" disabled>
+        <select id="browseSortOrder" disabled>
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
@@ -3069,7 +3069,7 @@
             </div>
             <div class="fs-row">
               <div class="fs-label">Sort by</div>
-              <select id="exploreSortFieldMob">
+              <select id="browseSortFieldMob">
                 <option value="default" selected>Default</option>
                 <option value="name">Waza Name</option>
                 <option value="likes">Likes</option>
@@ -3077,7 +3077,7 @@
             </div>
             <div class="fs-row">
               <div class="fs-label">Order</div>
-              <select id="exploreSortOrderMob" disabled>
+              <select id="browseSortOrderMob" disabled>
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
               </select>
@@ -3131,7 +3131,7 @@
     <!-- IMPORT LIST -->
     <div id="importlistView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
-        <div id="dashTextImport"></div>
+        <div id="dashImport"></div>
       </div>
     </div>
 
@@ -3310,8 +3310,8 @@
     let currentUsername = localStorage.getItem('wl_username') || '';
     let wazaData = [], prog = {}, selectedId = null;
     const savingIds = new Set(); // waza IDs currently being saved
-    let filters = { search: '', shapes: Array(6).fill(false) };
-    let exploreFilterAny = false; // true = show only waza with any mark (replaces My List)
+    let filters = { search: '', markings: Array(6).fill(false) };
+    let browseFilterAny = false; // true = show only waza with any mark (replaces My List)
     
     // Load sort preferences from localStorage
     const loadSortPrefs = () => { 
@@ -3323,8 +3323,8 @@
       }
     };
     const savedSort = loadSortPrefs();
-    let exploreSortField = savedSort.field; // 'default' | 'name' | 'likes'
-    let exploreSortOrder = savedSort.order;  // 'asc' | 'desc'
+    let browseSortField = savedSort.field; // 'default' | 'name' | 'likes'
+    let browseSortOrder = savedSort.order;  // 'asc' | 'desc'
     
     // Load view style preference from localStorage
     let browseListView = localStorage.getItem('wl_view_style') || 'expanded'; // 'expanded' | 'list' | 'compact' — default: Cards
@@ -3332,12 +3332,12 @@
 
     // ── localStorage ─────────────────────────────────────────────
     const LS_KEY = 'wl_local_prog';
-    const LS_LEGEND = 'wl_shape_legend';
+    const LS_LABELS = 'wl_shape_labels';
     const LS_SORT = 'wl_sort_prefs';
     const LS_VIEW = 'wl_view_style';
     const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} } };
     const saveLocal = d => localStorage.setItem(LS_KEY, JSON.stringify(d));
-    let shapeLegend = JSON.parse(localStorage.getItem(LS_LEGEND) || '["","","","","",""]');
+    let shapeLabels = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]');
 
     // ── API ──────────────────────────────────────────────────────
     const api = async (path, method = 'GET', body = null) => {
@@ -3405,22 +3405,22 @@
         try {
           const progRes = await api('/api/progress');
           if (Array.isArray(progRes)) progRes.forEach(p => {
-            let shapes = Array(6).fill(false);
+            let markings = Array(6).fill(false);
             try { if (p.shapes) shapes = JSON.parse(p.shapes); } catch { }
             prog[p.waza_id] = { shapes, like: p.like || null, updated_at: p.updated_at || null };
           });
         } catch (err) { console.warn('Progress load error:', err); }
       }
-      renderList(); renderDashboard();
+      renderList(); renderStats();
       
       // Sync sort dropdowns with loaded preferences
-      document.getElementById('exploreSortField').value = exploreSortField;
-      document.getElementById('exploreSortFieldMob').value = exploreSortField;
-      document.getElementById('exploreSortOrder').value = exploreSortOrder;
-      document.getElementById('exploreSortOrderMob').value = exploreSortOrder;
-      const isDefault = exploreSortField === 'default';
-      document.getElementById('exploreSortOrder').disabled = isDefault;
-      document.getElementById('exploreSortOrderMob').disabled = isDefault;
+      document.getElementById('browseSortField').value = browseSortField;
+      document.getElementById('browseSortFieldMob').value = browseSortField;
+      document.getElementById('browseSortOrder').value = browseSortOrder;
+      document.getElementById('browseSortOrderMob').value = browseSortOrder;
+      const isDefault = browseSortField === 'default';
+      document.getElementById('browseSortOrder').disabled = isDefault;
+      document.getElementById('browseSortOrderMob').disabled = isDefault;
       
       // Sync view style dropdowns with loaded preference
       document.getElementById('browseViewSelect').value = browseListView;
@@ -3452,17 +3452,17 @@
     else startUsernamePlaceholderRotation();
 
     // ── Progress helpers ─────────────────────────────────────────
-    const emptyP = () => ({ shapes: Array(6).fill(false), like: null });
+    const emptyP = () => ({ markings: Array(6).fill(false), like: null });
     const getP = id => prog[id] || emptyP();
 
     async function saveP(id, patch) {
       prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
-      if (isGuest) { const l = loadLocal(); l[id] = prog[id]; saveLocal(l); renderList(); renderDetail(); renderDashboard(); }
+      if (isGuest) { const l = loadLocal(); l[id] = prog[id]; saveLocal(l); renderList(); renderDetail(); renderStats(); }
       else {
         savingIds.add(id);
         renderDetail(); // show spinning state immediately
         try {
-          const res = await api('/api/progress', 'POST', { waza_id: id, shapes: JSON.stringify(prog[id].shapes), like: prog[id].like });
+          const res = await api('/api/progress', 'POST', { waza_id: id, markings: JSON.stringify(prog[id].shapes), like: prog[id].like });
           if (res.error) { console.warn('Progress save failed:', res.error); }
           else if (res.like_count != null) {
             // Apply fresh aggregate counts back to wazaData so cards update immediately
@@ -3471,7 +3471,7 @@
           }
         } catch (err) { console.warn('Progress save error:', err); }
         savingIds.delete(id);
-        renderList(); renderDetail(); renderDashboard();
+        renderList(); renderDetail(); renderStats();
         // Flash "Saved ✓" indicator
         const indicator = document.getElementById('saveIndicator');
         if (indicator) { indicator.style.opacity = '1'; clearTimeout(indicator._t); indicator._t = setTimeout(() => { indicator.style.opacity = '0'; }, 1400); }
@@ -3576,7 +3576,7 @@
       const anyShapeActive = shapes.some(Boolean);
       let results = wazaData.filter(w => {
         // "Any" mode: only show waza that have at least one mark
-        if (exploreFilterAny) {
+        if (browseFilterAny) {
           const p = getP(w.id);
           if (!(p.like || (p.shapes && p.shapes.some(Boolean)))) return false;
         }
@@ -3595,10 +3595,10 @@
         return true;
       });
       // Sort
-      if (exploreSortField !== 'default') {
+      if (browseSortField !== 'default') {
         results.sort((a, b) => {
           let cmp = 0;
-          if (exploreSortField === 'likes') {
+          if (browseSortField === 'likes') {
             // Sort by total like count (aggregate from all users)
             const la = a.like_count || 0;
             const lb = b.like_count || 0;
@@ -3608,7 +3608,7 @@
             const nb = (b.name_jp || dispName(b) || '').toLowerCase();
             cmp = na.localeCompare(nb, 'ja');
           }
-          return exploreSortOrder === 'desc' ? -cmp : cmp;
+          return browseSortOrder === 'desc' ? -cmp : cmp;
         });
       }
       return results;
@@ -3617,7 +3617,7 @@
     // ── Shared helpers ────────────────────────────────────────────
     // Returns a CSS class encoding the full shape bitmask (sh-1 to sh-63), or '' if none
     const shapeClass = shapes => { const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0); return mask ? 'sh-' + mask : ''; };
-    const shapePips = shapes => SHAPES.map((s, i) => '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '" title="' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '">' + s + '</span>').join('');
+    const shapePips = shapes => SHAPES.map((s, i) => '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</span>').join('');
 
     function platform(url) {
       if (!url) return 'other';
@@ -3771,13 +3771,13 @@
       if (browseListView === 'expanded') {
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const shapes = p.shapes || Array(6).fill(false);
+          const markings = p.shapes || Array(6).fill(false);
           const hasShape = shapes.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
-            + '<div class="shapes-row wce-shapes">' + shapePips(shapes) + '</div>'
+            + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
             + pill + '</div>';
-          return '<div class="waza-card-expanded ' + shapeClass(shapes) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          return '<div class="waza-list ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<div class="wce-header">'
             + '<div class="njp">' + (w.name_jp || '—') + '</div>'
             + '<div class="nen">' + dispName(w) + '</div>'
@@ -3785,36 +3785,36 @@
             + videoButtons(w)
             + '</div>';
         }).join('');
-        list.querySelectorAll('.waza-card-expanded').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
+        list.querySelectorAll('.waza-list').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
 
       } else if (browseListView === 'list') {
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const shapes = p.shapes || Array(6).fill(false);
+          const markings = p.shapes || Array(6).fill(false);
           const hasShape = shapes.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
-            + '<div class="shapes-row wce-shapes">' + shapePips(shapes) + '</div>'
+            + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
             + pill + '</div>';
-          return '<div class="waza-card ' + shapeClass(shapes) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          return '<div class="waza-list ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<div class="njp">' + (w.name_jp || '—') + '</div>'
             + '<div class="nen">' + dispName(w) + '</div>'
             + bottomRow + '</div>';
         }).join('');
-        list.querySelectorAll('.waza-card').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
+        list.querySelectorAll('.waza-list').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
 
       } else {
         // Compact — no likes, equal truncating names
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const shapes = p.shapes || Array(6).fill(false);
-          return '<div class="drow ' + shapeClass(shapes) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          const markings = p.shapes || Array(6).fill(false);
+          return '<div class="drow ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<span class="drn">' + (w.name_jp || '—') + '</span>'
             + '<span class="drs">' + dispName(w) + '</span>'
-            + '<div class="shapes-row" style="flex-shrink:0">' + shapePips(shapes) + '</div>'
+            + '<div class="shapes-row" style="flex-shrink:0">' + shapePips(markings) + '</div>'
             + '</div>';
         }).join('');
-        list.querySelectorAll('.drow').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
+        list.querySelectorAll('.waza-compact').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
       }
     }
 
@@ -3873,7 +3873,7 @@
       if (selectedId === null) { panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>'; return; }
       const w = wazaData.find(x => x.id === selectedId); if (!w) return;
       const p = getP(w.id);
-      const shapes = p.shapes || Array(6).fill(false);
+      const markings = p.shapes || Array(6).fill(false);
 
       const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5].filter(v => v && v.trim() && v !== '0');
 
@@ -3951,7 +3951,7 @@
 
         // Shapes — not collapsible
         + '<div class="dsec"><h3>Markings</h3>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="shape-btn' + (shapes[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="shape-btn' + (shapes[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
         + '<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of markings — meaning is up to you.</div></div>'
 
         // Videos — not collapsible
@@ -3992,7 +3992,7 @@
       panel.querySelector('#likeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'like' ? null : 'like' }));
       panel.querySelector('#dislikeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'dislike' ? null : 'dislike' }));
       panel.querySelectorAll('.shape-btn').forEach(btn => btn.addEventListener('click', () => {
-        const ns = [...shapes]; ns[+btn.dataset.si] = !ns[+btn.dataset.si]; saveP(w.id, { shapes: ns });
+        const ns = [...shapes]; ns[+btn.dataset.si] = !ns[+btn.dataset.si]; saveP(w.id, { markings: ns });
       }));
 
       // ── Play button toggle — lazy-load iframe on first expand ──
@@ -4129,7 +4129,7 @@
     }
 
     // ── Dashboard ─────────────────────────────────────────────────
-    function renderDashboard() { renderDashStats(); }
+    function renderStats() { renderDashStats(); }
 
     function timeAgo(iso) {
       if (!iso) return '—';
@@ -4170,11 +4170,11 @@
         + (recent.length
           ? recent.map(w => {
             const p = getP(w.id);
-            const shapes = p.shapes || Array(6).fill(false);
-            return '<div class="recent-row ' + shapeClass(shapes) + '" data-id="' + w.id + '">'
+            const markings = p.shapes || Array(6).fill(false);
+            return '<div class="recent-row ' + shapeClass(markings) + '" data-id="' + w.id + '">'
               + '<span class="drn">' + (w.name_jp || '—') + '</span>'
               + '<span class="drs">' + dispName(w) + '</span>'
-              + '<span style="margin-left:auto;display:flex;gap:2px">' + shapePips(shapes) + '</span>'
+              + '<span style="margin-left:auto;display:flex;gap:2px">' + shapePips(markings) + '</span>'
               + '<span class="recent-time">' + timeAgo(p.updated_at) + '</span>'
               + '</div>';
           }).join('')
@@ -4232,7 +4232,7 @@
       'PenSpinGod', 'GlowstickKing', 'MajiLover', 'WazaWizard',
       'OshiMaster', 'KusaPlayer', 'TigerDance', 'MelonPan',
       'UltraSolo', 'WotageiWarlord', 'SaltedFish', 'BakaSenpai',
-      'Legend27', 'NamelessWaza', 'ChikaIdol', 'GachiKoi',
+      'Labels27', 'NamelessWaza', 'ChikaIdol', 'GachiKoi',
       'JustBrowsing', 'NotARobot', 'DefinitelyHuman', 'GuestDesu',
       'Oshihen',
     ];
@@ -4371,59 +4371,59 @@
 
     function updateShapeFilterUI() {
       // Desktop
-      document.getElementById('filterShapeAll').classList.toggle('active', !exploreFilterAny && filters.shapes.every(Boolean));
-      document.getElementById('filterShapeAny').classList.toggle('active', exploreFilterAny);
+      document.getElementById('filterShapeAll').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
+      document.getElementById('filterShapeAny').classList.toggle('active', browseFilterAny);
       document.querySelectorAll('.shape-filter-btn').forEach(btn => {
-        btn.classList.toggle('active', !exploreFilterAny && filters.shapes[+btn.dataset.si]);
+        btn.classList.toggle('active', !browseFilterAny && filters.markings[+btn.dataset.si]);
       });
       // Mobile sheet mirrors
-      document.getElementById('filterShapeAllMob').classList.toggle('active', !exploreFilterAny && filters.shapes.every(Boolean));
-      document.getElementById('filterShapeAnyMob').classList.toggle('active', exploreFilterAny);
+      document.getElementById('filterShapeAllMob').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
+      document.getElementById('filterShapeAnyMob').classList.toggle('active', browseFilterAny);
       document.querySelectorAll('.shape-filter-btn-mob').forEach(btn => {
-        btn.classList.toggle('active', !exploreFilterAny && filters.shapes[+btn.dataset.si]);
+        btn.classList.toggle('active', !browseFilterAny && filters.markings[+btn.dataset.si]);
       });
       // Filter dot: visible when any non-default filter is active
-      const hasFilter = exploreFilterAny || filters.shapes.some(Boolean) || exploreSortField !== 'default' || exploreSortOrder !== 'asc';
+      const hasFilter = browseFilterAny || filters.markings.some(Boolean) || browseSortField !== 'default' || browseSortOrder !== 'asc';
       document.getElementById('filterDot').classList.toggle('visible', hasFilter);
     }
 
     document.getElementById('filterShapeAll').addEventListener('click', () => {
-      exploreFilterAny = false;
-      const anyOn = filters.shapes.some(Boolean);
-      filters.shapes = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
+      browseFilterAny = false;
+      const anyOn = filters.markings.some(Boolean);
+      filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
       updateShapeFilterUI(); renderList();
     });
 
     document.getElementById('filterShapeAny').addEventListener('click', () => {
-      exploreFilterAny = !exploreFilterAny;
-      if (exploreFilterAny) filters.shapes = Array(6).fill(false); // clear specific filters when entering Any mode
+      browseFilterAny = !browseFilterAny;
+      if (browseFilterAny) filters.markings = Array(6).fill(false); // clear specific filters when entering Any mode
       updateShapeFilterUI(); renderList();
     });
 
     document.querySelectorAll('.shape-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        exploreFilterAny = false; // specific shape filter exits Any mode
+        browseFilterAny = false; // specific shape filter exits Any mode
         const i = +btn.dataset.si;
-        filters.shapes = filters.shapes.map((v, idx) => idx === i ? !v : v);
+        filters.markings = filters.markings.map((v, idx) => idx === i ? !v : v);
         updateShapeFilterUI(); renderList();
       });
     });
 
-    document.getElementById('exploreSortField').addEventListener('change', e => {
-      exploreSortField = e.target.value;
-      const isDefault = exploreSortField === 'default';
-      document.getElementById('exploreSortOrder').disabled = isDefault;
-      document.getElementById('exploreSortOrderMob').disabled = isDefault;
+    document.getElementById('browseSortField').addEventListener('change', e => {
+      browseSortField = e.target.value;
+      const isDefault = browseSortField === 'default';
+      document.getElementById('browseSortOrder').disabled = isDefault;
+      document.getElementById('browseSortOrderMob').disabled = isDefault;
       // Save to localStorage
-      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: browseSortField, order: browseSortOrder }));
       updateShapeFilterUI(); renderList();
     });
 
-    document.getElementById('exploreSortOrder').addEventListener('change', e => {
-      exploreSortOrder = e.target.value;
-      document.getElementById('exploreSortOrderMob').value = e.target.value;
+    document.getElementById('browseSortOrder').addEventListener('change', e => {
+      browseSortOrder = e.target.value;
+      document.getElementById('browseSortOrderMob').value = e.target.value;
       // Save to localStorage
-      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: browseSortField, order: browseSortOrder }));
       updateShapeFilterUI(); renderList();
     });
 
@@ -4492,47 +4492,47 @@
 
     // Mobile shape buttons — stage only, applied on Confirm
     document.getElementById('filterShapeAllMob').addEventListener('click', () => {
-      exploreFilterAny = false;
-      const anyOn = filters.shapes.some(Boolean);
-      filters.shapes = Array(6).fill(!anyOn);
+      browseFilterAny = false;
+      const anyOn = filters.markings.some(Boolean);
+      filters.markings = Array(6).fill(!anyOn);
       updateShapeFilterUI();
     });
     document.getElementById('filterShapeAnyMob').addEventListener('click', () => {
-      exploreFilterAny = !exploreFilterAny;
-      if (exploreFilterAny) filters.shapes = Array(6).fill(false);
+      browseFilterAny = !browseFilterAny;
+      if (browseFilterAny) filters.markings = Array(6).fill(false);
       updateShapeFilterUI();
     });
     document.querySelectorAll('.shape-filter-btn-mob').forEach(btn => {
       btn.addEventListener('click', () => {
-        exploreFilterAny = false;
+        browseFilterAny = false;
         const i = +btn.dataset.si;
-        filters.shapes = filters.shapes.map((v, idx) => idx === i ? !v : v);
+        filters.markings = filters.markings.map((v, idx) => idx === i ? !v : v);
         updateShapeFilterUI();
       });
     });
-    document.getElementById('exploreSortFieldMob').addEventListener('change', e => {
+    document.getElementById('browseSortFieldMob').addEventListener('change', e => {
       const isDefault = e.target.value === 'default';
-      document.getElementById('exploreSortOrderMob').disabled = isDefault;
+      document.getElementById('browseSortOrderMob').disabled = isDefault;
     });
-    document.getElementById('exploreSortOrderMob').addEventListener('change', () => { });
+    document.getElementById('browseSortOrderMob').addEventListener('change', () => { });
     document.getElementById('browseViewSelectMob').addEventListener('change', () => { });
 
     document.getElementById('filterSheetConfirm').addEventListener('click', () => {
       // Read staged values from mob selects
-      const newSortField = document.getElementById('exploreSortFieldMob').value;
-      const newSortOrder = document.getElementById('exploreSortOrderMob').value;
+      const newSortField = document.getElementById('browseSortFieldMob').value;
+      const newSortOrder = document.getElementById('browseSortOrderMob').value;
       const newView = document.getElementById('browseViewSelectMob').value;
       // Apply to state + sync desktop controls
-      exploreSortField = newSortField;
-      exploreSortOrder = newSortOrder;
+      browseSortField = newSortField;
+      browseSortOrder = newSortOrder;
       browseListView = newView;
-      document.getElementById('exploreSortField').value = newSortField;
+      document.getElementById('browseSortField').value = newSortField;
       const isDefault = newSortField === 'default';
-      document.getElementById('exploreSortOrder').disabled = isDefault;
-      document.getElementById('exploreSortOrder').value = newSortOrder;
+      document.getElementById('browseSortOrder').disabled = isDefault;
+      document.getElementById('browseSortOrder').value = newSortOrder;
       document.getElementById('browseViewSelect').value = newView;
       // Save to localStorage
-      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: exploreSortField, order: exploreSortOrder }));
+      localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: browseSortField, order: browseSortOrder }));
       localStorage.setItem('wl_view_style', browseListView);
       // Close sheet and re-render
       filterSheetBg.classList.remove('open');
@@ -4551,7 +4551,7 @@
       document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
       if (t === 'dashboard') renderDashStats();
       if (t === 'compare') renderDashCompare();
-      if (t === 'importlist') renderTextImport();
+      if (t === 'importlist') renderImport();
       if (t === 'contribute') renderContribute();
       // Update mobile menu active state
       if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
@@ -4649,9 +4649,9 @@
       const marks = {};
       Object.entries(prog).forEach(([id, p]) => {
         const hasShape = p.shapes && p.shapes.some(Boolean);
-        if (hasShape || p.like) marks[+id] = { shapes: p.shapes || Array(6).fill(false), like: p.like || null };
+        if (hasShape || p.like) marks[+id] = { markings: p.shapes || Array(6).fill(false), like: p.like || null };
       });
-      return JSON.stringify({ v: 1, legend: shapeLegend, marks });
+      return JSON.stringify({ v: 1, legend: shapeLabels, marks });
     }
 
     async function hashList(serialized) {
@@ -4800,17 +4800,17 @@
         // No imported lists - show simple legend
         const shapeCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.shapes) p.shapes.forEach((on, i) => { if (on) shapeCounts[i]++; }); });
-        const simpleLegendHTML = '<div class="dsec2"><h3>My legend</h3>'
+        const simpleLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
             + '<span class="legend-shape">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLegend[i].replace(/"/g, '&quot;') + '">'
+            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLabels[i].replace(/"/g, '&quot;') + '">'
             + '<span class="legend-count">' + shapeCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
-        container.innerHTML = simpleLegendHTML + headerHtml + '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
+        container.innerHTML = simpleLabelsHTML + headerHtml + '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
         container.querySelector('#cmpExportBtn').addEventListener('click', openExportModal);
-        container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLegend[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LEGEND, JSON.stringify(shapeLegend)); }); });
+        container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
         container.querySelector('#cmpImportBtn').addEventListener('click', () => openImportModal());
         return;
       }
@@ -4818,7 +4818,7 @@
       const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
 
       // Combined legend - shows both imported and user's legend in one table
-      let combinedLegendHTML = '';
+      let combinedLabelsHTML = '';
       if (imp) {
         // Count shapes for both imported list and user's list
         const impShapeCounts = Array(6).fill(0);
@@ -4842,10 +4842,10 @@
           }
         });
         
-        combinedLegendHTML = '<div class="dsec2"><h3>Legend comparison</h3>'
+        combinedLabelsHTML = '<div class="dsec2"><h3>Labels comparison</h3>'
           + SHAPES.map((s, i) => {
               const impLabel = imp.legend && imp.legend[i] ? imp.legend[i] : '';
-              const myLabel = shapeLegend[i] || '';
+              const myLabel = shapeLabels[i] || '';
               return '<div class="legend-row">'
                 + '<span class="legend-shape">' + s + '</span>'
                 + '<div class="legend-combined">'
@@ -4870,10 +4870,10 @@
         // No imported list selected - show only user's legend
         const myShapeCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.shapes) p.shapes.forEach((on, i) => { if (on) myShapeCounts[i]++; }); });
-        combinedLegendHTML = '<div class="dsec2"><h3>My legend</h3>'
+        combinedLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
             + '<span class="legend-shape">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLegend[i].replace(/"/g, '&quot;') + '">'
+            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLabels[i].replace(/"/g, '&quot;') + '">'
             + '<span class="legend-count">' + myShapeCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
@@ -4887,7 +4887,7 @@
       const colHeaders = '<div class="cmp-col-headers"><span>Waza</span><span>Their marks</span><span>Your marks</span></div>';
 
       const rowsHtml = rows.map(w => {
-        const importedMark = imp ? (imp.marks[w.id] || { shapes: Array(6).fill(false), like: null }) : { shapes: Array(6).fill(false), like: null };
+        const importedMark = imp ? (imp.marks[w.id] || { markings: Array(6).fill(false), like: null }) : { markings: Array(6).fill(false), like: null };
         const myP = getP(w.id);
         const myShapes = myP.shapes || Array(6).fill(false);
         const impShapes = importedMark.shapes || Array(6).fill(false);
@@ -4899,18 +4899,18 @@
           // +impLikeBadge
           + '</div>'
           + '<div class="cmp-shapes-mine">'
-          + SHAPES.map((s, i) => '<button class="cmp-shape-btn' + (myShapes[i] ? ' on' : '') + '" data-wid="' + w.id + '" data-si="' + i + '" title="' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('')
+          + SHAPES.map((s, i) => '<button class="cmp-shape-btn' + (myShapes[i] ? ' on' : '') + '" data-wid="' + w.id + '" data-si="' + i + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('')
           + '</div>'
           + '</div>';
       }).join('');
 
       const emptyRows = !rows.length ? '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">This list has no marks.</div>' : '';
 
-      container.innerHTML = combinedLegendHTML + headerHtml + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
+      container.innerHTML = combinedLabelsHTML + headerHtml + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
 
       container.querySelector('#cmpExportBtn')?.addEventListener('click', openExportModal);
-      container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLegend[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LEGEND, JSON.stringify(shapeLegend)); }); });
-      container.querySelectorAll('.legend-input-bottom').forEach(inp => { inp.addEventListener('input', () => { shapeLegend[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LEGEND, JSON.stringify(shapeLegend)); }); });
+      container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+      container.querySelectorAll('.legend-input-bottom').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
 
       // Events
       container.querySelector('#cmpSelect').addEventListener('change', e => {
@@ -4936,7 +4936,7 @@
           const cur = getP(wid);
           const ns = [...(cur.shapes || Array(6).fill(false))];
           ns[si] = !ns[si];
-          saveP(wid, { shapes: ns }).then(() => renderDashCompare());
+          saveP(wid, { markings: ns }).then(() => renderDashCompare());
         });
       });
 
@@ -5391,7 +5391,7 @@
       _tiParsed = true;
     }
 
-    function renderTextImport() {
+    function renderImport() {
       const container = document.getElementById('dashTextImport');
 
       if (!_tiParsed) {
@@ -5421,7 +5421,7 @@
                 + '</div>'
                 + '<select class="color-shape-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
                 + '<option value="-1">No marking</option>'
-                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '</option>').join('')
+                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '</option>').join('')
                 + '</select>'
                 + '</div>';
             }).join('')
@@ -5452,7 +5452,7 @@
                   if (shapeIdx >= 0) {
                     item.manualShapes = Array(6).fill(false);
                     item.manualShapes[shapeIdx] = true;
-                    item.category = shapeLegend[shapeIdx] || `Shape ${shapeIdx + 1}`;
+                    item.category = shapeLabels[shapeIdx] || `Shape ${shapeIdx + 1}`;
                   }
                   break;
                 }
@@ -5461,14 +5461,14 @@
             
             _tiParsed = true; // Switch to normal mode
             _tiPreviewMode = true; // Enable preview mode
-            renderTextImport();
+            renderImport();
           });
           
           container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
             _tiParsed = false;
             _tiExcelColors = {};
             _tiColorMapping = {};
-            renderTextImport();
+            renderImport();
           });
           
           return;
@@ -5612,7 +5612,7 @@
           if (si >= 0) item.manualShapes[si] = true;
         }
         _tiPreviewMode = true;
-        renderTextImport();
+        renderImport();
         // Scroll to top where preview banner is
         setTimeout(() => {
           container.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -5627,7 +5627,7 @@
             const cur = getP(item.waza.id);
             const merged = [...(cur.shapes || Array(6).fill(false))];
             item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
-            await saveP(item.waza.id, { shapes: merged });
+            await saveP(item.waza.id, { markings: merged });
             count++;
           }
         }
@@ -5636,7 +5636,7 @@
           _tiParsed = false;
           _tiPreviewMode = false;
           _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderTextImport();
+          renderImport();
         } else {
           showToast('No shapes were toggled on — toggle at least one shape per waza.', 'amber');
         }
@@ -5650,7 +5650,7 @@
             const cur = getP(item.waza.id);
             const merged = [...(cur.shapes || Array(6).fill(false))];
             item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
-            await saveP(item.waza.id, { shapes: merged });
+            await saveP(item.waza.id, { markings: merged });
             count++;
           }
         }
@@ -5659,7 +5659,7 @@
           _tiParsed = false;
           _tiPreviewMode = false;
           _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderTextImport();
+          renderImport();
         } else {
           showToast('No shapes were marked — adjust the markings or clear preview.', 'amber');
         }
@@ -5672,7 +5672,7 @@
           item.manualShapes = Array(6).fill(false);
         });
         _tiPreviewMode = false;
-        renderTextImport();
+        renderImport();
         // Scroll to auto-mapping section
         setTimeout(() => {
           const autoMapSection = container.querySelector('.ti-auto-mapping');
@@ -5685,7 +5685,7 @@
         _tiParsed = false;
         _tiPreviewMode = false;
         _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-        renderTextImport();
+        renderImport();
       });
     }
 
@@ -5732,7 +5732,7 @@
         const text = container.querySelector('#tiPasteArea')?.value || '';
         if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
         parseTextImport(text);
-        renderTextImport();
+        renderImport();
       });
       
       // Excel file upload handlers
@@ -5751,7 +5751,7 @@
         
         try {
           await parseExcelFile(file);
-          renderTextImport();
+          renderImport();
         } catch (err) {
           console.error('Excel parse error:', err);
           showToast('Error reading Excel file. Please try text paste instead.', 'red');
@@ -5994,13 +5994,13 @@
   margin-top: 4px;
 }
 
-/* Browse demo list - uses real waza-card components */
+/* Browse demo list - uses real waza-list components */
 #obBrowseList {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-#obBrowseList .waza-card {
+#obBrowseList .waza-list {
   pointer-events: none; /* disable clicking in demo */
   cursor: default;
 }
@@ -6023,12 +6023,12 @@
   margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
   min-height: 56px;
 }
-/* Animate search results appearing (using actual .drow from main app) */
-#obSearchResults .drow {
+/* Animate search results appearing (using actual .waza-compact from main app) */
+#obSearchResults .waza-compact {
   opacity: 0; transform: translateY(4px);
   transition: opacity .18s, transform .18s;
 }
-#obSearchResults .drow.show { opacity: 1; transform: none; }
+#obSearchResults .waza-compact.show { opacity: 1; transform: none; }
 .ob-no-results { font-size: 13px; color: var(--text3); padding: 4px 0; }
 
 /* Card style demo - wrapper only */
@@ -6054,35 +6054,35 @@
 }
 .ob-style-pill.selected .sp-label { color: var(--accent); }
 /* Scale down the real components slightly for preview */
-.ob-style-pill .waza-card,
-.ob-style-pill .waza-card-expanded,
-.ob-style-pill .drow {
+.ob-style-pill .waza-list,
+.ob-style-pill .waza-list,
+.ob-style-pill .waza-compact {
   pointer-events: none; /* prevent clicking inside preview */
   font-size: 13px; /* slightly smaller */
 }
-.ob-style-pill .waza-card { margin-bottom: 4px; }
-.ob-style-pill .waza-card:last-child { margin-bottom: 0; }
-.ob-style-pill .drow { margin-bottom: 0; border-bottom: none; }
-.ob-style-pill .drow:first-child { border-radius: 5px 5px 0 0; }
-.ob-style-pill .drow:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
-.ob-style-pill .drow:not(:first-child):not(:last-child) { border-radius: 0; }
+.ob-style-pill .waza-list { margin-bottom: 4px; }
+.ob-style-pill .waza-list:last-child { margin-bottom: 0; }
+.ob-style-pill .waza-compact { margin-bottom: 0; border-bottom: none; }
+.ob-style-pill .waza-compact:first-child { border-radius: 5px 5px 0 0; }
+.ob-style-pill .waza-compact:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
+.ob-style-pill .waza-compact:not(:first-child):not(:last-child) { border-radius: 0; }
 
-/* Shape marking demo - use real app's drow (compact) style + cmp-shape-btn */
+/* Shape marking demo - use real app's waza-compact (compact) style + cmp-shape-btn */
 .ob-marking-demo { 
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
   overflow: hidden;
 }
-/* drow styling is already in main app CSS - just add container wrapper */
-.ob-marking-demo .drow {
+/* waza-compact styling is already in main app CSS - just add container wrapper */
+.ob-marking-demo .waza-compact {
   cursor: default; /* disable hover pointer in demo */
 }
-.ob-marking-demo .drow:last-child {
+.ob-marking-demo .waza-compact:last-child {
   border-bottom: none; /* remove border on last item */
 }
 
-/* Legend / "you decide" slide */
+/* Labels / "you decide" slide */
 .ob-legend { display: flex; flex-direction: column; gap: 6px; }
 .ob-legend-row {
   display: flex; align-items: center; gap: 10px;
@@ -6192,7 +6192,7 @@
           <div class="ob-demo" id="obBrowseDemo">
             <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Browse panel</div>
             <div id="obBrowseList">
-              <!-- Real waza-card components built by JS -->
+              <!-- Real waza-list components built by JS -->
             </div>
           </div>
         </div>
@@ -6250,7 +6250,7 @@
                 <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
               </div>
             </div>
-            <div class="ob-legend" id="obLegendPreview">
+            <div class="ob-legend" id="obLabelsPreview">
               <!-- rows built by JS -->
             </div>
           </div>
@@ -6366,7 +6366,7 @@
     [true,true,false,false,false,false],  // Double Mix: ● ▲
     [false,false,true,true,false,false],  // Romance: ■ ♥
   ];
-  // Legend inputs state
+  // Labels inputs state
   const legendValues = ['','','','','',''];
 
   // ── Show / hide ───────────────────────────────────────────────
@@ -6378,7 +6378,7 @@
     });
     buildBrowseDemo();
     buildMarkingDemo();
-    buildLegendPreview();
+    buildLabelsPreview();
     renderSlide(0);
     hasShownOnboardingThisSession = true;
   }
@@ -6406,7 +6406,7 @@
     if (currentSlide === 2) initSearchDemo();
     if (currentSlide === 3) initStyleDemo();
     if (currentSlide === 5) {
-      buildLegendPreview();
+      buildLabelsPreview();
       // Bind the "Use template" button
       const tplBtn = document.getElementById('obUseTemplate');
       if (tplBtn) {
@@ -6418,7 +6418,7 @@
       const clearBtn = document.getElementById('obClearAll');
       if (clearBtn) {
         clearBtn.onclick = () => {
-          clearAllLegend();
+          clearAllLabels();
         };
       }
     }
@@ -6457,7 +6457,7 @@
           const navCmp = document.querySelector('.nav-tab[data-tab="compare"]') || document.querySelector('[data-tab="compare"]');
           if (navCmp) navCmp.click();
           setTimeout(() => {
-            const importTab = document.querySelector('[data-tab="importlist"]');
+            const importTab = document.querySelector('[data-tab="import"]');
             if (importTab) importTab.click();
           }, 200);
         }, 400);
@@ -6526,22 +6526,22 @@
     
     // Use first 3 demo waza with preset shapes
     const demoItems = [
-      { waza: DEMO_WAZA[0], shapes: [true, false, true, false, false, false], likes: 2, dislikes: 0 },  // Thundersnake: ● ■
-      { waza: DEMO_WAZA[1], shapes: [false, true, false, false, false, false], likes: 1, dislikes: 0 }, // Amaterasu: ▲
-      { waza: DEMO_WAZA[2], shapes: [false, false, false, true, true, false], likes: 3, dislikes: 1 },  // Muramasa: ♥ ★
+      { waza: DEMO_WAZA[0], markings: [true, false, true, false, false, false], likes: 2, dislikes: 0 },  // Thundersnake: ● ■
+      { waza: DEMO_WAZA[1], markings: [false, true, false, false, false, false], likes: 1, dislikes: 0 }, // Amaterasu: ▲
+      { waza: DEMO_WAZA[2], markings: [false, false, false, true, true, false], likes: 3, dislikes: 1 },  // Muramasa: ♥ ★
     ];
     
-    // Build real waza-card components (same structure as main app's list view)
+    // Build real waza-list components (same structure as main app's list view)
     container.innerHTML = demoItems.map(item => {
       const w = item.waza;
-      const shapes = item.shapes;
+      const markings = item.shapes;
       const pill = localCardLikePill(item.likes, item.dislikes);
       
       const bottomRow = '<div class="card-bottom-row">'
-        + '<div class="shapes-row wce-shapes">' + shapePipsFunc(shapes) + '</div>'
+        + '<div class="shapes-row wce-shapes">' + shapePipsFunc(markings) + '</div>'
         + pill + '</div>';
       
-      return '<div class="waza-card ' + shapeClassFunc(shapes) + '">'
+      return '<div class="waza-list ' + shapeClassFunc(markings) + '">'
         + '<div class="njp">' + w.jp + '</div>'
         + '<div class="nen">' + w.en + '</div>'
         + bottomRow + '</div>';
@@ -6626,7 +6626,7 @@
     resultsEl.innerHTML = '';
     matches.forEach((w, idx) => {
       const row = document.createElement('div');
-      row.className = 'drow'; // Use actual list row class from main app
+      row.className = 'waza-compact'; // Use actual list row class from main app
       
       // Determine if it's exact or fuzzy match using real app logic
       let isExact = false;
@@ -6680,9 +6680,9 @@
     
     // Sample waza with demo data
     const samples = [
-      { jp: DEMO_WAZA[0].jp, en: DEMO_WAZA[0].en, shapes: [true,false,true,false,false,false] }, // ● ■
-      { jp: DEMO_WAZA[1].jp, en: DEMO_WAZA[1].en, shapes: [false,true,false,false,false,false] }, // ▲
-      { jp: DEMO_WAZA[2].jp, en: DEMO_WAZA[2].en, shapes: [false,false,false,true,true,false] }, // ♥ ★
+      { jp: DEMO_WAZA[0].jp, en: DEMO_WAZA[0].en, markings: [true,false,true,false,false,false] }, // ● ■
+      { jp: DEMO_WAZA[1].jp, en: DEMO_WAZA[1].en, markings: [false,true,false,false,false,false] }, // ▲
+      { jp: DEMO_WAZA[2].jp, en: DEMO_WAZA[2].en, markings: [false,false,false,true,true,false] }, // ♥ ★
     ];
     
     container.innerHTML = '';
@@ -6696,7 +6696,7 @@
     const listPreview = document.createElement('div');
     samples.slice(0, 2).forEach(w => {
       const card = document.createElement('div');
-      card.className = 'waza-card ' + shapeClass(w.shapes);
+      card.className = 'waza-list ' + shapeClass(w.shapes);
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
         + cardLikePill() + '</div>';
@@ -6716,7 +6716,7 @@
     
     const w = samples[0];
     const expandedCard = document.createElement('div');
-    expandedCard.className = 'waza-card-expanded ' + shapeClass(w.shapes);
+    expandedCard.className = 'waza-list ' + shapeClass(w.shapes);
     const bottomRow = '<div class="card-bottom-row">'
       + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
       + cardLikePill() + '</div>';
@@ -6769,8 +6769,8 @@
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
     
-    // Get shapeLegend if available from main app
-    const legend = window.shapeLegend || TEMPLATE;
+    // Get shapeLabels if available from main app
+    const legend = window.shapeLabels || TEMPLATE;
     const SHAPES = ['●','▲','■','♥','★','◆'];
     
     // Helper: generate shape class from bitmask (same as main app)
@@ -6782,10 +6782,10 @@
     container.innerHTML = '';
     DEMO_WAZA.forEach((w, wi) => {
       const row = document.createElement('div');
-      const shapes = demoShapes[wi];
+      const markings = demoShapes[wi];
       
-      // Use real drow structure with shape tint classes
-      row.className = 'drow ' + shapeClass(shapes);
+      // Use real waza-compact structure with shape tint classes
+      row.className = 'drow ' + shapeClass(markings);
       
       // Structure: drn (JP name) + drs (EN name) + cmp-shapes-mine (buttons)
       const shapesHTML = '<div class="cmp-shapes-mine" style="flex-shrink:0">'
@@ -6817,16 +6817,16 @@
     });
   }
   
-  // Remove updateMarkingRowStyle - no longer needed with drow structure
+  // Remove updateMarkingRowStyle - no longer needed with waza-compact structure
 
-  // ── Legend preview (slide 5) ──────────────────────────────────
-  function buildLegendPreview() {
-    const container = document.getElementById('obLegendPreview');
+  // ── Labels preview (slide 5) ──────────────────────────────────
+  function buildLabelsPreview() {
+    const container = document.getElementById('obLabelsPreview');
     if (!container) return;
     container.innerHTML = '';
     // Load existing legend from app
     let existing = ['','','','','',''];
-    try { existing = JSON.parse(localStorage.getItem('wl_shape_legend') || '["","","","","",""]'); } catch {}
+    try { existing = JSON.parse(localStorage.getItem('wl_shape_labels') || '["","","","","",""]'); } catch {}
     SHAPES_OB.forEach((sh, i) => {
       const row = document.createElement('div');
       row.className = 'ob-legend-row';
@@ -6839,40 +6839,40 @@
       inp.value = existing[i] || legendValues[i] || '';
       inp.oninput = () => {
         legendValues[i] = inp.value;
-        saveLegend();
+        saveLabels();
       };
       row.appendChild(inp);
       container.appendChild(row);
     });
   }
 
-  function saveLegend() {
-    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+  function saveLabels() {
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
     const vals = Array.from(inputs).map(i => i.value.trim());
-    localStorage.setItem('wl_shape_legend', JSON.stringify(vals));
-    // Sync with app's shapeLegend if it exists
-    if (window.shapeLegend) { vals.forEach((v, i) => { window.shapeLegend[i] = v; }); }
-    if (typeof renderDashboard === 'function') renderDashboard();
+    localStorage.setItem('wl_shape_labels', JSON.stringify(vals));
+    // Sync with app's shapeLabels if it exists
+    if (window.shapeLabels) { vals.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    if (typeof renderStats === 'function') renderStats();
   }
 
   // ── Apply template ────────────────────────────────────────────
   function applyTemplate() {
-    localStorage.setItem('wl_shape_legend', JSON.stringify(TEMPLATE));
-    if (window.shapeLegend) { TEMPLATE.forEach((v, i) => { window.shapeLegend[i] = v; }); }
-    if (typeof renderDashboard === 'function') renderDashboard();
+    localStorage.setItem('wl_shape_labels', JSON.stringify(TEMPLATE));
+    if (window.shapeLabels) { TEMPLATE.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
-    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
     inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
   }
 
   // ── Clear all legend labels ───────────────────────────────────
-  function clearAllLegend() {
-    const emptyLegend = ['','','','','',''];
-    localStorage.setItem('wl_shape_legend', JSON.stringify(emptyLegend));
-    if (window.shapeLegend) { emptyLegend.forEach((v, i) => { window.shapeLegend[i] = v; }); }
-    if (typeof renderDashboard === 'function') renderDashboard();
+  function clearAllLabels() {
+    const emptyLabels = ['','','','','',''];
+    localStorage.setItem('wl_shape_labels', JSON.stringify(emptyLabels));
+    if (window.shapeLabels) { emptyLabels.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
-    const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
+    const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
     inputs.forEach(inp => { inp.value = ''; });
   }
 

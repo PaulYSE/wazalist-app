@@ -110,7 +110,7 @@ export default {
 
 			if (request.method === "POST") {
 				if (!user) return err("Authentication required", 401);
-				const { waza_id, shapes, like } = await request.json();
+				const { waza_id, markings, like } = await request.json();
 				if (!waza_id) return err("waza_id is required");
 
 				// `like` is an account-only field — guests must not reach this,
@@ -118,14 +118,14 @@ export default {
 				const likeValue = user ? (like ?? null) : null;
 
 				await env.DB.prepare(`
-					INSERT INTO progress (user_id, waza_id, shapes, like, updated_at)
+					INSERT INTO progress (user_id, waza_id, markings, like, updated_at)
 					VALUES (?, ?, ?, ?, datetime('now'))
 					ON CONFLICT (user_id, waza_id) DO UPDATE SET
-						shapes = excluded.shapes,
+						markings = excluded.markings,
 						like = excluded.like,
 						updated_at = datetime('now')
 				`)
-					.bind(user.id, waza_id, shapes ?? "[]", likeValue)
+					.bind(user.id, waza_id, markings ?? "[]", likeValue)
 					.run();
 
 				// Return fresh aggregate counts for this waza so the frontend
@@ -142,33 +142,33 @@ export default {
 			}
 		}
 
-		// ── Shape legend ──────────────────────────────────────────
+		// ── Shape labels ──────────────────────────────────────────
 
-		// GET /api/legend
-		if (path === "/api/legend" && request.method === "GET") {
+		// GET /api/labels
+		if (path === "/api/labels" && request.method === "GET") {
 			const user = await getUser();
 			if (!user) return err("Authentication required", 401);
 
 			const row = await env.DB.prepare(
-				"SELECT shape_legend FROM users WHERE id = ?"
+				"SELECT shape_labels FROM users WHERE id = ?"
 			).bind(user.id).first();
 
-			const legend = row?.shape_legend ?? '["","","","","",""]';
-			return json({ legend: JSON.parse(legend as string) });
+			const labels = row?.shape_labels ?? '["","","","","",""]';
+			return json({ labels: JSON.parse(labels as string) });
 		}
 
-		// POST /api/legend
-		if (path === "/api/legend" && request.method === "POST") {
+		// POST /api/labels
+		if (path === "/api/labels" && request.method === "POST") {
 			const user = await getUser();
 			if (!user) return err("Authentication required", 401);
 
-			const { legend } = await request.json();
-			if (!Array.isArray(legend) || legend.length !== 6)
-				return err("legend must be an array of 6 strings");
+			const { labels } = await request.json();
+			if (!Array.isArray(labels) || labels.length !== 6)
+				return err("labels must be an array of 6 strings");
 
 			await env.DB.prepare(
-				"UPDATE users SET shape_legend = ? WHERE id = ?"
-			).bind(JSON.stringify(legend), user.id).run();
+				"UPDATE users SET shape_labels = ? WHERE id = ?"
+			).bind(JSON.stringify(labels), user.id).run();
 
 			return json({ success: true });
 		}
