@@ -3306,6 +3306,12 @@
     const platLabel = { yt: 'YouTube', bili: 'Bilibili', tw: 'Twitter/X', nico: 'NicoNico', fb: 'Facebook', other: 'Video' };
     const platColor = { yt: '#ff0000', bili: '#00a1d6', tw: '#1da1f2', nico: '#e6007b', fb: '#1877f2', other: '#555' };
 
+    // Like/dislike values (stored as integers in database)
+    const LIKE_NONE = null;   // No preference (neutral)
+    const LIKE_UP = 1;         // Like/thumbs up
+    const LIKE_DOWN = -1;      // Dislike/thumbs down
+
+
     let isGuest = false, token = localStorage.getItem('wl_token') || '';
     let currentUsername = localStorage.getItem('wl_username') || '';
     let wazaData = [], prog = {}, selectedId = null;
@@ -3758,8 +3764,8 @@
       const lc = w.like_count || 0, dc = w.dislike_count || 0;
       if (!lc && !dc && p.like === null) return '';
       return '<div class="card-like-pill">'
-        + '<span class="' + (p.like === 'like' ? 'like-on' : '') + '">' + '👍 ' + lc + '</span>'
-        + '<span class="' + (p.like === 'dislike' ? 'dislike-on' : '') + '">' + '👎 ' + dc + '</span>'
+        + '<span class="' + (p.like === 1 ? 'like-on' : '') + '">' + '👍 ' + lc + '</span>'
+        + '<span class="' + (p.like === -1 ? 'dislike-on' : '') + '">' + '👎 ' + dc + '</span>'
         + '</div>';
     }
 
@@ -3940,9 +3946,9 @@
         + ((!token || isGuest) ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>' : '')
         + '<div class="like-pill-wrap">'
         + '<div class="like-pill">'
-        + '<button class="like-pill-half' + (p.like === 'like' ? ' like-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="likeBtn">'
+        + '<button class="like-pill-half' + (p.like === 1 ? ' like-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="likeBtn">'
         + '👍 <span class="pill-count">' + (w.like_count || 0) + '</span></button>'
-        + '<button class="like-pill-half' + (p.like === 'dislike' ? ' dislike-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="dislikeBtn">'
+        + '<button class="like-pill-half' + (p.like === -1 ? ' dislike-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="dislikeBtn">'
         + '👎 <span class="pill-count">' + (w.dislike_count || 0) + '</span></button>'
         + '</div>'
         + (() => {
@@ -3991,8 +3997,8 @@
         + '<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div></div>'
         + (!isGuest && token ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>' : '');
 
-      panel.querySelector('#likeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'like' ? null : 'like' }));
-      panel.querySelector('#dislikeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'dislike' ? null : 'dislike' }));
+      panel.querySelector('#likeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 1 ? null : 1 }));
+      panel.querySelector('#dislikeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === -1 ? null : -1 }));
       panel.querySelectorAll('.marking-btn').forEach(btn => btn.addEventListener('click', () => {
         const ns = [...markings]; ns[+btn.dataset.si] = !ns[+btn.dataset.si]; saveP(w.id, { markings: ns });
       }));

@@ -26,8 +26,8 @@ export default {
 			const { results } = await env.DB.prepare(`
 				SELECT
 					w.*,
-					COALESCE(SUM(CASE WHEN p.like = 'like'    THEN 1 END), 0) AS like_count,
-					COALESCE(SUM(CASE WHEN p.like = 'dislike' THEN 1 END), 0) AS dislike_count
+					COALESCE(SUM(CASE WHEN p.like = 1 THEN 1 END), 0) AS like_count,
+					COALESCE(SUM(CASE WHEN p.like = -1 THEN 1 END), 0) AS dislike_count
 				FROM waza w
 				LEFT JOIN progress p ON p.waza_id = w.id
 				GROUP BY w.id
@@ -113,6 +113,11 @@ export default {
 				const { waza_id, markings, like } = await request.json();
 				if (!waza_id) return err("waza_id is required");
 
+				// Validate like value: must be null, 1, or -1
+				if (like !== null && like !== 1 && like !== -1) {
+					return err("Invalid like value: must be null, 1, or -1");
+				}
+
 				// `like` is an account-only field — guests must not reach this,
 				// but strip it defensively if no authenticated session exists.
 				const likeValue = user ? (like ?? null) : null;
@@ -132,8 +137,8 @@ export default {
 				// can update the displayed like_count/dislike_count immediately.
 				const counts = await env.DB.prepare(`
 					SELECT
-						COALESCE(SUM(CASE WHEN like = 'like'    THEN 1 END), 0) AS like_count,
-						COALESCE(SUM(CASE WHEN like = 'dislike' THEN 1 END), 0) AS dislike_count
+						COALESCE(SUM(CASE WHEN like = 1 THEN 1 END), 0) AS like_count,
+						COALESCE(SUM(CASE WHEN like = -1 THEN 1 END), 0) AS dislike_count
 					FROM progress
 					WHERE waza_id = ?
 				`).bind(waza_id).first();
