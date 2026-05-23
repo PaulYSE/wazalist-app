@@ -5777,27 +5777,16 @@
   box-sizing: border-box;
 }
 .ob-search-demo input:focus { border-color: var(--accent); }
-.ob-search-results {
+#obSearchResults {
   margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
   min-height: 56px;
 }
-.ob-result-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px; border-radius: 6px;
-  background: var(--bg1);
-  border: 1px solid var(--border);
-  font-size: 13px;
+/* Animate search results appearing (using actual .drow from main app) */
+#obSearchResults .drow {
   opacity: 0; transform: translateY(4px);
   transition: opacity .18s, transform .18s;
 }
-.ob-result-row.show { opacity: 1; transform: none; }
-.ob-result-jp { font-weight: 600; color: var(--text1); }
-.ob-result-en { color: var(--text2); font-size: 12px; }
-.ob-match-badge {
-  margin-left: auto; font-size: 10px; padding: 2px 7px;
-  border-radius: 10px; background: #1a1040; color: var(--accent);
-  border: 1px solid var(--accent2); white-space: nowrap;
-}
+#obSearchResults .drow.show { opacity: 1; transform: none; }
 .ob-no-results { font-size: 13px; color: var(--text3); padding: 4px 0; }
 
 /* Card style demo */
@@ -6178,23 +6167,43 @@
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 7;
 
-  // Fake waza data for demo purposes
+  // Demo waza data - used for both search and marking demos
   const DEMO_WAZA = [
-    { jp:'サンダースネーク', en:'Thundersnake',  alias:['thundersnake','thunder snake','thudersnake','thundrsnake','sandaasuneeku'] },
-    { jp:'アマテラス',       en:'Amaterasu',     alias:['amaterasu','amaterazu','amateraasu','amateras'] },
-    { jp:'ムラマサ',         en:'Muramasa',      alias:['muramasa','muramasaa','murmasa','muramaza'] },
-    { jp:'ダブルミックス',   en:'Double Mix',    alias:['double mix','daburu mikkusu','doublemix','dubble mix','doble mix'] },
-    { jp:'ハイパーミックス', en:'Hyper Mix',     alias:['hyper mix','haipaa mikkusu','hypermix','hiper mix'] },
-    { jp:'サイリウム',       en:'Cyalume',       alias:['cyalume','sairium','sairyuumu','lightstick'] },
-  ];
-
-  // Marking demo names
-  const DEMO_NAMES = [
-    { jp:'サンダースネーク', en:'Thundersnake' },
-    { jp:'アマテラス', en:'Amaterasu' },
-    { jp:'ムラマサ', en:'Muramasa' },
-    { jp:'ミセスナルシッサ', en:'Mrs Narcissa' },
-    { jp:'ロマンス', en:'Romance' },
+    { 
+      id: 1,
+      jp:'サンダースネーク', 
+      en:'Thundersnake',  
+      tag: 'Basic',
+      alias:['thundersnake','thunder snake','thudersnake','thundrsnake','sandaasuneeku'] 
+    },
+    { 
+      id: 2,
+      jp:'アマテラス',       
+      en:'Amaterasu',     
+      tag: 'Intermediate',
+      alias:['amaterasu','amaterazu','amateraasu','amateras'] 
+    },
+    { 
+      id: 3,
+      jp:'ムラマサ',         
+      en:'Muramasa',      
+      tag: 'Advanced',
+      alias:['muramasa','muramasaa','murmasa','muramaza'] 
+    },
+    { 
+      id: 4,
+      jp:'ダブルミックス',   
+      en:'Double Mix',    
+      tag: 'Intermediate',
+      alias:['double mix','daburu mikkusu','doublemix','dubble mix','doble mix'] 
+    },
+    { 
+      id: 5,
+      jp:'ロマンス', 
+      en:'Romance',
+      tag: 'Basic',
+      alias:['romance','romansu'] 
+    },
   ];
 
   let currentSlide = 0;
@@ -6204,7 +6213,7 @@
     [true,false,true,false,false,false],  // Thundersnake: ● ■
     [false,true,false,false,false,false], // Amaterasu: ▲
     [false,false,false,true,true,false],  // Muramasa: ♥ ★
-    [true,true,false,false,false,false],  // Mrs Narcissa: ● ▲
+    [true,true,false,false,false,false],  // Double Mix: ● ▲
     [false,false,true,true,false,false],  // Romance: ■ ♥
   ];
   // Legend inputs state
@@ -6385,10 +6394,19 @@
     resultsEl.innerHTML = '';
     matches.forEach((w, idx) => {
       const row = document.createElement('div');
-      row.className = 'ob-result-row';
+      row.className = 'drow'; // Use actual list row class from main app
       const isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
-      row.innerHTML = `<span class="ob-result-jp">${w.jp}</span><span class="ob-result-en">${w.en}</span><span class="ob-match-badge">${isExact ? 'match' : 'fuzzy match'}</span>`;
+      
+      // Use actual wazalist list row structure
+      row.innerHTML = `
+        <span class="dnjp">${w.jp}</span>
+        <span class="dnen">${w.en}</span>
+        ${w.tag ? `<span class="badge b-tag">${w.tag}</span>` : ''}
+        <span class="badge" style="background:rgba(124,111,247,.15);color:var(--accent);border:none;margin-left:auto">${isExact ? 'match' : 'fuzzy'}</span>
+      `;
+      
       resultsEl.appendChild(row);
+      // Stagger animation
       setTimeout(() => row.classList.add('show'), idx * 60);
     });
   }
@@ -6434,7 +6452,7 @@
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
     container.innerHTML = '';
-    DEMO_NAMES.forEach((w, wi) => {
+    DEMO_WAZA.forEach((w, wi) => {
       const row = document.createElement('div');
       const anyOn = demoShapes[wi].some(Boolean);
       const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
