@@ -21,6 +21,13 @@ export default {
 		const getUser = () =>
 			sessionToken ? getUserFromSession(env, sessionToken) : null;
 
+		// ── Say no to robots ──────────────────────────────────────
+		if (path === "/robots.txt") {
+			return new Response("User-agent: *\nDisallow: /", {
+				headers: { "Content-Type": "text/plain" },
+			});
+		}
+		
 		// ── Waza ──────────────────────────────────────────────────
 		if (path === "/api/waza") {
 			const { results } = await env.DB.prepare(`
