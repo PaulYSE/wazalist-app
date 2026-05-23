@@ -6039,39 +6039,44 @@
 
 /* Slides viewport */
 .ob-viewport {
-  flex: 1; overflow: hidden; position: relative;
+  flex: 1; 
+  overflow-x: hidden; /* Hide horizontal overflow for carousel */
+  overflow-y: auto; /* SCROLL HERE - viewport scrolls vertically */
+  position: relative;
   min-height: 0; /* Critical for flex children to respect parent height */
 }
 .ob-slides {
   display: flex;
   transition: transform .38s cubic-bezier(.4,0,.2,1);
-  height: 100%; /* Take full height of viewport */
+  min-height: 100%; /* Min height to fill viewport, but can grow taller */
 }
 .ob-slide {
-  min-width: 100%; 
-  max-height: 100%; /* Critical: constrain to viewport height */
+  min-width: 100%;
   padding: 24px;
-  display: flex; flex-direction: column; gap: 12px;
-  overflow-y: auto; /* Scroll when content exceeds max-height */
   box-sizing: border-box;
 }
-/* Show scrollbar for onboarding slides */
-.ob-slide {
+/* Children use default block layout with margins for spacing */
+.ob-slide > * + * {
+  margin-top: 12px;
+}
+
+/* Show scrollbar for onboarding viewport */
+.ob-viewport {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: var(--border) var(--bg0); /* Firefox: thumb track */
 }
-.ob-slide::-webkit-scrollbar {
+.ob-viewport::-webkit-scrollbar {
   width: 8px;
 }
-.ob-slide::-webkit-scrollbar-track {
+.ob-viewport::-webkit-scrollbar-track {
   background: var(--bg0);
   border-radius: 4px;
 }
-.ob-slide::-webkit-scrollbar-thumb {
+.ob-viewport::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
 }
-.ob-slide::-webkit-scrollbar-thumb:hover {
+.ob-viewport::-webkit-scrollbar-thumb:hover {
   background: var(--text3);
 }
 
