@@ -5629,7 +5629,14 @@
     };
 
     // ── Modal ─────────────────────────────────────────────────────
-    document.getElementById('helpBtn').addEventListener('click', () => { document.getElementById('modalBg').style.display = 'flex'; });
+    // Guide button triggers onboarding
+    document.getElementById('helpBtn').addEventListener('click', () => { 
+      if (typeof showWazaOnboarding === 'function') showWazaOnboarding(); 
+    });
+    document.getElementById('mobHelpBtn').addEventListener('click', () => { 
+      closeMobMenu(); 
+      if (typeof showWazaOnboarding === 'function') showWazaOnboarding(); 
+    });
     document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('modalBg').style.display = 'none'; });
     document.getElementById('modalBg').addEventListener('click', e => { if (e.target === document.getElementById('modalBg')) document.getElementById('modalBg').style.display = 'none'; });
 
@@ -5789,7 +5796,7 @@
 #obSearchResults .drow.show { opacity: 1; transform: none; }
 .ob-no-results { font-size: 13px; color: var(--text3); padding: 4px 0; }
 
-/* Card style demo */
+/* Card style demo - wrapper only */
 .ob-style-demo { display: flex; flex-direction: column; gap: 8px; }
 .ob-style-pill {
   padding: 10px 14px;
@@ -5807,31 +5814,25 @@
 }
 .ob-style-pill .sp-label {
   font-size: 12px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+  display: block;
 }
 .ob-style-pill.selected .sp-label { color: var(--accent); }
-/* List style preview */
-.sp-list-row { display: flex; align-items: center; gap: 8px; }
-.sp-list-row .jp { font-size: 14px; font-weight: 500; }
-.sp-list-row .en { font-size: 12px; color: var(--text2); }
-.sp-list-row .tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #2a2040; color: #b3a8f0; border:1px solid #3d3560; margin-left: auto; }
-/* Card style preview */
-.sp-card-inner { border-radius: 6px; background: var(--bg2); padding: 8px 10px; }
-.sp-card-inner .jp { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-.sp-card-inner .en { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
-.sp-card-inner .shapes { display: flex; gap: 4px; }
-.sp-card-inner .sh { font-size: 13px; opacity: .22; }
-.sp-card-inner .sh.on { opacity: 1; }
-/* Compact style preview */
-.sp-compact-row {
-  display: flex; gap: 6px; align-items: center;
-  font-size: 13px; flex-wrap: wrap;
+/* Scale down the real components slightly for preview */
+.ob-style-pill .waza-card,
+.ob-style-pill .waza-card-expanded,
+.ob-style-pill .drow {
+  pointer-events: none; /* prevent clicking inside preview */
+  font-size: 13px; /* slightly smaller */
 }
-.sp-compact-row .jp2 { font-weight: 500; }
-.sp-compact-row .en2 { color: var(--text2); font-size: 12px; }
-.sp-compact-row .tag2 { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #2a2040; color: #b3a8f0; border:1px solid #3d3560; }
+.ob-style-pill .waza-card { margin-bottom: 4px; }
+.ob-style-pill .waza-card:last-child { margin-bottom: 0; }
+.ob-style-pill .drow { margin-bottom: 0; border-bottom: none; }
+.ob-style-pill .drow:first-child { border-radius: 5px 5px 0 0; }
+.ob-style-pill .drow:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
+.ob-style-pill .drow:not(:first-child):not(:last-child) { border-radius: 0; }
 
-/* Shape marking demo */
+/* Shape marking demo - use real app's cmp-shape-btn class */
 .ob-marking-demo { display: flex; flex-direction: column; gap: 8px; }
 .ob-waza-row {
   display: flex; align-items: center; gap: 10px;
@@ -5839,25 +5840,8 @@
   background: var(--bg0); border: 1px solid var(--border);
 }
 .ob-waza-row .wname { font-size: 13px; font-weight: 500; flex: 1; }
-.ob-shape-btns { display: flex; gap: 4px; }
-.ob-shape-btn {
-  width: 28px; height: 28px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  color: var(--text2);
-  font-size: 14px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .12s;
-  flex-shrink: 0;
-}
-.ob-shape-btn:hover { border-color: var(--accent); color: var(--text1); }
-.ob-shape-btn.on {
-  background: rgba(124,111,247,.15);
-  border-color: var(--accent);
-  color: var(--text1);
-}
+/* Use cmp-shapes-mine container from main app */
+.ob-waza-row .cmp-shapes-mine { display: flex; gap: 4px; }
 /* marking highlight tint on rows */
 .ob-waza-row.marked {
   background: hsl(200,44%,8.5%);
@@ -6013,66 +5997,7 @@
           <div class="ob-slide-title">Choose a <span>card style</span></div>
           <div class="ob-slide-sub">Click a style to select it. You can change this anytime in the filter bar.</div>
           <div class="ob-style-demo" id="obStyleDemo">
-
-            <!-- List style -->
-            <div class="ob-style-pill" data-style="list">
-              <div class="sp-label">List</div>
-              <div style="display:flex;flex-direction:column;gap:3px">
-                <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;border-left:3px solid var(--accent);display:flex;align-items:center;gap:8px">
-                  <span style="font-size:14px;font-weight:500">サンダースネーク</span>
-                  <span style="font-size:12px;color:var(--text2)">Thundersnake</span>
-                  <span style="margin-left:auto;font-size:11px;color:var(--text3)">● ■</span>
-                </div>
-                <div style="padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;gap:8px">
-                  <span style="font-size:14px;font-weight:500">アマテラス</span>
-                  <span style="font-size:12px;color:var(--text2)">Amaterasu</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card style (default) -->
-            <div class="ob-style-pill selected" data-style="expanded">
-              <div class="sp-label">Cards ✓ (default)</div>
-              <div style="border-radius:8px;border:1px solid var(--border);overflow:hidden;background:hsl(200,44%,8.5%)">
-                <div style="padding:10px 12px 8px;border-left:3px solid hsl(200,70%,57%)">
-                  <div style="font-size:14px;font-weight:600;margin-bottom:2px">サンダースネーク</div>
-                  <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Thundersnake</div>
-                  <div style="display:flex;gap:4px;margin-bottom:6px">
-                    <span style="font-size:12px;opacity:1">●</span>
-                    <span style="font-size:12px;opacity:.2">▲</span>
-                    <span style="font-size:12px;opacity:1">■</span>
-                    <span style="font-size:12px;opacity:.2">♥</span>
-                    <span style="font-size:12px;opacity:.2">★</span>
-                    <span style="font-size:12px;opacity:.2">◆</span>
-                  </div>
-                </div>
-                <div style="display:flex;gap:5px;flex-wrap:wrap;padding:6px 12px 8px;border-top:1px solid var(--border);background:rgba(0,0,0,.15)">
-                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#ff0000;display:inline-block"></span>YouTube</span>
-                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#00a1d6;display:inline-block"></span>Bilibili</span>
-                  <span style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:50%;background:#1da1f2;display:inline-block"></span>Twitter/X</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Compact style -->
-            <div class="ob-style-pill" data-style="compact">
-              <div class="sp-label">Compact</div>
-              <div style="display:flex;flex-direction:column;gap:0">
-                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px 5px 0 0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
-                  <span style="font-weight:500">サンダースネーク</span><span style="color:var(--text2);font-size:12px">Thundersnake</span>
-                  <span style="font-size:11px;color:var(--text1);margin-left:auto">● ■</span>
-                </div>
-                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0;border-bottom:none;display:flex;align-items:center;gap:6px;font-size:13px">
-                  <span style="font-weight:500">アマテラス</span><span style="color:var(--text2);font-size:12px">Amaterasu</span>
-                  <span style="font-size:11px;color:var(--text1);margin-left:auto">▲</span>
-                </div>
-                <div style="padding:5px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:0 0 5px 5px;display:flex;align-items:center;gap:6px;font-size:13px">
-                  <span style="font-weight:500">ムラマサ</span><span style="color:var(--text2);font-size:12px">Muramasa</span>
-                  <span style="font-size:11px;color:var(--text1);margin-left:auto">♥ ★</span>
-                </div>
-              </div>
-            </div>
-
+            <!-- Demo styles built by JS using real app components -->
           </div>
         </div>
 
@@ -6433,24 +6358,124 @@
   }
 
   // ── Card style demo (slide 3) ─────────────────────────────────
-  function initStyleDemo() { updateStyleDemo(); }
-  function updateStyleDemo() {
-    document.querySelectorAll('.ob-style-pill').forEach(p => {
-      p.classList.toggle('selected', p.dataset.style === chosenStyle);
-      const lbl = p.querySelector('.sp-label');
-      if (lbl) {
-        const isSelected = p.dataset.style === chosenStyle;
-        const names = {list:'List',expanded:'Cards',compact:'Compact'};
-        lbl.textContent = names[p.dataset.style] + (isSelected ? ' ✓ (selected)' : '');
-      }
+  function initStyleDemo() { buildStyleDemo(); }
+  
+  function buildStyleDemo() {
+    const container = document.getElementById('obStyleDemo');
+    if (!container) return;
+    
+    const SHAPES = ['●','▲','■','♥','★','◆'];
+    
+    // Helper: generate shape class from bitmask
+    const shapeClass = shapes => {
+      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+      return mask ? 'sh-' + mask : '';
+    };
+    
+    // Helper: generate shape pips HTML
+    const shapePips = shapes => SHAPES.map((s, i) => 
+      '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '">' + s + '</span>'
+    ).join('');
+    
+    // Helper: like pill (simplified for demo)
+    const cardLikePill = () => {
+      return '<div class="card-like-pill"><span>👍 2</span><span>👎 0</span></div>';
+    };
+    
+    // Sample waza with demo data
+    const samples = [
+      { jp: DEMO_WAZA[0].jp, en: DEMO_WAZA[0].en, shapes: [true,false,true,false,false,false] }, // ● ■
+      { jp: DEMO_WAZA[1].jp, en: DEMO_WAZA[1].en, shapes: [false,true,false,false,false,false] }, // ▲
+      { jp: DEMO_WAZA[2].jp, en: DEMO_WAZA[2].en, shapes: [false,false,false,true,true,false] }, // ♥ ★
+    ];
+    
+    container.innerHTML = '';
+    
+    // ── List style ──
+    const listPill = document.createElement('div');
+    listPill.className = 'ob-style-pill' + (chosenStyle === 'list' ? ' selected' : '');
+    listPill.dataset.style = 'list';
+    listPill.innerHTML = '<div class="sp-label">List' + (chosenStyle === 'list' ? ' ✓ (selected)' : '') + '</div>';
+    
+    const listPreview = document.createElement('div');
+    samples.slice(0, 2).forEach(w => {
+      const card = document.createElement('div');
+      card.className = 'waza-card ' + shapeClass(w.shapes);
+      const bottomRow = '<div class="card-bottom-row">'
+        + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
+        + cardLikePill() + '</div>';
+      card.innerHTML = '<div class="njp">' + w.jp + '</div>'
+        + '<div class="nen">' + w.en + '</div>'
+        + bottomRow;
+      listPreview.appendChild(card);
     });
-    renderFooter();
+    listPill.appendChild(listPreview);
+    container.appendChild(listPill);
+    
+    // ── Cards style (expanded) ──
+    const cardsPill = document.createElement('div');
+    cardsPill.className = 'ob-style-pill' + (chosenStyle === 'expanded' ? ' selected' : '');
+    cardsPill.dataset.style = 'expanded';
+    cardsPill.innerHTML = '<div class="sp-label">Cards' + (chosenStyle === 'expanded' ? ' ✓ (default)' : '') + '</div>';
+    
+    const w = samples[0];
+    const expandedCard = document.createElement('div');
+    expandedCard.className = 'waza-card-expanded ' + shapeClass(w.shapes);
+    const bottomRow = '<div class="card-bottom-row">'
+      + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
+      + cardLikePill() + '</div>';
+    const videoHTML = '<div class="wce-videos">'
+      + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#ff0000"></span>YouTube 1</a>'
+      + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#00a1d6"></span>Bilibili 2</a>'
+      + '</div>';
+    expandedCard.innerHTML = '<div class="wce-header">'
+      + '<div class="njp">' + w.jp + '</div>'
+      + '<div class="nen">' + w.en + '</div>'
+      + bottomRow + '</div>'
+      + videoHTML;
+    cardsPill.appendChild(expandedCard);
+    container.appendChild(cardsPill);
+    
+    // ── Compact style ──
+    const compactPill = document.createElement('div');
+    compactPill.className = 'ob-style-pill' + (chosenStyle === 'compact' ? ' selected' : '');
+    compactPill.dataset.style = 'compact';
+    compactPill.innerHTML = '<div class="sp-label">Compact' + (chosenStyle === 'compact' ? ' ✓ (selected)' : '') + '</div>';
+    
+    const compactPreview = document.createElement('div');
+    samples.forEach(w => {
+      const row = document.createElement('div');
+      row.className = 'drow ' + shapeClass(w.shapes);
+      row.innerHTML = '<span class="drn">' + w.jp + '</span>'
+        + '<span class="drs">' + w.en + '</span>'
+        + '<div class="shapes-row" style="flex-shrink:0">' + shapePips(w.shapes) + '</div>';
+      compactPreview.appendChild(row);
+    });
+    compactPill.appendChild(compactPreview);
+    container.appendChild(compactPill);
+    
+    // Bind click handlers
+    container.querySelectorAll('.ob-style-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        chosenStyle = pill.dataset.style;
+        localStorage.setItem('wl_view_style', chosenStyle);
+        const sel = document.getElementById('browseViewSelect');
+        const selMob = document.getElementById('browseViewSelectMob');
+        if (sel) sel.value = chosenStyle;
+        if (selMob) selMob.value = chosenStyle;
+        buildStyleDemo(); // Rebuild to update labels
+      });
+    });
   }
 
   // ── Marking demo (slide 4) ────────────────────────────────────
   function buildMarkingDemo() {
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
+    
+    // Get shapeLegend if available from main app
+    const legend = window.shapeLegend || TEMPLATE;
+    
     container.innerHTML = '';
     DEMO_WAZA.forEach((w, wi) => {
       const row = document.createElement('div');
@@ -6458,20 +6483,29 @@
       const colorClass = anyOn ? (wi % 2 === 0 ? ' marked' : ' marked2') : '';
       row.className = 'ob-waza-row' + colorClass;
       row.id = 'obWazaRow' + wi;
-      row.innerHTML = `<span class="wname"><b>${w.jp}</b> <span style="color:var(--text2);font-size:12px">${w.en}</span></span><div class="ob-shape-btns" id="obShapeBtns${wi}"></div>`;
+      
+      // Use real app's structure: wname + cmp-shapes-mine container
+      const shapesHTML = '<div class="cmp-shapes-mine">'
+        + SHAPES_OB.map((sh, si) => 
+            '<button class="cmp-shape-btn' + (demoShapes[wi][si] ? ' on' : '') + '" '
+            + 'data-wid="' + wi + '" data-si="' + si + '" '
+            + 'title="' + (legend[si] || 'Shape ' + (si + 1)) + '">'
+            + sh + '</button>'
+          ).join('')
+        + '</div>';
+      
+      row.innerHTML = `<span class="wname"><b>${w.jp}</b> <span style="color:var(--text2);font-size:12px">${w.en}</span></span>${shapesHTML}`;
       container.appendChild(row);
-      const btns = row.querySelector('#obShapeBtns' + wi);
-      SHAPES_OB.forEach((sh, si) => {
-        const btn = document.createElement('button');
-        btn.className = 'ob-shape-btn' + (demoShapes[wi][si] ? ' on' : '');
-        btn.textContent = sh;
-        btn.title = sh;
-        btn.onclick = () => {
-          demoShapes[wi][si] = !demoShapes[wi][si];
-          btn.classList.toggle('on', demoShapes[wi][si]);
-          updateMarkingRowStyle(wi, row);
-        };
-        btns.appendChild(btn);
+      
+      // Attach click handlers to shape buttons
+      row.querySelectorAll('.cmp-shape-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const wid = +btn.dataset.wid;
+          const si = +btn.dataset.si;
+          demoShapes[wid][si] = !demoShapes[wid][si];
+          btn.classList.toggle('on', demoShapes[wid][si]);
+          updateMarkingRowStyle(wid, row);
+        });
       });
     });
   }
@@ -6539,19 +6573,6 @@
     const inputs = document.querySelectorAll('#obLegendPreview .ob-legend-input');
     inputs.forEach(inp => { inp.value = ''; });
   }
-
-  // ── Style pill clicks ─────────────────────────────────────────
-  document.querySelectorAll('.ob-style-pill').forEach(p => {
-    p.addEventListener('click', () => {
-      chosenStyle = p.dataset.style;
-      localStorage.setItem('wl_view_style', chosenStyle);
-      const sel = document.getElementById('browseViewSelect');
-      const selMob = document.getElementById('browseViewSelectMob');
-      if (sel) sel.value = chosenStyle;
-      if (selMob) selMob.value = chosenStyle;
-      updateStyleDemo();
-    });
-  });
 
   // ── Close button ──────────────────────────────────────────────
   document.getElementById('obClose').onclick = closeOnboarding;
