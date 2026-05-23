@@ -3383,7 +3383,9 @@
     // ── Init ─────────────────────────────────────────────────────
     async function initApp() {
       // Stop username placeholder rotation if it's running
-      stopUsernamePlaceholderRotation();
+      if (typeof stopUsernamePlaceholderRotation === 'function') {
+        stopUsernamePlaceholderRotation();
+      }
       document.getElementById('authWrap').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
       document.getElementById('guestBadge').style.display = isGuest ? '' : 'none';
@@ -3406,7 +3408,7 @@
           const progRes = await api('/api/progress');
           if (Array.isArray(progRes)) progRes.forEach(p => {
             let markings = Array(6).fill(false);
-            try { if (p.shapes) shapes = JSON.parse(p.shapes); } catch { }
+            try { if (p.markings) shapes = JSON.parse(p.markings); } catch { }
             prog[p.waza_id] = { shapes, like: p.like || null, updated_at: p.updated_at || null };
           });
         } catch (err) { console.warn('Progress load error:', err); }
@@ -3572,13 +3574,13 @@
     const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
     function filterWaza() {
-      const { search, shapes } = filters;
-      const anyShapeActive = shapes.some(Boolean);
+      const { search, markings } = filters;
+      const anyShapeActive = markings.some(Boolean);
       let results = wazaData.filter(w => {
         // "Any" mode: only show waza that have at least one mark
         if (browseFilterAny) {
           const p = getP(w.id);
-          if (!(p.like || (p.shapes && p.shapes.some(Boolean)))) return false;
+          if (!(p.like || (p.markings && p.markings.some(Boolean)))) return false;
         }
         if (search) {
           const isExact = search.startsWith('"') && search.endsWith('"');
@@ -3589,8 +3591,8 @@
         }
         if (anyShapeActive) {
           const p = getP(w.id);
-          const ws = p.shapes || Array(6).fill(false);
-          if (!shapes.every((on, i) => !on || ws[i])) return false;
+          const ws = p.markings || Array(6).fill(false);
+          if (!markings.every((on, i) => !on || ws[i])) return false;
         }
         return true;
       });
@@ -3771,8 +3773,8 @@
       if (browseListView === 'expanded') {
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const markings = p.shapes || Array(6).fill(false);
-          const hasShape = shapes.some(Boolean);
+          const markings = p.markings || Array(6).fill(false);
+          const hasShape = markings.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
             + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
@@ -3790,8 +3792,8 @@
       } else if (browseListView === 'list') {
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const markings = p.shapes || Array(6).fill(false);
-          const hasShape = shapes.some(Boolean);
+          const markings = p.markings || Array(6).fill(false);
+          const hasShape = markings.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
             + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
@@ -3807,7 +3809,7 @@
         // Compact — no likes, equal truncating names
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
-          const markings = p.shapes || Array(6).fill(false);
+          const markings = p.markings || Array(6).fill(false);
           return '<div class="drow ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<span class="drn">' + (w.name_jp || '—') + '</span>'
             + '<span class="drs">' + dispName(w) + '</span>'
@@ -3873,7 +3875,7 @@
       if (selectedId === null) { panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>'; return; }
       const w = wazaData.find(x => x.id === selectedId); if (!w) return;
       const p = getP(w.id);
-      const markings = p.shapes || Array(6).fill(false);
+      const markings = p.markings || Array(6).fill(false);
 
       const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5].filter(v => v && v.trim() && v !== '0');
 
@@ -4145,7 +4147,7 @@
       let shaped = 0;
       wazaData.forEach(w => {
         const p = getP(w.id);
-        if (p.shapes && p.shapes.some(Boolean)) shaped++;
+        if (p.markings && p.markings.some(Boolean)) shaped++;
       });
 
       // ── Overview cards (only marked and total) ────────────────
@@ -4170,7 +4172,7 @@
         + (recent.length
           ? recent.map(w => {
             const p = getP(w.id);
-            const markings = p.shapes || Array(6).fill(false);
+            const markings = p.markings || Array(6).fill(false);
             return '<div class="recent-row ' + shapeClass(markings) + '" data-id="' + w.id + '">'
               + '<span class="drn">' + (w.name_jp || '—') + '</span>'
               + '<span class="drs">' + dispName(w) + '</span>'
@@ -4188,12 +4190,12 @@
           if (!families[fam]) families[fam] = { total: 0, touched: 0 };
           families[fam].total++;
           const p = getP(w.id);
-          if (p.like || (p.shapes && p.shapes.some(Boolean))) families[fam].touched++;
+          if (p.like || (p.markings && p.markings.some(Boolean))) families[fam].touched++;
         });
       });
       const noFamily = wazaData.filter(w => !w.parent_en0 && !w.parent_en1);
       if (noFamily.length) {
-        families['Uncategorised'] = { total: noFamily.length, touched: noFamily.filter(w => { const p = getP(w.id); return p.like || (p.shapes && p.shapes.some(Boolean)); }).length };
+        families['Uncategorised'] = { total: noFamily.length, touched: noFamily.filter(w => { const p = getP(w.id); return p.like || (p.markings && p.markings.some(Boolean)); }).length };
       }
       
       // Sort by coverage percentage (descending), then by total count
@@ -4648,8 +4650,8 @@
     function serializeList() {
       const marks = {};
       Object.entries(prog).forEach(([id, p]) => {
-        const hasShape = p.shapes && p.shapes.some(Boolean);
-        if (hasShape || p.like) marks[+id] = { markings: p.shapes || Array(6).fill(false), like: p.like || null };
+        const hasShape = p.markings && p.markings.some(Boolean);
+        if (hasShape || p.like) marks[+id] = { markings: p.markings || Array(6).fill(false), like: p.like || null };
       });
       return JSON.stringify({ v: 1, legend: shapeLabels, marks });
     }
@@ -4661,7 +4663,7 @@
 
     // ── Export flow ───────────────────────────────────────────────
     async function openExportModal() {
-      const marks = Object.entries(prog).filter(([, p]) => (p.shapes && p.shapes.some(Boolean)) || p.like);
+      const marks = Object.entries(prog).filter(([, p]) => (p.markings && p.markings.some(Boolean)) || p.like);
       if (!marks.length) { showToast('Your list is empty — mark some Waza first.', 'amber'); return; }
 
       document.getElementById('exportStatus').style.display = '';
@@ -4799,7 +4801,7 @@
       if (!keys.length) {
         // No imported lists - show simple legend
         const shapeCounts = Array(6).fill(0);
-        wazaData.forEach(w => { const p = getP(w.id); if (p.shapes) p.shapes.forEach((on, i) => { if (on) shapeCounts[i]++; }); });
+        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) shapeCounts[i]++; }); });
         const simpleLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
             + '<span class="legend-shape">' + s + '</span>'
@@ -4838,7 +4840,7 @@
         wazaData.forEach(w => {
           if (importedIds.has(w.id)) {
             const p = getP(w.id);
-            if (p.shapes) p.shapes.forEach((on, i) => { if (on) myShapeCounts[i]++; });
+            if (p.markings) p.markings.forEach((on, i) => { if (on) myShapeCounts[i]++; });
           }
         });
         
@@ -4869,7 +4871,7 @@
       } else {
         // No imported list selected - show only user's legend
         const myShapeCounts = Array(6).fill(0);
-        wazaData.forEach(w => { const p = getP(w.id); if (p.shapes) p.shapes.forEach((on, i) => { if (on) myShapeCounts[i]++; }); });
+        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) myShapeCounts[i]++; }); });
         combinedLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
             + '<span class="legend-shape">' + s + '</span>'
