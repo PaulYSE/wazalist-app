@@ -5056,549 +5056,540 @@
       });
     }
 
+    /* ── Experimental xlsx import mode START ── */
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 1 IMPORT PARSER
+    // Handles real-world waza tracking lists (haku, Pengi, Jasper styles)
+    // ═══════════════════════════════════════════════════════════════
 
-    // ── Compare sub-tab switching ─────────────────────────────────
-    // ── Text Import ───────────────────────────────────────────────
-    // State for the text-import sub-tab
-    let _tiMatched = [];        // [{waza, rawLine, category, manualShapes}]
-    let _tiUnmatched = [];      // [rawLine]
-    let _tiParsed = false;
-    let _tiFoundLabels = [];    // ordered unique label strings found in the text e.g. "[Learning]", "(WIP)", "{Done}"
-    let _tiAutoMapping = {};    // { [labelStr]: shapeIndex (-1 = none) }
-    let _tiLabelNames = {};     // { [labelStr]: displayName } — user-editable
-    let _tiPreviewMode = false; // true when auto-labels have been applied to manualShapes as preview
+    // ── Constants ─────────────────────────────────────────────────
 
-    // Matches any [...], {...}, (...) encapsulation on a line
-    // Returns array of matched token strings (with brackets), e.g. ["[Learning]", "(WIP)"]
-    function extractEncapsulations(line) {
-      const matches = [];
-      const re = /\[([^\[\]]+)\]|\{([^{}]+)\}|\(([^()]+)\)/g;
-      let m;
-      while ((m = re.exec(line)) !== null) matches.push(m[0]);
-      return matches;
+    const IMPORT_DECORATIONS = [
+      /˗ˏˋ\s*★\s*ˎˊ˗/g,
+      /[˗ˏˋˎˊ]/g,
+    ];
+
+    const IMPORT_ANNOTATIONS = [
+      /\s*\(Optional\)\s*/gi,
+      /\s*-\s*(Center|Left|Right)\s*/gi,
+      /\s*-\s*Tutorial\s*\d+\s*/gi,
+      /\s*\(Tutorial\s*\d+\)\s*/gi,
+    ];
+
+    // Header/legend keywords — lines containing these are skipped
+    const IMPORT_HEADER_KEYWORDS = [
+      'basic waza', 'learn first', 'legend', 'fundamental',
+      'recommended', 'videos', 'channels', 'after initial',
+      'niche optional', 'advanced/', 'wazaren', 'resource',
+      'difficulty', 'curriculum', 'skill level',
+      'tutorial links', 'compilation',
+    ];
+
+    // Lines that look like "Label = Definition" legend entries
+    const LEGEND_PATTERN = /^[A-Za-z/ ]+\s*[=:→]\s*.+$/;
+
+    // Default status → shape index mapping (shape index 0-5, or -1 for none)
+    // Negative values used for like/dislike signals:
+    //   -2 = like, -3 = dislike
+    const DEFAULT_STATUS_MAP = {
+      // Learnt/Completed → shape index 2 (■, default "Learned")
+      'learnt':           2,
+      'learned':          2,
+      'completed':        2,
+      'mastered':         2,
+      'done':             2,
+      // Learning/In Progress → shape index 1 (▲, default "In Progress")
+      'learning':         1,
+      'in progress':      1,
+      'practicing':       1,
+      // Forgot/Review → shape index 4 (★, default "Needs Review")
+      'forgot':           4,
+      'forgotten':        4,
+      'review':           4,
+      'needs review':     4,
+      'outdated':         4,
+      // Want to Learn / Not Learnt → shape index 0 (●, default "Want to Learn")
+      'want to learn':    0,
+      'not learnt':       0,
+      'not learned':      0,
+      'planned':          0,
+      'to learn':         0,
+      'to do':            0,
+      // Original / Oriwaza → shape index 3 (♥, default "My Creation")
+      'own skills':       3,
+      'oriwaza':          3,
+      'original':         3,
+      'my waza':          3,
+      'custom':           3,
+      // Favourite → shape index 4 (★, default "Favourite") — note overlap with review;
+      // "Favourite" is explicitly labelled so takes ★
+      'favourite':        5,
+      'favorite':         5,
+      'liked':            -2,  // → like
+      'like':             -2,
+    };
+
+    // ── Step 1: Format detection ──────────────────────────────────
+
+    function detectImportFormat(text) {
+      if (/=HYPERLINK\s*\(/i.test(text)) return 'EXCEL_FORMULA';
+      if (/\t/.test(text)) return 'TAB_SEPARATED';
+      if (/˗ˏˋ|ˎˊ˗/.test(text)) return 'DECORATED';
+      return 'PLAIN_LIST';
     }
 
-    // Strip ALL encapsulated tokens from a line to get the bare waza name
-    function stripAllLabels(line) {
-      return line.replace(/\[([^\[\]]+)\]|\{([^{}]+)\}|\(([^()]+)\)/g, '').replace(/\s+/g, ' ').trim();
-    }
+    // ── Step 2: Name / status extraction ─────────────────────────
 
-    // Detect which known label(s) appear on this line; returns first match or null
-    function detectLabelOnLine(line) {
-      const tokens = extractEncapsulations(line);
-      for (const tok of tokens) {
-        if (_tiFoundLabels.includes(tok)) return tok;
+    /** Strip decorative markers from a line; returns { cleaned, wasDecorated } */
+    function stripDecorations(line) {
+      let cleaned = line;
+      let wasDecorated = false;
+      for (const re of IMPORT_DECORATIONS) {
+        if (re.test(cleaned)) { wasDecorated = true; cleaned = cleaned.replace(re, ''); }
       }
-      return null;
+      return { cleaned: cleaned.trim(), wasDecorated };
     }
 
-    // Collect all unique labels across the entire text
-    function collectLabels(rawText) {
-      const seen = new Set();
-      const ordered = [];
-      rawText.split('\n').forEach(line => {
-        extractEncapsulations(line.trim()).forEach(tok => {
-          const key = tok.toLowerCase();
-          if (!seen.has(key)) { seen.add(key); ordered.push(tok); }
-        });
-      });
-      return ordered;
+    /** Remove annotation noise from a waza name */
+    function cleanAnnotations(name) {
+      let out = name;
+      for (const re of IMPORT_ANNOTATIONS) out = out.replace(re, ' ');
+      return out.trim();
     }
 
-    function findWazaForLine(line) {
-      const cleaned = stripAllLabels(line);
-      if (!cleaned) return null;
-      const norm = normalizeForSearch(cleaned);
-      // Exact match first
-      let hit = wazaData.find(w =>
-        normalizeForSearch(w.name_jp || '') === norm ||
-        normalizeForSearch(w.name_en || '') === norm ||
-        normalizeForSearch(w.name_en_literal || '') === norm
-      );
-      if (hit) return hit;
-      // Fuzzy
-      hit = wazaData.find(w =>
-        isFuzzyMatch(w.name_jp, cleaned) ||
-        isFuzzyMatch(w.name_en, cleaned) ||
-        isFuzzyMatch(w.name_en_literal, cleaned)
-      );
-      return hit || null;
+    /**
+     * Parse "English (Japanese)" into { english, japanese }.
+     * Handles:
+     *   "Thundersnake (サンダースネーク)"
+     *   "Kamui/Shin'i (神威)"
+     *   "Romance ()"        → japanese = ''
+     *   "Plain name"        → japanese = ''
+     */
+    function parseWazaName(raw) {
+      // Try greedy match for last parenthesised block
+      const match = raw.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+      if (match) {
+        const english = cleanAnnotations(match[1].trim());
+        const japanese = match[2].trim();
+        return { english, japanese };
+      }
+      // No parentheses at all
+      return { english: cleanAnnotations(raw.trim()), japanese: '' };
     }
 
-    function parseTextImport(rawText) {
-      // 1. Collect all unique labels in document order
-      _tiFoundLabels = collectLabels(rawText);
+    /** Extract waza name from =HYPERLINK("url","Waza Name") */
+    function extractFromHyperlink(line) {
+      const m = line.match(/=HYPERLINK\s*\(\s*"[^"]*"\s*,\s*"([^"]+)"\s*\)/i);
+      return m ? m[1].trim() : null;
+    }
 
-      // 2. Seed _tiAutoMapping for new labels (preserve existing assignments)
-      _tiFoundLabels.forEach((lbl, i) => {
-        if (_tiAutoMapping[lbl] === undefined) _tiAutoMapping[lbl] = i < 6 ? i : -1;
-      });
+    /** Normalise a status string for map lookup */
+    function normalizeStatus(s) {
+      return s.toLowerCase().replace(/[^a-z0-9 /]/g, '').trim();
+    }
 
-      // 3. Seed _tiLabelNames for new labels (default = inner text without brackets)
-      _tiFoundLabels.forEach(lbl => {
-        if (_tiLabelNames[lbl] === undefined) {
-          _tiLabelNames[lbl] = lbl.slice(1, -1); // strip outer bracket pair
+    /** Map a status label to { shapeIndex, isLike, isDislike }.
+     *  Returns null if unknown. */
+    function mapStatusToProgress(label, autoMapping) {
+      const key = normalizeStatus(label);
+      // User-overridden mapping takes precedence
+      const override = autoMapping ? autoMapping[label] : undefined;
+      const idx = override !== undefined ? override : (DEFAULT_STATUS_MAP[key] ?? -1);
+
+      if (idx === -1) return null;
+      if (idx === -2) return { shapeIndex: -1, isLike: true, isDislike: false };
+      if (idx === -3) return { shapeIndex: -1, isLike: false, isDislike: true };
+      return { shapeIndex: idx, isLike: false, isDislike: false };
+    }
+
+    // ── Step 3: Header / legend detection ────────────────────────
+
+    function isHeaderLine(line) {
+      const lower = line.toLowerCase();
+      // Skip legend-style "Label = Definition" rows
+      if (LEGEND_PATTERN.test(line)) return true;
+      // Skip known header keywords
+      if (IMPORT_HEADER_KEYWORDS.some(kw => lower.includes(kw))) return true;
+      // Skip very short non-waza-looking lines (e.g. "!" or "—")
+      if (line.length < 3 && !/[ぁ-んァ-ン一-龥]/.test(line)) return true;
+      return false;
+    }
+
+    // ── Step 4: Line processor ────────────────────────────────────
+
+    /**
+     * Extract { rawWaza, status, isDecorated } from a single line given the detected format.
+     * Returns null if the line should be skipped.
+     */
+    function extractLineData(line, format) {
+      let raw = line.trim();
+      if (!raw) return null;
+
+      // Excel hyperlink formula
+      if (format === 'EXCEL_FORMULA' || raw.startsWith('=HYPERLINK')) {
+        const extracted = extractFromHyperlink(raw);
+        if (!extracted) return null;
+        raw = extracted;
+      }
+
+      // Strip decorations first (affects "DECORATED" lines but safe on all)
+      const { cleaned, wasDecorated } = stripDecorations(raw);
+      raw = cleaned;
+      if (!raw) return null;
+
+      // Skip headers
+      if (isHeaderLine(raw)) return null;
+
+      let wazaRaw = raw;
+      let status = wasDecorated ? 'Favourite' : '';
+
+      // Tab-separated: two columns
+      if (format === 'TAB_SEPARATED' && raw.includes('\t')) {
+        const parts = raw.split('\t').map(p => p.trim());
+        // Determine column order: waza has parentheses or Japanese chars, status is a short English word
+        const looksLikeStatus = s => /^[A-Za-z/ ]+$/.test(s) && s.length < 30 && DEFAULT_STATUS_MAP[normalizeStatus(s)] !== undefined;
+
+        if (parts.length >= 2) {
+          if (looksLikeStatus(parts[0]) && !looksLikeStatus(parts[1])) {
+            // Status | Waza
+            status = parts[0];
+            wazaRaw = parts[1];
+          } else if (!looksLikeStatus(parts[0]) && looksLikeStatus(parts[1])) {
+            // Waza | Status
+            wazaRaw = parts[0];
+            status = parts[1];
+          } else if (parts[1] && /[ぁ-んァ-ン一-龥(（]/.test(parts[1])) {
+            // Waza | Status (waza column has Japanese/parentheses)
+            wazaRaw = parts[1];
+            status = parts[0];
+          } else {
+            // Fall through: treat whole line as waza name
+            wazaRaw = parts[0];
+          }
         }
-      });
+      }
 
-      // 4. Parse lines
-      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-      let currentLabel = null;
-      _tiMatched = [];
-      _tiUnmatched = [];
+      // Skip if the remaining waza string looks like a standalone status word (header not caught)
+      if (!wazaRaw || isHeaderLine(wazaRaw)) return null;
 
-      lines.forEach(line => {
-        const stripped = stripAllLabels(line);
-        const lineLabel = detectLabelOnLine(line);
-
-        if (!stripped) {
-          // Pure label header line — update running context
-          if (lineLabel) currentLabel = lineLabel;
-          return;
-        }
-
-        // Effective label: inline takes priority over running context
-        const effectiveLabel = lineLabel || currentLabel;
-
-        const waza = findWazaForLine(line);
-        if (waza) {
-          _tiMatched.push({ waza, rawLine: line, category: effectiveLabel, manualShapes: Array(6).fill(false) });
-        } else {
-          _tiUnmatched.push(line);
-        }
-      });
-      _tiParsed = true;
+      return { rawWaza: wazaRaw, status, isDecorated: wasDecorated };
     }
+
+    // ── Main parser ───────────────────────────────────────────────
+    /**
+     * Parse pasted import text into matched/unmatched buckets.
+     * Fills the module-level _tiMatched, _tiUnmatched, _tiFoundLabels, _tiAutoMapping.
+     *
+     * @param {string} text     Raw pasted text
+     * @param {Array}  wazaData The global waza database array
+     */
+    function parseImportText(text, wazaData) {
+      const format = detectImportFormat(text);
+      const lines = text.split(/\r?\n/);
+
+      // Gather unique labels found
+      const foundLabels = new Set();
+      const results = []; // { waza, rawLine, category, manualShapes, isLike }
+
+      for (const line of lines) {
+        const data = extractLineData(line, format);
+        if (!data) continue;
+
+        const { rawWaza, status, isDecorated } = data;
+        const { english, japanese } = parseWazaName(rawWaza);
+
+        if (!english && !japanese) continue;
+
+        // Database matching (priority: JP exact → EN fuzzy)
+        let matched = null;
+        if (japanese) {
+          matched = wazaData.find(w => w.name_jp === japanese);
+        }
+        if (!matched && english) {
+          // Exact EN match first
+          const enLower = english.toLowerCase();
+          matched = wazaData.find(w =>
+            (w.name_en && w.name_en.toLowerCase() === enLower) ||
+            (w.name_en_literal && w.name_en_literal.toLowerCase() === enLower)
+          );
+        }
+        if (!matched && english) {
+          // Fuzzy EN match (reuse existing isFuzzyMatch)
+          const candidates = wazaData.filter(w =>
+            isFuzzyMatch(w.name_en, english) ||
+            isFuzzyMatch(w.name_en_literal, english) ||
+            isFuzzyMatch(w.name_jp, english)
+          );
+          if (candidates.length === 1) matched = candidates[0];
+        }
+
+        // Track the label
+        if (status) foundLabels.add(status);
+        // Also auto-detect "Favourite" from decorations
+        if (isDecorated) foundLabels.add('Favourite');
+
+        const entry = {
+          waza: matched || null,
+          rawLine: line.trim(),
+          displayName: english || japanese,
+          category: status || '',
+          manualShapes: Array(6).fill(false),
+          isLike: false,
+        };
+        results.push(entry);
+      }
+
+      // Build auto-mapping from found labels
+      const autoMapping = {};
+      for (const label of foundLabels) {
+        const key = normalizeStatus(label);
+        autoMapping[label] = DEFAULT_STATUS_MAP[key] ?? -1;
+      }
+
+      // Apply autoMapping to manualShapes
+      for (const entry of results) {
+        if (entry.category) {
+          const idx = autoMapping[entry.category];
+          if (idx !== undefined && idx >= 0) {
+            entry.manualShapes = Array(6).fill(false);
+            entry.manualShapes[idx] = true;
+          } else if (idx === -2) {
+            entry.isLike = true;
+          }
+        }
+      }
+
+      // Split into matched/unmatched
+      _tiMatched = results.filter(r => r.waza !== null);
+      _tiUnmatched = results.filter(r => r.waza === null).map(r => r.rawLine);
+      _tiFoundLabels = [...foundLabels];
+      _tiAutoMapping = autoMapping;
+      _tiLabelNames = Object.fromEntries(_tiFoundLabels.map(l => [l, l]));
+
+      return { format, total: results.length };
+    }
+    
+    // ── renderTextImport ──────────────────────────────────────────
+    // Drop-in replacement. Keeps all existing UI structure and
+    // global variable contracts (_tiParsed, _tiMatched, etc.).
+
+    let _tiParsed = false;
+    let _tiMatched = [];
+    let _tiUnmatched = [];
+    let _tiFoundLabels = [];
+    let _tiAutoMapping = {};
+    let _tiLabelNames = {};
+    let _tiPreviewMode = false;
 
     function renderTextImport() {
-      const container = document.getElementById('dashTextImport');
+      const container = document.getElementById('dashImportList');
+      if (!container) return;
 
       if (!_tiParsed) {
-        container.innerHTML = renderTiInput('');
-        bindTiInputEvents(container);
-        return;
-      }
-      
-      // ── Excel color mapping mode ──────────────────────────────────
-      if (_tiParsed === 'excel' && Object.keys(_tiExcelColors).length > 1) {
-        const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
-        
-        if (colorKeys.length > 0) {
-          const colorMappingHtml = '<div>'
-            + '<div class="dsec2"><h3>📊 Excel Colors Detected</h3></div>'
-            + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Map each color to a proficiency level:</p>'
-            + '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">'
-            + colorKeys.map(colorHex => {
-              const wazaCount = _tiExcelColors[colorHex].length;
-              const rgb = hexToRgb(colorHex);
-              const colorDisplay = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-              return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">'
-                + '<div style="width:40px;height:40px;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
-                + '<div style="flex:1">'
-                + '<div style="font-size:13px;font-weight:500">' + wazaCount + ' waza</div>'
-                + '<div style="font-size:11px;color:var(--text3)">' + colorHex + '</div>'
-                + '</div>'
-                + '<select class="color-shape-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
-                + '<option value="-1">No marking</option>'
-                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (shapeLegend[i] || 'Shape ' + (i + 1)) + '</option>').join('')
-                + '</select>'
-                + '</div>';
-            }).join('')
-            + '</div>'
-            + '<div style="display:flex;gap:8px">'
-            + '<button class="cbtn cbtn-primary" id="tiApplyColorMapBtn">Apply Color Mapping →</button>'
-            + '<button class="cbtn cbtn-ghost" id="tiCancelExcelBtn">← Cancel</button>'
-            + '</div>'
-            + '</div>';
-          
-          container.innerHTML = colorMappingHtml;
-          
-          // Bind color mapping events
-          container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', () => {
-            // Read mappings
-            container.querySelectorAll('.color-shape-map').forEach(select => {
-              const color = select.dataset.color;
-              const shapeIdx = parseInt(select.value);
-              _tiColorMapping[color] = shapeIdx;
-            });
-            
-            // Apply color mappings to matched waza
-            _tiMatched.forEach(item => {
-              // Find which color this waza belongs to
-              for (const [color, wazaNames] of Object.entries(_tiExcelColors)) {
-                if (wazaNames.includes(item.rawLine)) {
-                  const shapeIdx = _tiColorMapping[color];
-                  if (shapeIdx >= 0) {
-                    item.manualShapes = Array(6).fill(false);
-                    item.manualShapes[shapeIdx] = true;
-                    item.category = shapeLegend[shapeIdx] || `Shape ${shapeIdx + 1}`;
-                  }
-                  break;
-                }
-              }
-            });
-            
-            _tiParsed = true; // Switch to normal mode
-            _tiPreviewMode = true; // Enable preview mode
-            renderTextImport();
-          });
-          
-          container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
-            _tiParsed = false;
-            _tiExcelColors = {};
-            _tiColorMapping = {};
-            renderTextImport();
-          });
-          
-          return;
-        }
-      }
+        // ── Step A: Paste screen ────────────────────────────────
+        container.innerHTML = `
+          <div style="max-width:680px">
+            <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
+              Paste your waza tracking list below. Supports tab-separated columns (Status | Waza or Waza | Status),
+              <code>=HYPERLINK()</code> formulas, decorated lines, and plain lists —
+              all in <b>English (Japanese)</b> format.
+            </p>
+            <textarea id="tiRawText" rows="14" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none;resize:vertical;font-family:monospace" placeholder="Thundersnake (サンダースネーク)\tLearnt\nAmaterasu (アマテラス)\tWant to Learn\n…"></textarea>
+            <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+              <button class="cbtn cbtn-primary" id="tiParseBtn">Parse list</button>
+              <span id="tiParseErr" style="font-size:12px;color:var(--red)"></span>
+            </div>
+            <div style="margin-top:14px;padding:10px 14px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);font-size:12px;color:var(--text3)">
+              <b style="color:var(--text2)">Supported formats:</b><br>
+              &bull; <code>Waza Name (日本語)</code> — plain list<br>
+              &bull; <code>Waza Name (日本語)\tLearnt</code> — waza then status<br>
+              &bull; <code>Learnt\tWaza Name (日本語)</code> — status then waza<br>
+              &bull; <code>=HYPERLINK("url","Waza Name (日本語)")</code> — Excel hyperlinks<br>
+              &bull; <code>˗ˏˋ ★ ˎˊ˗ Waza Name (日本語) ˗ˏˋ ★ ˎˊ˗</code> — decorated lines (auto-tagged Favourite)<br>
+              <br>
+              <b style="color:var(--text2)">Recognised status labels:</b>
+              Learnt, Learning, Forgot, Want to Learn, Completed, Own Skills, ORIWAZA, Not Learnt, Favourite, …
+            </div>
+          </div>`;
 
-      const hasCategories = _tiFoundLabels.length > 0 && _tiMatched.some(m => m.category);
+        document.getElementById('tiParseBtn').addEventListener('click', () => {
+          const raw = document.getElementById('tiRawText').value.trim();
+          if (!raw) { document.getElementById('tiParseErr').textContent = 'Please paste some text first.'; return; }
 
-      // ── Unmatched section ────────────────────────────────────────
-      const unmatchedHtml = _tiUnmatched.length
-        ? '<div class="ti-section-head"><span>Not found in database</span><span class="ti-badge ti-badge-miss">' + _tiUnmatched.length + '</span></div>'
-          + _tiUnmatched.map(l => '<div class="ti-unmatched-row"><span class="ti-raw">' + escHtml(l) + '</span><span style="font-size:11px;color:var(--text3)">No match</span></div>').join('')
-        : '';
+          const { format, total } = parseImportText(raw, wazaData);
 
-      // ── Matched rows ─────────────────────────────────────────────
-      const matchedHeaderHtml = '<div class="ti-section-head"><span>Matched waza</span><span class="ti-badge ti-badge-ok">' + _tiMatched.length + '</span></div>';
+          if (total === 0) { document.getElementById('tiParseErr').textContent = 'No waza found. Check the format.'; return; }
 
-      const matchedRowsHtml = _tiMatched.map((item, idx) => {
-        const lbl = item.category;
-        const dispLbl = lbl ? (_tiLabelNames[lbl] || lbl) : null;
-        const catBadge = dispLbl
-          ? '<span class="ti-match-row ti-category-badge ti-cat-dynamic">' + escHtml(dispLbl) + '</span>'
-          : '';
-        const shapesBtns = SHAPES.map((s, si) =>
-          '<button class="cmp-shape-btn' + (item.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
-        ).join('');
-        return '<div class="ti-match-row" data-idx="' + idx + '">'
-          + '<div class="ti-names"><div class="ti-njp">' + escHtml(item.waza.name_jp || '—') + '</div>'
-          + '<div class="ti-nen">' + escHtml(dispName(item.waza)) + '</div>'
-          + (catBadge ? '<div style="margin-top:4px">' + catBadge + '</div>' : '')
-          + '</div>'
-          + '<div class="ti-manual-shapes">' + shapesBtns + '</div>'
-          + '</div>';
-      }).join('');
+          _tiParsed = true;
+          renderTextImport();
+        });
 
-      // ── Auto-mapping section (legend-style) ───────────────────────
-      let autoMapHtml = '';
-      if (hasCategories) {
-        const mapRows = _tiFoundLabels.map((lbl, li) => {
-          const assigned = _tiAutoMapping[lbl] !== undefined ? _tiAutoMapping[lbl] : -1;
-          const dispName_ = _tiLabelNames[lbl] !== undefined ? _tiLabelNames[lbl] : lbl.slice(1, -1);
-          const shapeBtns = SHAPES.map((s, si) =>
-            '<button class="ti-map-shape-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
-          ).join('');
-          return '<div class="legend-row">'
-            + '<span class="legend-shape" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
-            + '<input class="legend-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
-            + '<div class="ti-map-shapes">' + shapeBtns + '</div>'
-            + '</div>';
+      } else if (!_tiPreviewMode) {
+        // ── Step B: Mapping + preview ───────────────────────────
+        const matched = _tiMatched.length;
+        const unmatched = _tiUnmatched.length;
+
+        // Build label mapping rows
+        const labelRows = _tiFoundLabels.map(label => {
+          const cur = _tiAutoMapping[label] ?? -1;
+          const shapeOptions = [
+            '<option value="-1"' + (cur === -1 ? ' selected' : '') + '>— none —</option>',
+            ...SHAPES.map((s, i) =>
+              '<option value="' + i + '"' + (cur === i ? ' selected' : '') + '>' + s + ' Shape ' + (i + 1) + '</option>'),
+            '<option value="-2"' + (cur === -2 ? ' selected' : '') + '>👍 Like</option>',
+          ].join('');
+          return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border)">
+            <span style="min-width:140px;font-size:13px">${escHtml(label)}</span>
+            <select class="ti-map-sel" data-label="${escHtml(label)}" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;outline:none">
+              ${shapeOptions}
+            </select>
+          </div>`;
         }).join('');
 
-        const wazaCountPerLabel = {};
-        _tiFoundLabels.forEach(l => { wazaCountPerLabel[l] = _tiMatched.filter(m => m.category === l).length; });
-        const countsNote = _tiFoundLabels.map(l =>
-          '<span style="font-size:11px;color:var(--text3)">' + escHtml(_tiLabelNames[l] || l.slice(1,-1)) + ': ' + wazaCountPerLabel[l] + ' waza</span>'
-        ).join(' &nbsp;·&nbsp; ');
+        // Build preview table (first 40 matches)
+        const previewRows = _tiMatched.slice(0, 40).map((entry, idx) => {
+          const shapeHtml = SHAPES.map((s, si) =>
+            '<button class="shape-btn ti-shape-btn' + (entry.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '" style="padding:3px 7px;font-size:13px">' + s + '</button>'
+          ).join('');
+          const likeMark = entry.isLike ? ' <span class="badge b-like" style="font-size:10px">👍</span>' : '';
+          return `<tr>
+            <td style="padding:5px 8px;font-size:13px">${escHtml(entry.waza.name_jp || '—')}</td>
+            <td style="padding:5px 8px;font-size:12px;color:var(--text2)">${escHtml(entry.displayName)}</td>
+            <td style="padding:5px 8px;font-size:12px;color:var(--text3)">${escHtml(entry.category)}${likeMark}</td>
+            <td style="padding:5px 8px">${shapeHtml}</td>
+          </tr>`;
+        }).join('');
 
-        autoMapHtml = '<div class="ti-auto-mapping">'
-          + '<h4>Auto-import: map labels to shapes</h4>'
-          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which shape each maps to. Click a shape to assign, click again to unassign.</p>'
-          + '<div style="margin-bottom:10px;line-height:2">' + countsNote + '</div>'
-          + mapRows
-          + '</div>';
+        container.innerHTML = `
+          <div style="max-width:780px">
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+              <button class="btn" id="tiBackBtn">← Re-paste</button>
+              <span style="font-size:13px;color:var(--green)">✓ ${matched} matched</span>
+              ${unmatched ? '<span style="font-size:13px;color:var(--amber)">⚠ ' + unmatched + ' unmatched</span>' : ''}
+            </div>
+
+            ${_tiFoundLabels.length ? `
+            <div class="dsec2" style="margin-bottom:20px">
+              <h3>Auto-detected status mapping</h3>
+              <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Adjust which shape each status maps to before importing.</p>
+              ${labelRows}
+            </div>` : ''}
+
+            ${matched ? `
+            <div class="dsec2">
+              <h3>Preview (${Math.min(matched, 40)} of ${matched})</h3>
+              <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="padding:5px 8px;text-align:left;color:var(--text3);font-weight:500">JP Name</th>
+                  <th style="padding:5px 8px;text-align:left;color:var(--text3);font-weight:500">EN Name</th>
+                  <th style="padding:5px 8px;text-align:left;color:var(--text3);font-weight:500">Status</th>
+                  <th style="padding:5px 8px;text-align:left;color:var(--text3);font-weight:500">Shapes</th>
+                </tr></thead>
+                <tbody id="tiPreviewBody">${previewRows}</tbody>
+              </table>
+              </div>
+            </div>` : ''}
+
+            ${unmatched ? `
+            <div class="dsec2" style="margin-top:16px">
+              <h3 style="color:var(--amber)">Unmatched lines (${unmatched})</h3>
+              <p style="font-size:12px;color:var(--text3);margin-bottom:6px">These lines couldn't be matched to any waza in the database.</p>
+              <div style="background:var(--bg2);border-radius:var(--r);padding:10px;font-size:12px;font-family:monospace;color:var(--text3);max-height:120px;overflow-y:auto">
+                ${_tiUnmatched.map(l => escHtml(l)).join('<br>')}
+              </div>
+            </div>` : ''}
+
+            ${matched ? `
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="cbtn cbtn-primary" id="tiCommitBtn">Import ${matched} waza</button>
+              <span style="font-size:12px;color:var(--text3)">This will update your shape markers for matched waza.</span>
+            </div>` : ''}
+          </div>`;
+
+        document.getElementById('tiBackBtn').addEventListener('click', () => {
+          _tiParsed = false; _tiMatched = []; _tiUnmatched = [];
+          _tiFoundLabels = []; _tiAutoMapping = {}; _tiPreviewMode = false;
+          renderTextImport();
+        });
+
+        // Live mapping updates
+        container.querySelectorAll('.ti-map-sel').forEach(sel => {
+          sel.addEventListener('change', () => {
+            _tiAutoMapping[sel.dataset.label] = +sel.value;
+            // Recompute manualShapes for all entries with this label
+            for (const entry of _tiMatched) {
+              if (entry.category === sel.dataset.label) {
+                const idx = +sel.value;
+                entry.manualShapes = Array(6).fill(false);
+                entry.isLike = false;
+                if (idx >= 0) entry.manualShapes[idx] = true;
+                else if (idx === -2) entry.isLike = true;
+              }
+            }
+            // Re-render preview rows only
+            const tbody = document.getElementById('tiPreviewBody');
+            if (tbody) {
+              tbody.innerHTML = _tiMatched.slice(0, 40).map((entry, idx) => {
+                const shapeHtml = SHAPES.map((s, si) =>
+                  '<button class="shape-btn ti-shape-btn' + (entry.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '" style="padding:3px 7px;font-size:13px">' + s + '</button>'
+                ).join('');
+                const likeMark = entry.isLike ? ' <span class="badge b-like" style="font-size:10px">👍</span>' : '';
+                return `<tr>
+                  <td style="padding:5px 8px;font-size:13px">${escHtml(entry.waza.name_jp || '—')}</td>
+                  <td style="padding:5px 8px;font-size:12px;color:var(--text2)">${escHtml(entry.displayName)}</td>
+                  <td style="padding:5px 8px;font-size:12px;color:var(--text3)">${escHtml(entry.category)}${likeMark}</td>
+                  <td style="padding:5px 8px">${shapeHtml}</td>
+                </tr>`;
+              }).join('');
+              attachShapeBtnListeners(container);
+            }
+          });
+        });
+
+        attachShapeBtnListeners(container);
+
+        document.getElementById('tiCommitBtn')?.addEventListener('click', async () => {
+          const btn = document.getElementById('tiCommitBtn');
+          btn.disabled = true; btn.textContent = 'Importing…';
+          let done = 0;
+          for (const entry of _tiMatched) {
+            if (!entry.waza) continue;
+            const existing = getP(entry.waza.id);
+            const newShapes = entry.manualShapes.map((on, i) => on || existing.shapes[i]);
+            const like = entry.isLike ? 'like' : (existing.like || null);
+            await saveP(entry.waza.id, { shapes: newShapes, like });
+            done++;
+          }
+          // Done — show success
+          container.innerHTML = `<div style="padding:30px;text-align:center">
+            <div style="font-size:32px;margin-bottom:10px">✓</div>
+            <div style="font-size:16px;font-weight:600;color:var(--green);margin-bottom:6px">Import complete!</div>
+            <div style="font-size:13px;color:var(--text2)">${done} waza updated.</div>
+            <button class="cbtn cbtn-ghost" style="margin-top:16px" id="tiDoneBtn">Import another list</button>
+          </div>`;
+          document.getElementById('tiDoneBtn').addEventListener('click', () => {
+            _tiParsed = false; _tiMatched = []; _tiUnmatched = [];
+            _tiFoundLabels = []; _tiAutoMapping = {}; _tiPreviewMode = false;
+            renderTextImport();
+          });
+          renderDashboard();
+        });
       }
-
-      // ── Actions ──────────────────────────────────────────────────
-      let previewBannerHtml = '';
-      let actionsHtml = '';
-      
-      if (_tiPreviewMode) {
-        // In preview mode - show banner at top and commit/cancel buttons at bottom
-        previewBannerHtml = '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:16px">'
-          + '<p style="font-size:13px;color:var(--accent);margin-bottom:8px">✨ <b>Preview Mode:</b> Auto-labels have been applied to the markings below.</p>'
-          + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked shapes. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
-          + '</div>';
+    }    
         
-        actionsHtml = '<div class="ti-actions">'
-          + '<button class="cbtn cbtn-primary" id="tiCommitBtn">✓ Commit Markings to Database</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiClearPreviewBtn">✕ Clear Preview</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
-          + '</div>';
-      } else {
-        // Normal mode - show auto-import and manual import buttons
-        actionsHtml = '<div class="ti-actions">'
-          + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Preview Auto-Labels</button>' : '')
-          + '<button class="cbtn cbtn-primary" id="tiManualImportBtn">✓ Apply Manual Markings</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
-          + '</div>';
-      }
-
-      container.innerHTML = previewBannerHtml + unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !_tiPreviewMode ? autoMapHtml : '') + actionsHtml;
-
-      // Manual shape toggles
-      container.querySelectorAll('.ti-manual-shapes .cmp-shape-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const idx = +btn.dataset.idx, si = +btn.dataset.si;
+    function attachShapeBtnListeners(container) {
+      container.querySelectorAll('.ti-shape-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = +btn.dataset.idx;
+          const si = +btn.dataset.si;
           _tiMatched[idx].manualShapes[si] = !_tiMatched[idx].manualShapes[si];
           btn.classList.toggle('on', _tiMatched[idx].manualShapes[si]);
         });
       });
-
-      // Label name inputs
-      container.querySelectorAll('.ti-label-name-input').forEach(inp => {
-        inp.addEventListener('input', () => {
-          _tiLabelNames[inp.dataset.lbl] = inp.value;
-          // Update badges in matched rows without full re-render
-          container.querySelectorAll('.ti-match-row').forEach(row => {
-            const idx2 = +row.dataset.idx;
-            if (isNaN(idx2)) return;
-            const item = _tiMatched[idx2];
-            if (item && item.category === inp.dataset.lbl) {
-              const badge = row.querySelector('.ti-cat-dynamic');
-              if (badge) badge.textContent = inp.value || inp.dataset.lbl.slice(1,-1);
-            }
-          });
-        });
-      });
-
-      // Auto-map shape selectors
-      container.querySelectorAll('.ti-map-shape-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const lbl = btn.dataset.lbl, si = +btn.dataset.si;
-          _tiAutoMapping[lbl] = _tiAutoMapping[lbl] === si ? -1 : si;
-          // Update only the shape buttons in this row
-          const row = btn.closest('.legend-row');
-          row.querySelectorAll('.ti-map-shape-btn').forEach((b, bsi) => {
-            b.classList.toggle('on', _tiAutoMapping[lbl] === bsi);
-          });
-        });
-      });
-
-      // Auto import (now preview mode)
-      container.querySelector('#tiAutoImportBtn')?.addEventListener('click', () => {
-        // Apply auto-mapping to manualShapes as a preview
-        for (const item of _tiMatched) {
-          const si = item.category != null ? (_tiAutoMapping[item.category] !== undefined ? _tiAutoMapping[item.category] : -1) : -1;
-          // Reset manual shapes first
-          item.manualShapes = Array(6).fill(false);
-          // Apply the auto-detected label
-          if (si >= 0) item.manualShapes[si] = true;
-        }
-        _tiPreviewMode = true;
-        renderTextImport();
-        // Scroll to top where preview banner is
-        setTimeout(() => {
-          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      });
-
-      // Manual import
-      container.querySelector('#tiManualImportBtn')?.addEventListener('click', async () => {
-        let count = 0;
-        for (const item of _tiMatched) {
-          if (item.manualShapes.some(Boolean)) {
-            const cur = getP(item.waza.id);
-            const merged = [...(cur.shapes || Array(6).fill(false))];
-            item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
-            await saveP(item.waza.id, { shapes: merged });
-            count++;
-          }
-        }
-        if (count) {
-          showToast('Applied markings to ' + count + ' waza!', 'green');
-          _tiParsed = false;
-          _tiPreviewMode = false;
-          _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderTextImport();
-        } else {
-          showToast('No shapes were toggled on — toggle at least one shape per waza.', 'amber');
-        }
-      });
-
-      // Commit preview (save to database)
-      container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
-        let count = 0;
-        for (const item of _tiMatched) {
-          if (item.manualShapes.some(Boolean)) {
-            const cur = getP(item.waza.id);
-            const merged = [...(cur.shapes || Array(6).fill(false))];
-            item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
-            await saveP(item.waza.id, { shapes: merged });
-            count++;
-          }
-        }
-        if (count) {
-          showToast('Committed ' + count + ' waza markings to database!', 'green');
-          _tiParsed = false;
-          _tiPreviewMode = false;
-          _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderTextImport();
-        } else {
-          showToast('No shapes were marked — adjust the markings or clear preview.', 'amber');
-        }
-      });
-
-      // Clear preview (reset manualShapes back to empty, return to label mapping UI)
-      container.querySelector('#tiClearPreviewBtn')?.addEventListener('click', () => {
-        // Clear all manual shapes
-        _tiMatched.forEach(item => {
-          item.manualShapes = Array(6).fill(false);
-        });
-        _tiPreviewMode = false;
-        renderTextImport();
-        // Scroll to auto-mapping section
-        setTimeout(() => {
-          const autoMapSection = container.querySelector('.ti-auto-mapping');
-          if (autoMapSection) autoMapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      });
-
-      // Reset
-      container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
-        _tiParsed = false;
-        _tiPreviewMode = false;
-        _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-        renderTextImport();
-      });
-    }
-
-    function renderTiInput(prefill) {
-      return '<div style="display:flex;flex-direction:column;height:100%">'
-        + '<div class="dsec2"><h3>Import from your own list</h3></div>'
-        
-        // Method 1: Excel Upload
-        + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px">'
-        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📊 Method 1: Upload Excel File (Recommended)</div>'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to proficiency levels.</p>'
-        + '<div style="display:flex;gap:8px;align-items:center">'
-        + '<input type="file" id="tiFileInput" accept=".xlsx,.xls" style="display:none">'
-        + '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>'
-        + '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>'
-        + '</div>'
-        + '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>'
-        + '</div>'
-        
-        // Divider
-        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
-        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
-        + '<span style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Or</span>'
-        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
-        + '</div>'
-        
-        // Method 2: Text Paste
-        + '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'
-        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📋 Method 2: Paste Text</div>'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>'
-        + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nAny bracket style works:\n[Learning]\nDouble Rainbow\nMix\n\n{Performance Ready}\nNami\n\n(Want to Learn) Hyper Mix"></textarea>'
-        + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
-        + '<div style="margin-top:12px;display:flex;gap:8px">'
-        + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
-        + '</div>'
-        + '</div>'
-        
-        + '</div>';
-    }
-
-    function bindTiInputEvents(container) {
-      // Text paste handler
-      container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
-        const text = container.querySelector('#tiPasteArea')?.value || '';
-        if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
-        parseTextImport(text);
-        renderTextImport();
-      });
-      
-      // Excel file upload handlers
-      const fileInput = container.querySelector('#tiFileInput');
-      const fileBtn = container.querySelector('#tiFileBtn');
-      const fileName = container.querySelector('#tiFileName');
-      
-      fileBtn?.addEventListener('click', () => fileInput?.click());
-      
-      fileInput?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        fileName.textContent = file.name;
-        fileName.style.color = 'var(--text1)';
-        
-        try {
-          await parseExcelFile(file);
-          renderTextImport();
-        } catch (err) {
-          console.error('Excel parse error:', err);
-          showToast('Error reading Excel file. Please try text paste instead.', 'red');
-        }
-      });
     }
     
-    // Excel parsing with cell color detection
-    let _tiExcelColors = {}; // { colorHex: [wazaNames] }
-    let _tiColorMapping = {}; // { colorHex: shapeIndex }
-    
-    function hexToRgb(hex) {
-      // Remove # if present and handle 6-digit hex
-      hex = hex.replace('#', '');
-      if (hex.length === 8) hex = hex.substring(0, 6); // Remove alpha if present
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return { r, g, b };
-    }
-    
-    async function parseExcelFile(file) {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const range = XLSX.utils.decode_range(firstSheet['!ref']);
-      
-      _tiExcelColors = {};
-      const allLines = [];
-      
-      // Read cells with color information
-      for (let row = range.s.r; row <= range.e.r; row++) {
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
-          const cell = firstSheet[cellAddr];
-          
-          if (!cell || !cell.v) continue;
-          
-          const text = String(cell.v).trim();
-          if (!text) continue;
-          
-          // Extract fill color (if any)
-          let fillColor = 'FFFFFF'; // default white
-          if (cell.s && cell.s.fgColor && cell.s.fgColor.rgb) {
-            fillColor = cell.s.fgColor.rgb;
-          } else if (cell.s && cell.s.bgColor && cell.s.bgColor.rgb) {
-            fillColor = cell.s.bgColor.rgb;
-          }
-          
-          // Group by color
-          if (!_tiExcelColors[fillColor]) _tiExcelColors[fillColor] = [];
-          _tiExcelColors[fillColor].push(text);
-          allLines.push(text);
-        }
-      }
-      
-      // If we detected colors other than white, show color mapping UI
-      const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
-      if (colorKeys.length > 0) {
-        // Parse the text to match waza
-        parseTextImport(allLines.join('\n'));
-        _tiParsed = 'excel'; // Special mode for color mapping
-      } else {
-        // No colors detected, treat as regular text import
-        parseTextImport(allLines.join('\n'));
-      }
-    }
-
+    /* ── Experimental xlsx import mode END ── */
 
     // ── Toast helper ─────────────────────────────────────────────
     function showToast(msg, color = 'green') {
