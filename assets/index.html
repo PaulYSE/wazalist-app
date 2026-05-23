@@ -1706,7 +1706,7 @@
     }
 
     /* ── Stats ── */
-    .legend-row {
+    .labels-row {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -1714,14 +1714,14 @@
       border-bottom: 1px solid var(--border)
     }
 
-    .legend-shape {
+    .labels-shape {
       font-size: 18px;
       width: 24px;
       text-align: center;
       flex-shrink: 0
     }
 
-    .legend-input {
+    .labels-input {
       flex: 1;
       padding: 5px 8px;
       background: var(--bg2);
@@ -1732,11 +1732,11 @@
       outline: none
     }
 
-    .legend-input:focus {
+    .labels-input:focus {
       border-color: var(--accent)
     }
 
-    .legend-text {
+    .labels-text {
       flex: 1;
       padding: 5px 8px;
       background: var(--bg2);
@@ -1749,19 +1749,19 @@
       align-items: center
     }
 
-    .legend-combined {
+    .labels-combined {
       flex: 1;
       display: flex;
       flex-direction: column
     }
 
-    .legend-stacked {
+    .labels-stacked {
       display: flex;
       flex-direction: column;
       gap: 0
     }
 
-    .legend-imported {
+    .labels-imported {
       padding: 5px 8px 3px;
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -1775,13 +1775,13 @@
       align-items: center
     }
 
-    .legend-divider {
+    .labels-divider {
       height: 1px;
       background: var(--border);
       margin: 0 8px
     }
 
-    .legend-input-bottom {
+    .labels-input-bottom {
       padding: 3px 8px 5px;
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -1794,11 +1794,11 @@
       min-height: 26px
     }
 
-    .legend-input-bottom:focus {
+    .labels-input-bottom:focus {
       border-color: var(--accent)
     }
 
-    .legend-count {
+    .labels-count {
       font-size: 12px;
       color: var(--text3);
       flex-shrink: 0;
@@ -1806,7 +1806,7 @@
       text-align: right
     }
 
-    .legend-count-stacked {
+    .labels-count-stacked {
       display: flex;
       flex-direction: column;
       gap: 0;
@@ -1815,7 +1815,7 @@
       align-items: flex-end
     }
 
-    .legend-count-top {
+    .labels-count-top {
       font-size: 11px;
       color: var(--text3);
       padding: 2px 4px;
@@ -1826,14 +1826,14 @@
       justify-content: flex-end
     }
 
-    .legend-count-divider {
+    .labels-count-divider {
       width: 100%;
       height: 1px;
       background: var(--border);
       margin: 1px 0
     }
 
-    .legend-count-bottom {
+    .labels-count-bottom {
       font-size: 11px;
       color: var(--text2);
       padding: 2px 4px;
@@ -4810,7 +4810,7 @@
           + '</div>';
         container.innerHTML = simpleLabelsHTML + headerHtml + '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
         container.querySelector('#cmpExportBtn').addEventListener('click', openExportModal);
-        container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+        container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
         container.querySelector('#cmpImportBtn').addEventListener('click', () => openImportModal());
         return;
       }
@@ -4844,7 +4844,7 @@
         
         combinedLabelsHTML = '<div class="dsec2"><h3>Labels comparison</h3>'
           + SHAPES.map((s, i) => {
-              const impLabel = imp.legend && imp.legend[i] ? imp.legend[i] : '';
+              const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
               const myLabel = shapeLabels[i] || '';
               return '<div class="legend-row">'
                 + '<span class="legend-shape">' + s + '</span>'
@@ -4909,8 +4909,8 @@
       container.innerHTML = combinedLabelsHTML + headerHtml + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
 
       container.querySelector('#cmpExportBtn')?.addEventListener('click', openExportModal);
-      container.querySelectorAll('.legend-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
-      container.querySelectorAll('.legend-input-bottom').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+      container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+      container.querySelectorAll('.labels-input-bottom').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
 
       // Events
       container.querySelector('#cmpSelect').addEventListener('change', e => {
@@ -5594,7 +5594,7 @@
           const lbl = btn.dataset.lbl, si = +btn.dataset.si;
           _tiAutoMapping[lbl] = _tiAutoMapping[lbl] === si ? -1 : si;
           // Update only the shape buttons in this row
-          const row = btn.closest('.legend-row');
+          const row = btn.closest('.labels-row');
           row.querySelectorAll('.ti-map-shape-btn').forEach((b, bsi) => {
             b.classList.toggle('on', _tiAutoMapping[lbl] === bsi);
           });
