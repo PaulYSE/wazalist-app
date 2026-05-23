@@ -380,7 +380,7 @@
       outline: 1px solid var(--accent)
     }
 
-    /* Shape tints — unique color per combination bitmask (bits 0-5 = ● ▲ ■ ♥ ★ ◆, mask 1-63) */
+    /* Marking tints — unique color per combination bitmask (bits 0-5 = ● ▲ ■ ♥ ★ ◆, mask 1-63) */
     .waza-list.sh-1,
     .waza-list.sh-1,
     .waza-compact.sh-1 {
@@ -841,7 +841,7 @@
       align-items: center
     }
 
-    /* card bottom row: shapes left, mini like-pill right */
+    /* card bottom row: markings left, mini like-pill right */
     .card-bottom-row {
       display: flex;
       align-items: center;
@@ -851,7 +851,7 @@
       min-width: 0
     }
 
-    .card-bottom-row .shapes-row {
+    .card-bottom-row .markings-row {
       flex: 1;
       min-width: 0
     }
@@ -913,21 +913,21 @@
       border: 1px solid #5a0020
     }
 
-    /* ── Shape pips ── */
-    .shapes-row {
+    /* ── Marking pips ── */
+    .markings-row {
       display: flex;
       gap: 4px;
       flex-wrap: wrap
     }
 
-    .shape-pip {
+    .marking-pip {
       font-size: 13px;
       line-height: 1;
       opacity: .2;
       transition: opacity .12s
     }
 
-    .shape-pip.on {
+    .marking-pip.on {
       opacity: 1
     }
 
@@ -968,7 +968,7 @@
       align-items: center
     }
 
-    .wce-shapes {
+    .wce-markings {
       margin-top: 6px
     }
 
@@ -1369,7 +1369,7 @@
       transition: width .3s
     }
 
-    .shape-btn {
+    .marking-btn {
       padding: 5px 10px;
       border-radius: var(--r);
       border: 1px solid var(--border);
@@ -1381,11 +1381,11 @@
       line-height: 1
     }
 
-    .shape-btn:hover {
+    .marking-btn:hover {
       background: var(--bg3)
     }
 
-    .shape-btn.on {
+    .marking-btn.on {
       background: var(--bg3);
       border-color: var(--accent);
       color: var(--text1)
@@ -1621,7 +1621,7 @@
       white-space: nowrap
     }
 
-    .crow .crshapes {
+    .crow .crmarkings {
       display: flex;
       gap: 2px;
       flex-shrink: 0
@@ -1649,9 +1649,9 @@
       border-right-width: 1px
     }
 
-    /* shape filter buttons inside groups are slightly smaller emoji */
-    #browseShapeGroup .btn,
-    #mlShapeGroup .btn {
+    /* marking filter buttons inside groups are slightly smaller emoji */
+    #browseMarkingGroup .btn,
+    #mlMarkingGroup .btn {
       font-size: 13px;
       padding: 5px 9px
     }
@@ -1714,7 +1714,7 @@
       border-bottom: 1px solid var(--border)
     }
 
-    .labels-shape {
+    .labels-marking {
       font-size: 18px;
       width: 24px;
       text-align: center;
@@ -2233,19 +2233,19 @@
       color: var(--text2)
     }
 
-    .cmp-shapes-imported {
+    .cmp-markings-imported {
       display: flex;
       gap: 3px;
       align-items: center
     }
 
-    .cmp-shapes-mine {
+    .cmp-markings-mine {
       display: flex;
       gap: 4px;
       align-items: center
     }
 
-    .cmp-shape-btn {
+    .cmp-marking-btn {
       padding: 3px 7px;
       border-radius: 4px;
       border: 1px solid var(--border);
@@ -2257,11 +2257,11 @@
       transition: all .12s
     }
 
-    .cmp-shape-btn:hover {
+    .cmp-marking-btn:hover {
       background: var(--bg3)
     }
 
-    .cmp-shape-btn.on {
+    .cmp-marking-btn.on {
       background: var(--bg3);
       border-color: var(--accent);
       color: var(--text1)
@@ -2423,7 +2423,7 @@
       border: 1px solid var(--accent2)
     }
 
-    .ti-manual-shapes {
+    .ti-manual-markings {
       display: flex;
       gap: 4px;
       flex-wrap: wrap;
@@ -2471,12 +2471,12 @@
       flex-shrink: 0
     }
 
-    .ti-map-shapes {
+    .ti-map-markings {
       display: flex;
       gap: 4px
     }
 
-    .ti-map-shape-btn {
+    .ti-map-marking-btn {
       padding: 3px 7px;
       border-radius: 4px;
       border: 1px solid var(--border);
@@ -2488,9 +2488,9 @@
       transition: all .12s
     }
 
-    .ti-map-shape-btn:hover { background: var(--bg2) }
+    .ti-map-marking-btn:hover { background: var(--bg2) }
 
-    .ti-map-shape-btn.on {
+    .ti-map-marking-btn.on {
       border-color: var(--accent);
       color: var(--text1);
       background: var(--bg2)
@@ -3023,15 +3023,15 @@
           <option value="expanded" selected>Cards</option>
           <option value="compact">Compact</option>
         </select>
-        <div class="view-toggle-group" id="browseShapeGroup">
-          <button class="btn" id="filterShapeAll">All</button>
-          <button class="btn shape-filter-btn" data-si="0">●</button>
-          <button class="btn shape-filter-btn" data-si="1">▲</button>
-          <button class="btn shape-filter-btn" data-si="2">■</button>
-          <button class="btn shape-filter-btn" data-si="3">♥</button>
-          <button class="btn shape-filter-btn" data-si="4">★</button>
-          <button class="btn shape-filter-btn" data-si="5">◆</button>
-          <button class="btn" id="filterShapeAny">Any</button>
+        <div class="view-toggle-group" id="browseMarkingGroup">
+          <button class="btn" id="filterMarkingAll">All</button>
+          <button class="btn marking-filter-btn" data-si="0">●</button>
+          <button class="btn marking-filter-btn" data-si="1">▲</button>
+          <button class="btn marking-filter-btn" data-si="2">■</button>
+          <button class="btn marking-filter-btn" data-si="3">♥</button>
+          <button class="btn marking-filter-btn" data-si="4">★</button>
+          <button class="btn marking-filter-btn" data-si="5">◆</button>
+          <button class="btn" id="filterMarkingAny">Any</button>
         </div>
         <select id="browseSortField">
           <option value="default" selected>Default</option>
@@ -3055,16 +3055,16 @@
           <div class="filter-sheet-handle"></div>
           <div class="filter-sheet-body">
             <div class="fs-row">
-              <div class="fs-label">Shape filter</div>
-              <div class="view-toggle-group" id="browseShapeGroupMob">
-                <button class="btn" id="filterShapeAllMob">All</button>
-                <button class="btn shape-filter-btn-mob" data-si="0">●</button>
-                <button class="btn shape-filter-btn-mob" data-si="1">▲</button>
-                <button class="btn shape-filter-btn-mob" data-si="2">■</button>
-                <button class="btn shape-filter-btn-mob" data-si="3">♥</button>
-                <button class="btn shape-filter-btn-mob" data-si="4">★</button>
-                <button class="btn shape-filter-btn-mob" data-si="5">◆</button>
-                <button class="btn" id="filterShapeAnyMob">Any</button>
+              <div class="fs-label">Marking filter</div>
+              <div class="view-toggle-group" id="browseMarkingGroupMob">
+                <button class="btn" id="filterMarkingAllMob">All</button>
+                <button class="btn marking-filter-btn-mob" data-si="0">●</button>
+                <button class="btn marking-filter-btn-mob" data-si="1">▲</button>
+                <button class="btn marking-filter-btn-mob" data-si="2">■</button>
+                <button class="btn marking-filter-btn-mob" data-si="3">♥</button>
+                <button class="btn marking-filter-btn-mob" data-si="4">★</button>
+                <button class="btn marking-filter-btn-mob" data-si="5">◆</button>
+                <button class="btn" id="filterMarkingAnyMob">Any</button>
               </div>
             </div>
             <div class="fs-row">
@@ -3115,7 +3115,7 @@
     </div>
 
     <!-- STATS -->
-    <div id="dashboardView" style="display:none;flex:1;overflow:hidden">
+    <div id="statsView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
         <div id="dashStats"></div>
       </div>
@@ -3129,7 +3129,7 @@
     </div>
 
     <!-- IMPORT LIST -->
-    <div id="importlistView" style="display:none;flex:1;overflow:hidden">
+    <div id="importView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
         <div id="dashImport"></div>
       </div>
@@ -3332,12 +3332,12 @@
 
     // ── localStorage ─────────────────────────────────────────────
     const LS_KEY = 'wl_local_prog';
-    const LS_LABELS = 'wl_shape_labels';
+    const LS_LABELS = 'wl_marking_labels';
     const LS_SORT = 'wl_sort_prefs';
     const LS_VIEW = 'wl_view_style';
     const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} } };
     const saveLocal = d => localStorage.setItem(LS_KEY, JSON.stringify(d));
-    let shapeLabels = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]');
+    let markingLabels = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]');
 
     // ── API ──────────────────────────────────────────────────────
     const api = async (path, method = 'GET', body = null) => {
@@ -3408,8 +3408,8 @@
           const progRes = await api('/api/progress');
           if (Array.isArray(progRes)) progRes.forEach(p => {
             let markings = Array(6).fill(false);
-            try { if (p.markings) shapes = JSON.parse(p.markings); } catch { }
-            prog[p.waza_id] = { shapes, like: p.like || null, updated_at: p.updated_at || null };
+            try { if (p.markings) markings = JSON.parse(p.markings); } catch { }
+            prog[p.waza_id] = { markings, like: p.like || null, updated_at: p.updated_at || null };
           });
         } catch (err) { console.warn('Progress load error:', err); }
       }
@@ -3464,7 +3464,7 @@
         savingIds.add(id);
         renderDetail(); // show spinning state immediately
         try {
-          const res = await api('/api/progress', 'POST', { waza_id: id, markings: JSON.stringify(prog[id].shapes), like: prog[id].like });
+          const res = await api('/api/progress', 'POST', { waza_id: id, markings: JSON.stringify(prog[id].markings), like: prog[id].like });
           if (res.error) { console.warn('Progress save failed:', res.error); }
           else if (res.like_count != null) {
             // Apply fresh aggregate counts back to wazaData so cards update immediately
@@ -3575,7 +3575,7 @@
 
     function filterWaza() {
       const { search, markings } = filters;
-      const anyShapeActive = markings.some(Boolean);
+      const anyMarkingActive = markings.some(Boolean);
       let results = wazaData.filter(w => {
         // "Any" mode: only show waza that have at least one mark
         if (browseFilterAny) {
@@ -3589,7 +3589,7 @@
           const matches = matchFn(w.name_jp, query) || matchFn(w.name_en, query) || matchFn(w.name_en_literal, query) || matchFn(w.name_en_gtranslate, query);
           if (!matches) return false;
         }
-        if (anyShapeActive) {
+        if (anyMarkingActive) {
           const p = getP(w.id);
           const ws = p.markings || Array(6).fill(false);
           if (!markings.every((on, i) => !on || ws[i])) return false;
@@ -3617,9 +3617,9 @@
     }
 
     // ── Shared helpers ────────────────────────────────────────────
-    // Returns a CSS class encoding the full shape bitmask (sh-1 to sh-63), or '' if none
-    const shapeClass = shapes => { const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0); return mask ? 'sh-' + mask : ''; };
-    const shapePips = shapes => SHAPES.map((s, i) => '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</span>').join('');
+    // Returns a CSS class encoding the full marking bitmask (sh-1 to sh-63), or '' if none
+    const markingClass = markings => { const mask = (markings || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0); return mask ? 'sh-' + mask : ''; };
+    const markingPips = markings => SHAPES.map((s, i) => '<span class="marking-pip' + (markings[i] ? ' on' : '') + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</span>').join('');
 
     function platform(url) {
       if (!url) return 'other';
@@ -3774,12 +3774,12 @@
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
           const markings = p.markings || Array(6).fill(false);
-          const hasShape = markings.some(Boolean);
+          const hasMarking = markings.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
-            + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
+            + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
             + pill + '</div>';
-          return '<div class="waza-list ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          return '<div class="waza-list ' + markingClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<div class="wce-header">'
             + '<div class="njp">' + (w.name_jp || '—') + '</div>'
             + '<div class="nen">' + dispName(w) + '</div>'
@@ -3793,12 +3793,12 @@
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
           const markings = p.markings || Array(6).fill(false);
-          const hasShape = markings.some(Boolean);
+          const hasMarking = markings.some(Boolean);
           const pill = cardLikePill(w, p);
           const bottomRow = '<div class="card-bottom-row">'
-            + '<div class="shapes-row wce-shapes">' + shapePips(markings) + '</div>'
+            + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
             + pill + '</div>';
-          return '<div class="waza-list ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          return '<div class="waza-list ' + markingClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<div class="njp">' + (w.name_jp || '—') + '</div>'
             + '<div class="nen">' + dispName(w) + '</div>'
             + bottomRow + '</div>';
@@ -3810,10 +3810,10 @@
         list.innerHTML = filtered.map(w => {
           const p = getP(w.id);
           const markings = p.markings || Array(6).fill(false);
-          return '<div class="drow ' + shapeClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
+          return '<div class="drow ' + markingClass(markings) + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '">'
             + '<span class="drn">' + (w.name_jp || '—') + '</span>'
             + '<span class="drs">' + dispName(w) + '</span>'
-            + '<div class="shapes-row" style="flex-shrink:0">' + shapePips(markings) + '</div>'
+            + '<div class="markings-row" style="flex-shrink:0">' + markingPips(markings) + '</div>'
             + '</div>';
         }).join('');
         list.querySelectorAll('.waza-compact').forEach(el => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
@@ -3951,9 +3951,9 @@
         })()
         + '</div></div>'
 
-        // Shapes — not collapsible
+        // Markings — not collapsible
         + '<div class="dsec"><h3>Markings</h3>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="shape-btn' + (shapes[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="marking-btn' + (markings[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
         + '<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of markings — meaning is up to you.</div></div>'
 
         // Videos — not collapsible
@@ -3993,8 +3993,8 @@
 
       panel.querySelector('#likeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'like' ? null : 'like' }));
       panel.querySelector('#dislikeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 'dislike' ? null : 'dislike' }));
-      panel.querySelectorAll('.shape-btn').forEach(btn => btn.addEventListener('click', () => {
-        const ns = [...shapes]; ns[+btn.dataset.si] = !ns[+btn.dataset.si]; saveP(w.id, { markings: ns });
+      panel.querySelectorAll('.marking-btn').forEach(btn => btn.addEventListener('click', () => {
+        const ns = [...markings]; ns[+btn.dataset.si] = !ns[+btn.dataset.si]; saveP(w.id, { markings: ns });
       }));
 
       // ── Play button toggle — lazy-load iframe on first expand ──
@@ -4057,9 +4057,9 @@
       document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
       document.querySelector('[data-tab="browse"]').classList.add('active');
       document.getElementById('browseView').style.display = 'flex';
-      document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('statsView').style.display = 'none';
       document.getElementById('compareView').style.display = 'none';
-      document.getElementById('importlistView').style.display = 'none';
+      document.getElementById('importView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
     }
 
@@ -4144,16 +4144,16 @@
     }
 
     function renderDashStats() {
-      let shaped = 0;
+      let markingd = 0;
       wazaData.forEach(w => {
         const p = getP(w.id);
-        if (p.markings && p.markings.some(Boolean)) shaped++;
+        if (p.markings && p.markings.some(Boolean)) markingd++;
       });
 
       // ── Overview cards (only marked and total) ────────────────
       const overviewHTML =
         '<div class="dstats" style="grid-template-columns:repeat(2,1fr)">'
-        + '<div class="scard"><div class="n" style="color:var(--accent)">' + shaped + '</div><div class="l">Marked</div></div>'
+        + '<div class="scard"><div class="n" style="color:var(--accent)">' + markingd + '</div><div class="l">Marked</div></div>'
         + '<div class="scard"><div class="n">' + wazaData.length + '</div><div class="l">Total Waza</div></div>'
         + '</div>';
 
@@ -4173,10 +4173,10 @@
           ? recent.map(w => {
             const p = getP(w.id);
             const markings = p.markings || Array(6).fill(false);
-            return '<div class="recent-row ' + shapeClass(markings) + '" data-id="' + w.id + '">'
+            return '<div class="recent-row ' + markingClass(markings) + '" data-id="' + w.id + '">'
               + '<span class="drn">' + (w.name_jp || '—') + '</span>'
               + '<span class="drs">' + dispName(w) + '</span>'
-              + '<span style="margin-left:auto;display:flex;gap:2px">' + shapePips(markings) + '</span>'
+              + '<span style="margin-left:auto;display:flex;gap:2px">' + markingPips(markings) + '</span>'
               + '<span class="recent-time">' + timeAgo(p.updated_at) + '</span>'
               + '</div>';
           }).join('')
@@ -4371,17 +4371,17 @@
     // ── Filter events ─────────────────────────────────────────────
     document.getElementById('searchInput').addEventListener('input', e => { filters.search = e.target.value; renderList(); });
 
-    function updateShapeFilterUI() {
+    function updateMarkingFilterUI() {
       // Desktop
-      document.getElementById('filterShapeAll').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
-      document.getElementById('filterShapeAny').classList.toggle('active', browseFilterAny);
-      document.querySelectorAll('.shape-filter-btn').forEach(btn => {
+      document.getElementById('filterMarkingAll').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
+      document.getElementById('filterMarkingAny').classList.toggle('active', browseFilterAny);
+      document.querySelectorAll('.marking-filter-btn').forEach(btn => {
         btn.classList.toggle('active', !browseFilterAny && filters.markings[+btn.dataset.si]);
       });
       // Mobile sheet mirrors
-      document.getElementById('filterShapeAllMob').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
-      document.getElementById('filterShapeAnyMob').classList.toggle('active', browseFilterAny);
-      document.querySelectorAll('.shape-filter-btn-mob').forEach(btn => {
+      document.getElementById('filterMarkingAllMob').classList.toggle('active', !browseFilterAny && filters.markings.every(Boolean));
+      document.getElementById('filterMarkingAnyMob').classList.toggle('active', browseFilterAny);
+      document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
         btn.classList.toggle('active', !browseFilterAny && filters.markings[+btn.dataset.si]);
       });
       // Filter dot: visible when any non-default filter is active
@@ -4389,25 +4389,25 @@
       document.getElementById('filterDot').classList.toggle('visible', hasFilter);
     }
 
-    document.getElementById('filterShapeAll').addEventListener('click', () => {
+    document.getElementById('filterMarkingAll').addEventListener('click', () => {
       browseFilterAny = false;
       const anyOn = filters.markings.some(Boolean);
       filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
-      updateShapeFilterUI(); renderList();
+      updateMarkingFilterUI(); renderList();
     });
 
-    document.getElementById('filterShapeAny').addEventListener('click', () => {
+    document.getElementById('filterMarkingAny').addEventListener('click', () => {
       browseFilterAny = !browseFilterAny;
       if (browseFilterAny) filters.markings = Array(6).fill(false); // clear specific filters when entering Any mode
-      updateShapeFilterUI(); renderList();
+      updateMarkingFilterUI(); renderList();
     });
 
-    document.querySelectorAll('.shape-filter-btn').forEach(btn => {
+    document.querySelectorAll('.marking-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        browseFilterAny = false; // specific shape filter exits Any mode
+        browseFilterAny = false; // specific marking filter exits Any mode
         const i = +btn.dataset.si;
         filters.markings = filters.markings.map((v, idx) => idx === i ? !v : v);
-        updateShapeFilterUI(); renderList();
+        updateMarkingFilterUI(); renderList();
       });
     });
 
@@ -4418,7 +4418,7 @@
       document.getElementById('browseSortOrderMob').disabled = isDefault;
       // Save to localStorage
       localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: browseSortField, order: browseSortOrder }));
-      updateShapeFilterUI(); renderList();
+      updateMarkingFilterUI(); renderList();
     });
 
     document.getElementById('browseSortOrder').addEventListener('change', e => {
@@ -4426,7 +4426,7 @@
       document.getElementById('browseSortOrderMob').value = e.target.value;
       // Save to localStorage
       localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: browseSortField, order: browseSortOrder }));
-      updateShapeFilterUI(); renderList();
+      updateMarkingFilterUI(); renderList();
     });
 
     // ── Mobile ⋮ menu ─────────────────────────────────────────────
@@ -4492,24 +4492,24 @@
       if (!filterSheet.contains(e.target)) filterSheetBg.classList.remove('open');
     });
 
-    // Mobile shape buttons — stage only, applied on Confirm
-    document.getElementById('filterShapeAllMob').addEventListener('click', () => {
+    // Mobile marking buttons — stage only, applied on Confirm
+    document.getElementById('filterMarkingAllMob').addEventListener('click', () => {
       browseFilterAny = false;
       const anyOn = filters.markings.some(Boolean);
       filters.markings = Array(6).fill(!anyOn);
-      updateShapeFilterUI();
+      updateMarkingFilterUI();
     });
-    document.getElementById('filterShapeAnyMob').addEventListener('click', () => {
+    document.getElementById('filterMarkingAnyMob').addEventListener('click', () => {
       browseFilterAny = !browseFilterAny;
       if (browseFilterAny) filters.markings = Array(6).fill(false);
-      updateShapeFilterUI();
+      updateMarkingFilterUI();
     });
-    document.querySelectorAll('.shape-filter-btn-mob').forEach(btn => {
+    document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
       btn.addEventListener('click', () => {
         browseFilterAny = false;
         const i = +btn.dataset.si;
         filters.markings = filters.markings.map((v, idx) => idx === i ? !v : v);
-        updateShapeFilterUI();
+        updateMarkingFilterUI();
       });
     });
     document.getElementById('browseSortFieldMob').addEventListener('change', e => {
@@ -4538,7 +4538,7 @@
       localStorage.setItem('wl_view_style', browseListView);
       // Close sheet and re-render
       filterSheetBg.classList.remove('open');
-      updateShapeFilterUI();
+      updateMarkingFilterUI();
       renderList();
     });
 
@@ -4547,13 +4547,13 @@
       document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
       const t = tab.dataset.tab;
       document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
-      document.getElementById('dashboardView').style.display = t === 'dashboard' ? 'block' : 'none';
+      document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
       document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
-      document.getElementById('importlistView').style.display = t === 'importlist' ? 'block' : 'none';
+      document.getElementById('importView').style.display = t === 'import' ? 'block' : 'none';
       document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
-      if (t === 'dashboard') renderDashStats();
+      if (t === 'stats') renderDashStats();
       if (t === 'compare') renderDashCompare();
-      if (t === 'importlist') renderImport();
+      if (t === 'import') renderImport();
       if (t === 'contribute') renderContribute();
       // Update mobile menu active state
       if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
@@ -4650,10 +4650,10 @@
     function serializeList() {
       const marks = {};
       Object.entries(prog).forEach(([id, p]) => {
-        const hasShape = p.markings && p.markings.some(Boolean);
-        if (hasShape || p.like) marks[+id] = { markings: p.markings || Array(6).fill(false), like: p.like || null };
+        const hasMarking = p.markings && p.markings.some(Boolean);
+        if (hasMarking || p.like) marks[+id] = { markings: p.markings || Array(6).fill(false), like: p.like || null };
       });
-      return JSON.stringify({ v: 1, legend: shapeLabels, marks });
+      return JSON.stringify({ v: 1, legend: markingLabels, marks });
     }
 
     async function hashList(serialized) {
@@ -4763,8 +4763,8 @@
       document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
       document.querySelector('[data-tab="compare"]').classList.add('active');
       document.getElementById('browseView').style.display = 'none';
-      document.getElementById('dashboardView').style.display = 'none';
-      document.getElementById('importlistView').style.display = 'none';
+      document.getElementById('statsView').style.display = 'none';
+      document.getElementById('importView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
       document.getElementById('compareView').style.display = 'block';
       renderDashCompare();
@@ -4800,19 +4800,19 @@
 
       if (!keys.length) {
         // No imported lists - show simple legend
-        const shapeCounts = Array(6).fill(0);
-        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) shapeCounts[i]++; }); });
+        const markingCounts = Array(6).fill(0);
+        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) markingCounts[i]++; }); });
         const simpleLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
-            + '<span class="legend-shape">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="legend-count">' + shapeCounts[i] + ' waza</span>'
+            + '<span class="legend-marking">' + s + '</span>'
+            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+            + '<span class="legend-count">' + markingCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
         container.innerHTML = simpleLabelsHTML + headerHtml + '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
         container.querySelector('#cmpExportBtn').addEventListener('click', openExportModal);
-        container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+        container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(markingLabels)); }); });
         container.querySelector('#cmpImportBtn').addEventListener('click', () => openImportModal());
         return;
       }
@@ -4822,34 +4822,34 @@
       // Combined legend - shows both imported and user's legend in one table
       let combinedLabelsHTML = '';
       if (imp) {
-        // Count shapes for both imported list and user's list
-        const impShapeCounts = Array(6).fill(0);
-        const myShapeCounts = Array(6).fill(0);
+        // Count markings for both imported list and user's list
+        const impMarkingCounts = Array(6).fill(0);
+        const myMarkingCounts = Array(6).fill(0);
         
-        // Count imported shapes
+        // Count imported markings
         if (imp.marks) {
           Object.values(imp.marks).forEach(mark => {
-            if (mark.shapes) {
-              mark.shapes.forEach((on, i) => { if (on) impShapeCounts[i]++; });
+            if (mark.markings) {
+              mark.markings.forEach((on, i) => { if (on) impMarkingCounts[i]++; });
             }
           });
         }
         
-        // Count user's shapes (only for waza in the imported list)
+        // Count user's markings (only for waza in the imported list)
         const importedIds = new Set(Object.keys(imp.marks).map(Number));
         wazaData.forEach(w => {
           if (importedIds.has(w.id)) {
             const p = getP(w.id);
-            if (p.markings) p.markings.forEach((on, i) => { if (on) myShapeCounts[i]++; });
+            if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; });
           }
         });
         
         combinedLabelsHTML = '<div class="dsec2"><h3>Labels comparison</h3>'
           + SHAPES.map((s, i) => {
               const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
-              const myLabel = shapeLabels[i] || '';
+              const myLabel = markingLabels[i] || '';
               return '<div class="legend-row">'
-                + '<span class="legend-shape">' + s + '</span>'
+                + '<span class="legend-marking">' + s + '</span>'
                 + '<div class="legend-combined">'
                   + '<div class="legend-stacked">'
                     + '<div class="legend-imported" title="Their label">' 
@@ -4860,9 +4860,9 @@
                   + '</div>'
                 + '</div>'
                 + '<div class="legend-count-stacked">'
-                  + '<div class="legend-count-top" title="Their marks">' + impShapeCounts[i] + '</div>'
+                  + '<div class="legend-count-top" title="Their marks">' + impMarkingCounts[i] + '</div>'
                   + '<div class="legend-count-divider"></div>'
-                  + '<div class="legend-count-bottom" title="Your marks">' + myShapeCounts[i] + '</div>'
+                  + '<div class="legend-count-bottom" title="Your marks">' + myMarkingCounts[i] + '</div>'
                 + '</div>'
                 + '</div>';
             }).join('')
@@ -4870,13 +4870,13 @@
           + '</div>';
       } else {
         // No imported list selected - show only user's legend
-        const myShapeCounts = Array(6).fill(0);
-        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) myShapeCounts[i]++; }); });
+        const myMarkingCounts = Array(6).fill(0);
+        wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; }); });
         combinedLabelsHTML = '<div class="dsec2"><h3>My legend</h3>'
           + SHAPES.map((s, i) => '<div class="legend-row">'
-            + '<span class="legend-shape">' + s + '</span>'
-            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this shape…" value="' + shapeLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="legend-count">' + myShapeCounts[i] + ' waza</span>'
+            + '<span class="legend-marking">' + s + '</span>'
+            + '<input class="legend-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+            + '<span class="legend-count">' + myMarkingCounts[i] + ' waza</span>'
             + '</div>').join('')
           + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
           + '</div>';
@@ -4891,17 +4891,17 @@
       const rowsHtml = rows.map(w => {
         const importedMark = imp ? (imp.marks[w.id] || { markings: Array(6).fill(false), like: null }) : { markings: Array(6).fill(false), like: null };
         const myP = getP(w.id);
-        const myShapes = myP.shapes || Array(6).fill(false);
-        const impShapes = importedMark.shapes || Array(6).fill(false);
+        const myMarkings = myP.markings || Array(6).fill(false);
+        const impMarkings = importedMark.markings || Array(6).fill(false);
         // const impLike = importedMark.like;
         // const impLikeBadge = impLike==='like'?'<span class="badge b-like" style="font-size:10px">👍</span>':impLike==='dislike'?'<span class="badge b-dislike" style="font-size:10px">👎</span>':'';
         return '<div class="cmp-row" data-id="' + w.id + '">'
           + '<div><div class="cmp-name-jp">' + (w.name_jp || '—') + '</div><div class="cmp-name-en">' + dispName(w) + '</div></div>'
-          + '<div class="cmp-shapes-imported">' + shapePips(impShapes)
+          + '<div class="cmp-markings-imported">' + markingPips(impMarkings)
           // +impLikeBadge
           + '</div>'
-          + '<div class="cmp-shapes-mine">'
-          + SHAPES.map((s, i) => '<button class="cmp-shape-btn' + (myShapes[i] ? ' on' : '') + '" data-wid="' + w.id + '" data-si="' + i + '" title="' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '">' + s + '</button>').join('')
+          + '<div class="cmp-markings-mine">'
+          + SHAPES.map((s, i) => '<button class="cmp-marking-btn' + (myMarkings[i] ? ' on' : '') + '" data-wid="' + w.id + '" data-si="' + i + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</button>').join('')
           + '</div>'
           + '</div>';
       }).join('');
@@ -4911,8 +4911,8 @@
       container.innerHTML = combinedLabelsHTML + headerHtml + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
 
       container.querySelector('#cmpExportBtn')?.addEventListener('click', openExportModal);
-      container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
-      container.querySelectorAll('.labels-input-bottom').forEach(inp => { inp.addEventListener('input', () => { shapeLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(shapeLabels)); }); });
+      container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(markingLabels)); }); });
+      container.querySelectorAll('.labels-input-bottom').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; localStorage.setItem(LS_LABELS, JSON.stringify(markingLabels)); }); });
 
       // Events
       container.querySelector('#cmpSelect').addEventListener('change', e => {
@@ -4930,13 +4930,13 @@
         renderDashCompare();
       });
 
-      // Shape buttons in compare view — call saveP (existing save path)
-      container.querySelectorAll('.cmp-shape-btn').forEach(btn => {
+      // Marking buttons in compare view — call saveP (existing save path)
+      container.querySelectorAll('.cmp-marking-btn').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
           const wid = +btn.dataset.wid, si = +btn.dataset.si;
           const cur = getP(wid);
-          const ns = [...(cur.shapes || Array(6).fill(false))];
+          const ns = [...(cur.markings || Array(6).fill(false))];
           ns[si] = !ns[si];
           saveP(wid, { markings: ns }).then(() => renderDashCompare());
         });
@@ -4945,7 +4945,7 @@
       // Row click — navigate to browse
       container.querySelectorAll('.cmp-row').forEach(el => {
         el.addEventListener('click', e => {
-          if (e.target.classList.contains('cmp-shape-btn')) return;
+          if (e.target.classList.contains('cmp-marking-btn')) return;
           navigateToBrowse();
           selectWaza(+el.dataset.id);
         });
@@ -4956,29 +4956,29 @@
     // ── Compare sub-tab switching ─────────────────────────────────
     // ── Text Import ───────────────────────────────────────────────
     // State for the text-import sub-tab
-    let _tiMatched = [];        // [{waza, rawLine, category, manualShapes}]
+    let _tiMatched = [];        // [{waza, rawLine, category, manualMarkings}]
     let _tiUnmatched = [];      // [rawLine]
     let _tiParsed = false;
     let _tiFoundLabels = [];    // ordered unique label strings found in the text e.g. "[Learning]", "(WIP)", "{Done}"
-    let _tiAutoMapping = {};    // { [labelStr]: shapeIndex (-1 = none) }
+    let _tiAutoMapping = {};    // { [labelStr]: markingIndex (-1 = none) }
     let _tiLabelNames = {};     // { [labelStr]: displayName } — user-editable
-    let _tiPreviewMode = false; // true when auto-labels have been applied to manualShapes as preview
+    let _tiPreviewMode = false; // true when auto-labels have been applied to manualMarkings as preview
 
     // ── Phase 1 Import Enhancements ──────────────────────────────
 
-    // Common status labels mapping to Wazalist shapes
+    // Common status labels mapping to Wazalist markings
     const STATUS_TO_SHAPE_MAP = {
-      // Completed/Learnt → Shape 3 (Complete)
+      // Completed/Learnt → Marking 3 (Complete)
       'learnt': 2, 'completed': 2, 'mastered': 2, 'done': 2, 'finished': 2,
-      // Learning/In Progress → Shape 2 (Learning)
+      // Learning/In Progress → Marking 2 (Learning)
       'learning': 1, 'in progress': 1, 'wip': 1, 'practicing': 1,
-      // Forgot/Review → Shape 5 (Forgot)
+      // Forgot/Review → Marking 5 (Forgot)
       'forgot': 4, 'forgotten': 4, 'review': 4, 'needs review': 4, 'outdated': 4,
-      // Want to Learn → Shape 1 (Want to Learn)
+      // Want to Learn → Marking 1 (Want to Learn)
       'want to learn': 0, 'planned': 0, 'not learnt': 0, 'todo': 0, 'future': 0,
-      // Original/Favourite → Shape 4 (My Favourite)
+      // Original/Favourite → Marking 4 (My Favourite)
       'original': 3, 'own skills': 3, 'oriwaza': 3, 'favourite': 3, 'favorite': 3, 'custom': 3,
-      // Decorative markers → Shape 4 (My Favourite)
+      // Decorative markers → Marking 4 (My Favourite)
       '★': 3, '˗ˏˋ ★ ˎˊ˗': 3
     };
 
@@ -5177,8 +5177,8 @@
       }
     }
 
-    // Map status text to shape index (0-5) - Phase 2: with fuzzy matching
-    function mapStatusToShape(statusText) {
+    // Map status text to marking index (0-5) - Phase 2: with fuzzy matching
+    function mapStatusToMarking(statusText) {
       if (!statusText) return null;
       return fuzzyMatchStatus(statusText); // Use Phase 2 fuzzy matcher
     }
@@ -5299,8 +5299,8 @@
       _tiFoundLabels.forEach((lbl, i) => {
         if (_tiAutoMapping[lbl] === undefined) {
           // Phase 1: Try to map known status labels automatically
-          const statusShape = mapStatusToShape(lbl.slice(1, -1)); // Remove brackets
-          _tiAutoMapping[lbl] = statusShape !== null ? statusShape : (i < 6 ? i : -1);
+          const statusMarking = mapStatusToMarking(lbl.slice(1, -1)); // Remove brackets
+          _tiAutoMapping[lbl] = statusMarking !== null ? statusMarking : (i < 6 ? i : -1);
         }
       });
 
@@ -5371,18 +5371,18 @@
             waza, 
             rawLine: line, 
             category: effectiveLabel, 
-            manualShapes: Array(6).fill(false) 
+            manualMarkings: Array(6).fill(false) 
           };
           
-          // Phase 1: Auto-assign shapes from status or decorations
+          // Phase 1: Auto-assign markings from status or decorations
           if (detectedStatus) {
-            const shapeIdx = mapStatusToShape(detectedStatus);
-            if (shapeIdx !== null) {
-              matchedItem.manualShapes[shapeIdx] = true;
+            const markingIdx = mapStatusToMarking(detectedStatus);
+            if (markingIdx !== null) {
+              matchedItem.manualMarkings[markingIdx] = true;
             }
           } else if (isFavorite) {
-            // Auto-assign Favourite shape for decorated waza
-            matchedItem.manualShapes[3] = true; // Shape 4 (index 3)
+            // Auto-assign Favourite marking for decorated waza
+            matchedItem.manualMarkings[3] = true; // Marking 4 (index 3)
           }
           
           _tiMatched.push(matchedItem);
@@ -5394,7 +5394,7 @@
     }
 
     function renderImport() {
-      const container = document.getElementById('dashTextImport');
+      const container = document.getElementById('dashImport');
 
       if (!_tiParsed) {
         container.innerHTML = renderTiInput('');
@@ -5421,9 +5421,9 @@
                 + '<div style="font-size:13px;font-weight:500">' + wazaCount + ' waza</div>'
                 + '<div style="font-size:11px;color:var(--text3)">' + colorHex + '</div>'
                 + '</div>'
-                + '<select class="color-shape-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
+                + '<select class="color-marking-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
                 + '<option value="-1">No marking</option>'
-                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (shapeLabels[i] || 'Shape ' + (i + 1)) + '</option>').join('')
+                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (markingLabels[i] || 'Marking ' + (i + 1)) + '</option>').join('')
                 + '</select>'
                 + '</div>';
             }).join('')
@@ -5439,10 +5439,10 @@
           // Bind color mapping events
           container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', () => {
             // Read mappings
-            container.querySelectorAll('.color-shape-map').forEach(select => {
+            container.querySelectorAll('.color-marking-map').forEach(select => {
               const color = select.dataset.color;
-              const shapeIdx = parseInt(select.value);
-              _tiColorMapping[color] = shapeIdx;
+              const markingIdx = parseInt(select.value);
+              _tiColorMapping[color] = markingIdx;
             });
             
             // Apply color mappings to matched waza
@@ -5450,11 +5450,11 @@
               // Find which color this waza belongs to
               for (const [color, wazaNames] of Object.entries(_tiExcelColors)) {
                 if (wazaNames.includes(item.rawLine)) {
-                  const shapeIdx = _tiColorMapping[color];
-                  if (shapeIdx >= 0) {
-                    item.manualShapes = Array(6).fill(false);
-                    item.manualShapes[shapeIdx] = true;
-                    item.category = shapeLabels[shapeIdx] || `Shape ${shapeIdx + 1}`;
+                  const markingIdx = _tiColorMapping[color];
+                  if (markingIdx >= 0) {
+                    item.manualMarkings = Array(6).fill(false);
+                    item.manualMarkings[markingIdx] = true;
+                    item.category = markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
                   }
                   break;
                 }
@@ -5494,15 +5494,15 @@
         const catBadge = dispLbl
           ? '<span class="ti-match-row ti-category-badge ti-cat-dynamic">' + escHtml(dispLbl) + '</span>'
           : '';
-        const shapesBtns = SHAPES.map((s, si) =>
-          '<button class="cmp-shape-btn' + (item.manualShapes[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
+        const markingsBtns = SHAPES.map((s, si) =>
+          '<button class="cmp-marking-btn' + (item.manualMarkings[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
         ).join('');
         return '<div class="ti-match-row" data-idx="' + idx + '">'
           + '<div class="ti-names"><div class="ti-njp">' + escHtml(item.waza.name_jp || '—') + '</div>'
           + '<div class="ti-nen">' + escHtml(dispName(item.waza)) + '</div>'
           + (catBadge ? '<div style="margin-top:4px">' + catBadge + '</div>' : '')
           + '</div>'
-          + '<div class="ti-manual-shapes">' + shapesBtns + '</div>'
+          + '<div class="ti-manual-markings">' + markingsBtns + '</div>'
           + '</div>';
       }).join('');
 
@@ -5512,13 +5512,13 @@
         const mapRows = _tiFoundLabels.map((lbl, li) => {
           const assigned = _tiAutoMapping[lbl] !== undefined ? _tiAutoMapping[lbl] : -1;
           const dispName_ = _tiLabelNames[lbl] !== undefined ? _tiLabelNames[lbl] : lbl.slice(1, -1);
-          const shapeBtns = SHAPES.map((s, si) =>
-            '<button class="ti-map-shape-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
+          const markingBtns = SHAPES.map((s, si) =>
+            '<button class="ti-map-marking-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
           ).join('');
           return '<div class="legend-row">'
-            + '<span class="legend-shape" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
+            + '<span class="legend-marking" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
             + '<input class="legend-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
-            + '<div class="ti-map-shapes">' + shapeBtns + '</div>'
+            + '<div class="ti-map-markings">' + markingBtns + '</div>'
             + '</div>';
         }).join('');
 
@@ -5529,8 +5529,8 @@
         ).join(' &nbsp;·&nbsp; ');
 
         autoMapHtml = '<div class="ti-auto-mapping">'
-          + '<h4>Auto-import: map labels to shapes</h4>'
-          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which shape each maps to. Click a shape to assign, click again to unassign.</p>'
+          + '<h4>Auto-import: map labels to markings</h4>'
+          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which marking each maps to. Click a marking to assign, click again to unassign.</p>'
           + '<div style="margin-bottom:10px;line-height:2">' + countsNote + '</div>'
           + mapRows
           + '</div>';
@@ -5544,7 +5544,7 @@
         // In preview mode - show banner at top and commit/cancel buttons at bottom
         previewBannerHtml = '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:16px">'
           + '<p style="font-size:13px;color:var(--accent);margin-bottom:8px">✨ <b>Preview Mode:</b> Auto-labels have been applied to the markings below.</p>'
-          + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked shapes. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
+          + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked markings. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
           + '</div>';
         
         actionsHtml = '<div class="ti-actions">'
@@ -5563,13 +5563,13 @@
 
       container.innerHTML = previewBannerHtml + unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !_tiPreviewMode ? autoMapHtml : '') + actionsHtml;
 
-      // Manual shape toggles
-      container.querySelectorAll('.ti-manual-shapes .cmp-shape-btn').forEach(btn => {
+      // Manual marking toggles
+      container.querySelectorAll('.ti-manual-markings .cmp-marking-btn').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
           const idx = +btn.dataset.idx, si = +btn.dataset.si;
-          _tiMatched[idx].manualShapes[si] = !_tiMatched[idx].manualShapes[si];
-          btn.classList.toggle('on', _tiMatched[idx].manualShapes[si]);
+          _tiMatched[idx].manualMarkings[si] = !_tiMatched[idx].manualMarkings[si];
+          btn.classList.toggle('on', _tiMatched[idx].manualMarkings[si]);
         });
       });
 
@@ -5590,14 +5590,14 @@
         });
       });
 
-      // Auto-map shape selectors
-      container.querySelectorAll('.ti-map-shape-btn').forEach(btn => {
+      // Auto-map marking selectors
+      container.querySelectorAll('.ti-map-marking-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const lbl = btn.dataset.lbl, si = +btn.dataset.si;
           _tiAutoMapping[lbl] = _tiAutoMapping[lbl] === si ? -1 : si;
-          // Update only the shape buttons in this row
+          // Update only the marking buttons in this row
           const row = btn.closest('.labels-row');
-          row.querySelectorAll('.ti-map-shape-btn').forEach((b, bsi) => {
+          row.querySelectorAll('.ti-map-marking-btn').forEach((b, bsi) => {
             b.classList.toggle('on', _tiAutoMapping[lbl] === bsi);
           });
         });
@@ -5605,13 +5605,13 @@
 
       // Auto import (now preview mode)
       container.querySelector('#tiAutoImportBtn')?.addEventListener('click', () => {
-        // Apply auto-mapping to manualShapes as a preview
+        // Apply auto-mapping to manualMarkings as a preview
         for (const item of _tiMatched) {
           const si = item.category != null ? (_tiAutoMapping[item.category] !== undefined ? _tiAutoMapping[item.category] : -1) : -1;
-          // Reset manual shapes first
-          item.manualShapes = Array(6).fill(false);
+          // Reset manual markings first
+          item.manualMarkings = Array(6).fill(false);
           // Apply the auto-detected label
-          if (si >= 0) item.manualShapes[si] = true;
+          if (si >= 0) item.manualMarkings[si] = true;
         }
         _tiPreviewMode = true;
         renderImport();
@@ -5625,10 +5625,10 @@
       container.querySelector('#tiManualImportBtn')?.addEventListener('click', async () => {
         let count = 0;
         for (const item of _tiMatched) {
-          if (item.manualShapes.some(Boolean)) {
+          if (item.manualMarkings.some(Boolean)) {
             const cur = getP(item.waza.id);
-            const merged = [...(cur.shapes || Array(6).fill(false))];
-            item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
+            const merged = [...(cur.markings || Array(6).fill(false))];
+            item.manualMarkings.forEach((v, i) => { if (v) merged[i] = true; });
             await saveP(item.waza.id, { markings: merged });
             count++;
           }
@@ -5640,7 +5640,7 @@
           _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
           renderImport();
         } else {
-          showToast('No shapes were toggled on — toggle at least one shape per waza.', 'amber');
+          showToast('No markings were toggled on — toggle at least one marking per waza.', 'amber');
         }
       });
 
@@ -5648,10 +5648,10 @@
       container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
         let count = 0;
         for (const item of _tiMatched) {
-          if (item.manualShapes.some(Boolean)) {
+          if (item.manualMarkings.some(Boolean)) {
             const cur = getP(item.waza.id);
-            const merged = [...(cur.shapes || Array(6).fill(false))];
-            item.manualShapes.forEach((v, i) => { if (v) merged[i] = true; });
+            const merged = [...(cur.markings || Array(6).fill(false))];
+            item.manualMarkings.forEach((v, i) => { if (v) merged[i] = true; });
             await saveP(item.waza.id, { markings: merged });
             count++;
           }
@@ -5663,15 +5663,15 @@
           _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
           renderImport();
         } else {
-          showToast('No shapes were marked — adjust the markings or clear preview.', 'amber');
+          showToast('No markings were marked — adjust the markings or clear preview.', 'amber');
         }
       });
 
-      // Clear preview (reset manualShapes back to empty, return to label mapping UI)
+      // Clear preview (reset manualMarkings back to empty, return to label mapping UI)
       container.querySelector('#tiClearPreviewBtn')?.addEventListener('click', () => {
-        // Clear all manual shapes
+        // Clear all manual markings
         _tiMatched.forEach(item => {
-          item.manualShapes = Array(6).fill(false);
+          item.manualMarkings = Array(6).fill(false);
         });
         _tiPreviewMode = false;
         renderImport();
@@ -5763,7 +5763,7 @@
     
     // Excel parsing with cell color detection
     let _tiExcelColors = {}; // { colorHex: [wazaNames] }
-    let _tiColorMapping = {}; // { colorHex: shapeIndex }
+    let _tiColorMapping = {}; // { colorHex: markingIndex }
     
     function hexToRgb(hex) {
       // Remove # if present and handle 6-digit hex
@@ -6069,7 +6069,7 @@
 .ob-style-pill .waza-compact:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
 .ob-style-pill .waza-compact:not(:first-child):not(:last-child) { border-radius: 0; }
 
-/* Shape marking demo - use real app's waza-compact (compact) style + cmp-shape-btn */
+/* Marking marking demo - use real app's waza-compact (compact) style + cmp-marking-btn */
 .ob-marking-demo { 
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -6091,7 +6091,7 @@
   padding: 6px 10px; border-radius: var(--r);
   background: var(--bg0); border: 1px solid var(--border);
 }
-.ob-legend-shape { font-size: 16px; width: 22px; text-align: center; }
+.ob-legend-marking { font-size: 16px; width: 22px; text-align: center; }
 .ob-legend-input {
   flex: 1; padding: 4px 8px;
   background: var(--bg2); border: 1px solid var(--border);
@@ -6107,7 +6107,7 @@
   padding: 7px 12px; border-radius: var(--r);
   background: var(--bg0); border: 1px solid var(--border);
 }
-.ob-tpl-shape { font-size: 15px; width: 20px; text-align: center; }
+.ob-tpl-marking { font-size: 15px; width: 20px; text-align: center; }
 .ob-tpl-label { font-size: 13px; color: var(--text2); }
 
 /* Footer / buttons */
@@ -6230,7 +6230,7 @@
           <div class="ob-slide-icon">🏷️</div>
           <div class="ob-slide-title">Build your <span>Wazalist</span></div>
           <div class="ob-slide-sub">
-            Use the 6 shape markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off — try it below!
+            Use the 6 marking markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off — try it below!
           </div>
           <div class="ob-demo ob-marking-demo" id="obMarkingDemo">
             <!-- rows built by JS -->
@@ -6242,7 +6242,7 @@
           <div class="ob-slide-icon">✍️</div>
           <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
           <div class="ob-slide-sub">
-            Label each shape however suits your learning style — or use the suggested template below. You can rename them anytime.
+            Label each marking however suits your learning style — or use the suggested template below. You can rename them anytime.
           </div>
           <div class="ob-demo">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
@@ -6360,8 +6360,8 @@
 
   let currentSlide = 0;
   let chosenStyle = localStorage.getItem('wl_view_style') || 'expanded';
-  // Demo shape state: [wazaIndex][shapeIndex] - combined markings to show they're not mutually exclusive
-  const demoShapes = [
+  // Demo marking state: [wazaIndex][markingIndex] - combined markings to show they're not mutually exclusive
+  const demoMarkings = [
     [true,false,true,false,false,false],  // Thundersnake: ● ■
     [false,true,false,false,false,false], // Amaterasu: ▲
     [false,false,false,true,true,false],  // Muramasa: ♥ ★
@@ -6497,20 +6497,20 @@
     if (!container) return;
     
     // Get real app helper functions if available
-    const hasRealFunctions = typeof shapePips === 'function' && 
-                             typeof shapeClass === 'function' &&
+    const hasRealFunctions = typeof markingPips === 'function' && 
+                             typeof markingClass === 'function' &&
                              typeof SHAPES !== 'undefined';
     
     // Local fallback helpers if real functions not available
-    const localShapePips = shapes => {
+    const localMarkingPips = markings => {
       const SHAPES_LOCAL = ['●','▲','■','♥','★','◆'];
       return SHAPES_LOCAL.map((s, i) => 
-        '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '">' + s + '</span>'
+        '<span class="marking-pip' + (markings[i] ? ' on' : '') + '">' + s + '</span>'
       ).join('');
     };
     
-    const localShapeClass = shapes => {
-      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+    const localMarkingClass = markings => {
+      const mask = (markings || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
       return mask ? 'sh-' + mask : '';
     };
     
@@ -6523,10 +6523,10 @@
     };
     
     // Choose which functions to use
-    const shapePipsFunc = hasRealFunctions ? shapePips : localShapePips;
-    const shapeClassFunc = hasRealFunctions ? shapeClass : localShapeClass;
+    const markingPipsFunc = hasRealFunctions ? markingPips : localMarkingPips;
+    const markingClassFunc = hasRealFunctions ? markingClass : localMarkingClass;
     
-    // Use first 3 demo waza with preset shapes
+    // Use first 3 demo waza with preset markings
     const demoItems = [
       { waza: DEMO_WAZA[0], markings: [true, false, true, false, false, false], likes: 2, dislikes: 0 },  // Thundersnake: ● ■
       { waza: DEMO_WAZA[1], markings: [false, true, false, false, false, false], likes: 1, dislikes: 0 }, // Amaterasu: ▲
@@ -6536,14 +6536,14 @@
     // Build real waza-list components (same structure as main app's list view)
     container.innerHTML = demoItems.map(item => {
       const w = item.waza;
-      const markings = item.shapes;
+      const markings = item.markings;
       const pill = localCardLikePill(item.likes, item.dislikes);
       
       const bottomRow = '<div class="card-bottom-row">'
-        + '<div class="shapes-row wce-shapes">' + shapePipsFunc(markings) + '</div>'
+        + '<div class="markings-row wce-markings">' + markingPipsFunc(markings) + '</div>'
         + pill + '</div>';
       
-      return '<div class="waza-list ' + shapeClassFunc(markings) + '">'
+      return '<div class="waza-list ' + markingClassFunc(markings) + '">'
         + '<div class="njp">' + w.jp + '</div>'
         + '<div class="nen">' + w.en + '</div>'
         + bottomRow + '</div>';
@@ -6664,15 +6664,15 @@
     
     const SHAPES = ['●','▲','■','♥','★','◆'];
     
-    // Helper: generate shape class from bitmask
-    const shapeClass = shapes => {
-      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+    // Helper: generate marking class from bitmask
+    const markingClass = markings => {
+      const mask = (markings || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
       return mask ? 'sh-' + mask : '';
     };
     
-    // Helper: generate shape pips HTML
-    const shapePips = shapes => SHAPES.map((s, i) => 
-      '<span class="shape-pip' + (shapes[i] ? ' on' : '') + '">' + s + '</span>'
+    // Helper: generate marking pips HTML
+    const markingPips = markings => SHAPES.map((s, i) => 
+      '<span class="marking-pip' + (markings[i] ? ' on' : '') + '">' + s + '</span>'
     ).join('');
     
     // Helper: like pill (simplified for demo)
@@ -6698,9 +6698,9 @@
     const listPreview = document.createElement('div');
     samples.slice(0, 2).forEach(w => {
       const card = document.createElement('div');
-      card.className = 'waza-list ' + shapeClass(w.shapes);
+      card.className = 'waza-list ' + markingClass(w.markings);
       const bottomRow = '<div class="card-bottom-row">'
-        + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
+        + '<div class="markings-row wce-markings">' + markingPips(w.markings) + '</div>'
         + cardLikePill() + '</div>';
       card.innerHTML = '<div class="njp">' + w.jp + '</div>'
         + '<div class="nen">' + w.en + '</div>'
@@ -6718,9 +6718,9 @@
     
     const w = samples[0];
     const expandedCard = document.createElement('div');
-    expandedCard.className = 'waza-list ' + shapeClass(w.shapes);
+    expandedCard.className = 'waza-list ' + markingClass(w.markings);
     const bottomRow = '<div class="card-bottom-row">'
-      + '<div class="shapes-row wce-shapes">' + shapePips(w.shapes) + '</div>'
+      + '<div class="markings-row wce-markings">' + markingPips(w.markings) + '</div>'
       + cardLikePill() + '</div>';
     const videoHTML = '<div class="wce-videos">'
       + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#ff0000"></span>YouTube 1</a>'
@@ -6743,10 +6743,10 @@
     const compactPreview = document.createElement('div');
     samples.forEach(w => {
       const row = document.createElement('div');
-      row.className = 'drow ' + shapeClass(w.shapes);
+      row.className = 'drow ' + markingClass(w.markings);
       row.innerHTML = '<span class="drn">' + w.jp + '</span>'
         + '<span class="drs">' + w.en + '</span>'
-        + '<div class="shapes-row" style="flex-shrink:0">' + shapePips(w.shapes) + '</div>';
+        + '<div class="markings-row" style="flex-shrink:0">' + markingPips(w.markings) + '</div>';
       compactPreview.appendChild(row);
     });
     compactPill.appendChild(compactPreview);
@@ -6771,49 +6771,49 @@
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
     
-    // Get shapeLabels if available from main app
-    const legend = window.shapeLabels || TEMPLATE;
+    // Get markingLabels if available from main app
+    const legend = window.markingLabels || TEMPLATE;
     const SHAPES = ['●','▲','■','♥','★','◆'];
     
-    // Helper: generate shape class from bitmask (same as main app)
-    const shapeClass = shapes => {
-      const mask = (shapes || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
+    // Helper: generate marking class from bitmask (same as main app)
+    const markingClass = markings => {
+      const mask = (markings || []).reduce((m, on, i) => on ? m | (1 << i) : m, 0);
       return mask ? 'sh-' + mask : '';
     };
     
     container.innerHTML = '';
     DEMO_WAZA.forEach((w, wi) => {
       const row = document.createElement('div');
-      const markings = demoShapes[wi];
+      const markings = demoMarkings[wi];
       
-      // Use real waza-compact structure with shape tint classes
-      row.className = 'drow ' + shapeClass(markings);
+      // Use real waza-compact structure with marking tint classes
+      row.className = 'drow ' + markingClass(markings);
       
-      // Structure: drn (JP name) + drs (EN name) + cmp-shapes-mine (buttons)
-      const shapesHTML = '<div class="cmp-shapes-mine" style="flex-shrink:0">'
+      // Structure: drn (JP name) + drs (EN name) + cmp-markings-mine (buttons)
+      const markingsHTML = '<div class="cmp-markings-mine" style="flex-shrink:0">'
         + SHAPES.map((sh, si) => 
-            '<button class="cmp-shape-btn' + (shapes[si] ? ' on' : '') + '" '
+            '<button class="cmp-marking-btn' + (markings[si] ? ' on' : '') + '" '
             + 'data-wid="' + wi + '" data-si="' + si + '" '
-            + 'title="' + (legend[si] || 'Shape ' + (si + 1)) + '">'
+            + 'title="' + (markingLabels[si] || 'Marking ' + (si + 1)) + '">'
             + sh + '</button>'
           ).join('')
         + '</div>';
       
       row.innerHTML = '<span class="drn">' + w.jp + '</span>'
         + '<span class="drs">' + w.en + '</span>'
-        + shapesHTML;
+        + markingsHTML;
       
       container.appendChild(row);
       
-      // Attach click handlers to shape buttons
-      row.querySelectorAll('.cmp-shape-btn').forEach(btn => {
+      // Attach click handlers to marking buttons
+      row.querySelectorAll('.cmp-marking-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const wid = +btn.dataset.wid;
           const si = +btn.dataset.si;
-          demoShapes[wid][si] = !demoShapes[wid][si];
-          btn.classList.toggle('on', demoShapes[wid][si]);
-          // Update row's shape class for color tinting
-          row.className = 'drow ' + shapeClass(demoShapes[wid]);
+          demoMarkings[wid][si] = !demoMarkings[wid][si];
+          btn.classList.toggle('on', demoMarkings[wid][si]);
+          // Update row's marking class for color tinting
+          row.className = 'drow ' + markingClass(demoMarkings[wid]);
         });
       });
     });
@@ -6828,16 +6828,16 @@
     container.innerHTML = '';
     // Load existing legend from app
     let existing = ['','','','','',''];
-    try { existing = JSON.parse(localStorage.getItem('wl_shape_labels') || '["","","","","",""]'); } catch {}
+    try { existing = JSON.parse(localStorage.getItem('wl_marking_labels') || '["","","","","",""]'); } catch {}
     SHAPES_OB.forEach((sh, i) => {
       const row = document.createElement('div');
       row.className = 'ob-legend-row';
-      row.innerHTML = `<span class="ob-legend-shape">${sh}</span>`;
+      row.innerHTML = `<span class="ob-legend-marking">${sh}</span>`;
       const inp = document.createElement('input');
       inp.className = 'ob-legend-input';
       inp.type = 'text';
       inp.maxLength = 32;
-      inp.placeholder = 'Label this shape…';
+      inp.placeholder = 'Label this marking…';
       inp.value = existing[i] || legendValues[i] || '';
       inp.oninput = () => {
         legendValues[i] = inp.value;
@@ -6851,16 +6851,16 @@
   function saveLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
     const vals = Array.from(inputs).map(i => i.value.trim());
-    localStorage.setItem('wl_shape_labels', JSON.stringify(vals));
-    // Sync with app's shapeLabels if it exists
-    if (window.shapeLabels) { vals.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
+    // Sync with app's markingLabels if it exists
+    if (window.markingLabels) { vals.forEach((v, i) => { window.markingLabels[i] = v; }); }
     if (typeof renderStats === 'function') renderStats();
   }
 
   // ── Apply template ────────────────────────────────────────────
   function applyTemplate() {
-    localStorage.setItem('wl_shape_labels', JSON.stringify(TEMPLATE));
-    if (window.shapeLabels) { TEMPLATE.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    localStorage.setItem('wl_marking_labels', JSON.stringify(TEMPLATE));
+    if (window.markingLabels) { TEMPLATE.forEach((v, i) => { window.markingLabels[i] = v; }); }
     if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
@@ -6870,8 +6870,8 @@
   // ── Clear all legend labels ───────────────────────────────────
   function clearAllLabels() {
     const emptyLabels = ['','','','','',''];
-    localStorage.setItem('wl_shape_labels', JSON.stringify(emptyLabels));
-    if (window.shapeLabels) { emptyLabels.forEach((v, i) => { window.shapeLabels[i] = v; }); }
+    localStorage.setItem('wl_marking_labels', JSON.stringify(emptyLabels));
+    if (window.markingLabels) { emptyLabels.forEach((v, i) => { window.markingLabels[i] = v; }); }
     if (typeof renderStats === 'function') renderStats();
     // Update the preview inputs
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-legend-input');
