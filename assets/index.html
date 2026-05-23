@@ -5105,6 +5105,101 @@
       /\s*\(outdated\)\s*/gi  // Outdated markers
     ];
 
+    // ── Phase 2 Import Enhancements ──────────────────────────────
+
+    // Fuzzy status matching - find closest known status label
+    function fuzzyMatchStatus(text) {
+      if (!text) return null;
+      const normalized = text.toLowerCase().trim();
+      
+      // Exact match first
+      if (STATUS_TO_SHAPE_MAP[normalized] !== undefined) {
+        return STATUS_TO_SHAPE_MAP[normalized];
+      }
+      
+      // Fuzzy match - check if status text contains any known keywords
+      for (const [key, value] of Object.entries(STATUS_TO_SHAPE_MAP)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return value;
+        }
+      }
+      
+      // Check for partial word matches
+      const words = normalized.split(/\s+/);
+      for (const word of words) {
+        if (STATUS_TO_SHAPE_MAP[word] !== undefined) {
+          return STATUS_TO_SHAPE_MAP[word];
+        }
+      }
+      
+      return null;
+    }
+
+    // Enhanced multi-column detection with better heuristics
+    function detectColumnLayout(lines) {
+      const tabLines = lines.filter(l => l.includes('\t'));
+      if (tabLines.length === 0) return null;
+      
+      // Sample first few tab-separated lines to detect pattern
+      const samples = tabLines.slice(0, Math.min(10, tabLines.length));
+      let wazaFirstCount = 0;
+      let statusFirstCount = 0;
+      
+      samples.forEach(line => {
+        const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+        if (parts.length < 2) return;
+        
+        const firstHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[0]);
+        const firstHasParens = parts[0].includes('(');
+        const secondHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[1]);
+        const secondHasParens = parts[1].includes('(');
+        
+        // Check if first column looks like a status
+        const firstIsStatus = fuzzyMatchStatus(parts[0]) !== null;
+        const secondIsStatus = fuzzyMatchStatus(parts[1]) !== null;
+        
+        // Heuristic: waza names have Japanese + parentheses, statuses don't
+        if ((firstHasParens && firstHasJapanese) || (firstIsStatus === false && secondIsStatus === true)) {
+          wazaFirstCount++;
+        }
+        if ((secondHasParens && secondHasJapanese) || (secondIsStatus === false && firstIsStatus === true)) {
+          statusFirstCount++;
+        }
+      });
+      
+      // Return most common pattern
+      if (wazaFirstCount > statusFirstCount) {
+        return 'WAZA_STATUS'; // Column A = Waza, Column B = Status
+      } else if (statusFirstCount > wazaFirstCount) {
+        return 'STATUS_WAZA'; // Column A = Status, Column B = Waza
+      }
+      
+      return 'WAZA_STATUS'; // Default assumption
+    }
+
+    // Category detection and preservation
+    function detectCategory(line) {
+      // Check if line is a category header
+      const lower = line.toLowerCase();
+      
+      // Common category patterns
+      const categoryPatterns = [
+        { pattern: /fundamental|basic|beginner/i, category: 'Fundamental' },
+        { pattern: /advanced|expert|master/i, category: 'Advanced' },
+        { pattern: /intermediate/i, category: 'Intermediate' },
+        { pattern: /optional|niche/i, category: 'Optional' },
+        { pattern: /favourite|favorite|custom|original|own/i, category: 'Favourite' }
+      ];
+      
+      for (const { pattern, category } of categoryPatterns) {
+        if (pattern.test(lower)) {
+          return category;
+        }
+      }
+      
+      return null; // Not a category header
+    }
+
     // Check if line is a header/instruction row (should be skipped)
     function isHeaderLine(line) {
       const lower = line.toLowerCase();
@@ -5148,17 +5243,27 @@
       return { english: text, japanese: '', original: text };
     }
 
-    // Detect tab-separated format and parse status + waza
-    function parseTabSeparated(line) {
+    // Detect tab-separated format and parse status + waza (Phase 2: enhanced)
+    function parseTabSeparated(line, columnLayout = null) {
       if (!line.includes('\t')) return null;
       
       const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
       if (parts.length < 2) return null;
       
-      // Try to determine which column is waza vs status
-      // If first column has parentheses with Japanese, it's likely waza
+      // Phase 2: Use detected layout if available
+      if (columnLayout === 'STATUS_WAZA') {
+        return { waza: parts[1], status: parts[0] || null };
+      } else if (columnLayout === 'WAZA_STATUS') {
+        return { waza: parts[0], status: parts[1] || null };
+      }
+      
+      // Auto-detect if no layout provided
       const firstHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[0]);
       const secondHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[1]);
+      
+      // Phase 2: Use fuzzy status detection
+      const firstIsStatus = fuzzyMatchStatus(parts[0]) !== null;
+      const secondIsStatus = fuzzyMatchStatus(parts[1]) !== null;
       
       if (parts[0].includes('(') && firstHasJapanese) {
         // Column A = Waza, Column B = Status
@@ -5166,17 +5271,20 @@
       } else if (parts[1].includes('(') && secondHasJapanese) {
         // Column A = Status, Column B = Waza
         return { waza: parts[1], status: parts[0] || null };
+      } else if (firstIsStatus && !secondIsStatus) {
+        return { waza: parts[1], status: parts[0] };
+      } else if (secondIsStatus && !firstIsStatus) {
+        return { waza: parts[0], status: parts[1] };
       } else {
         // Ambiguous - assume first is waza
         return { waza: parts[0], status: parts[1] || null };
       }
     }
 
-    // Map status text to shape index (0-5)
+    // Map status text to shape index (0-5) - Phase 2: with fuzzy matching
     function mapStatusToShape(statusText) {
       if (!statusText) return null;
-      const normalized = statusText.toLowerCase().trim();
-      return STATUS_TO_SHAPE_MAP[normalized] ?? null;
+      return fuzzyMatchStatus(statusText); // Use Phase 2 fuzzy matcher
     }
 
     // Matches any [...], {...}, (...) encapsulation on a line
@@ -5309,7 +5417,12 @@
 
       // 4. Parse lines
       const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      // Phase 2: Detect column layout for tab-separated format
+      const columnLayout = detectColumnLayout(lines);
+      
       let currentLabel = null;
+      let currentCategory = null; // Phase 2: Track category context
       _tiMatched = [];
       _tiUnmatched = [];
 
@@ -5319,8 +5432,15 @@
           return;
         }
         
+        // Phase 2: Check if line is a category header
+        const detectedCategory = detectCategory(line);
+        if (detectedCategory) {
+          currentCategory = detectedCategory;
+          return; // Skip category header line itself
+        }
+        
         // Phase 1: Handle tab-separated format
-        const tabParsed = parseTabSeparated(line);
+        const tabParsed = parseTabSeparated(line, columnLayout); // Phase 2: Pass detected layout
         let lineToProcess = line;
         let detectedStatus = null;
         
@@ -5342,7 +5462,12 @@
         }
 
         // Effective label: inline takes priority over running context
-        const effectiveLabel = lineLabel || currentLabel;
+        let effectiveLabel = lineLabel || currentLabel;
+        
+        // Phase 2: Use category as label if no other label present
+        if (!effectiveLabel && currentCategory) {
+          effectiveLabel = `[${currentCategory}]`; // Wrap in brackets to match label format
+        }
 
         const waza = findWazaForLine(lineToProcess);
         if (waza) {
