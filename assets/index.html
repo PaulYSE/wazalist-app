@@ -5068,6 +5068,117 @@
     let _tiLabelNames = {};     // { [labelStr]: displayName } — user-editable
     let _tiPreviewMode = false; // true when auto-labels have been applied to manualShapes as preview
 
+    // ── Phase 1 Import Enhancements ──────────────────────────────
+
+    // Common status labels mapping to Wazalist shapes
+    const STATUS_TO_SHAPE_MAP = {
+      // Completed/Learnt → Shape 3 (Complete)
+      'learnt': 2, 'completed': 2, 'mastered': 2, 'done': 2, 'finished': 2,
+      // Learning/In Progress → Shape 2 (Learning)
+      'learning': 1, 'in progress': 1, 'wip': 1, 'practicing': 1,
+      // Forgot/Review → Shape 5 (Forgot)
+      'forgot': 4, 'forgotten': 4, 'review': 4, 'needs review': 4, 'outdated': 4,
+      // Want to Learn → Shape 1 (Want to Learn)
+      'want to learn': 0, 'planned': 0, 'not learnt': 0, 'todo': 0, 'future': 0,
+      // Original/Favourite → Shape 4 (My Favourite)
+      'original': 3, 'own skills': 3, 'oriwaza': 3, 'favourite': 3, 'favorite': 3, 'custom': 3,
+      // Decorative markers → Shape 4 (My Favourite)
+      '★': 3, '˗ˏˋ ★ ˎˊ˗': 3
+    };
+
+    // Common header keywords to skip
+    const HEADER_KEYWORDS = [
+      'basic waza', 'learn first', 'learn after', 'useful to learn',
+      'fundamental', 'advanced', 'optional', 'niche', 'recommended',
+      'legend', 'completed', 'forgot', 'learning', 'want to learn',
+      'videos', 'channels', 'wazaren', 'tutorial', 'compilation',
+      'insert name here', '>>>'
+    ];
+
+    // Decorative markers to strip
+    const DECORATIVE_PATTERNS = [
+      /˗ˏˋ ★ ˎˊ˗/g,  // Star decorations
+      /\s*\(optional\)\s*/gi,  // (Optional) tags
+      /\s*-\s*(center|left|right)\s*/gi,  // Position markers
+      /\s*-\s*tutorial\s*\d+\s*/gi,  // Tutorial year markers
+      /\s*\(private\s*link\)\s*/gi,  // Private link markers
+      /\s*\(outdated\)\s*/gi  // Outdated markers
+    ];
+
+    // Check if line is a header/instruction row (should be skipped)
+    function isHeaderLine(line) {
+      const lower = line.toLowerCase();
+      return HEADER_KEYWORDS.some(keyword => lower.includes(keyword));
+    }
+
+    // Strip decorative markers and return cleaned text + detected favorite flag
+    function stripDecorations(text) {
+      let cleaned = text;
+      let isFavorite = false;
+      
+      // Check for star decoration before stripping
+      if (text.includes('˗ˏˋ ★ ˎˊ˗') || text.includes('★')) {
+        isFavorite = true;
+      }
+      
+      // Strip all decorative patterns
+      DECORATIVE_PATTERNS.forEach(pattern => {
+        cleaned = cleaned.replace(pattern, '');
+      });
+      
+      return { cleaned: cleaned.trim(), isFavorite };
+    }
+
+    // Extract waza name from Excel hyperlink formula
+    function extractFromHyperlink(text) {
+      // Pattern: =HYPERLINK("URL", "Waza Name")
+      const match = text.match(/=HYPERLINK\s*\(\s*"[^"]*"\s*,\s*"([^"]+)"\s*\)/i);
+      return match ? match[1] : null;
+    }
+
+    // Parse "English (Japanese)" format and extract both parts
+    function parseWazaName(text) {
+      // Try to extract from "English (Japanese)" format
+      const match = text.match(/^(.+?)\s*\(([^()]*)\)\s*$/);
+      if (match) {
+        const english = match[1].trim();
+        const japanese = match[2].trim();
+        return { english, japanese, original: text };
+      }
+      return { english: text, japanese: '', original: text };
+    }
+
+    // Detect tab-separated format and parse status + waza
+    function parseTabSeparated(line) {
+      if (!line.includes('\t')) return null;
+      
+      const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+      if (parts.length < 2) return null;
+      
+      // Try to determine which column is waza vs status
+      // If first column has parentheses with Japanese, it's likely waza
+      const firstHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[0]);
+      const secondHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[1]);
+      
+      if (parts[0].includes('(') && firstHasJapanese) {
+        // Column A = Waza, Column B = Status
+        return { waza: parts[0], status: parts[1] || null };
+      } else if (parts[1].includes('(') && secondHasJapanese) {
+        // Column A = Status, Column B = Waza
+        return { waza: parts[1], status: parts[0] || null };
+      } else {
+        // Ambiguous - assume first is waza
+        return { waza: parts[0], status: parts[1] || null };
+      }
+    }
+
+    // Map status text to shape index (0-5)
+    function mapStatusToShape(statusText) {
+      if (!statusText) return null;
+      const normalized = statusText.toLowerCase().trim();
+      return STATUS_TO_SHAPE_MAP[normalized] ?? null;
+    }
+
     // Matches any [...], {...}, (...) encapsulation on a line
     // Returns array of matched token strings (with brackets), e.g. ["[Learning]", "(WIP)"]
     function extractEncapsulations(line) {
@@ -5106,17 +5217,68 @@
     }
 
     function findWazaForLine(line) {
+      // Phase 1: Try hyperlink extraction first
+      const hyperlinkMatch = extractFromHyperlink(line);
+      if (hyperlinkMatch) {
+        line = hyperlinkMatch;
+      }
+      
+      // Phase 1: Strip decorations (but we'll check for favorites later)
+      const { cleaned: decorationStripped } = stripDecorations(line);
+      line = decorationStripped;
+      
       const cleaned = stripAllLabels(line);
       if (!cleaned) return null;
+      
+      // Phase 1: Parse "English (Japanese)" format
+      const { english, japanese } = parseWazaName(cleaned);
+      
+      // Try matching with both English and Japanese parts
       const norm = normalizeForSearch(cleaned);
-      // Exact match first
-      let hit = wazaData.find(w =>
+      const normEnglish = normalizeForSearch(english);
+      const normJapanese = normalizeForSearch(japanese);
+      
+      // Exact match - prioritize Japanese, then English, then full text
+      let hit = null;
+      
+      // 1. Try exact Japanese match
+      if (japanese) {
+        hit = wazaData.find(w =>
+          normalizeForSearch(w.name_jp || '') === normJapanese
+        );
+        if (hit) return hit;
+      }
+      
+      // 2. Try exact English match
+      hit = wazaData.find(w =>
+        normalizeForSearch(w.name_en || '') === normEnglish ||
+        normalizeForSearch(w.name_en_literal || '') === normEnglish ||
+        normalizeForSearch(w.name_en_gtranslate || '') === normEnglish
+      );
+      if (hit) return hit;
+      
+      // 3. Try exact match on full cleaned text (fallback)
+      hit = wazaData.find(w =>
         normalizeForSearch(w.name_jp || '') === norm ||
         normalizeForSearch(w.name_en || '') === norm ||
         normalizeForSearch(w.name_en_literal || '') === norm
       );
       if (hit) return hit;
-      // Fuzzy
+      
+      // Fuzzy match - try Japanese first, then English
+      if (japanese) {
+        hit = wazaData.find(w => isFuzzyMatch(w.name_jp, japanese));
+        if (hit) return hit;
+      }
+      
+      hit = wazaData.find(w =>
+        isFuzzyMatch(w.name_en, english) ||
+        isFuzzyMatch(w.name_en_literal, english) ||
+        isFuzzyMatch(w.name_en_gtranslate, english)
+      );
+      if (hit) return hit;
+      
+      // Final fallback: fuzzy on full text
       hit = wazaData.find(w =>
         isFuzzyMatch(w.name_jp, cleaned) ||
         isFuzzyMatch(w.name_en, cleaned) ||
@@ -5131,7 +5293,11 @@
 
       // 2. Seed _tiAutoMapping for new labels (preserve existing assignments)
       _tiFoundLabels.forEach((lbl, i) => {
-        if (_tiAutoMapping[lbl] === undefined) _tiAutoMapping[lbl] = i < 6 ? i : -1;
+        if (_tiAutoMapping[lbl] === undefined) {
+          // Phase 1: Try to map known status labels automatically
+          const statusShape = mapStatusToShape(lbl.slice(1, -1)); // Remove brackets
+          _tiAutoMapping[lbl] = statusShape !== null ? statusShape : (i < 6 ? i : -1);
+        }
       });
 
       // 3. Seed _tiLabelNames for new labels (default = inner text without brackets)
@@ -5148,8 +5314,26 @@
       _tiUnmatched = [];
 
       lines.forEach(line => {
-        const stripped = stripAllLabels(line);
-        const lineLabel = detectLabelOnLine(line);
+        // Phase 1: Skip header lines
+        if (isHeaderLine(line)) {
+          return;
+        }
+        
+        // Phase 1: Handle tab-separated format
+        const tabParsed = parseTabSeparated(line);
+        let lineToProcess = line;
+        let detectedStatus = null;
+        
+        if (tabParsed) {
+          lineToProcess = tabParsed.waza;
+          detectedStatus = tabParsed.status;
+        }
+        
+        // Phase 1: Check for decorative markers (favorites)
+        const { isFavorite } = stripDecorations(lineToProcess);
+        
+        const stripped = stripAllLabels(lineToProcess);
+        const lineLabel = detectLabelOnLine(lineToProcess);
 
         if (!stripped) {
           // Pure label header line — update running context
@@ -5160,9 +5344,27 @@
         // Effective label: inline takes priority over running context
         const effectiveLabel = lineLabel || currentLabel;
 
-        const waza = findWazaForLine(line);
+        const waza = findWazaForLine(lineToProcess);
         if (waza) {
-          _tiMatched.push({ waza, rawLine: line, category: effectiveLabel, manualShapes: Array(6).fill(false) });
+          const matchedItem = { 
+            waza, 
+            rawLine: line, 
+            category: effectiveLabel, 
+            manualShapes: Array(6).fill(false) 
+          };
+          
+          // Phase 1: Auto-assign shapes from status or decorations
+          if (detectedStatus) {
+            const shapeIdx = mapStatusToShape(detectedStatus);
+            if (shapeIdx !== null) {
+              matchedItem.manualShapes[shapeIdx] = true;
+            }
+          } else if (isFavorite) {
+            // Auto-assign Favourite shape for decorated waza
+            matchedItem.manualShapes[3] = true; // Shape 4 (index 3)
+          }
+          
+          _tiMatched.push(matchedItem);
         } else {
           _tiUnmatched.push(line);
         }
