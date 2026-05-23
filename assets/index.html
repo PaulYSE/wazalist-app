@@ -3031,6 +3031,10 @@
           <span class="mob-menu-item-icon">⚖️</span>
           <span>Compare</span>
         </button>
+        <button class="mob-menu-item" data-menu-tab="importlist">
+          <span class="mob-menu-item-icon">📋</span>
+          <span>Import List</span>
+        </button>
         <button class="mob-menu-item" data-menu-tab="contribute">
           <span class="mob-menu-item-icon">✏️</span>
           <span>Contribute</span>
@@ -3065,6 +3069,7 @@
       <button class="ntab active" data-tab="browse">Explore</button>
       <button class="ntab" data-tab="dashboard">Stats</button>
       <button class="ntab" data-tab="compare">Compare</button>
+      <button class="ntab" data-tab="importlist">Import List</button>
       <button class="ntab" data-tab="contribute">Contribute</button>
     </div>
 
@@ -3181,12 +3186,14 @@
     <!-- COMPARE -->
     <div id="compareView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
-        <div class="cmp-subtabs">
-          <button class="cmp-stab active" data-cstab="lists">↕ Lists</button>
-          <button class="cmp-stab" data-cstab="textimport">📋 Text Import</button>
-        </div>
-        <div id="dashCompare" class="ti-panel active"></div>
-        <div id="dashTextImport" class="ti-panel"></div>
+        <div id="dashCompare"></div>
+      </div>
+    </div>
+
+    <!-- IMPORT LIST -->
+    <div id="importlistView" style="display:none;flex:1;overflow:hidden">
+      <div class="dash">
+        <div id="dashTextImport"></div>
       </div>
     </div>
 
@@ -4156,6 +4163,7 @@
       document.getElementById('browseView').style.display = 'flex';
       document.getElementById('dashboardView').style.display = 'none';
       document.getElementById('compareView').style.display = 'none';
+      document.getElementById('importlistView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
     }
 
@@ -4650,9 +4658,11 @@
       document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
       document.getElementById('dashboardView').style.display = t === 'dashboard' ? 'block' : 'none';
       document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
+      document.getElementById('importlistView').style.display = t === 'importlist' ? 'block' : 'none';
       document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
       if (t === 'dashboard') renderDashStats();
-      if (t === 'compare') { const activeCstab = document.querySelector('.cmp-stab.active')?.dataset?.cstab || 'lists'; if (activeCstab === 'textimport') renderTextImport(); else renderDashCompare(); }
+      if (t === 'compare') renderDashCompare();
+      if (t === 'importlist') renderTextImport();
       if (t === 'contribute') renderContribute();
       // Update mobile menu active state
       if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
@@ -4863,6 +4873,7 @@
       document.querySelector('[data-tab="compare"]').classList.add('active');
       document.getElementById('browseView').style.display = 'none';
       document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('importlistView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
       document.getElementById('compareView').style.display = 'block';
       renderDashCompare();
@@ -5052,18 +5063,6 @@
 
 
     // ── Compare sub-tab switching ─────────────────────────────────
-    document.querySelectorAll('.cmp-stab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.cmp-stab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.cstab;
-        document.getElementById('dashCompare').classList.toggle('active', tab === 'lists');
-        document.getElementById('dashTextImport').classList.toggle('active', tab === 'textimport');
-        if (tab === 'textimport') renderTextImport();
-        if (tab === 'lists') renderDashCompare();
-      });
-    });
-
     // ── Text Import ───────────────────────────────────────────────
     // State for the text-import sub-tab
     let _tiMatched = [];        // [{waza, rawLine, category, manualShapes}]
@@ -6237,8 +6236,8 @@
           const navCmp = document.querySelector('.nav-tab[data-tab="compare"]') || document.querySelector('[data-tab="compare"]');
           if (navCmp) navCmp.click();
           setTimeout(() => {
-            const tiTab = document.querySelector('[data-cstab="textimport"]');
-            if (tiTab) tiTab.click();
+            const importTab = document.querySelector('[data-tab="importlist"]');
+            if (importTab) importTab.click();
           }, 200);
         }, 400);
       };
