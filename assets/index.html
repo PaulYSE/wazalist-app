@@ -5831,7 +5831,7 @@
           </div>
           <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
           <div class="ob-demo ob-search-demo">
-            <input type="text" id="obSearchInput" placeholder="Try typing: doublemix" autocomplete="off" spellcheck="false">
+            <input type="text" id="obSearchInput" placeholder="Try searching for a waza..." autocomplete="off" spellcheck="false">
             <div class="ob-search-results" id="obSearchResults">
               <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing above to see fuzzy matching in action…</div>
             </div>
@@ -5942,44 +5942,21 @@
   // Session flag - only show auto-onboarding once per session after registration
   let hasShownOnboardingThisSession = false;
 
-  // Demo waza data - used for both search and marking demos
-  const DEMO_WAZA = [
-    { 
-      id: 1,
-      jp:'サンダースネーク', 
-      en:'Thundersnake',  
-      tag: 'Basic',
-      alias:['thundersnake','thunder snake','thudersnake','thundrsnake','sandaasuneeku'] 
-    },
-    { 
-      id: 2,
-      jp:'アマテラス',       
-      en:'Amaterasu',     
-      tag: 'Intermediate',
-      alias:['amaterasu','amaterazu','amateraasu','amateras'] 
-    },
-    { 
-      id: 3,
-      jp:'ムラマサ',         
-      en:'Muramasa',      
-      tag: 'Advanced',
-      alias:['muramasa','muramasaa','murmasa','muramaza'] 
-    },
-    { 
-      id: 4,
-      jp:'ダブルミックス',   
-      en:'Double Mix',    
-      tag: 'Intermediate',
-      alias:['double mix','daburu mikkusu','doublemix','dubble mix','doble mix'] 
-    },
-    { 
-      id: 5,
-      jp:'ロマンス', 
-      en:'Romance',
-      tag: 'Basic',
-      alias:['romance','romansu'] 
-    },
-  ];
+  // Get real waza data from the main app (first 20 waza)
+  function getRealWaza() {
+    // Access the global wazaData from the main app
+    if (typeof wazaData !== 'undefined' && Array.isArray(wazaData) && wazaData.length > 0) {
+      return wazaData.slice(0, 20).map(w => ({
+        id: w.id,
+        jp: w.name_jp || '',
+        en: w.name_en || '',
+        tag: w.tag || '',
+        alias: [] // Real waza don't have pre-computed aliases in the DB
+      }));
+    }
+    // Fallback empty array if wazaData not yet loaded
+    return [];
+  }
 
   let currentSlide = 0;
   let chosenStyle = localStorage.getItem('wl_view_style') || 'expanded';
@@ -6119,6 +6096,13 @@
     const container = document.getElementById('obBrowseList');
     if (!container) return;
     
+    // Get real waza data
+    const realWaza = getRealWaza();
+    if (realWaza.length === 0) {
+      container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      return;
+    }
+    
     // Get real app helper functions if available
     const hasRealFunctions = typeof markingPips === 'function' && 
                              typeof markingStyle === 'function' &&
@@ -6155,11 +6139,11 @@
     const markingPipsFunc = hasRealFunctions ? markingPips : localMarkingPips;
     const markingClassFunc = hasRealFunctions ? markingStyle : localMarkingClass;
     
-    // Use first 3 demo waza with preset markings
+    // Use first 3 real waza with demo markings
     const demoItems = [
-      { waza: DEMO_WAZA[0], markings: [true, false, true, false, false, false], likes: 2, dislikes: 0 },  // Thundersnake: ● ■
-      { waza: DEMO_WAZA[1], markings: [false, true, false, false, false, false], likes: 1, dislikes: 0 }, // Amaterasu: ▲
-      { waza: DEMO_WAZA[2], markings: [false, false, false, true, true, false], likes: 3, dislikes: 1 },  // Muramasa: ♥ ★
+      { waza: realWaza[0], markings: [true, false, true, false, false, false], likes: 2, dislikes: 0 },
+      { waza: realWaza[1], markings: [false, true, false, false, false, false], likes: 1, dislikes: 0 },
+      { waza: realWaza[2], markings: [false, false, false, true, true, false], likes: 3, dislikes: 1 },
     ];
     
     // Build real waza-list components (same structure as main app's list view)
@@ -6200,7 +6184,14 @@
   }
 
   function autoTypeDemo(input) {
-    const phrase = 'doublemix';
+    // Get a search term from real waza data
+    const realWaza = getRealWaza();
+    let phrase = 'waza'; // fallback
+    if (realWaza.length > 0 && realWaza[0].en) {
+      // Use first few characters of the first waza's English name (lowercase)
+      phrase = realWaza[0].en.toLowerCase().substring(0, 8);
+    }
+    
     let i = 0;
     function type() {
       if (input !== document.getElementById('obSearchInput')) return; // slide changed
@@ -6223,21 +6214,26 @@
       return;
     }
     
+    // Get real waza data
+    const realWaza = getRealWaza();
+    if (realWaza.length === 0) {
+      resultsEl.innerHTML = '<div class="ob-no-results">Loading waza data...</div>';
+      return;
+    }
+    
     // Use real app search functions - check if they're available
     const hasRealFunctions = typeof isFuzzyMatch === 'function' && typeof matchesQuery === 'function';
     
-    const matches = DEMO_WAZA.filter(w => {
+    const matches = realWaza.filter(w => {
       if (hasRealFunctions) {
         // Use real app's search logic - check all searchable fields
         // Check exact match first (fast path)
         if (matchesQuery(w.jp, query)) return true;
         if (matchesQuery(w.en, query)) return true;
-        if (w.alias && w.alias.some(a => matchesQuery(a, query))) return true;
         
         // Then check fuzzy match
         if (isFuzzyMatch(w.jp, query)) return true;
         if (isFuzzyMatch(w.en, query)) return true;
-        if (w.alias && w.alias.some(a => isFuzzyMatch(a, query))) return true;
         
         return false;
       } else {
@@ -6245,10 +6241,9 @@
         const q = query.toLowerCase().trim();
         if (w.en.toLowerCase().includes(q)) return true;
         if (w.jp.includes(query)) return true;
-        if (w.alias && w.alias.some(a => a.toLowerCase().includes(q))) return true;
         return false;
       }
-    });
+    }).slice(0, 5); // Limit to first 5 matches
 
     if (!matches.length) {
       resultsEl.innerHTML = '<div class="ob-no-results">No matches found — try a different spelling</div>';
@@ -6263,9 +6258,7 @@
       // Determine if it's exact or fuzzy match using real app logic
       let isExact = false;
       if (hasRealFunctions) {
-        isExact = matchesQuery(w.jp, query) || 
-                  matchesQuery(w.en, query) || 
-                  (w.alias && w.alias.some(a => matchesQuery(a, query)));
+        isExact = matchesQuery(w.jp, query) || matchesQuery(w.en, query);
       } else {
         const q = query.toLowerCase().trim();
         isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
@@ -6316,11 +6309,18 @@
       return '<div class="card-like-pill"><span>👍 2</span><span>👎 0</span></div>';
     };
     
+    // Get real waza data
+    const realWaza = getRealWaza();
+    if (realWaza.length === 0) {
+      container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      return;
+    }
+    
     // Sample waza with demo data
     const samples = [
-      { jp: DEMO_WAZA[0].jp, en: DEMO_WAZA[0].en, markings: [true,false,true,false,false,false] }, // ● ■
-      { jp: DEMO_WAZA[1].jp, en: DEMO_WAZA[1].en, markings: [false,true,false,false,false,false] }, // ▲
-      { jp: DEMO_WAZA[2].jp, en: DEMO_WAZA[2].en, markings: [false,false,false,true,true,false] }, // ♥ ★
+      { jp: realWaza[0].jp, en: realWaza[0].en, markings: [true,false,true,false,false,false] }, // ● ■
+      { jp: realWaza[1].jp, en: realWaza[1].en, markings: [false,true,false,false,false,false] }, // ▲
+      { jp: realWaza[2].jp, en: realWaza[2].en, markings: [false,false,false,true,true,false] }, // ♥ ★
     ];
     
     container.innerHTML = '';
@@ -6407,6 +6407,13 @@
     const container = document.getElementById('obMarkingDemo');
     if (!container) return;
     
+    // Get real waza data
+    const realWaza = getRealWaza();
+    if (realWaza.length === 0) {
+      container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      return;
+    }
+    
     // Get markingLabels if available from main app
     const labels = window.markingLabels || TEMPLATE;
     const SHAPES = ['●','▲','■','♥','★','◆'];
@@ -6424,7 +6431,8 @@
     };
     
     container.innerHTML = '';
-    DEMO_WAZA.forEach((w, wi) => {
+    // Use first 5 real waza for marking demo
+    realWaza.slice(0, 5).forEach((w, wi) => {
       const row = document.createElement('div');
       const markings = demoMarkings[wi];
       
