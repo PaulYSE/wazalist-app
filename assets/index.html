@@ -5934,13 +5934,9 @@
   'use strict';
 
   // ── Config ────────────────────────────────────────────────────
-  const OB_KEY = 'wl_onboarding_done';
   const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 7;
-  
-  // Session flag - only show auto-onboarding once per session after registration
-  let hasShownOnboardingThisSession = false;
 
   // Get real waza data from the main app (first 20 waza)
   function getRealWaza() {
@@ -5982,7 +5978,6 @@
     buildMarkingDemo();
     buildLabelsPreview();
     renderSlide(0);
-    hasShownOnboardingThisSession = true;
   }
 
   function closeOnboarding() {
@@ -5990,7 +5985,7 @@
     el.classList.remove('ob-visible');
     el.classList.add('ob-hidden');
     setTimeout(() => { el.style.display = 'none'; }, 350);
-    // Don't set localStorage - allow reopening via Guide button anytime
+    // Onboarding can be reopened anytime via Guide button
   }
 
   // ── Slide navigation ──────────────────────────────────────────
@@ -6580,10 +6575,8 @@
       await _orig.apply(this, arguments);
       if (window._wlJustRegistered) {
         window._wlJustRegistered = false;
-        // Show onboarding once per session after registration
-        if (!hasShownOnboardingThisSession) {
-          setTimeout(showOnboarding, 600);
-        }
+        // Show onboarding after registration
+        setTimeout(showOnboarding, 600);
       }
     };
   }
