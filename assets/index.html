@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Wazalist</title>
+  <!-- SheetJS library for Excel file parsing -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -5375,11 +5377,16 @@
         fileName.style.color = 'var(--text1)';
         
         try {
+          // Check if XLSX library is loaded
+          if (typeof XLSX === 'undefined') {
+            throw new Error('Excel library not loaded. Please refresh the page and try again.');
+          }
           await parseExcelFile(file);
           renderImport();
         } catch (err) {
           console.error('Excel parse error:', err);
-          showToast('Error reading Excel file. Please try text paste instead.', 'red');
+          const errorMsg = err.message || 'Error reading Excel file. Please try text paste instead.';
+          showToast(errorMsg, 'red');
         }
       });
     }
