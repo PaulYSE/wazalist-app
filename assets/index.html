@@ -3143,9 +3143,17 @@
       const normalizedText = normalizeForSearch(text);
       const normalizedQuery = normalizeForSearch(query);
 
-      // For longer queries, allow more errors
-      const adaptiveMaxDist = Math.max(1, Math.floor(normalizedQuery.length / 4));
-      const actualMaxDist = Math.min(maxDistance, adaptiveMaxDist);
+      // For general search (maxDistance = 2), use adaptive scaling for longer queries
+      // For strict matching (maxDistance = 1), use exactly the specified distance
+      let actualMaxDist;
+      if (maxDistance === 1) {
+        // Strict mode: use exactly 1 for Excel import
+        actualMaxDist = 1;
+      } else {
+        // Flexible mode: for longer queries, allow more errors
+        const adaptiveMaxDist = Math.max(1, Math.floor(normalizedQuery.length / 4));
+        actualMaxDist = Math.min(maxDistance, adaptiveMaxDist);
+      }
 
       // Check if query is a substring of text (within distance)
       for (let i = 0; i <= normalizedText.length - normalizedQuery.length + actualMaxDist; i++) {
@@ -4896,24 +4904,24 @@
       );
       if (hit) return hit;
       
-      // Fuzzy match - try Japanese first, then English
+      // Fuzzy match - try Japanese first, then English (STRICT: maxDistance=1)
       if (japanese) {
-        hit = wazaData.find(w => isFuzzyMatch(w.name_jp, japanese));
+        hit = wazaData.find(w => isFuzzyMatch(w.name_jp, japanese, 1));
         if (hit) return hit;
       }
       
       hit = wazaData.find(w =>
-        isFuzzyMatch(w.name_en, english) ||
-        isFuzzyMatch(w.name_en_literal, english) ||
-        isFuzzyMatch(w.name_en_gtranslate, english)
+        isFuzzyMatch(w.name_en, english, 1) ||
+        isFuzzyMatch(w.name_en_literal, english, 1) ||
+        isFuzzyMatch(w.name_en_gtranslate, english, 1)
       );
       if (hit) return hit;
       
-      // Final fallback: fuzzy on full text
+      // Final fallback: fuzzy on full text (STRICT: maxDistance=1)
       hit = wazaData.find(w =>
-        isFuzzyMatch(w.name_jp, cleaned) ||
-        isFuzzyMatch(w.name_en, cleaned) ||
-        isFuzzyMatch(w.name_en_literal, cleaned)
+        isFuzzyMatch(w.name_jp, cleaned, 1) ||
+        isFuzzyMatch(w.name_en, cleaned, 1) ||
+        isFuzzyMatch(w.name_en_literal, cleaned, 1)
       );
       return hit || null;
     }
