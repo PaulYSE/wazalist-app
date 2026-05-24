@@ -5271,10 +5271,9 @@
         let count = 0;
         for (const item of _tiMatched) {
           if (item.manualMarkings.some(Boolean)) {
-            const cur = getP(item.waza.id);
-            const merged = [...(cur.markings || Array(6).fill(false))];
-            item.manualMarkings.forEach((v, i) => { if (v) merged[i] = true; });
-            await saveP(item.waza.id, { markings: merged });
+            // REPLACE markings entirely (don't merge with existing)
+            const newMarkings = [...item.manualMarkings];
+            await saveP(item.waza.id, { markings: newMarkings });
             count++;
           }
         }
@@ -5300,14 +5299,15 @@
           
           if (item.manualMarkings.some(Boolean)) {
             const cur = getP(item.waza.id);
-            const merged = [...(cur.markings || Array(6).fill(false))];
-            item.manualMarkings.forEach((v, i) => { if (v) merged[i] = true; });
+            
+            // REPLACE markings entirely (don't merge with existing)
+            const newMarkings = [...item.manualMarkings];
             
             console.log('[COMMIT] Current markings:', cur.markings);
             console.log('[COMMIT] Manual markings:', item.manualMarkings);
-            console.log('[COMMIT] Merged markings:', merged);
+            console.log('[COMMIT] New markings (REPLACE):', newMarkings);
             
-            await saveP(item.waza.id, { markings: merged });
+            await saveP(item.waza.id, { markings: newMarkings });
             count++;
           } else {
             console.log('[COMMIT] Skipping (no markings):', item.waza.name_jp);
