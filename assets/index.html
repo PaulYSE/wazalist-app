@@ -3177,10 +3177,10 @@
       const { search, markings } = filters;
       const anyMarkingActive = markings.some(Boolean);
       let results = wazaData.filter(w => {
-        // "Any" mode: only show waza that have at least one mark
+        // "Any" mode: only show waza that have at least one marking
         if (browseFilterAny) {
           const p = getP(w.id);
-          if (!(p.like || (p.markings && p.markings.some(Boolean)))) return false;
+          if (!(p.markings && p.markings.some(Boolean))) return false;
         }
         if (search) {
           const isExact = search.startsWith('"') && search.endsWith('"');
@@ -3813,12 +3813,12 @@
           if (!families[fam]) families[fam] = { total: 0, touched: 0 };
           families[fam].total++;
           const p = getP(w.id);
-          if (p.like || (p.markings && p.markings.some(Boolean))) families[fam].touched++;
+          if (p.markings && p.markings.some(Boolean)) families[fam].touched++;
         });
       });
       const noFamily = wazaData.filter(w => !w.parent_en0 && !w.parent_en1);
       if (noFamily.length) {
-        families['Uncategorised'] = { total: noFamily.length, touched: noFamily.filter(w => { const p = getP(w.id); return p.like || (p.markings && p.markings.some(Boolean)); }).length };
+        families['Uncategorised'] = { total: noFamily.length, touched: noFamily.filter(w => { const p = getP(w.id); return p.markings && p.markings.some(Boolean); }).length };
       }
       
       // Sort by coverage percentage (descending), then by total count
