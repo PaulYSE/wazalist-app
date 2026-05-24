@@ -5093,7 +5093,12 @@
                   const markingIdx = _tiColorMapping[color];
                   console.log('[COLOR MAP] Match found for', item.waza.name_jp, '- color:', color, 'marking:', markingIdx);
                   
-                  if (markingIdx >= 0 && markingIdx < 6) {
+                  if (markingIdx === -1) {
+                    // Explicitly clear all markings when "no marking" is selected
+                    item.manualMarkings = Array(6).fill(false);
+                    item.category = null;
+                    console.log('[COLOR MAP] Cleared markings (no marking selected)');
+                  } else if (markingIdx >= 0 && markingIdx < 6) {
                     item.manualMarkings = Array(6).fill(false);
                     item.manualMarkings[markingIdx] = true;
                     item.category = markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
