@@ -5065,28 +5065,46 @@
           
           // Bind color mapping events
           container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', () => {
+            console.log('[COLOR MAP] Starting color mapping application...');
+            console.log('[COLOR MAP] _tiExcelColors:', _tiExcelColors);
+            console.log('[COLOR MAP] _tiMatched before mapping:', _tiMatched.map(i => ({ name: i.waza.name_jp, rawLine: i.rawLine, markings: i.manualMarkings })));
+            
             // Read mappings
             container.querySelectorAll('.color-marking-map').forEach(select => {
               const color = select.dataset.color;
               const markingIdx = parseInt(select.value);
               _tiColorMapping[color] = markingIdx;
+              console.log('[COLOR MAP] Mapping color', color, 'to marking index', markingIdx);
             });
+            
+            console.log('[COLOR MAP] Final _tiColorMapping:', _tiColorMapping);
             
             // Apply color mappings to matched waza
             _tiMatched.forEach(item => {
               // Find which color this waza belongs to
+              // Normalize both sides for comparison (trim whitespace)
+              const normalizedRawLine = item.rawLine.trim();
+              
               for (const [color, wazaNames] of Object.entries(_tiExcelColors)) {
-                if (wazaNames.includes(item.rawLine)) {
+                // Check if any of the waza names from this color match this item
+                const matchFound = wazaNames.some(name => name.trim() === normalizedRawLine);
+                
+                if (matchFound) {
                   const markingIdx = _tiColorMapping[color];
-                  if (markingIdx >= 0) {
+                  console.log('[COLOR MAP] Match found for', item.waza.name_jp, '- color:', color, 'marking:', markingIdx);
+                  
+                  if (markingIdx >= 0 && markingIdx < 6) {
                     item.manualMarkings = Array(6).fill(false);
                     item.manualMarkings[markingIdx] = true;
                     item.category = markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
+                    console.log('[COLOR MAP] Set markings to:', item.manualMarkings);
                   }
                   break;
                 }
               }
             });
+            
+            console.log('[COLOR MAP] _tiMatched after mapping:', _tiMatched.map(i => ({ name: i.waza.name_jp, markings: i.manualMarkings })));
             
             _tiParsed = true; // Switch to normal mode
             _tiPreviewMode = true; // Enable preview mode
@@ -5273,16 +5291,29 @@
 
       // Commit preview (save to database)
       container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
+        console.log('[COMMIT] Starting commit process...');
+        console.log('[COMMIT] _tiMatched length:', _tiMatched.length);
+        
         let count = 0;
         for (const item of _tiMatched) {
+          console.log('[COMMIT] Processing:', item.waza.name_jp, 'manualMarkings:', item.manualMarkings);
+          
           if (item.manualMarkings.some(Boolean)) {
             const cur = getP(item.waza.id);
             const merged = [...(cur.markings || Array(6).fill(false))];
             item.manualMarkings.forEach((v, i) => { if (v) merged[i] = true; });
+            
+            console.log('[COMMIT] Current markings:', cur.markings);
+            console.log('[COMMIT] Manual markings:', item.manualMarkings);
+            console.log('[COMMIT] Merged markings:', merged);
+            
             await saveP(item.waza.id, { markings: merged });
             count++;
+          } else {
+            console.log('[COMMIT] Skipping (no markings):', item.waza.name_jp);
           }
         }
+        
         if (count) {
           showToast('Committed ' + count + ' waza markings to database!', 'green');
           _tiParsed = false;
