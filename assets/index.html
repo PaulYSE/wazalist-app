@@ -5788,6 +5788,9 @@
       <div class="ob-dot" id="obDot4"></div>
       <div class="ob-dot" id="obDot5"></div>
       <div class="ob-dot" id="obDot6"></div>
+      <div class="ob-dot" id="obDot7"></div>
+      <div class="ob-dot" id="obDot8"></div>
+      <div class="ob-dot" id="obDot9"></div>
       <button class="ob-close" id="obClose" title="Skip onboarding">✕</button>
     </div>
 
@@ -5803,7 +5806,7 @@
             Your personal database for Wotagei techniques — browse every Waza, track your learning, and build your own list.
           </div>
           <div class="ob-slide-sub" style="color:var(--text3);font-size:13px">
-            This quick tour covers the key features. It takes about 60 seconds.
+            This quick tour covers all the key features. It takes about 90 seconds.
           </div>
         </div>
 
@@ -5892,7 +5895,101 @@
           </div>
         </div>
 
-        <!-- SLIDE 6: Import -->
+        <!-- SLIDE 6: Stats -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">📊</div>
+          <div class="ob-slide-title">Track your <span>Progress</span></div>
+          <div class="ob-slide-sub">
+            The <b>Stats</b> tab shows your marking history and recent activity. See which Waza you've marked, when you last updated them, and your coverage by technique family.
+          </div>
+          <div class="ob-demo" style="padding:14px">
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Overview</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
+                  <div style="font-size:24px;font-weight:700;color:var(--accent)">23</div>
+                  <div style="font-size:12px;color:var(--text3)">Marked</div>
+                </div>
+                <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
+                  <div style="font-size:24px;font-weight:700">150</div>
+                  <div style="font-size:12px;color:var(--text3)">Total Waza</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Recent Activity</div>
+              <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">Updated Romance <span style="color:var(--text3);margin-left:auto;float:right">2h ago</span></div>
+              <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">Updated Muramasa <span style="color:var(--text3);margin-left:auto;float:right">1d ago</span></div>
+              <div style="font-size:13px;color:var(--text2);padding:6px 0">Updated Double Mix <span style="color:var(--text3);margin-left:auto;float:right">3d ago</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: Compare -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">🔄</div>
+          <div class="ob-slide-title">Share & <span>Compare</span> lists</div>
+          <div class="ob-slide-sub">
+            <b>Any user</b> can export their list with custom labels to get a shareable key. <b>Anyone (including guests)</b> can import these lists in the <b>Compare</b> tab to do side-by-side comparisons.
+          </div>
+          <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:20px">📤</span>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Export Your List</div>
+                  <div style="font-size:12px;color:var(--text3)">Generate a shareable URL with your markings & labels</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:20px">📥</span>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Import & Compare</div>
+                  <div style="font-size:12px;color:var(--text3)">Paste a list URL to see differences side-by-side</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:rgba(124,111,247,.1);border:1px solid var(--accent);border-radius:var(--r);padding:8px 10px;margin-top:4px">
+              <div style="font-size:12px;color:var(--accent)">💡 <b>Tip:</b> Works for guest accounts too — no sign-in required!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: Contribute -->
+        <div class="ob-slide">
+          <div class="ob-slide-icon">✏️</div>
+          <div class="ob-slide-title">Help grow the <span>Database</span></div>
+          <div class="ob-slide-sub">
+            Any <b>logged-in user</b> can suggest edits to existing Waza or add new ones via the <b>Contribute</b> tab. All contributions are reviewed by admins before being added to the database.
+          </div>
+          <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:20px">📝</span>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Suggest Edits</div>
+                  <div style="font-size:12px;color:var(--text3)">Fix typos, add translations, or update video links</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:20px">➕</span>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Add New Waza</div>
+                  <div style="font-size:12px;color:var(--text3)">Submit a new technique with all its details</div>
+                </div>
+              </div>
+            </div>
+            <div style="background:rgba(76,175,130,.1);border:1px solid var(--green);border-radius:var(--r);padding:8px 10px;margin-top:4px">
+              <div style="font-size:12px;color:var(--green)">✓ All contributions reviewed by admins for quality</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: Import -->
         <div class="ob-slide">
           <div class="ob-slide-icon">📥</div>
           <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
@@ -5936,7 +6033,7 @@
   // ── Config ────────────────────────────────────────────────────
   const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
-  const SLIDE_COUNT = 7;
+  const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
   // Get real waza data from the main app (first 20 waza)
   function getRealWaza() {
@@ -6042,8 +6139,8 @@
       const next = mkNextBtn();
       footer.appendChild(next);
 
-    } else if (currentSlide === 6) {
-      // Import slide — "Skip" or "Import now"
+    } else if (currentSlide === 9) {
+      // Import slide (last slide) — "Skip" or "Import now"
       const importBtn = document.createElement('button');
       importBtn.className = 'ob-btn ob-btn-primary';
       importBtn.style.marginLeft = 'auto';
