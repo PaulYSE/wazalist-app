@@ -3814,10 +3814,11 @@
             <div style="font-size:13px;color:var(--text3);margin-bottom:16px">You're using guest mode. Your data is stored locally in your browser.</div>
           </div>`;
 
-      // Progress stats
-      const totalMarked = progData.filter(p => p.markings && JSON.parse(p.markings).some(m => m)).length;
-      const totalLiked = progData.filter(p => p.like === 1).length;
-      const totalDisliked = progData.filter(p => p.like === -1).length;
+      // Progress stats - prog is an object keyed by waza_id
+      const progEntries = Object.values(prog);
+      const totalMarked = progEntries.filter(p => p.markings && p.markings.some(m => m)).length;
+      const totalLiked = progEntries.filter(p => p.like === 1).length;
+      const totalDisliked = progEntries.filter(p => p.like === -1).length;
 
       const statsHTML = `<div class="dsec2">
         <h3>Your Progress</h3>
@@ -3911,15 +3912,15 @@
             await api('/api/labels', 'POST', { labels: ['','','','','',''] });
 
             // Clear local cache
-            progData = [];
+            prog = {};
             markingLabels = ['','','','','',''];
             localStorage.removeItem('wl_prog');
-            localStorage.removeItem('wl_labels');
+            localStorage.removeItem(LS_LABELS);
           } else {
             // For guest users, clear localStorage
             localStorage.removeItem('wl_prog');
-            localStorage.removeItem('wl_labels');
-            progData = [];
+            localStorage.removeItem(LS_LABELS);
+            prog = {};
             markingLabels = ['','','','','',''];
           }
 
