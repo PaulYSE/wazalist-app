@@ -5118,7 +5118,7 @@
             const hasLabelNames = Object.keys(_tiExcelColorLabels).length > 0;
             const usedMarkings = new Set(Object.values(_tiColorMapping).filter(idx => idx >= 0));
             
-            if (hasLabelNames && usedMarkings.size > 0 && isAuthenticated) {
+            if (hasLabelNames && usedMarkings.size > 0) {
               // Build a list of changes
               const changes = [];
               for (const [color, markingIdx] of Object.entries(_tiColorMapping)) {
