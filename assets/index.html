@@ -2744,8 +2744,12 @@
           <div class="cfield"><label>Parent EN 1</label><input id="se-parent_en1" type="text"></div>
         </div>
         <div class="cfield-row">
-          <div class="cfield"><label>Author (JP)</label><input id="se-author_jp" type="text"></div>
-          <div class="cfield"><label>Author (EN)</label><input id="se-author_en" type="text"></div>
+          <div class="cfield"><label>Author (JP) 0</label><input id="se-author_jp0" type="text"></div>
+          <div class="cfield"><label>Author (EN) 0</label><input id="se-author_en0" type="text"></div>
+        </div>
+        <div class="cfield-row">
+          <div class="cfield"><label>Author (JP) 1</label><input id="se-author_jp1" type="text"></div>
+          <div class="cfield"><label>Author (EN) 1</label><input id="se-author_en1" type="text"></div>
         </div>
         <div class="cfield"><label>Video 1</label><input id="se-video0" type="url" placeholder="https://…"></div>
         <div class="cfield"><label>Video 2</label><input id="se-video1" type="url" placeholder="https://…"></div>
@@ -2753,6 +2757,10 @@
         <div class="cfield"><label>Video 4</label><input id="se-video3" type="url" placeholder="https://…"></div>
         <div class="cfield"><label>Video 5</label><input id="se-video4" type="url" placeholder="https://…"></div>
         <div class="cfield"><label>Video 6</label><input id="se-video5" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 7</label><input id="se-video6" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 8</label><input id="se-video7" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 9</label><input id="se-video8" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 10</label><input id="se-video9" type="url" placeholder="https://…"></div>
         <div class="cmodal-err" id="se-err"></div>
       </div>
       <div class="cmodal-footer">
@@ -2786,12 +2794,18 @@
           <div class="cfield"><label>Parent EN 0</label><input id="nw-parent_en0" type="text"></div>
         </div>
         <div class="cfield-row">
-          <div class="cfield"><label>Author (JP)</label><input id="nw-author_jp" type="text"></div>
-          <div class="cfield"><label>Author (EN)</label><input id="nw-author_en" type="text"></div>
+          <div class="cfield"><label>Author (JP) 0</label><input id="nw-author_jp0" type="text"></div>
+          <div class="cfield"><label>Author (EN) 0</label><input id="nw-author_en0" type="text"></div>
+        </div>
+        <div class="cfield-row">
+          <div class="cfield"><label>Author (JP) 1</label><input id="nw-author_jp1" type="text"></div>
+          <div class="cfield"><label>Author (EN) 1</label><input id="nw-author_en1" type="text"></div>
         </div>
         <div class="cfield"><label>Video 1 *</label><input id="nw-video0" type="url" placeholder="https://…"></div>
         <div class="cfield"><label>Video 2</label><input id="nw-video1" type="url" placeholder="https://…"></div>
         <div class="cfield"><label>Video 3</label><input id="nw-video2" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 4</label><input id="nw-video3" type="url" placeholder="https://…"></div>
+        <div class="cfield"><label>Video 5</label><input id="nw-video4" type="url" placeholder="https://…"></div>
         <div class="cfield">
           <label>Reference / notes</label>
           <textarea id="nw-reference" rows="2" placeholder="Any context, lore, or source notes…"></textarea>
@@ -3376,7 +3390,7 @@
       });
     }
     function videoButtons(w) {
-      const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5].filter(v => v && v.trim() && v !== '0');
+      const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5, w.video6, w.video7, w.video8, w.video9].filter(v => v && v.trim() && v !== '0');
       if (!vids.length) return '';
       return '<div class="wce-videos">' + vids.map((v, i) => {
         const pl = platform(v);
@@ -3510,7 +3524,7 @@
       const p = getP(w.id);
       const markings = p.markings || Array(6).fill(false);
 
-      const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5].filter(v => v && v.trim() && v !== '0');
+      const vids = [w.video0, w.video1, w.video2, w.video3, w.video4, w.video5, w.video6, w.video7, w.video8, w.video9].filter(v => v && v.trim() && v !== '0');
 
       // Resolve embed URLs — use cache if available, otherwise compute locally
       if (!embedCache.has(w.id)) {
@@ -3618,8 +3632,11 @@
             })() : '')) : ''
           )
 
-        + ((w.author_jp || w.author_en) ? sec('creator', 'Creator',
-          '<div class="dfield" style="display:inline-block"><div class="lbl">Author</div><div class="val">' + (w.author_jp || '') + (w.author_en ? ' / ' + w.author_en : '') + '</div></div>') : '')
+        + ((w.author_jp0 || w.author_en0 || w.author_jp1 || w.author_en1) ? sec('creator', 'Creator',
+          '<div class="dgrid">'
+          + (w.author_jp0 || w.author_en0 ? '<div class="dfield"><div class="lbl">Author 0</div><div class="val">' + (w.author_jp0 || '') + (w.author_en0 ? ' / ' + w.author_en0 : '') + '</div></div>' : '')
+          + (w.author_jp1 || w.author_en1 ? '<div class="dfield"><div class="lbl">Author 1</div><div class="val">' + (w.author_jp1 || '') + (w.author_en1 ? ' / ' + w.author_en1 : '') + '</div></div>' : '')
+          + '</div>') : '')
 
         + '<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div></div>'
         + (!isGuest && token ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>' : '');
@@ -4195,7 +4212,7 @@
     function escHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
     // ── Suggest Edit modal ────────────────────────────────────────
-    const SE_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'tag', 'reference', 'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1', 'author_jp', 'author_en', 'video0', 'video1', 'video2', 'video3', 'video4', 'video5'];
+    const SE_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'tag', 'reference', 'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1', 'author_jp0', 'author_en0', 'author_jp1', 'author_en1', 'video0', 'video1', 'video2', 'video3', 'video4', 'video5', 'video6', 'video7', 'video8', 'video9'];
 
     function openSuggestEdit(w) {
       // Pre-fill with current values as placeholders
@@ -4236,7 +4253,7 @@
     });
 
     // ── New Waza modal ────────────────────────────────────────────
-    const NW_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'tag', 'parent_jp0', 'parent_en0', 'author_jp', 'author_en', 'video0', 'video1', 'video2', 'reference'];
+    const NW_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'tag', 'parent_jp0', 'parent_en0', 'author_jp0', 'author_en0', 'author_jp1', 'author_en1', 'video0', 'video1', 'video2', 'video3', 'video4', 'reference'];
 
     function openNewWazaModal() {
       NW_FIELDS.forEach(f => { const el = document.getElementById('nw-' + f); if (el) el.value = ''; });
