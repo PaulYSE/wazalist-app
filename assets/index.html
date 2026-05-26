@@ -5044,19 +5044,19 @@
         if (colorKeys.length > 0) {
           const colorMappingHtml = '<div>'
             + '<div class="dsec2"><h3>📊 Excel Colors Detected</h3></div>'
-            + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Map each color to a proficiency level:</p>'
+            + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Rename the label for each color and choose which marking to assign:</p>'
             + '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">'
             + colorKeys.map(colorHex => {
               const wazaCount = _tiExcelColors[colorHex].length;
               const rgb = hexToRgb(colorHex);
               const colorDisplay = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
               return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">'
-                + '<div style="width:40px;height:40px;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
-                + '<div style="flex:1">'
-                + '<div style="font-size:13px;font-weight:500">' + wazaCount + ' waza</div>'
-                + '<div style="font-size:11px;color:var(--text3)">' + colorHex + '</div>'
+                + '<div style="width:40px;height:40px;flex-shrink:0;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
+                + '<div style="flex:1;display:flex;flex-direction:column;gap:6px">'
+                + '<input type="text" class="excel-color-label-input" data-color="' + colorHex + '" placeholder="Label name (e.g., Learning, Mastered...)" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;width:100%">'
+                + '<div style="font-size:11px;color:var(--text3)">' + wazaCount + ' waza · #' + colorHex + '</div>'
                 + '</div>'
-                + '<select class="color-marking-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">'
+                + '<select class="color-marking-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;flex-shrink:0">'
                 + '<option value="-1">No marking</option>'
                 + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (markingLabels[i] || 'Marking ' + (i + 1)) + '</option>').join('')
                 + '</select>'
@@ -5072,10 +5072,19 @@
           container.innerHTML = colorMappingHtml;
           
           // Bind color mapping events
-          container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', () => {
+          container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', async () => {
             console.log('[COLOR MAP] Starting color mapping application...');
             console.log('[COLOR MAP] _tiExcelColors:', _tiExcelColors);
             console.log('[COLOR MAP] _tiMatched before mapping:', _tiMatched.map(i => ({ name: i.waza.name_jp, rawLine: i.rawLine, markings: i.manualMarkings })));
+            
+            // Read label names
+            container.querySelectorAll('.excel-color-label-input').forEach(input => {
+              const color = input.dataset.color;
+              const labelName = input.value.trim();
+              if (labelName) {
+                _tiExcelColorLabels[color] = labelName;
+              }
+            });
             
             // Read mappings
             container.querySelectorAll('.color-marking-map').forEach(select => {
@@ -5086,6 +5095,57 @@
             });
             
             console.log('[COLOR MAP] Final _tiColorMapping:', _tiColorMapping);
+            console.log('[COLOR MAP] Final _tiExcelColorLabels:', _tiExcelColorLabels);
+            
+            // Check if user wants to update their marking labels
+            const hasLabelNames = Object.keys(_tiExcelColorLabels).length > 0;
+            const usedMarkings = new Set(Object.values(_tiColorMapping).filter(idx => idx >= 0));
+            
+            if (hasLabelNames && usedMarkings.size > 0 && isAuthenticated) {
+              // Build a list of changes
+              const changes = [];
+              for (const [color, markingIdx] of Object.entries(_tiColorMapping)) {
+                if (markingIdx >= 0 && _tiExcelColorLabels[color]) {
+                  const currentLabel = markingLabels[markingIdx] || '';
+                  const newLabel = _tiExcelColorLabels[color];
+                  if (currentLabel !== newLabel) {
+                    changes.push({
+                      markingIdx,
+                      oldLabel: currentLabel || '(empty)',
+                      newLabel: newLabel
+                    });
+                  }
+                }
+              }
+              
+              if (changes.length > 0) {
+                const changesList = changes.map(c => 
+                  `${SHAPES[c.markingIdx]} ${c.oldLabel} → ${c.newLabel}`
+                ).join('\n');
+                
+                const shouldUpdate = confirm(
+                  `Update your marking labels with the names you entered?\n\n${changesList}\n\nThis will save to your account and affect all your waza.`
+                );
+                
+                if (shouldUpdate) {
+                  // Update local marking labels
+                  for (const [color, markingIdx] of Object.entries(_tiColorMapping)) {
+                    if (markingIdx >= 0 && _tiExcelColorLabels[color]) {
+                      markingLabels[markingIdx] = _tiExcelColorLabels[color];
+                    }
+                  }
+                  
+                  // Save to server
+                  try {
+                    await saveMarkingLabels();
+                    console.log('[COLOR MAP] Marking labels updated successfully');
+                  } catch (err) {
+                    console.error('[COLOR MAP] Failed to save marking labels:', err);
+                    alert('Failed to save marking labels. Your selections will still be applied to this import.');
+                  }
+                }
+              }
+            }
             
             // Apply color mappings to matched waza
             _tiMatched.forEach(item => {
@@ -5128,6 +5188,7 @@
             _tiParsed = false;
             _tiExcelColors = {};
             _tiColorMapping = {};
+            _tiExcelColorLabels = {};
             renderImport();
           });
           
@@ -5440,6 +5501,7 @@
     // Excel parsing with cell color detection
     let _tiExcelColors = {}; // { colorHex: [wazaNames] }
     let _tiColorMapping = {}; // { colorHex: markingIndex }
+    let _tiExcelColorLabels = {}; // { colorHex: labelName }
     
     function hexToRgb(hex) {
       // Remove # if present and handle 6-digit hex
