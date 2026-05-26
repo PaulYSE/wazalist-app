@@ -3910,19 +3910,15 @@
 
             // Reset custom labels to empty
             await api('/api/labels', 'POST', { labels: ['','','','','',''] });
-
-            // Clear local cache
-            prog = {};
-            markingLabels = ['','','','','',''];
-            localStorage.removeItem('wl_prog');
-            localStorage.removeItem(LS_LABELS);
-          } else {
-            // For guest users, clear localStorage
-            localStorage.removeItem('wl_prog');
-            localStorage.removeItem(LS_LABELS);
-            prog = {};
-            markingLabels = ['','','','','',''];
           }
+
+          // Clear local cache
+          localStorage.removeItem(LS_KEY);
+          localStorage.removeItem(LS_LABELS);
+          localStorage.removeItem(LS_SORT);
+          localStorage.removeItem(LS_VIEW);
+          prog = {};
+          markingLabels = ['','','','','',''];
 
           alert('✅ All progress data has been reset successfully.');
           
