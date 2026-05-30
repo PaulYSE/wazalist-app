@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Wazalist</title>
-  <!-- SheetJS library for Excel file parsing -->
+  <!-- SheetJS library for Excel file parsing (read) -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- ExcelJS library for Excel file generation (write, supports cell fills + hyperlinks) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -2537,13 +2539,13 @@
           <span class="mob-menu-item-icon">⚖️</span>
           <span>Compare</span>
         </button>
-        <button class="mob-menu-item" data-menu-tab="import">
-          <span class="mob-menu-item-icon">📋</span>
-          <span>Import List</span>
-        </button>
         <button class="mob-menu-item" data-menu-tab="contribute">
           <span class="mob-menu-item-icon">✏️</span>
           <span>Contribute</span>
+        </button>
+        <button class="mob-menu-item" data-menu-tab="account">
+          <span class="mob-menu-item-icon">👤</span>
+          <span>Account</span>
         </button>
       </div>
 
@@ -2575,7 +2577,6 @@
       <button class="ntab active" data-tab="browse">Explore</button>
       <button class="ntab" data-tab="stats">Stats</button>
       <button class="ntab" data-tab="compare">Compare</button>
-      <button class="ntab" data-tab="import">Import List</button>
       <button class="ntab" data-tab="contribute">Contribute</button>
       <button class="ntab" data-tab="account">Account</button>
     </div>
@@ -2694,13 +2695,6 @@
     <div id="compareView" style="display:none;flex:1;overflow:hidden">
       <div class="dash">
         <div id="dashCompare"></div>
-      </div>
-    </div>
-
-    <!-- IMPORT LIST -->
-    <div id="importView" style="display:none;flex:1;overflow:hidden">
-      <div class="dash">
-        <div id="dashImport"></div>
       </div>
     </div>
 
@@ -3717,7 +3711,7 @@
       document.getElementById('browseView').style.display = 'flex';
       document.getElementById('statsView').style.display = 'none';
       document.getElementById('compareView').style.display = 'none';
-      document.getElementById('importView').style.display = 'none';
+      document.getElementById('accountView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
     }
 
@@ -3838,6 +3832,23 @@
         </div>
       </div>`;
 
+      // ── Export to Excel ───────────────────────────────────────────
+      const exportHTML = `<div class="dsec2" style="margin-top:20px">
+        <h3>Export to Excel</h3>
+        <p style="font-size:13px;color:var(--text2);margin:8px 0 12px">
+          Download an <b>.xlsx</b> of every waza you've marked. Each entry is a clickable link to its video,
+          shown as <code>name_en(name_jp)</code>, with the cell coloured by its marking.
+        </p>
+        <button class="cbtn cbtn-primary" id="exportXlsxBtn">⬇️ Export to Excel</button>
+        <span id="exportXlsxStatus" style="font-size:13px;color:var(--text3);margin-left:10px"></span>
+      </div>`;
+
+      // ── Import (moved here from the old Import List tab) ───────────
+      const importHTML = `<div class="dsec2" style="margin-top:20px">
+        <h3>Import</h3>
+        <div id="dashImport" style="margin-top:8px"></div>
+      </div>`;
+
       // Danger zone
       const dangerZoneHTML = `<div class="dsec2" style="border:1px solid var(--red);border-radius:var(--rl);padding:16px;margin-top:20px">
         <h3 style="color:var(--red)">⚠️ Danger Zone</h3>
@@ -3863,7 +3874,13 @@
             </button>
           </div>`;
 
-      container.innerHTML = accountInfoHTML + statsHTML + dangerZoneHTML + actionsHTML;
+      container.innerHTML = accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + actionsHTML;
+
+      // Populate the moved import UI (renders into the #dashImport above)
+      renderImport();
+
+      // Bind export button
+      container.querySelector('#exportXlsxBtn')?.addEventListener('click', () => exportToExcel());
 
       // Bind reset button
       const resetBtn = container.querySelector('#resetAccountBtn');
@@ -3941,6 +3958,122 @@
 
       // Bind sign in button
       container.querySelector('#signInBtn')?.addEventListener('click', doLogout);
+    }
+
+    // ── Export to Excel ───────────────────────────────────────────
+    // One ARGB fill per marking index (matches the ● ▲ ■ ♥ ★ ◆ order).
+    const EXPORT_MARK_COLORS = ['FF4F8FF7','FF4CAF82','FFE8A030','FFE0557F','FFF5C518','FF7C6FF7'];
+
+    function pickVideoUrl(w) {
+      // User asked for video1; fall back to the first available video so links aren't broken.
+      return w.video1 || w.video0 || w.video2 || w.video3 || w.video4 || w.video5 || '';
+    }
+
+    async function exportToExcel() {
+      const btn = document.getElementById('exportXlsxBtn');
+      const status = document.getElementById('exportXlsxStatus');
+      const setStatus = (msg, color) => { if (status) { status.textContent = msg; status.style.color = color || 'var(--text3)'; } };
+
+      if (typeof ExcelJS === 'undefined') {
+        setStatus('Excel library not loaded — please refresh and try again.', 'var(--red)');
+        return;
+      }
+
+      // Collect every waza the user has marked (at least one active marking).
+      const rows = [];
+      wazaData.forEach(w => {
+        const p = prog[w.id];
+        const markings = (p && p.markings) || null;
+        if (!markings || !markings.some(Boolean)) return;
+        const firstMark = markings.findIndex(Boolean); // colour by first active marking
+        rows.push({ waza: w, firstMark });
+      });
+
+      if (!rows.length) {
+        setStatus('Nothing to export — mark some waza first.', 'var(--amber)');
+        return;
+      }
+
+      const headerName = (!isGuest && currentUsername) ? currentUsername : 'Guest';
+
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+      setStatus('');
+
+      try {
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'Wazalist';
+        wb.created = new Date();
+        const ws = wb.addWorksheet('Wazalist');
+        ws.getColumn(1).width = 52;
+
+        // Header = username (or Guest)
+        const head = ws.getCell('A1');
+        head.value = headerName;
+        head.font = { bold: true, size: 14 };
+
+        // Track which markings actually appear, for the legend
+        const usedMarks = new Set();
+
+        let r = 2;
+        rows.forEach(({ waza: w, firstMark }) => {
+          const en = (w.name_en || w.name_en_literal || w.name_en_gtranslate || '').trim();
+          const jp = (w.name_jp || '').trim();
+          let disp = en && jp ? `${en}(${jp})` : (en || jp || ('Waza #' + w.id));
+          const url = pickVideoUrl(w);
+
+          const cell = ws.getCell('A' + r);
+          if (url) {
+            // =HYPERLINK("url","name_en(name_jp)") — escape any double quotes for the formula
+            const fUrl = url.replace(/"/g, '""');
+            const fDisp = disp.replace(/"/g, '""');
+            cell.value = { formula: `HYPERLINK("${fUrl}","${fDisp}")` };
+            cell.font = { color: { argb: 'FF1A1A1A' }, underline: true };
+          } else {
+            cell.value = disp;
+            cell.font = { color: { argb: 'FF1A1A1A' } };
+          }
+
+          // Cell colour based on the active marking
+          const argb = EXPORT_MARK_COLORS[firstMark] || 'FFFFFFFF';
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } };
+          usedMarks.add(firstMark);
+          r++;
+        });
+
+        // Legend (a couple of rows below the list) so the colours have meaning
+        r += 1;
+        ws.getCell('A' + r).value = 'Legend';
+        ws.getCell('A' + r).font = { bold: true, color: { argb: 'FF777777' } };
+        r++;
+        [...usedMarks].sort((a, b) => a - b).forEach(mi => {
+          const label = (markingLabels[mi] || '').trim() || ('Marking ' + (mi + 1));
+          const cell = ws.getCell('A' + r);
+          cell.value = `${SHAPES[mi]}  ${label}`;
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: EXPORT_MARK_COLORS[mi] } };
+          cell.font = { color: { argb: 'FF1A1A1A' } };
+          r++;
+        });
+
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = headerName.replace(/[^\w\-]+/g, '_');
+        a.href = dlUrl;
+        a.download = `wazalist_${safeName}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(dlUrl), 2000);
+
+        setStatus(`Exported ${rows.length} waza.`, 'var(--green)');
+        showToast(`Exported ${rows.length} waza to Excel.`, 'green');
+      } catch (e) {
+        console.error('Export error:', e);
+        setStatus('Export failed — please try again.', 'var(--red)');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '⬇️ Export to Excel'; }
+      }
     }
 
     // ── Dashboard ─────────────────────────────────────────────────
@@ -4362,12 +4495,10 @@
       document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
       document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
       document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
-      document.getElementById('importView').style.display = t === 'import' ? 'block' : 'none';
       document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
       document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
       if (t === 'stats') renderDashStats();
       if (t === 'compare') renderDashCompare();
-      if (t === 'import') renderImport();
       if (t === 'contribute') renderContribute();
       if (t === 'account') renderAccount();
       // Update mobile menu active state
@@ -4579,7 +4710,7 @@
       document.querySelector('[data-tab="compare"]').classList.add('active');
       document.getElementById('browseView').style.display = 'none';
       document.getElementById('statsView').style.display = 'none';
-      document.getElementById('importView').style.display = 'none';
+      document.getElementById('accountView').style.display = 'none';
       document.getElementById('contributeView').style.display = 'none';
       document.getElementById('compareView').style.display = 'block';
       renderDashCompare();
@@ -5607,30 +5738,22 @@
 
     function renderTiInput(prefill) {
       return '<div style="display:flex;flex-direction:column;height:100%">'
-        + '<div class="dsec2"><h3>Import from your own list</h3></div>'
-        
-        // Method 1: Excel Upload
-        + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px">'
-        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📊 Method 1: Upload Excel File (Recommended)</div>'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to proficiency levels.</p>'
-        + '<div style="display:flex;gap:8px;align-items:center">'
+
+        // ── Import from Excel ──────────────────────────────────────
+        + '<div class="dsec2"><h3>📊 Import from Excel</h3></div>'
+        + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px">'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to your markings.</p>'
+        + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
         + '<input type="file" id="tiFileInput" accept=".xlsx,.xls" style="display:none">'
         + '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>'
         + '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>'
         + '</div>'
         + '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>'
         + '</div>'
-        
-        // Divider
-        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
-        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
-        + '<span style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Or</span>'
-        + '<div style="flex:1;height:1px;background:var(--border)"></div>'
-        + '</div>'
-        
-        // Method 2: Text Paste
+
+        // ── Import from Text ───────────────────────────────────────
+        + '<div class="dsec2"><h3>📋 Import from Text</h3></div>'
         + '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'
-        + '<div style="font-weight:500;font-size:14px;margin-bottom:8px">📋 Method 2: Paste Text</div>'
         + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>'
         + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nSupported label formats:\n[Learning]\nDouble Rainbow (ダブルレインボー)\nMix\n\n{Performance Ready}\nNami (波)\n\nHyper Mix (ハイパーミックス)"></textarea>'
         + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
@@ -5638,7 +5761,7 @@
         + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
         + '</div>'
         + '</div>'
-        
+
         + '</div>';
     }
 
@@ -6445,12 +6568,8 @@
       importBtn.onclick = () => {
         closeOnboarding();
         setTimeout(() => {
-          const navCmp = document.querySelector('.nav-tab[data-tab="compare"]') || document.querySelector('[data-tab="compare"]');
-          if (navCmp) navCmp.click();
-          setTimeout(() => {
-            const importTab = document.querySelector('[data-tab="import"]');
-            if (importTab) importTab.click();
-          }, 200);
+          const navAcc = document.querySelector('[data-tab="account"]');
+          if (navAcc) navAcc.click();
         }, 400);
       };
 
