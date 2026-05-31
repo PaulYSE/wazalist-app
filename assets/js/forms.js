@@ -157,7 +157,22 @@
             </button>
           </div>`;
 
-      container.innerHTML = accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + actionsHTML;
+      // Delete account (logged-in users only) — bottom-most option
+      const deleteAccountHTML = loggedIn
+        ? `<div class="dsec2" style="border:1px solid var(--red);border-radius:var(--rl);padding:16px;margin-top:20px">
+            <h3 style="color:var(--red)">Delete Account</h3>
+            <p style="font-size:13px;color:var(--text2);margin:12px 0">
+              Permanently delete your account and everything tied to it — your login, all marked waza,
+              likes and dislikes, custom labels, contribution history, and active sessions.
+              This cannot be undone.
+            </p>
+            <button class="btn" id="deleteAccountBtn" style="background:var(--red);border:1px solid var(--red);color:white">
+              Delete My Account
+            </button>
+          </div>`
+        : '';
+
+      container.innerHTML = accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + actionsHTML + deleteAccountHTML;
 
       // Populate the moved import UI (renders into the #dashImport above)
       renderImport();
@@ -241,6 +256,49 @@
 
       // Bind sign in button
       container.querySelector('#signInBtn')?.addEventListener('click', doLogout);
+
+      // Bind delete-account button
+      const deleteBtn = container.querySelector('#deleteAccountBtn');
+      deleteBtn?.addEventListener('click', async () => {
+        const sure = confirm(
+          '⚠️ This permanently deletes your account and ALL associated data:\n\n' +
+          '• Your login\n' +
+          `• ${totalMarked} marked Waza\n` +
+          `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
+          '• Custom labels and contribution history\n\n' +
+          'This CANNOT be undone. Continue?'
+        );
+        if (!sure) return;
+
+        const password = prompt('Enter your password to confirm account deletion:');
+        if (!password) return;
+
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = '⏳ Deleting…';
+
+        try {
+          const res = await api('/api/account', 'DELETE', { password });
+          if (res.error) {
+            alert('❌ ' + res.error);
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Delete My Account';
+            return;
+          }
+          // Wipe local state and drop to a logged-out screen.
+          localStorage.removeItem('wl_token');
+          localStorage.removeItem('wl_username');
+          localStorage.removeItem(LS_KEY);
+          localStorage.removeItem(LS_LABELS);
+          localStorage.removeItem(LS_SORT);
+          localStorage.removeItem(LS_VIEW);
+          alert('Your account has been deleted.');
+          location.reload();
+        } catch (e) {
+          alert('❌ Failed to delete account. Please try again.');
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'Delete My Account';
+        }
+      });
     }
 
     // ── Export to Excel ───────────────────────────────────────────
