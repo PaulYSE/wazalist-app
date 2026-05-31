@@ -52,7 +52,7 @@
   }
 
   function closeOnboarding() {
-    await saveOnboardingLabels();
+    saveOnboardingLabels();
     const el = document.getElementById('wlOnboarding');
     el.classList.remove('ob-visible');
     setTimeout(() => { el.style.display = 'none'; }, 150);
@@ -103,7 +103,7 @@
       const backBtn = document.createElement('button');
       backBtn.className = 'ob-btn';
       backBtn.textContent = '← Back';
-      backBtn.onclick = async () => { await saveOnboardingLabels(); goToSlide(currentSlide - 1); };
+      backBtn.onclick = () => { saveOnboardingLabels(); goToSlide(currentSlide - 1); };
       footer.appendChild(backBtn);
     }
 
@@ -148,7 +148,7 @@
     btn.className = 'ob-btn ob-btn-primary';
     btn.style.marginLeft = 'auto';
     btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
-    btn.onclick = async () => { await saveOnboardingLabels(); goToSlide(currentSlide + 1); };    
+    btn.onclick = () => { saveOnboardingLabels(); goToSlide(currentSlide + 1); };    
     return btn;
   }
 
@@ -580,14 +580,14 @@
   function applyTemplate() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
-    await saveOnboardingLabels();
+    saveOnboardingLabels();
   }
 
   // ── Clear all labels ──────────────────────────────────────────
   function clearAllLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = ''; labelsValues[i] = ''; });
-    await saveOnboardingLabels();
+    saveOnboardingLabels();
   }
 
   // ── Close button ──────────────────────────────────────────────
