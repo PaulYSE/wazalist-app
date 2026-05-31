@@ -145,7 +145,6 @@
       const container = document.getElementById('dashCompare');
       const keys = Object.keys(importedLists);
 
-      // Auto-select first if none selected or selection deleted
       if (compareSelectedKey && !importedLists[compareSelectedKey]) compareSelectedKey = null;
       if (!compareSelectedKey && keys.length) compareSelectedKey = keys[0];
 
@@ -160,44 +159,47 @@
         + '<button class="btn" id="cmpImportBtn" style="margin-left:auto">↓ Import List</button>'
         + '</div>';
 
+      // Shared save button HTML
+      const saveBtnHtml = '<div style="margin-top:10px;display:flex;gap:8px">'
+        + '<button class="btn" id="cmpExportBtn">↑ Export My List</button>'
+        + '<button class="btn" id="cmpSaveLabelsBtn" style="margin-left:auto">Save Labels</button>'
+        + '</div>';
+
       if (!keys.length) {
-        // No imported lists - show simple labels
         const markingCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) markingCounts[i]++; }); });
         const simpleLabelsHTML = '<div class="dsec2"><h3>My labels</h3>'
           + SHAPES.map((s, i) => '<div class="labels-row">'
-            + '<span class="labels-marking">' + s + '</span>'
-            + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="labels-count">' + markingCounts[i] + ' waza</span>'
-            + '</div>').join('')
-          + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
+              + '<span class="labels-marking">' + s + '</span>'
+              + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+              + '<span class="labels-count">' + markingCounts[i] + ' waza</span>'
+              + '</div>').join('')
+          + saveBtnHtml
           + '</div>';
+
         container.innerHTML = simpleLabelsHTML + headerHtml + '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
+
         container.querySelector('#cmpExportBtn').addEventListener('click', openExportModal);
-        container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; saveLabels(); }); });
         container.querySelector('#cmpImportBtn').addEventListener('click', () => openImportModal());
+        container.querySelector('#cmpSaveLabelsBtn').addEventListener('click', () => {
+          container.querySelectorAll('.labels-input').forEach(inp => { markingLabels[+inp.dataset.si] = inp.value; });
+          saveLabels();
+          showToast('Labels saved', 'green');
+        });
         return;
       }
 
       const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
 
-      // Combined labels - shows both imported and user's labels in one table
       let combinedLabelsHTML = '';
       if (imp) {
-        // Count markings for both imported list and user's list
         const impMarkingCounts = Array(6).fill(0);
         const myMarkingCounts = Array(6).fill(0);
-        
-        // Count imported markings
         if (imp.marks) {
           Object.values(imp.marks).forEach(mark => {
-            if (mark.markings) {
-              mark.markings.forEach((on, i) => { if (on) impMarkingCounts[i]++; });
-            }
+            if (mark.markings) mark.markings.forEach((on, i) => { if (on) impMarkingCounts[i]++; });
           });
         }
-        
-        // Count user's markings (only for waza in the imported list)
         const importedIds = new Set(Object.keys(imp.marks).map(Number));
         wazaData.forEach(w => {
           if (importedIds.has(w.id)) {
@@ -205,7 +207,7 @@
             if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; });
           }
         });
-        
+
         combinedLabelsHTML = '<div class="dsec2"><h3>Labels comparison</h3>'
           + SHAPES.map((s, i) => {
               const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
@@ -214,8 +216,8 @@
                 + '<span class="labels-marking">' + s + '</span>'
                 + '<div class="labels-combined">'
                   + '<div class="labels-stacked">'
-                    + '<div class="labels-imported" title="Their label">' 
-                      + (impLabel ? escHtml(impLabel) : '<span style="color:var(--text3);font-style:italic">Unlabeled</span>') 
+                    + '<div class="labels-imported" title="Their label">'
+                      + (impLabel ? escHtml(impLabel) : '<span style="color:var(--text3);font-style:italic">Unlabeled</span>')
                     + '</div>'
                     + '<div class="labels-divider"></div>'
                     + '<input class="labels-input-bottom" data-si="' + i + '" type="text" maxlength="32" placeholder="Your label…" value="' + myLabel.replace(/"/g, '&quot;') + '" title="Your label">'
@@ -228,40 +230,32 @@
                 + '</div>'
                 + '</div>';
             }).join('')
-          + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
+          + saveBtnHtml
           + '</div>';
       } else {
-        // No imported list selected - show only user's labels
         const myMarkingCounts = Array(6).fill(0);
         wazaData.forEach(w => { const p = getP(w.id); if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; }); });
         combinedLabelsHTML = '<div class="dsec2"><h3>My labels</h3>'
           + SHAPES.map((s, i) => '<div class="labels-row">'
-            + '<span class="labels-marking">' + s + '</span>'
-            + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
-            + '<span class="labels-count">' + myMarkingCounts[i] + ' waza</span>'
-            + '</div>').join('')
-          + '<div style="margin-top:10px"><button class="btn" id="cmpExportBtn">↑ Export My List</button></div>'
+              + '<span class="labels-marking">' + s + '</span>'
+              + '<input class="labels-input" data-si="' + i + '" type="text" maxlength="32" placeholder="Label this marking…" value="' + markingLabels[i].replace(/"/g, '&quot;') + '">'
+              + '<span class="labels-count">' + myMarkingCounts[i] + ' waza</span>'
+              + '</div>').join('')
+          + saveBtnHtml
           + '</div>';
       }
 
-      // Rows: all waza IDs from imported marks, sorted by waza order
       const importedIds = imp ? new Set(Object.keys(imp.marks).map(Number)) : new Set();
       const rows = wazaData.filter(w => importedIds.has(w.id));
-
       const colHeaders = '<div class="cmp-col-headers"><span>Waza</span><span>Their marks</span><span>Your marks</span></div>';
-
       const rowsHtml = rows.map(w => {
         const importedMark = imp ? (imp.marks[w.id] || { markings: Array(6).fill(false), like: null }) : { markings: Array(6).fill(false), like: null };
         const myP = getP(w.id);
         const myMarkings = myP.markings || Array(6).fill(false);
         const impMarkings = importedMark.markings || Array(6).fill(false);
-        // const impLike = importedMark.like;
-        // const impLikeBadge = impLike==='like'?'<span class="badge b-like" style="font-size:10px">👍</span>':impLike==='dislike'?'<span class="badge b-dislike" style="font-size:10px">👎</span>':'';
         return '<div class="cmp-row" data-id="' + w.id + '">'
           + '<div><div class="cmp-name-jp">' + (w.name_jp || '—') + '</div><div class="cmp-name-en">' + dispName(w) + '</div></div>'
-          + '<div class="cmp-markings-imported">' + markingPips(impMarkings)
-          // +impLikeBadge
-          + '</div>'
+          + '<div class="cmp-markings-imported">' + markingPips(impMarkings) + '</div>'
           + '<div class="cmp-markings-mine">'
           + SHAPES.map((s, i) => '<button class="cmp-marking-btn' + (myMarkings[i] ? ' on' : '') + '" data-wid="' + w.id + '" data-si="' + i + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</button>').join('')
           + '</div>'
@@ -273,10 +267,14 @@
       container.innerHTML = combinedLabelsHTML + headerHtml + (rows.length ? colHeaders : '') + rowsHtml + emptyRows;
 
       container.querySelector('#cmpExportBtn')?.addEventListener('click', openExportModal);
-      container.querySelectorAll('.labels-input').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; saveLabels(); }); });
-      container.querySelectorAll('.labels-input-bottom').forEach(inp => { inp.addEventListener('input', () => { markingLabels[+inp.dataset.si] = inp.value; saveLabels(); }); });
 
-      // Events
+      // Save button — single handler covers both .labels-input and .labels-input-bottom
+      container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
+        container.querySelectorAll('.labels-input, .labels-input-bottom').forEach(inp => { markingLabels[+inp.dataset.si] = inp.value; });
+        saveLabels();
+        showToast('Labels saved', 'green');
+      });
+
       container.querySelector('#cmpSelect').addEventListener('change', e => {
         compareSelectedKey = e.target.value || null;
         renderDashCompare();
@@ -292,7 +290,6 @@
         renderDashCompare();
       });
 
-      // Marking buttons in compare view — call saveP (existing save path)
       container.querySelectorAll('.cmp-marking-btn').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
@@ -304,7 +301,6 @@
         });
       });
 
-      // Row click — navigate to browse
       container.querySelectorAll('.cmp-row').forEach(el => {
         el.addEventListener('click', e => {
           if (e.target.classList.contains('cmp-marking-btn')) return;
@@ -313,7 +309,6 @@
         });
       });
     }
-
 
     // ── Compare sub-tab switching ─────────────────────────────────
     // ── Text Import ───────────────────────────────────────────────
