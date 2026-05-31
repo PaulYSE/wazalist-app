@@ -10,7 +10,6 @@
   opacity: 0; transition: opacity .35s ease;
 }
 #wlOnboarding.ob-visible { opacity: 1; }
-#wlOnboarding.ob-hidden { opacity: 0; pointer-events: none; }
 
 .ob-card {
   background: var(--bg1);

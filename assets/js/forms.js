@@ -91,6 +91,19 @@
             <div style="font-size:13px;color:var(--text3);margin-bottom:16px">You're using guest mode. Your data is stored locally in your browser.</div>
           </div>`;
 
+      // Actions section (logout/sign out)
+      const actionsHTML = loggedIn
+        ? `<div class="dsec2" style="margin-top:20px">
+            <button class="btn" id="logoutBtn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2)">
+              Sign Out
+            </button>
+          </div>`
+        : `<div class="dsec2" style="margin-top:20px">
+            <button class="btn" id="signInBtn" style="background:var(--accent);border:1px solid var(--accent);color:white">
+              Sign In / Register
+            </button>
+          </div>`;
+
       // Progress stats - prog is an object keyed by waza_id
       const progEntries = Object.values(prog);
       const totalMarked = progEntries.filter(p => p.markings && p.markings.some(m => m)).length;
@@ -143,19 +156,6 @@
           🗑️ Reset All Progress
         </button>
       </div>`;
-
-      // Actions section (logout/sign out)
-      const actionsHTML = loggedIn
-        ? `<div class="dsec2" style="margin-top:20px">
-            <button class="btn" id="logoutBtn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2)">
-              Sign Out
-            </button>
-          </div>`
-        : `<div class="dsec2" style="margin-top:20px">
-            <button class="btn" id="signInBtn" style="background:var(--accent);border:1px solid var(--accent);color:white">
-              Sign In / Register
-            </button>
-          </div>`;
 
       // Delete account (logged-in users only) — bottom-most option
       const deleteAccountHTML = loggedIn

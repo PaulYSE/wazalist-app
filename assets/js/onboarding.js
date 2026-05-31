@@ -54,9 +54,7 @@
   function closeOnboarding() {
     const el = document.getElementById('wlOnboarding');
     el.classList.remove('ob-visible');
-    el.classList.add('ob-hidden');
-    setTimeout(() => { el.style.display = 'none'; }, 350);
-    // Onboarding can be reopened anytime via Guide button
+    setTimeout(() => { el.style.display = 'none'; }, 150);
   }
 
   // ── Slide navigation ──────────────────────────────────────────
@@ -553,14 +551,14 @@
       inp.value = existing[i] || labelsValues[i] || '';
       inp.oninput = () => {
         labelsValues[i] = inp.value;
-        saveLabels();
+        saveOnboardingLabels();
       };
       row.appendChild(inp);
       container.appendChild(row);
     });
   }
 
-  function saveLabels() {
+  function saveOnboardingLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     const vals = Array.from(inputs).map(i => i.value.trim());
     // Update window.markingLabels which is the main app's variable
@@ -586,7 +584,7 @@
       TEMPLATE.forEach((v, i) => { window.markingLabels[i] = v; }); 
       // Call main app's saveLabels if available
       if (typeof window.saveLabels === 'function') {
-        window.saveLabels();
+        saveOnboardingLabels();
       } else {
         localStorage.setItem('wl_marking_labels', JSON.stringify(TEMPLATE));
       }
@@ -606,7 +604,7 @@
       emptyLabels.forEach((v, i) => { window.markingLabels[i] = v; }); 
       // Call main app's saveLabels if available
       if (typeof window.saveLabels === 'function') {
-        window.saveLabels();
+        saveOnboardingLabels();
       } else {
         localStorage.setItem('wl_marking_labels', JSON.stringify(emptyLabels));
       }
