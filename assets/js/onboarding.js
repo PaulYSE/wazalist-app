@@ -5,7 +5,7 @@
   'use strict';
 
   // ── Config ────────────────────────────────────────────────────
-  const TEMPLATE = ['Want to Learn','Learning','Complete','My Favourite Waza','Forgot',''];
+  const TEMPLATE = ['Want to Learn','Learning','Complete','Favourite','Oriwaza','Forgotten'];
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
@@ -52,6 +52,7 @@
   }
 
   function closeOnboarding() {
+    saveOnboardingLabels();
     const el = document.getElementById('wlOnboarding');
     el.classList.remove('ob-visible');
     setTimeout(() => { el.style.display = 'none'; }, 150);
@@ -549,10 +550,7 @@
       inp.maxLength = 32;
       inp.placeholder = 'Label this marking…';
       inp.value = existing[i] || labelsValues[i] || '';
-      inp.oninput = () => {
-        labelsValues[i] = inp.value;
-        saveOnboardingLabels();
-      };
+      inp.oninput = () => { labelsValues[i] = inp.value; };
       row.appendChild(inp);
       container.appendChild(row);
     });
@@ -561,18 +559,14 @@
   function saveOnboardingLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     const vals = Array.from(inputs).map(i => i.value.trim());
-    // Update window.markingLabels which is the main app's variable
-    if (window.markingLabels) { 
-      vals.forEach((v, i) => { window.markingLabels[i] = v; }); 
-      // Call main app's saveLabels function if available (saves to localStorage and server)
+    if (window.markingLabels) {
+      vals.forEach((v, i) => { window.markingLabels[i] = v; });
       if (typeof window.saveLabels === 'function') {
         window.saveLabels();
       } else {
-        // Fallback if main saveLabels not available
         localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
       }
     } else {
-      // Fallback if markingLabels not available
       localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
     }
     if (typeof renderStats === 'function') renderStats();
@@ -580,41 +574,16 @@
 
   // ── Apply template ────────────────────────────────────────────
   function applyTemplate() {
-    if (window.markingLabels) { 
-      TEMPLATE.forEach((v, i) => { window.markingLabels[i] = v; }); 
-      // Call main app's saveLabels if available
-      if (typeof window.saveLabels === 'function') {
-        saveOnboardingLabels();
-      } else {
-        localStorage.setItem('wl_marking_labels', JSON.stringify(TEMPLATE));
-      }
-    } else {
-      localStorage.setItem('wl_marking_labels', JSON.stringify(TEMPLATE));
-    }
-    if (typeof renderStats === 'function') renderStats();
-    // Update the preview inputs
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
-    inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; });
+    inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
+    saveOnboardingLabels();
   }
 
   // ── Clear all labels ──────────────────────────────────────────
   function clearAllLabels() {
-    const emptyLabels = ['','','','','',''];
-    if (window.markingLabels) { 
-      emptyLabels.forEach((v, i) => { window.markingLabels[i] = v; }); 
-      // Call main app's saveLabels if available
-      if (typeof window.saveLabels === 'function') {
-        saveOnboardingLabels();
-      } else {
-        localStorage.setItem('wl_marking_labels', JSON.stringify(emptyLabels));
-      }
-    } else {
-      localStorage.setItem('wl_marking_labels', JSON.stringify(emptyLabels));
-    }
-    if (typeof renderStats === 'function') renderStats();
-    // Update the preview inputs
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
-    inputs.forEach(inp => { inp.value = ''; });
+    inputs.forEach((inp, i) => { inp.value = ''; labelsValues[i] = ''; });
+    saveOnboardingLabels();
   }
 
   // ── Close button ──────────────────────────────────────────────
