@@ -556,13 +556,13 @@
     });
   }
 
-  async function saveOnboardingLabels() {
+  function saveOnboardingLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     if (!inputs.length) return;
     inputs.forEach((inp, i) => {
       if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
     });
-    await window.saveLabels?.();
+    saveLabels();
     if (typeof renderStats === 'function') renderStats();
   }
 

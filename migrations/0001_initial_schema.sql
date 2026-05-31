@@ -12,20 +12,27 @@ CREATE TABLE IF NOT EXISTS waza (
     name_en           TEXT,
     name_en_literal   TEXT,
     name_en_gtranslate TEXT,
+    name_cn_gtranslate TEXT,
     reference         TEXT,
     tag               TEXT,
     parent_jp0        TEXT,
     parent_en0        TEXT,
     parent_jp1        TEXT,
     parent_en1        TEXT,
-    author_jp         TEXT,
-    author_en         TEXT,
+    author_jp0        TEXT,
+    author_en0        TEXT,
+    author_jp1        TEXT,
+    author_en1        TEXT,
     video0            TEXT,
     video1            TEXT,
     video2            TEXT,
     video3            TEXT,
     video4            TEXT,
-    video5            TEXT
+    video5            TEXT,
+    video6            TEXT,
+    video7            TEXT,
+    video8            TEXT,
+    video9            TEXT
 );
 
 -- User accounts.
