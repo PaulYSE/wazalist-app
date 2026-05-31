@@ -558,21 +558,11 @@
 
   async function saveOnboardingLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
-    
-    // not on labels slide, nothing to save
-    if (!inputs.length) return; 
-
-    const vals = Array.from(inputs).map(i => i.value.trim());
-    if (window.markingLabels) {
-      vals.forEach((v, i) => { window.markingLabels[i] = v; });
-      if (typeof window.saveLabels === 'function') {
-        await window.saveLabels();
-      } else {
-        localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
-      }
-    } else {
-      localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
-    }
+    if (!inputs.length) return;
+    inputs.forEach((inp, i) => {
+      if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
+    });
+    await window.saveLabels?.();
     if (typeof renderStats === 'function') renderStats();
   }
 
