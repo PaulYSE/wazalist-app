@@ -40,6 +40,12 @@
 
   // ── Show / hide ───────────────────────────────────────────────
   function showOnboarding() {
+    if (window.markingLabels) {
+      window.markingLabels.forEach((v, i) => { labelsValues[i] = v; });
+    } else {
+      labelsValues.fill('');
+    }
+    currentSlide = 0;
     const el = document.getElementById('wlOnboarding');
     el.style.display = 'flex';
     requestAnimationFrame(() => {
@@ -538,8 +544,12 @@
     if (!container) return;
     container.innerHTML = '';
     // Load existing labels from app
-    let existing = ['','','','','',''];
-    try { existing = JSON.parse(localStorage.getItem('wl_marking_labels') || '["","","","","",""]'); } catch {}
+    if (labelsValues.every(v => v === '')) {
+      try {
+        const stored = JSON.parse(localStorage.getItem('wl_marking_labels') || '["","","","","",""]');
+        stored.forEach((v, i) => { labelsValues[i] = v; });
+      } catch {}
+    }    
     SHAPES_OB.forEach((sh, i) => {
       const row = document.createElement('div');
       row.className = 'ob-labels-row';
@@ -549,7 +559,7 @@
       inp.type = 'text';
       inp.maxLength = 32;
       inp.placeholder = 'Label this marking…';
-      inp.value = existing[i] || labelsValues[i] || '';
+      inp.value = labelsValues[i];
       inp.oninput = () => { labelsValues[i] = inp.value; };
       row.appendChild(inp);
       container.appendChild(row);
@@ -561,6 +571,7 @@
     if (!inputs.length) return;
     inputs.forEach((inp, i) => {
       if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
+      labelsValues[i] = inp.value.trim();
     });
     saveLabels();
     if (typeof renderStats === 'function') renderStats();
