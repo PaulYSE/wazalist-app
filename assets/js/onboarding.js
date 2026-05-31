@@ -52,7 +52,7 @@
   }
 
   function closeOnboarding() {
-    saveOnboardingLabels();
+    await saveOnboardingLabels();
     const el = document.getElementById('wlOnboarding');
     el.classList.remove('ob-visible');
     setTimeout(() => { el.style.display = 'none'; }, 150);
@@ -103,7 +103,7 @@
       const backBtn = document.createElement('button');
       backBtn.className = 'ob-btn';
       backBtn.textContent = '← Back';
-      backBtn.onclick = () => goToSlide(currentSlide - 1);
+      backBtn.onclick = async () => { await saveOnboardingLabels(); goToSlide(currentSlide - 1); };
       footer.appendChild(backBtn);
     }
 
@@ -148,7 +148,7 @@
     btn.className = 'ob-btn ob-btn-primary';
     btn.style.marginLeft = 'auto';
     btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
-    btn.onclick = () => goToSlide(currentSlide + 1);
+    btn.onclick = async () => { await saveOnboardingLabels(); goToSlide(currentSlide + 1); };    
     return btn;
   }
 
@@ -556,13 +556,17 @@
     });
   }
 
-  function saveOnboardingLabels() {
+  async function saveOnboardingLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
+    
+    // not on labels slide, nothing to save
+    if (!inputs.length) return; 
+
     const vals = Array.from(inputs).map(i => i.value.trim());
     if (window.markingLabels) {
       vals.forEach((v, i) => { window.markingLabels[i] = v; });
       if (typeof window.saveLabels === 'function') {
-        window.saveLabels();
+        await window.saveLabels();
       } else {
         localStorage.setItem('wl_marking_labels', JSON.stringify(vals));
       }
@@ -576,14 +580,14 @@
   function applyTemplate() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
-    saveOnboardingLabels();
+    await saveOnboardingLabels();
   }
 
   // ── Clear all labels ──────────────────────────────────────────
   function clearAllLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = ''; labelsValues[i] = ''; });
-    saveOnboardingLabels();
+    await saveOnboardingLabels();
   }
 
   // ── Close button ──────────────────────────────────────────────
