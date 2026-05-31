@@ -1,0 +1,277 @@
+/* onboarding.css — styles for the first-run onboarding overlay (#wlOnboarding). */
+/* ── Onboarding overlay ── */
+#wlOnboarding {
+  position: fixed; inset: 0;
+  background: rgba(6,5,12,0.92);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; transition: opacity .35s ease;
+}
+#wlOnboarding.ob-visible { opacity: 1; }
+#wlOnboarding.ob-hidden { opacity: 0; pointer-events: none; }
+
+.ob-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 520px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(124,111,247,.15);
+  position: relative;
+}
+
+/* Progress dots */
+.ob-progress {
+  display: flex; gap: 6px; align-items: center;
+  padding: 18px 24px 0;
+  flex-shrink: 0;
+}
+.ob-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border);
+  transition: background .25s, transform .25s;
+}
+.ob-dot.active {
+  background: var(--accent);
+  transform: scale(1.4);
+}
+.ob-dot.done { background: var(--accent2); }
+
+/* Close button */
+.ob-close {
+  margin-left: auto;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.ob-close:hover { background: var(--bg2); color: var(--text1); }
+
+/* Slides viewport */
+.ob-viewport {
+  flex: 1; 
+  overflow-x: hidden; /* Hide horizontal overflow for carousel */
+  overflow-y: auto; /* SCROLL HERE - viewport scrolls vertically */
+  position: relative;
+  min-height: 0; /* Critical for flex children to respect parent height */
+}
+.ob-slides {
+  display: flex;
+  transition: transform .38s cubic-bezier(.4,0,.2,1);
+  min-height: 100%; /* Min height to fill viewport, but can grow taller */
+}
+.ob-slide {
+  min-width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+/* Children use default block layout with margins for spacing */
+.ob-slide > * + * {
+  margin-top: 12px;
+}
+
+/* Show scrollbar for onboarding viewport */
+.ob-viewport {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border) var(--bg0); /* Firefox: thumb track */
+}
+.ob-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+.ob-viewport::-webkit-scrollbar-track {
+  background: var(--bg0);
+  border-radius: 4px;
+}
+.ob-viewport::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.ob-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+.ob-slide-icon { font-size: 38px; line-height: 1; }
+.ob-slide-title {
+  font-size: 22px; font-weight: 700; color: var(--text1);
+  line-height: 1.25;
+}
+.ob-slide-title span { color: var(--accent); }
+.ob-slide-sub {
+  font-size: 14px; color: var(--text2); line-height: 1.55;
+}
+.ob-slide-note {
+  font-size: 12px; color: var(--text3); font-style: italic;
+}
+
+/* Demo area */
+.ob-demo {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-top: 4px;
+}
+
+/* Browse demo list - uses real waza-list components */
+#obBrowseList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#obBrowseList .waza-list {
+  pointer-events: none; /* disable clicking in demo */
+  cursor: default;
+}
+
+/* Fuzzy search demo */
+.ob-search-demo input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 14px; outline: none;
+  transition: border-color .15s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.ob-search-demo input:focus { border-color: var(--accent); }
+#obSearchResults {
+  margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
+  min-height: 56px;
+}
+/* Animate search results appearing (using actual .waza-compact from main app) */
+#obSearchResults .waza-compact {
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .18s, transform .18s;
+}
+#obSearchResults .waza-compact.show { opacity: 1; transform: none; }
+.ob-no-results { font-size: 13px; color: var(--text3); padding: 4px 0; }
+
+/* Card style demo - wrapper only */
+.ob-style-demo { display: flex; flex-direction: column; gap: 8px; }
+.ob-style-pill {
+  padding: 10px 14px;
+  border-radius: var(--r);
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+}
+.ob-style-pill:hover { background: var(--bg2); }
+.ob-style-pill.selected {
+  border-color: var(--accent);
+  background: rgba(124,111,247,.08);
+}
+.ob-style-pill .sp-label {
+  font-size: 12px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+  display: block;
+}
+.ob-style-pill.selected .sp-label { color: var(--accent); }
+/* Scale down the real components slightly for preview */
+.ob-style-pill .waza-list,
+.ob-style-pill .waza-card,
+.ob-style-pill .waza-compact {
+  pointer-events: none; /* prevent clicking inside preview */
+  font-size: 13px; /* slightly smaller */
+}
+.ob-style-pill .waza-list { margin-bottom: 4px; }
+.ob-style-pill .waza-list:last-child { margin-bottom: 0; }
+.ob-style-pill .waza-compact { margin-bottom: 0; border-bottom: none; }
+.ob-style-pill .waza-compact:first-child { border-radius: 5px 5px 0 0; }
+.ob-style-pill .waza-compact:last-child { border-radius: 0 0 5px 5px; border-bottom: 1px solid var(--border); }
+.ob-style-pill .waza-compact:not(:first-child):not(:last-child) { border-radius: 0; }
+
+/* Marking marking demo - use real app's waza-compact (compact) style + cmp-marking-btn */
+.ob-marking-demo { 
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+/* waza-compact styling is already in main app CSS - just add container wrapper */
+.ob-marking-demo .waza-compact {
+  cursor: default; /* disable hover pointer in demo */
+}
+.ob-marking-demo .waza-compact:last-child {
+  border-bottom: none; /* remove border on last item */
+}
+
+/* Labels / "you decide" slide */
+.ob-labels { display: flex; flex-direction: column; gap: 6px; }
+.ob-labels-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px; border-radius: var(--r);
+  background: var(--bg0); border: 1px solid var(--border);
+}
+.ob-labels-marking { font-size: 16px; width: 22px; text-align: center; }
+.ob-labels-input {
+  flex: 1; padding: 4px 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text1); font-size: 13px;
+  outline: none; font-family: inherit;
+}
+.ob-labels-input:focus { border-color: var(--accent); }
+
+/* Template slide */
+.ob-template { display: flex; flex-direction: column; gap: 6px; }
+.ob-tpl-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: var(--r);
+  background: var(--bg0); border: 1px solid var(--border);
+}
+.ob-tpl-marking { font-size: 15px; width: 20px; text-align: center; }
+.ob-tpl-label { font-size: 13px; color: var(--text2); }
+
+/* Footer / buttons */
+.ob-footer {
+  padding: 16px 24px 20px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  background: var(--bg1);
+  flex-shrink: 0;
+}
+.ob-btn {
+  padding: 9px 18px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+.ob-btn:hover { background: var(--bg3); color: var(--text1); }
+.ob-btn-primary {
+  background: var(--accent2);
+  border-color: var(--accent);
+  color: #fff;
+  margin-left: auto;
+}
+.ob-btn-primary:hover { background: var(--accent); }
+.ob-btn-green {
+  background: #002a10;
+  border-color: var(--green);
+  color: var(--green);
+}
+.ob-btn-green:hover { background: #003d18; }
+
+/* Slide-in animation for demo items */
+@keyframes obFadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:none; }
+}
+.ob-animate { animation: obFadeUp .3s ease forwards; }

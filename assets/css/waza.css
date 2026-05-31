@@ -1,0 +1,627 @@
+/* waza.css — the waza list/cards, marking pips, expanded card,
+   detail panel, video references, and the like pill. */
+    /* ── Browse main ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0
+    }
+
+    .list-panel {
+      width: 320px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: var(--bg0)
+    }
+
+    .detail-panel {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg1);
+      padding: 20px
+    }
+
+    .count-bar {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text3);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg1)
+    }
+
+    /* ── Waza (List Style) ── */
+    .waza-list {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .12s;
+      border-left: 3px solid transparent
+    }
+
+    .waza-list:hover {
+      filter: brightness(1.08)
+    }
+
+    .waza-list.selected {
+      outline: 1px solid var(--accent)
+    }
+
+    /* Marking tints — colors computed by markingStyle() in JS via circular hue blending */
+    /* .sh-active is set when any markings are on; actual background/border come from inline styles */
+    .waza-list.sh-active,
+    .waza-card.sh-active,
+    .waza-compact.sh-active {
+      /* colors applied inline */
+    }
+
+    .waza-list .njp {
+      font-size: 15px;
+      font-weight: 500
+    }
+
+    .waza-list .nen {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 1px
+    }
+
+    .waza-list .badges {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+      align-items: center
+    }
+
+    /* card bottom row: markings left, mini like-pill right */
+    .card-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 5px;
+      gap: 6px;
+      min-width: 0
+    }
+
+    .card-bottom-row .markings-row {
+      flex: 1;
+      min-width: 0
+    }
+
+    /* mini like pill on cards */
+    .card-like-pill {
+      display: inline-flex;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      flex-shrink: 0
+    }
+
+    .card-like-pill span {
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text3);
+      white-space: nowrap
+    }
+
+    .card-like-pill span:first-child {
+      border-right: 1px solid var(--border)
+    }
+
+    .card-like-pill span.like-on {
+      background: #001a2a;
+      color: #60b8f0
+    }
+
+    .card-like-pill span.dislike-on {
+      background: #2a0010;
+      color: #e080a0
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 500;
+      white-space: nowrap
+    }
+
+    .b-tag {
+      background: #2a2040;
+      color: #b3a8f0;
+      border: 1px solid #3d3560
+    }
+
+    .b-like {
+      background: #001a2a;
+      color: #60b8f0;
+      border: 1px solid #004a7a
+    }
+
+    .b-dislike {
+      background: #2a0010;
+      color: #e080a0;
+      border: 1px solid #5a0020
+    }
+
+    /* ── Marking pips ── */
+    .markings-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap
+    }
+
+    .marking-pip {
+      font-size: 13px;
+      line-height: 1;
+      opacity: .2;
+      transition: opacity .12s
+    }
+
+    .marking-pip.on {
+      opacity: 1
+    }
+
+    /* ── Expanded waza card (My List) ── */
+    .waza-card {
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: filter .12s
+    }
+
+    .waza-card:hover {
+      filter: brightness(1.06)
+    }
+
+    .wce-header {
+      padding: 12px 14px 8px
+    }
+
+    .wce-header .njp {
+      font-size: 15px;
+      font-weight: 600
+    }
+
+    .wce-header .nen {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .wce-badges {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      align-items: center
+    }
+
+    .wce-markings {
+      margin-top: 6px
+    }
+
+    .wce-videos {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 8px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, .15)
+    }
+
+    .vid-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      font-size: 12px;
+      color: var(--text2);
+      text-decoration: none;
+      transition: all .12s;
+      white-space: nowrap
+    }
+
+    .vid-btn:hover {
+      border-color: var(--accent);
+      color: var(--text1)
+    }
+
+    .vid-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    /* ── Detail panel ── */
+    .d-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text3);
+      gap: 8px;
+      font-size: 15px
+    }
+
+    .d-njp {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 2px
+    }
+
+    .d-nen {
+      font-size: 16px;
+      color: var(--accent);
+      margin-bottom: 14px
+    }
+
+    .dsec {
+      margin-bottom: 18px
+    }
+
+    .dsec h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: 8px
+    }
+
+    /* collapsible section */
+    .dsec-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 0
+    }
+
+    .dsec-toggle h3 {
+      margin-bottom: 0
+    }
+
+    .dsec-toggle .toggle-arrow {
+      font-size: 11px;
+      color: var(--text3);
+      transition: transform .2s
+    }
+
+    .dsec-toggle.collapsed .toggle-arrow {
+      transform: rotate(-90deg)
+    }
+
+    .dsec-body {
+      margin-top: 8px
+    }
+
+    .dgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .dfield {
+      background: var(--bg2);
+      border-radius: var(--r);
+      padding: 8px 12px
+    }
+
+    .dfield .lbl {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 2px
+    }
+
+    .dfield .val {
+      font-size: 14px
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+      margin: 3px
+    }
+
+    .chip:hover {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    /* ── Video references ── */
+    .vlinks {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .vlink-item {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      background: var(--bg2)
+    }
+
+    .vlink-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text1)
+    }
+
+    .vlink-row a {
+      color: var(--text1);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 0;
+      min-width: 0
+    }
+
+    .vlink-row a:hover {
+      color: var(--accent)
+    }
+
+    .vlink-row .vico {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff
+    }
+
+    .vlink-meta {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px
+    }
+
+    .vlink-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text2)
+    }
+
+    .vlink-author {
+      font-size: 11px;
+      color: var(--text3);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .vlink-title.loading {
+      opacity: .45
+    }
+
+    @keyframes vlink-shimmer {
+      0% {
+        opacity: .3
+      }
+
+      50% {
+        opacity: .55
+      }
+
+      100% {
+        opacity: .3
+      }
+    }
+
+    .vlink-title.loading {
+      animation: vlink-shimmer 1.4s ease-in-out infinite
+    }
+
+    .vlink-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .vlink-row .ext-link {
+      font-size: 12px;
+      color: var(--text3);
+      flex-shrink: 0;
+      padding: 2px 4px;
+      margin-left: 8px;
+    }
+
+    .vlink-row .ext-link:hover {
+      color: var(--accent)
+    }
+
+    .play-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .12s;
+      white-space: nowrap
+    }
+
+    .play-btn:hover {
+      border-color: var(--accent);
+      color: var(--text1)
+    }
+
+    .play-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff
+    }
+
+    .embed-wrap {
+      display: none;
+      border-top: 1px solid var(--border);
+      background: #000;
+      position: relative;
+      padding-top: 56.25%
+    }
+
+    .embed-wrap.open {
+      display: block
+    }
+
+    .embed-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none
+    }
+
+    .vico {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff
+    }
+
+    .prog-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 6px
+    }
+
+
+    /* ── Like pill ── */
+    .like-pill-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 8px
+    }
+
+    .like-pill {
+      display: inline-flex;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg2)
+    }
+
+    .like-pill-half {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text2);
+      transition: background .12s, color .12s;
+      font-family: inherit;
+      white-space: nowrap
+    }
+
+    .like-pill-half:first-child {
+      border-right: 1px solid var(--border)
+    }
+
+    .like-pill-half:hover:not(:disabled) {
+      background: var(--bg3)
+    }
+
+    .like-pill-half .pill-count {
+      font-size: 11px;
+      opacity: .7
+    }
+
+    .like-pill-half.like-on {
+      background: #001a2a;
+      color: #60b8f0
+    }
+
+    .like-pill-half.dislike-on {
+      background: #2a0010;
+      color: #e080a0
+    }
+
+    .like-pill-half:disabled {
+      cursor: not-allowed;
+      opacity: .5
+    }
+
+    .like-ratio-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--bg3);
+      overflow: hidden;
+      width: 100%
+    }
+
+    .like-ratio-fill {
+      height: 100%;
+      background: #60b8f0;
+      border-radius: 2px;
+      transition: width .3s
+    }
+
+    .marking-btn {
+      padding: 5px 10px;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      color: var(--text2);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all .12s;
+      line-height: 1
+    }
+
+    .marking-btn:hover {
+      background: var(--bg3)
+    }
+
+    .marking-btn.on {
+      background: var(--bg3);
+      border-color: var(--accent);
+      color: var(--text1)
+    }
+

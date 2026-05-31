@@ -308,7 +308,7 @@ const LIKE_DOWN = -1;
 
 ### Setup
 1. Clone the repository
-2. Run database migrations (see schema above)
+2. Run database migrations: `npx wrangler d1 migrations apply DB --remote` (see `migrations/README.md`)
 3. Configure `wrangler.json` with your D1 database ID and KV namespace ID
 4. Deploy: `wrangler deploy`
 
@@ -336,18 +336,50 @@ Set in `wrangler.json`:
 
 ```
 wazalist-app/
-├── src/
-│   ├── index.ts          # Main worker entry point
-│   ├── auth.ts           # Authentication helpers
-│   ├── renderHtml.ts     # Serve main HTML
-│   └── renderAdmin.ts    # Serve admin panel
-├── assets/
-│   ├── index.html        # Main application UI
-│   └── admin.html        # Admin panel UI
-├── wrangler.json         # Cloudflare Workers config
-├── package.json          # Node.js dependencies
-└── README.md             # This file
+├── src/                       # Backend — Cloudflare Worker (TypeScript)
+│   ├── index.ts               # Router: all /api/... endpoints
+│   ├── auth.ts                # Password hashing + session lookup
+│   ├── renderHtml.ts          # Serves assets/index.html
+│   └── renderAdmin.ts         # Serves assets/admin.html
+├── assets/                    # Frontend — served to the browser unchanged
+│   ├── index.html             # Page markup + the <link>/<script> load list
+│   ├── admin.html             # Admin panel UI
+│   ├── css/                   # Styles, split by area
+│   │   ├── base.css           # reset, layout, auth, filter row
+│   │   ├── waza.css           # list/cards/detail/videos/like pill
+│   │   ├── panels.css         # dashboard, nav, stats, contributions
+│   │   ├── modals.css         # contribution/compare/import/share modals
+│   │   ├── mobile.css         # mobile menu, filter sheet, @media overrides
+│   │   └── onboarding.css     # onboarding overlay
+│   └── js/                    # App logic, split by area (plain classic scripts)
+│       ├── config.js          # constants
+│       ├── state.js           # app state + localStorage
+│       ├── app-core.js        # api(), login/guest, initApp, save progress
+│       ├── search.js          # search + fuzzy match + filterWaza
+│       ├── render-helpers.js  # marking styles/pips, video/oEmbed
+│       ├── render.js          # browse list + detail view
+│       ├── forms.js           # Contribute & Account tabs
+│       ├── export.js          # Excel export
+│       ├── stats.js           # Stats dashboard
+│       ├── ui.js              # placeholders, filter UI, mobile menu, escHtml
+│       ├── contribute-modals.js  # suggest-edit / new-waza dialogs
+│       ├── share.js           # share + compare
+│       ├── import-parser.js   # text-import engine (no DOM)
+│       ├── import-ui.js       # Import tab UI + Excel reading
+│       ├── main.js            # boot/wiring (load second-to-last)
+│       └── onboarding.js      # onboarding overlay (load LAST)
+├── migrations/                # D1 SQL schema (see migrations/README.md)
+│   └── 0001_initial_schema.sql
+├── wrangler.json              # Cloudflare Workers config
+├── package.json               # npm scripts + dev dependencies
+├── CONTRIBUTING.md            # How to contribute (start here if new to web dev)
+└── README.md                  # This file
 ```
+
+> **Frontend has no build step.** `assets/js/*.js` are loaded as ordinary
+> `<script>` tags that share one global scope, so the order in `index.html`
+> matters and you must not convert them to ES modules. See `CONTRIBUTING.md`
+> for the full explanation.
 
 ## Security
 
