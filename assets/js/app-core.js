@@ -124,9 +124,9 @@
     else startUsernamePlaceholderRotation();
 
     // ── Progress helpers ─────────────────────────────────────────
-    const emptyP = () => ({ markings: Array(6).fill(false), like: null });
-    const getP = id => prog[id] || emptyP();
-
+    var emptyP = function() { return { shapes: Array(6).fill(false), like: null }; };
+    var getP = function(id) { return prog[id] || emptyP(); };
+    
     // ── Labels helpers ───────────────────────────────────────────
     async function saveLabels() {
       // Always save to localStorage (for guest mode and offline access)
