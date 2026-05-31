@@ -52,7 +52,6 @@
   }
 
   function closeOnboarding() {
-    saveOnboardingLabels();
     const el = document.getElementById('wlOnboarding');
     el.classList.remove('ob-visible');
     setTimeout(() => { el.style.display = 'none'; }, 150);
@@ -103,7 +102,7 @@
       const backBtn = document.createElement('button');
       backBtn.className = 'ob-btn';
       backBtn.textContent = '← Back';
-      backBtn.onclick = () => { saveOnboardingLabels(); goToSlide(currentSlide - 1); };
+      backBtn.onclick = () => { goToSlide(currentSlide - 1); };
       footer.appendChild(backBtn);
     }
 
@@ -148,7 +147,7 @@
     btn.className = 'ob-btn ob-btn-primary';
     btn.style.marginLeft = 'auto';
     btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
-    btn.onclick = () => { saveOnboardingLabels(); goToSlide(currentSlide + 1); };    
+    btn.onclick = () => { goToSlide(currentSlide + 1); };    
     return btn;
   }
 
@@ -554,30 +553,34 @@
       row.appendChild(inp);
       container.appendChild(row);
     });
-  }
 
-  function saveOnboardingLabels() {
-    const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
-    if (!inputs.length) return;
-    inputs.forEach((inp, i) => {
-      if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
-    });
-    saveLabels();
-    if (typeof renderStats === 'function') renderStats();
+    // Save button — same pattern as share.js
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'ob-btn ob-btn-primary';
+    saveBtn.style.marginTop = '10px';
+    saveBtn.textContent = 'Save Labels';
+    saveBtn.onclick = () => {
+      container.querySelectorAll('.ob-labels-input').forEach((inp, i) => {
+        if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
+      });
+      window.saveLabels?.();
+      if (typeof renderStats === 'function') renderStats();
+      saveBtn.textContent = 'Saved ✓';
+      setTimeout(() => { saveBtn.textContent = 'Save Labels'; }, 1800);
+    };
+    container.appendChild(saveBtn);
   }
 
   // ── Apply template ────────────────────────────────────────────
   function applyTemplate() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
-    saveOnboardingLabels();
   }
 
   // ── Clear all labels ──────────────────────────────────────────
   function clearAllLabels() {
     const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
     inputs.forEach((inp, i) => { inp.value = ''; labelsValues[i] = ''; });
-    saveOnboardingLabels();
   }
 
   // ── Close button ──────────────────────────────────────────────
