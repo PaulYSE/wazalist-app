@@ -289,7 +289,6 @@
         <span class="dnjp">${w.name_jp}</span>
         <span class="dnen">${w.name_en}</span>
         ${w.tag ? `<span class="badge b-tag">${w.tag}</span>` : ''}
-        <span class="badge" style="background:rgba(124,111,247,.15);color:var(--accent);border:none;margin-left:auto">${isExact ? 'match' : 'fuzzy'}</span>
       `;
       
       resultsEl.appendChild(row);
