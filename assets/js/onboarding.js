@@ -106,10 +106,14 @@
 
     } else if (currentSlide === 9) {
       // Import slide (last slide) — "Skip" or "Import now"
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'ob-btn ob-btn-primary ob-btn-skip';
+      skipBtn.textContent = "Skip";
+      skipBtn.onclick = () => closeOnboarding();
+
       const importBtn = document.createElement('button');
-      importBtn.className = 'ob-btn ob-btn-primary';
-      importBtn.style.marginLeft = 'auto';
-      importBtn.textContent = '📥 Import now';
+      importBtn.className = 'ob-btn ob-btn-primary ob-btn-import';
+      importBtn.textContent = 'Import now';
       importBtn.onclick = () => {
         closeOnboarding();
         setTimeout(() => {
@@ -117,14 +121,6 @@
           if (navAcc) navAcc.click();
         }, 400);
       };
-
-      const skipBtn = document.createElement('button');
-      skipBtn.className = 'ob-btn ob-btn-primary';
-      skipBtn.style.marginLeft = currentSlide > 0 ? '0' : 'auto';
-      skipBtn.textContent = "I'll set up later";
-      skipBtn.onclick = () => closeOnboarding();
-      // Push skip to right if no back button
-      if (currentSlide === 0) skipBtn.style.marginLeft = 'auto';
 
       footer.appendChild(skipBtn);
       footer.appendChild(importBtn);
