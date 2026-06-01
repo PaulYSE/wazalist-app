@@ -13,7 +13,7 @@
   function getRealWaza() {
     // Access the global wazaData from the main app
     if (typeof wazaData !== 'undefined' && Array.isArray(wazaData) && wazaData.length > 0) {
-      return wazaData;
+      return wazaData.slice(0, 100);
     }
     // Fallback empty array if wazaData not yet loaded
     return [];
@@ -195,10 +195,10 @@
     
     // Use first 3 real waza with demo markings
     const demoItems = [
-      { waza: realWaza[0], markings: [false, false, true, true, false, false], likes: 67, dislikes: 0 },
-      { waza: realWaza[1], markings: [false, false, false, false, true, true], likes: 5, dislikes: 0 },
-      { waza: realWaza[2], markings: [true, false, false, false, false, false], likes: 3, dislikes: 1 },
-      { waza: realWaza[4], markings: [true, false, false, false, false, false], likes: 3, dislikes: 4 },
+      { waza: realWaza[0], markings: [true, false, false, true, true, false], likes: 67, dislikes: 0 },
+      { waza: realWaza[1], markings: [false, false, false, true, true, true], likes: 5, dislikes: 0 },
+      { waza: realWaza[2], markings: [true, true, false, false, false, false], likes: 3, dislikes: 1 },
+      { waza: realWaza[4], markings: [false, false, true, false, false, true], likes: 3, dislikes: 4 },
     ];
     
     // Build real waza-list components (same structure as main app's list view)
@@ -239,9 +239,6 @@
   }
 
   function autoTypeDemo(input) {
-    // Get a search term from real waza data
-    const realWaza = getRealWaza();
-
     // Search for a Snake waza
     let phrase = 'suneiku'; 
     
@@ -269,7 +266,7 @@
     }
     
     // Get real waza data
-    const realWaza = getRealWaza();
+    const realWaza = getRealWaza(); // Limit to first 100 for performance
     if (realWaza.length === 0) {
       resultsEl.innerHTML = '<div class="ob-no-results">Loading waza data...</div>';
       return;
@@ -351,7 +348,7 @@
     // Sample waza with demo data
     const samples = [
       { jp: realWaza[0].name_jp, en: realWaza[0].name_en, markings: [true,false,false,false,true,false] }, 
-      { jp: realWaza[1].name_jp, en: realWaza[1].name_en, markings: [false,true,false,false,false,false] }, 
+      { jp: realWaza[1].name_jp, en: realWaza[1].name_en, markings: [false,true,false,true,false,false] }, 
       { jp: realWaza[2].name_jp, en: realWaza[2].name_en, markings: [false,false,true,true,false,false] }, 
       { jp: realWaza[3].name_jp, en: realWaza[3].name_en, markings: [false,false,true,false,false,true] }, 
     ];
