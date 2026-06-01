@@ -95,6 +95,23 @@
       footer.appendChild(mkBackBtn());
     }
 
+    if (currentSlide === 5) {
+      // Save button — same pattern as share.js
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'ob-btn ob-btn-primary';
+      saveBtn.style.marginTop = '10px';
+      saveBtn.textContent = 'Save Labels';
+
+      saveBtn.onclick = () => {
+        labelsValues.forEach((value, i) => { markingLabels[i] = value.trim(); });
+        window.saveLabels?.();
+        if (typeof renderStats === 'function') renderStats();
+        saveBtn.textContent = 'Saved ✓';
+        setTimeout(() => { saveBtn.textContent = 'Save Labels'; }, 1800);
+      };
+      container.appendChild(saveBtn);
+    }
+
     if (currentSlide === 9) {
       // Import slide (last slide) — "Skip" or "Import now"
       const skipBtn = document.createElement('button');
@@ -451,22 +468,6 @@
       row.appendChild(inp);
       container.appendChild(row);
     });
-
-    // Save button — same pattern as share.js
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'ob-btn ob-btn-primary';
-    saveBtn.style.marginTop = '10px';
-    saveBtn.textContent = 'Save Labels';
-    saveBtn.onclick = () => {
-      container.querySelectorAll('.ob-labels-input').forEach((inp, i) => {
-        markingLabels[i] = inp.value.trim(); // drop window. and the if-guard
-      });
-      window.saveLabels?.();
-      if (typeof renderStats === 'function') renderStats();
-      saveBtn.textContent = 'Saved ✓';
-      setTimeout(() => { saveBtn.textContent = 'Save Labels'; }, 1800);
-    };
-    container.appendChild(saveBtn);
   }
 
   // ── Apply template ────────────────────────────────────────────
