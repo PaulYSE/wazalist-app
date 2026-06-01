@@ -17,7 +17,7 @@
 		}
   	],
 	"assets": {
-		"directory": "./assets",
+		"directory": "./public",
 		"binding": "ASSETS"
 	},
 	"observability": {

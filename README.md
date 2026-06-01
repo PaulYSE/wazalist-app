@@ -339,9 +339,9 @@ wazalist-app/
 ├── src/                       # Backend — Cloudflare Worker (TypeScript)
 │   ├── index.ts               # Router: all /api/... endpoints
 │   ├── auth.ts                # Password hashing + session lookup
-│   ├── renderHtml.ts          # Serves assets/index.html
-│   └── renderAdmin.ts         # Serves assets/admin.html
-├── assets/                    # Frontend — served to the browser unchanged
+│   ├── renderHtml.ts          # Serves public/index.html
+│   └── renderAdmin.ts         # Serves public/admin.html
+├── public/                    # Frontend — served to the browser unchanged
 │   ├── index.html             # Page markup + the <link>/<script> load list
 │   ├── admin.html             # Admin panel UI
 │   ├── css/                   # Styles, split by area
@@ -376,7 +376,7 @@ wazalist-app/
 └── README.md                  # This file
 ```
 
-> **Frontend has no build step.** `assets/js/*.js` are loaded as ordinary
+> **Frontend has no build step.** `public/js/*.js` are loaded as ordinary
 > `<script>` tags that share one global scope, so the order in `index.html`
 > matters and you must not convert them to ES modules. See `CONTRIBUTING.md`
 > for the full explanation.
