@@ -92,19 +92,10 @@
 
     // Back button (all slides except first)
     if (currentSlide > 0) {
-      const backBtn = document.createElement('button');
-      backBtn.className = 'ob-btn';
-      backBtn.textContent = '← Back';
-      backBtn.onclick = () => { goToSlide(currentSlide - 1); };
-      footer.appendChild(backBtn);
+      footer.appendChild(mkBackBtn());
     }
 
-    if (currentSlide === 5) {
-      // Combined labels + template slide — "Skip" or "Next"
-      const next = mkNextBtn();
-      footer.appendChild(next);
-
-    } else if (currentSlide === 9) {
+    if (currentSlide === 9) {
       // Import slide (last slide) — "Skip" or "Import now"
       const skipBtn = document.createElement('button');
       skipBtn.className = 'ob-btn ob-btn-primary';
@@ -124,13 +115,20 @@
 
       footer.appendChild(skipBtn);
       footer.appendChild(importBtn);
+    }
 
-    } else {
-      // Default: Next button pushed to right
+    if (currentSlide < SLIDE_COUNT - 1) {
       footer.appendChild(mkNextBtn());
     }
   }
 
+  function mkBackBtn() {
+    const btn = document.createElement('button');
+    btn.className = 'ob-btn';
+    btn.textContent = '← Back';
+    btn.onclick = () => { goToSlide(currentSlide - 1); };
+    return btn;
+  }
   function mkNextBtn() {
     const btn = document.createElement('button');
     btn.className = 'ob-btn ob-btn-primary';
