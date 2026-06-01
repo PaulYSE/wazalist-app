@@ -99,6 +99,23 @@
     // ── Filter logic ─────────────────────────────────────────────
     const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
+    // Fields to search within each waza for the search query
+    const SEARCH_FIELDS = [
+      'name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'name_cn_gtranslate',
+      'reference', 'tag',
+      'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1',
+      'author_jp0', 'author_en0', 'author_jp1', 'author_en1',
+    ];
+
+    // Returns true if the waza matches the search string in any of the specified fields
+    function wazaMatchesSearch(w, search) {
+      if (!search) return true;
+      const isExact = search.startsWith('"') && search.endsWith('"');
+      const matchFn = isExact ? matchesQuery : isFuzzyMatch;
+      const query = isExact ? search.slice(1, -1).trim() : search;
+      return SEARCH_FIELDS.some(f => w[f] && matchFn(w[f], query));
+    }
+
     function filterWaza() {
       const { search, markings } = filters;
       const anyMarkingActive = markings.some(Boolean);
@@ -108,13 +125,7 @@
           const p = getP(w.id);
           if (!(p.markings && p.markings.some(Boolean))) return false;
         }
-        if (search) {
-          const isExact = search.startsWith('"') && search.endsWith('"');
-          const matchFn = isExact ? matchesQuery : isFuzzyMatch;
-          const query = isExact ? search.slice(1, -1).trim() : search;
-          const matches = matchFn(w.name_jp, query) || matchFn(w.name_en, query) || matchFn(w.name_en_literal, query) || matchFn(w.name_en_gtranslate, query);
-          if (!matches) return false;
-        }
+        if (!wazaMatchesSearch(w, search)) return false;
         if (anyMarkingActive) {
           const p = getP(w.id);
           const ws = p.markings || Array(6).fill(false);

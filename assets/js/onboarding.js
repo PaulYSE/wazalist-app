@@ -9,17 +9,11 @@
   const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
-  // Get real waza data from the main app (first 20 waza)
+  // Get real waza data from the main app
   function getRealWaza() {
     // Access the global wazaData from the main app
     if (typeof wazaData !== 'undefined' && Array.isArray(wazaData) && wazaData.length > 0) {
-      return wazaData.slice(0, 20).map(w => ({
-        id: w.id,
-        jp: w.name_jp || '',
-        en: w.name_en || '',
-        tag: w.tag || '',
-        alias: [] // Real waza don't have pre-computed aliases in the DB
-      }));
+      return wazaData;
     }
     // Fallback empty array if wazaData not yet loaded
     return [];
@@ -201,9 +195,10 @@
     
     // Use first 3 real waza with demo markings
     const demoItems = [
-      { waza: realWaza[0], markings: [true, false, true, false, false, false], likes: 2, dislikes: 0 },
-      { waza: realWaza[1], markings: [false, true, false, false, false, false], likes: 1, dislikes: 0 },
-      { waza: realWaza[2], markings: [false, false, false, true, true, false], likes: 3, dislikes: 1 },
+      { waza: realWaza[0], markings: [false, false, true, true, false, false], likes: 67, dislikes: 0 },
+      { waza: realWaza[1], markings: [false, false, false, false, true, true], likes: 5, dislikes: 0 },
+      { waza: realWaza[2], markings: [true, false, false, false, false, false], likes: 3, dislikes: 1 },
+      { waza: realWaza[4], markings: [true, false, false, false, false, false], likes: 3, dislikes: 4 },
     ];
     
     // Build real waza-list components (same structure as main app's list view)
@@ -218,8 +213,8 @@
       
       const _ms = markingClassFunc(markings);
       return '<div class="waza-list ' + _ms.cls + '" style="' + _ms.style + '">'
-        + '<div class="njp">' + w.jp + '</div>'
-        + '<div class="nen">' + w.en + '</div>'
+        + '<div class="njp">' + w.name_jp + '</div>'
+        + '<div class="nen">' + w.name_en + '</div>'
         + bottomRow + '</div>';
     }).join('');
   }
@@ -246,12 +241,11 @@
   function autoTypeDemo(input) {
     // Get a search term from real waza data
     const realWaza = getRealWaza();
-    let phrase = 'waza'; // fallback
-    if (realWaza.length > 0 && realWaza[0].en) {
-      // Use first few characters of the first waza's English name (lowercase)
-      phrase = realWaza[0].en.toLowerCase().substring(0, 8);
-    }
+
+    // Search for a Snake waza
+    let phrase = 'suneiku'; 
     
+    // Autotype
     let i = 0;
     function type() {
       if (input !== document.getElementById('obSearchInput')) return; // slide changed
@@ -280,30 +274,8 @@
       resultsEl.innerHTML = '<div class="ob-no-results">Loading waza data...</div>';
       return;
     }
-    
-    // Use real app search functions - check if they're available
-    const hasRealFunctions = typeof isFuzzyMatch === 'function' && typeof matchesQuery === 'function';
-    
-    const matches = realWaza.filter(w => {
-      if (hasRealFunctions) {
-        // Use real app's search logic - check all searchable fields
-        // Check exact match first (fast path)
-        if (matchesQuery(w.jp, query)) return true;
-        if (matchesQuery(w.en, query)) return true;
-        
-        // Then check fuzzy match
-        if (isFuzzyMatch(w.jp, query)) return true;
-        if (isFuzzyMatch(w.en, query)) return true;
-        
-        return false;
-      } else {
-        // Fallback to simple matching if real functions not available
-        const q = query.toLowerCase().trim();
-        if (w.en.toLowerCase().includes(q)) return true;
-        if (w.jp.includes(query)) return true;
-        return false;
-      }
-    }).slice(0, 5); // Limit to first 5 matches
+
+    const matches = realWaza.filter(w => wazaMatchesSearch(w, query)).slice(0, 5);
 
     if (!matches.length) {
       resultsEl.innerHTML = '<div class="ob-no-results">No matches found — try a different spelling</div>';
@@ -318,16 +290,16 @@
       // Determine if it's exact or fuzzy match using real app logic
       let isExact = false;
       if (hasRealFunctions) {
-        isExact = matchesQuery(w.jp, query) || matchesQuery(w.en, query);
+        isExact = matchesQuery(w.name_jp, query) || matchesQuery(w.name_en, query);
       } else {
         const q = query.toLowerCase().trim();
-        isExact = w.en.toLowerCase().includes(q) || w.jp.includes(query);
+        isExact = w.name_en.toLowerCase().includes(q) || w.name_jp.includes(query);
       }
       
       // Use actual wazalist list row structure
       row.innerHTML = `
-        <span class="dnjp">${w.jp}</span>
-        <span class="dnen">${w.en}</span>
+        <span class="dnjp">${w.name_jp}</span>
+        <span class="dnen">${w.name_en}</span>
         ${w.tag ? `<span class="badge b-tag">${w.tag}</span>` : ''}
         <span class="badge" style="background:rgba(124,111,247,.15);color:var(--accent);border:none;margin-left:auto">${isExact ? 'match' : 'fuzzy'}</span>
       `;
@@ -378,9 +350,10 @@
     
     // Sample waza with demo data
     const samples = [
-      { jp: realWaza[0].jp, en: realWaza[0].en, markings: [true,false,true,false,false,false] }, // ● ■
-      { jp: realWaza[1].jp, en: realWaza[1].en, markings: [false,true,false,false,false,false] }, // ▲
-      { jp: realWaza[2].jp, en: realWaza[2].en, markings: [false,false,false,true,true,false] }, // ♥ ★
+      { jp: realWaza[0].name_jp, en: realWaza[0].name_en, markings: [true,false,false,false,true,false] }, 
+      { jp: realWaza[1].name_jp, en: realWaza[1].name_en, markings: [false,true,false,false,false,false] }, 
+      { jp: realWaza[2].name_jp, en: realWaza[2].name_en, markings: [false,false,true,true,false,false] }, 
+      { jp: realWaza[3].name_jp, en: realWaza[3].name_en, markings: [false,false,true,false,false,true] }, 
     ];
     
     container.innerHTML = '';
@@ -392,14 +365,14 @@
     listPill.innerHTML = '<div class="sp-label">List' + (chosenStyle === 'list' ? ' ✓ (selected)' : '') + '</div>';
     
     const listPreview = document.createElement('div');
-    samples.slice(0, 2).forEach(w => {
+    samples.slice(0, 1).forEach(w => {
       const card = document.createElement('div');
       (function(){var _ms=markingClass(w.markings);card.className='waza-list '+_ms.cls;card.setAttribute('style',_ms.style);})();
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="markings-row wce-markings">' + markingPips(w.markings) + '</div>'
         + cardLikePill() + '</div>';
-      card.innerHTML = '<div class="njp">' + w.jp + '</div>'
-        + '<div class="nen">' + w.en + '</div>'
+      card.innerHTML = '<div class="njp">' + w.name_jp + '</div>'
+        + '<div class="nen">' + w.name_en + '</div>'
         + bottomRow;
       listPreview.appendChild(card);
     });
@@ -412,7 +385,7 @@
     cardsPill.dataset.style = 'expanded';
     cardsPill.innerHTML = '<div class="sp-label">Cards' + (chosenStyle === 'expanded' ? ' ✓ (default)' : '') + '</div>';
     
-    const w = samples[0];
+    const w = samples[1];
     const expandedCard = document.createElement('div');
     (function(){var _ms=markingClass(w.markings);expandedCard.className='waza-card '+_ms.cls;expandedCard.setAttribute('style',_ms.style);})();
     const bottomRow = '<div class="card-bottom-row">'
@@ -423,8 +396,8 @@
       + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#00a1d6"></span>Bilibili 2</a>'
       + '</div>';
     expandedCard.innerHTML = '<div class="wce-header">'
-      + '<div class="njp">' + w.jp + '</div>'
-      + '<div class="nen">' + w.en + '</div>'
+      + '<div class="njp">' + w.name_jp + '</div>'
+      + '<div class="nen">' + w.name_en + '</div>'
       + bottomRow + '</div>'
       + videoHTML;
     cardsPill.appendChild(expandedCard);
@@ -440,8 +413,8 @@
     samples.forEach(w => {
       const row = document.createElement('div');
       (function(){var _ms=markingClass(w.markings);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
-      row.innerHTML = '<span class="drn">' + w.jp + '</span>'
-        + '<span class="drs">' + w.en + '</span>'
+      row.innerHTML = '<span class="drn">' + w.name_jp + '</span>'
+        + '<span class="drs">' + w.name_en + '</span>'
         + '<div class="markings-row" style="flex-shrink:0">' + markingPips(w.markings) + '</div>';
       compactPreview.appendChild(row);
     });
@@ -509,8 +482,8 @@
           ).join('')
         + '</div>';
       
-      row.innerHTML = '<span class="drn">' + w.jp + '</span>'
-        + '<span class="drs">' + w.en + '</span>'
+      row.innerHTML = '<span class="drn">' + w.name_jp + '</span>'
+        + '<span class="drs">' + w.name_en + '</span>'
         + markingsHTML;
       
       container.appendChild(row);
