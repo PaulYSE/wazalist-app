@@ -99,7 +99,6 @@
       // Save button — same pattern as share.js
       const saveBtn = document.createElement('button');
       saveBtn.className = 'ob-btn ob-btn-primary';
-      saveBtn.style.marginTop = '10px';
       saveBtn.textContent = 'Save Labels';
 
       saveBtn.onclick = () => {
