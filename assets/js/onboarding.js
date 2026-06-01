@@ -299,14 +299,13 @@
 
   // ── Card style demo (slide 3) ─────────────────────────────────
   function initStyleDemo() { buildStyleDemo(); }
-  
+
   function buildStyleDemo() {
     const container = document.getElementById('obStyleDemo');
     if (!container) return;
-    
+
     const SHAPES = ['●','▲','■','♥','★','◆'];
-    
-    // Helper: generate marking style from markings (circular hue blend)
+
     const markingClass = markings => {
       const active = (markings || []).map((on, i) => on ? i : -1).filter(i => i >= 0);
       if (!active.length) return { cls: '', style: '' };
@@ -317,98 +316,107 @@
       const count = active.length;
       return { cls: 'sh-active', style: 'background:hsl(' + hue + ',' + (44+count*4) + '%,' + (8.5+count*0.5) + '%);border-left-color:hsl(' + hue + ',70%,' + (57+count*2) + '%)' };
     };
-    
-    // Helper: generate marking pips HTML
-    const markingPips = markings => SHAPES.map((s, i) => 
+
+    const pipsHTML = markings => SHAPES.map((s, i) =>
       '<span class="marking-pip' + (markings[i] ? ' on' : '') + '">' + s + '</span>'
     ).join('');
-    
-    // Helper: like pill (simplified for demo)
-    const cardLikePill = () => {
-      return '<div class="card-like-pill"><span>👍 2</span><span>👎 0</span></div>';
-    };
-    
-    // Get real waza data
-    const realWaza = getRealWaza(4);
+
+    const likePillHTML = (likes, dislikes) =>
+      '<div class="card-like-pill"><span>👍 ' + likes + '</span><span>👎 ' + dislikes + '</span></div>';
+
+    const bottomRowHTML = w =>
+      '<div class="card-bottom-row">'
+      + '<div class="markings-row wce-markings">' + pipsHTML(w.markings) + '</div>'
+      + likePillHTML(w.likes, w.dislikes)
+      + '</div>';
+
+    // ── Sample waza ───────────────────────────────────────────────
+    const realWaza = getRealWaza(5);
     if (realWaza.length === 0) {
       container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
       return;
     }
-    
-    // Sample waza with demo data
-    const samples = [
-      { jp: realWaza[0].name_jp, en: realWaza[0].name_en, markings: [true,false,false,false,true,false] }, 
-      { jp: realWaza[1].name_jp, en: realWaza[1].name_en, markings: [false,true,false,true,false,false] }, 
-      { jp: realWaza[2].name_jp, en: realWaza[2].name_en, markings: [false,false,true,true,false,false] }, 
-      { jp: realWaza[3].name_jp, en: realWaza[3].name_en, markings: [false,false,true,false,false,true] }, 
+
+    const sample_waza = [
+      { ...realWaza[0], markings: [true,  false, false, false, true,  false], likes: 67, dislikes: 2 },
+      { ...realWaza[1], markings: [false, true,  false, true,  false, false], likes: 12, dislikes: 0 },
+      { ...realWaza[2], markings: [false, false, true,  true,  false, false], likes: 5,  dislikes: 1 },
+      { ...realWaza[3], markings: [true,  false, false, false, false, true ], likes: 8,  dislikes: 3 },
+      { ...realWaza[4], markings: [false, true,  true,  false, false, false], likes: 3,  dislikes: 0 },
     ];
-    
-    container.innerHTML = '';
-    
-    // ── List style ──
-    const listPill = document.createElement('div');
-    listPill.className = 'ob-style-pill' + (chosenStyle === 'list' ? ' selected' : '');
-    listPill.dataset.style = 'list';
-    listPill.innerHTML = '<div class="sp-label">List' + (chosenStyle === 'list' ? ' ✓ (selected)' : '') + '</div>';
-    
-    const listPreview = document.createElement('div');
-    samples.slice(0, 1).forEach(w => {
-      const card = document.createElement('div');
-      (function(){var _ms=markingClass(w.markings);card.className='waza-list '+_ms.cls;card.setAttribute('style',_ms.style);})();
-      const bottomRow = '<div class="card-bottom-row">'
-        + '<div class="markings-row wce-markings">' + markingPips(w.markings) + '</div>'
-        + cardLikePill() + '</div>';
-      card.innerHTML = '<div class="njp">' + w.name_jp + '</div>'
+
+    // ── Item builders ─────────────────────────────────────────────
+    const buildListItem = w => {
+      const ms = markingClass(w.markings);
+      const el = document.createElement('div');
+      el.className = 'waza-list ' + ms.cls;
+      el.setAttribute('style', ms.style);
+      el.innerHTML = '<div class="njp">' + w.name_jp + '</div>'
         + '<div class="nen">' + w.name_en + '</div>'
-        + bottomRow;
-      listPreview.appendChild(card);
-    });
-    listPill.appendChild(listPreview);
-    container.appendChild(listPill);
-    
-    // ── Cards style (expanded) ──
-    const cardsPill = document.createElement('div');
-    cardsPill.className = 'ob-style-pill' + (chosenStyle === 'expanded' ? ' selected' : '');
-    cardsPill.dataset.style = 'expanded';
-    cardsPill.innerHTML = '<div class="sp-label">Cards' + (chosenStyle === 'expanded' ? ' ✓ (default)' : '') + '</div>';
-    
-    const w = samples[1];
-    const expandedCard = document.createElement('div');
-    (function(){var _ms=markingClass(w.markings);expandedCard.className='waza-card '+_ms.cls;expandedCard.setAttribute('style',_ms.style);})();
-    const bottomRow = '<div class="card-bottom-row">'
-      + '<div class="markings-row wce-markings">' + markingPips(w.markings) + '</div>'
-      + cardLikePill() + '</div>';
-    const videoHTML = '<div class="wce-videos">'
-      + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#ff0000"></span>YouTube 1</a>'
-      + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#00a1d6"></span>Bilibili 2</a>'
-      + '</div>';
-    expandedCard.innerHTML = '<div class="wce-header">'
-      + '<div class="njp">' + w.name_jp + '</div>'
-      + '<div class="nen">' + w.name_en + '</div>'
-      + bottomRow + '</div>'
-      + videoHTML;
-    cardsPill.appendChild(expandedCard);
-    container.appendChild(cardsPill);
-    
-    // ── Compact style ──
-    const compactPill = document.createElement('div');
-    compactPill.className = 'ob-style-pill' + (chosenStyle === 'compact' ? ' selected' : '');
-    compactPill.dataset.style = 'compact';
-    compactPill.innerHTML = '<div class="sp-label">Compact' + (chosenStyle === 'compact' ? ' ✓ (selected)' : '') + '</div>';
-    
-    const compactPreview = document.createElement('div');
-    samples.forEach(w => {
-      const row = document.createElement('div');
-      (function(){var _ms=markingClass(w.markings);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
-      row.innerHTML = '<span class="drn">' + w.name_jp + '</span>'
+        + bottomRowHTML(w);
+      return el;
+    };
+
+    const buildCardItem = w => {
+      const ms = markingClass(w.markings);
+      const el = document.createElement('div');
+      el.className = 'waza-card ' + ms.cls;
+      el.setAttribute('style', ms.style);
+      el.innerHTML = '<div class="wce-header">'
+        + '<div class="njp">' + w.name_jp + '</div>'
+        + '<div class="nen">' + w.name_en + '</div>'
+        + bottomRowHTML(w)
+        + '</div>'
+        + '<div class="wce-videos">'
+        + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#ff0000"></span>YouTube</a>'
+        + '<a class="vid-btn" href="#" onclick="return false"><span class="vid-dot" style="background:#00a1d6"></span>Bilibili</a>'
+        + '</div>';
+      return el;
+    };
+
+    const buildCompactItem = w => {
+      const ms = markingClass(w.markings);
+      const el = document.createElement('div');
+      el.className = 'waza-compact ' + ms.cls;
+      el.setAttribute('style', ms.style);
+      el.innerHTML = '<span class="drn">' + w.name_jp + '</span>'
         + '<span class="drs">' + w.name_en + '</span>'
-        + '<div class="markings-row" style="flex-shrink:0">' + markingPips(w.markings) + '</div>';
-      compactPreview.appendChild(row);
+        + '<div class="markings-row" style="flex-shrink:0">' + pipsHTML(w.markings) + '</div>';
+      return el;
+    };
+
+    // ── Build pills ───────────────────────────────────────────────
+    const STYLES = [
+      { key: 'list',     label: 'List' },
+      { key: 'expanded', label: 'Cards' },
+      { key: 'compact',  label: 'Compact' },
+    ];
+
+    container.innerHTML = '';
+
+    STYLES.forEach(({ key, label }) => {
+      const pill = document.createElement('div');
+      pill.className = 'ob-style-pill' + (chosenStyle === key ? ' selected' : '');
+      pill.dataset.style = key;
+
+      const pillLabel = document.createElement('div');
+      pillLabel.className = 'sp-label';
+      pillLabel.textContent = label + (chosenStyle === key ? ' ✓ (selected)' : '');
+      pill.appendChild(pillLabel);
+
+      const preview = document.createElement('div');
+      if (key === 'list') {
+        preview.appendChild(buildListItem(sample_waza[0]));
+      } else if (key === 'expanded') {
+        preview.appendChild(buildCardItem(sample_waza[1]));
+      } else {
+        sample_waza.slice(2).forEach(w => preview.appendChild(buildCompactItem(w)));
+      }
+      pill.appendChild(preview);
+      container.appendChild(pill);
     });
-    compactPill.appendChild(compactPreview);
-    container.appendChild(compactPill);
-    
-    // Bind click handlers
+
+    // ── Style selection ───────────────────────────────────────────
     container.querySelectorAll('.ob-style-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         chosenStyle = pill.dataset.style;
@@ -417,7 +425,7 @@
         const selMob = document.getElementById('browseViewSelectMob');
         if (sel) sel.value = chosenStyle;
         if (selMob) selMob.value = chosenStyle;
-        buildStyleDemo(); // Rebuild to update labels
+        buildStyleDemo();
       });
     });
   }
