@@ -107,12 +107,12 @@
     } else if (currentSlide === 9) {
       // Import slide (last slide) — "Skip" or "Import now"
       const skipBtn = document.createElement('button');
-      skipBtn.className = 'ob-btn ob-btn-primary ob-btn-skip';
+      skipBtn.className = 'ob-btn ob-btn-primary';
       skipBtn.textContent = "Skip";
       skipBtn.onclick = () => closeOnboarding();
 
       const importBtn = document.createElement('button');
-      importBtn.className = 'ob-btn ob-btn-primary ob-btn-import';
+      importBtn.className = 'ob-btn ob-btn-primary';
       importBtn.textContent = 'Import now';
       importBtn.onclick = () => {
         closeOnboarding();
@@ -134,7 +134,6 @@
   function mkNextBtn() {
     const btn = document.createElement('button');
     btn.className = 'ob-btn ob-btn-primary';
-    btn.style.marginLeft = 'auto';
     btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
     btn.onclick = () => { goToSlide(currentSlide + 1); };    
     return btn;
