@@ -6,7 +6,6 @@
 
   // ── Config ────────────────────────────────────────────────────
   const TEMPLATE = ['Want to Learn','Learning','Complete','Favourite','Oriwaza','Forgotten'];
-  const SHAPES_OB = ['●','▲','■','♥','★','◆'];
   const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
   // Get real waza data from the main app
@@ -162,7 +161,8 @@
       { waza: realWaza[0], markings: [true, false, false, true, true, false], likes: 67, dislikes: 0 },
       { waza: realWaza[1], markings: [false, false, false, true, true, true], likes: 5, dislikes: 0 },
       { waza: realWaza[2], markings: [true, true, false, false, false, false], likes: 3, dislikes: 1 },
-      { waza: realWaza[4], markings: [false, false, true, false, false, true], likes: 3, dislikes: 4 },
+      { waza: realWaza[3], markings: [true, false, false, false, true, true], likes: 12, dislikes: 0 },
+      { waza: realWaza[4], markings: [false, false, true, false, false, true], likes: 3, dislikes: 2 },
     ];
     
     // Build real waza-list components (same structure as main app's list view)
@@ -236,7 +236,7 @@
       return;
     }
 
-    const matches = realWaza.filter(w => wazaMatchesSearch(w, query)).slice(0, 5);
+    const matches = realWaza.filter(w => wazaMatchesSearch(w, query)).slice(0, 10);
 
     if (!matches.length) {
       resultsEl.innerHTML = '<div class="ob-no-results">No matches found — try a different spelling</div>';
@@ -252,7 +252,6 @@
       row.innerHTML = `
         <span class="dnjp">${w.name_jp}</span>
         <span class="dnen">${w.name_en}</span>
-        ${w.tag ? `<span class="badge b-tag">${w.tag}</span>` : ''}
       `;
       
       resultsEl.appendChild(row);
@@ -397,11 +396,10 @@
     
     // Get markingLabels if available from main app
     const labels = window.markingLabels || TEMPLATE;
-    const SHAPES = ['●','▲','■','♥','★','◆'];
     
     container.innerHTML = '';
     // Use first 5 real waza for marking demo
-    realWaza.slice(0, 5).forEach((w, wi) => {
+    realWaza.forEach((w, wi) => {
       const row = document.createElement('div');
       const markings = demoMarkings[wi];
       
@@ -437,8 +435,6 @@
       });
     });
   }
-  
-  // Remove updateMarkingRowStyle - no longer needed with waza-compact structure
 
   // ── Labels preview (slide 5) ──────────────────────────────────
   function buildLabelsPreview() {
@@ -448,7 +444,7 @@
     // Load existing labels from app
     let existing = ['','','','','',''];
     try { existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'); } catch {}
-    SHAPES_OB.forEach((sh, i) => {
+    SHAPES.forEach((sh, i) => {
       const row = document.createElement('div');
       row.className = 'ob-labels-row';
       row.innerHTML = `<span class="ob-labels-marking">${sh}</span>`;

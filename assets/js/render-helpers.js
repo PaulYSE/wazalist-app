@@ -162,8 +162,8 @@
       const lc = w.like_count || 0, dc = w.dislike_count || 0;
       if (!lc && !dc && p.like === null) return '';
       return '<div class="card-like-pill">'
-        + '<span class="' + (p.like === 1 ? 'like-on' : '') + '">' + '👍 ' + lc + '</span>'
-        + '<span class="' + (p.like === -1 ? 'dislike-on' : '') + '">' + '👎 ' + dc + '</span>'
+        + '<span class="' + (p.like === LIKE_UP ? 'like-on' : '') + '">' + '👍 ' + lc + '</span>'
+        + '<span class="' + (p.like === LIKE_DOWN ? 'dislike-on' : '') + '">' + '👎 ' + dc + '</span>'
         + '</div>';
     }
 
