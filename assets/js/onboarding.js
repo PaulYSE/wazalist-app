@@ -109,7 +109,7 @@
         saveBtn.textContent = 'Saved ✓';
         setTimeout(() => { saveBtn.textContent = 'Save Labels'; }, 1800);
       };
-      container.appendChild(saveBtn);
+      footer.appendChild(saveBtn);
     }
 
     if (currentSlide === 9) {
