@@ -90,11 +90,14 @@
     const footer = document.getElementById('obFooter');
     footer.innerHTML = '';
 
-    const footerLeft = document.getElementById('obFooterLeft');
-    footerLeft.innerHTML = '';
+    const footerLeft = document.createElement('div');
+    footerLeft.className = 'ob-footer-left';
 
-    const footerRight = document.getElementById('obFooterRight');
-    footerRight.innerHTML = '';
+    const footerRight = document.createElement('div');
+    footerRight.className = 'ob-footer-right';
+
+    footer.appendChild(footerLeft);
+    footer.appendChild(footerRight);
 
     // Back button (all slides except first)
     if (currentSlide > 0) {
