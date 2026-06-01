@@ -10,10 +10,10 @@
   const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
   // Get real waza data from the main app
-  function getRealWaza() {
+  function getRealWaza(limit = 20) {
     // Access the global wazaData from the main app
     if (typeof wazaData !== 'undefined' && Array.isArray(wazaData) && wazaData.length > 0) {
-      return wazaData.slice(0, 100);
+      return wazaData.slice(0, limit);
     }
     // Fallback empty array if wazaData not yet loaded
     return [];
@@ -151,7 +151,7 @@
     if (!container) return;
     
     // Get real waza data
-    const realWaza = getRealWaza();
+    const realWaza = getRealWaza(5);
     if (realWaza.length === 0) {
       container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
       return;
@@ -266,7 +266,7 @@
     }
     
     // Get real waza data
-    const realWaza = getRealWaza(); // Limit to first 100 for performance
+    const realWaza = getRealWaza(100); // Limit to first 100 for performance
     if (realWaza.length === 0) {
       resultsEl.innerHTML = '<div class="ob-no-results">Loading waza data...</div>';
       return;
@@ -339,7 +339,7 @@
     };
     
     // Get real waza data
-    const realWaza = getRealWaza();
+    const realWaza = getRealWaza(4);
     if (realWaza.length === 0) {
       container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
       return;
@@ -438,7 +438,7 @@
     if (!container) return;
     
     // Get real waza data
-    const realWaza = getRealWaza();
+    const realWaza = getRealWaza(10);
     if (realWaza.length === 0) {
       container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
       return;
