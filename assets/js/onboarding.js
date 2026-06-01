@@ -381,7 +381,7 @@
     if (!container) return;
     
     // Get real waza data
-    const realWaza = getRealWaza(10);
+    const realWaza = getRealWaza(5);
     if (realWaza.length === 0) {
       container.innerHTML = '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
       return;

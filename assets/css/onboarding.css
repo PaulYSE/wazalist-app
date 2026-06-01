@@ -268,14 +268,6 @@
 }
 .ob-btn-green:hover { background: #003d18; }
 
-.ob-btn-skip {
-  margin-left: auto;
-}
-
-.ob-btn-import {
-  margin-left: auto;
-}
-
 /* Slide-in animation for demo items */
 @keyframes obFadeUp {
   from { opacity:0; transform:translateY(8px); }
