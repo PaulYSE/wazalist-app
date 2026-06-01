@@ -157,42 +157,6 @@
       return;
     }
     
-    // Get real app helper functions if available
-    const hasRealFunctions = typeof markingPips === 'function' && 
-                             typeof markingStyle === 'function' &&
-                             typeof SHAPES !== 'undefined';
-    
-    // Local fallback helpers if real functions not available
-    const localMarkingPips = markings => {
-      const SHAPES_LOCAL = ['●','▲','■','♥','★','◆'];
-      return SHAPES_LOCAL.map((s, i) => 
-        '<span class="marking-pip' + (markings[i] ? ' on' : '') + '">' + s + '</span>'
-      ).join('');
-    };
-    
-    const localMarkingClass = markings => {
-      const active = (markings || []).map((on, i) => on ? i : -1).filter(i => i >= 0);
-      if (!active.length) return { cls: '', style: '' };
-      const HUES = [200, 45, 123, 280, 80, 330];
-      let sinSum = 0, cosSum = 0;
-      active.forEach(i => { const r = HUES[i] * Math.PI / 180; sinSum += Math.sin(r); cosSum += Math.cos(r); });
-      const hue = Math.round((Math.atan2(sinSum, cosSum) * 180 / Math.PI + 360) % 360);
-      const count = active.length;
-      return { cls: 'sh-active', style: 'background:hsl(' + hue + ',' + (44+count*4) + '%,' + (8.5+count*0.5) + '%);border-left-color:hsl(' + hue + ',70%,' + (57+count*2) + '%)' };
-    };
-    
-    const localCardLikePill = (likeCount, dislikeCount) => {
-      if (!likeCount && !dislikeCount) return '';
-      return '<div class="card-like-pill">'
-        + '<span>👍 ' + likeCount + '</span>'
-        + '<span>👎 ' + dislikeCount + '</span>'
-        + '</div>';
-    };
-    
-    // Choose which functions to use
-    const markingPipsFunc = hasRealFunctions ? markingPips : localMarkingPips;
-    const markingClassFunc = hasRealFunctions ? markingStyle : localMarkingClass;
-    
     // Use first 3 real waza with demo markings
     const demoItems = [
       { waza: realWaza[0], markings: [true, false, false, true, true, false], likes: 67, dislikes: 0 },
@@ -205,13 +169,13 @@
     container.innerHTML = demoItems.map(item => {
       const w = item.waza;
       const markings = item.markings;
-      const pill = localCardLikePill(item.likes, item.dislikes);
+      const pill = cardLikePill(item.likes, item.dislikes);
       
       const bottomRow = '<div class="card-bottom-row">'
-        + '<div class="markings-row wce-markings">' + markingPipsFunc(markings) + '</div>'
+        + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
         + pill + '</div>';
       
-      const _ms = markingClassFunc(markings);
+      const _ms = markingStyle(markings);
       return '<div class="waza-list ' + _ms.cls + '" style="' + _ms.style + '">'
         + '<div class="njp">' + w.name_jp + '</div>'
         + '<div class="nen">' + w.name_en + '</div>'
@@ -306,17 +270,6 @@
 
     const SHAPES = ['●','▲','■','♥','★','◆'];
 
-    const markingClass = markings => {
-      const active = (markings || []).map((on, i) => on ? i : -1).filter(i => i >= 0);
-      if (!active.length) return { cls: '', style: '' };
-      const HUES = [200, 45, 123, 280, 80, 330];
-      let sinSum = 0, cosSum = 0;
-      active.forEach(i => { const r = HUES[i] * Math.PI / 180; sinSum += Math.sin(r); cosSum += Math.cos(r); });
-      const hue = Math.round((Math.atan2(sinSum, cosSum) * 180 / Math.PI + 360) % 360);
-      const count = active.length;
-      return { cls: 'sh-active', style: 'background:hsl(' + hue + ',' + (44+count*4) + '%,' + (8.5+count*0.5) + '%);border-left-color:hsl(' + hue + ',70%,' + (57+count*2) + '%)' };
-    };
-
     const pipsHTML = markings => SHAPES.map((s, i) =>
       '<span class="marking-pip' + (markings[i] ? ' on' : '') + '">' + s + '</span>'
     ).join('');
@@ -347,7 +300,7 @@
 
     // ── Item builders ─────────────────────────────────────────────
     const buildListItem = w => {
-      const ms = markingClass(w.markings);
+      const ms = markingStyle(w.markings);
       const el = document.createElement('div');
       el.className = 'waza-list ' + ms.cls;
       el.setAttribute('style', ms.style);
@@ -358,7 +311,7 @@
     };
 
     const buildCardItem = w => {
-      const ms = markingClass(w.markings);
+      const ms = markingStyle(w.markings);
       const el = document.createElement('div');
       el.className = 'waza-card ' + ms.cls;
       el.setAttribute('style', ms.style);
@@ -375,7 +328,7 @@
     };
 
     const buildCompactItem = w => {
-      const ms = markingClass(w.markings);
+      const ms = markingStyle(w.markings);
       const el = document.createElement('div');
       el.className = 'waza-compact ' + ms.cls;
       el.setAttribute('style', ms.style);
@@ -446,18 +399,6 @@
     const labels = window.markingLabels || TEMPLATE;
     const SHAPES = ['●','▲','■','♥','★','◆'];
     
-    // Helper: generate marking style from bitmask (same as main app)
-    const markingClass = markings => {
-      const active = (markings || []).map((on, i) => on ? i : -1).filter(i => i >= 0);
-      if (!active.length) return { cls: '', style: '' };
-      const HUES = [200, 45, 123, 280, 80, 330];
-      let sinSum = 0, cosSum = 0;
-      active.forEach(i => { const r = HUES[i] * Math.PI / 180; sinSum += Math.sin(r); cosSum += Math.cos(r); });
-      const hue = Math.round((Math.atan2(sinSum, cosSum) * 180 / Math.PI + 360) % 360);
-      const count = active.length;
-      return { cls: 'sh-active', style: 'background:hsl(' + hue + ',' + (44+count*4) + '%,' + (8.5+count*0.5) + '%);border-left-color:hsl(' + hue + ',70%,' + (57+count*2) + '%)' };
-    };
-    
     container.innerHTML = '';
     // Use first 5 real waza for marking demo
     realWaza.slice(0, 5).forEach((w, wi) => {
@@ -465,7 +406,7 @@
       const markings = demoMarkings[wi];
       
       // Use real waza-compact structure with marking tint classes
-      (function(){var _ms=markingClass(markings);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
+      (function(){var _ms=markingStyle(markings);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
       
       // Structure: drn (JP name) + drs (EN name) + cmp-markings-mine (buttons)
       const markingsHTML = '<div class="cmp-markings-mine" style="flex-shrink:0">'
@@ -491,7 +432,7 @@
           demoMarkings[wid][si] = !demoMarkings[wid][si];
           btn.classList.toggle('on', demoMarkings[wid][si]);
           // Update row's marking class for color tinting
-          (function(){var _ms=markingClass(demoMarkings[wid]);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
+          (function(){var _ms=markingStyle(demoMarkings[wid]);row.className='waza-compact '+_ms.cls;row.setAttribute('style',_ms.style);})();
         });
       });
     });
