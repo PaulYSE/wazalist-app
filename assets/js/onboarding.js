@@ -90,9 +90,15 @@
     const footer = document.getElementById('obFooter');
     footer.innerHTML = '';
 
+    const footerLeft = document.getElementById('obFooterLeft');
+    footerLeft.innerHTML = '';
+
+    const footerRight = document.getElementById('obFooterRight');
+    footerRight.innerHTML = '';
+
     // Back button (all slides except first)
     if (currentSlide > 0) {
-      footer.appendChild(mkBackBtn());
+      footerLeft.appendChild(mkBackBtn());
     }
 
     if (currentSlide === 5) {
@@ -108,10 +114,14 @@
         saveBtn.textContent = 'Saved ✓';
         setTimeout(() => { saveBtn.textContent = 'Save Labels'; }, 1800);
       };
-      footer.appendChild(saveBtn);
+      footerRight.appendChild(saveBtn);
     }
 
-    if (currentSlide === 9) {
+    if (currentSlide < SLIDE_COUNT - 1) {
+      footerRight.appendChild(mkNextBtn());
+    }
+
+    if (currentSlide === SLIDE_COUNT - 1) {
       // Import slide (last slide) — "Skip" or "Import now"
       const skipBtn = document.createElement('button');
       skipBtn.className = 'ob-btn ob-btn-primary';
@@ -119,7 +129,7 @@
       skipBtn.onclick = () => closeOnboarding();
 
       const importBtn = document.createElement('button');
-      importBtn.className = 'ob-btn ob-btn-primary';
+      importBtn.className = 'ob-btn ob-btn-secondary';
       importBtn.textContent = 'Import now';
       importBtn.onclick = () => {
         closeOnboarding();
@@ -129,12 +139,8 @@
         }, 400);
       };
 
-      footer.appendChild(skipBtn);
-      footer.appendChild(importBtn);
-    }
-
-    if (currentSlide < SLIDE_COUNT - 1) {
-      footer.appendChild(mkNextBtn());
+      footerRight.appendChild(skipBtn);
+      footerRight.appendChild(importBtn);
     }
   }
 
@@ -145,6 +151,7 @@
     btn.onclick = () => { goToSlide(currentSlide - 1); };
     return btn;
   }
+
   function mkNextBtn() {
     const btn = document.createElement('button');
     btn.className = 'ob-btn ob-btn-primary';

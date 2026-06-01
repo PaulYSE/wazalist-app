@@ -237,11 +237,25 @@
 /* Footer / buttons */
 .ob-footer {
   padding: 16px 24px 20px;
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap;
   border-top: 1px solid var(--border);
   background: var(--bg1);
   flex-shrink: 0;
 }
+
+.ob-footer-left,
+.ob-footer-right{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ob-footer-right{
+  margin-left: auto;
+}
+
 .ob-btn {
   padding: 9px 18px;
   border-radius: var(--r);
@@ -261,6 +275,12 @@
   margin-left: auto;
 }
 .ob-btn-primary:hover { background: var(--accent); }
+.ob-btn-secondary {
+  background: var(--accent2);
+  border-color: var(--accent);
+  color: #fff;
+}
+.ob-btn-secondary:hover { background: var(--accent); }
 .ob-btn-green {
   background: #002a10;
   border-color: var(--green);
