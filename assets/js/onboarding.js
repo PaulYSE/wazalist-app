@@ -538,7 +538,7 @@
     container.innerHTML = '';
     // Load existing labels from app
     let existing = ['','','','','',''];
-    try { existing = JSON.parse(localStorage.getItem('wl_marking_labels') || '["","","","","",""]'); } catch {}
+    try { existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'); } catch {}
     SHAPES_OB.forEach((sh, i) => {
       const row = document.createElement('div');
       row.className = 'ob-labels-row';
@@ -561,7 +561,7 @@
     saveBtn.textContent = 'Save Labels';
     saveBtn.onclick = () => {
       container.querySelectorAll('.ob-labels-input').forEach((inp, i) => {
-        if (window.markingLabels) window.markingLabels[i] = inp.value.trim();
+        markingLabels[i] = inp.value.trim(); // drop window. and the if-guard
       });
       window.saveLabels?.();
       if (typeof renderStats === 'function') renderStats();
