@@ -284,15 +284,6 @@
       const row = document.createElement('div');
       row.className = 'waza-compact'; // Use actual list row class from main app
       
-      // Determine if it's exact or fuzzy match using real app logic
-      let isExact = false;
-      if (hasRealFunctions) {
-        isExact = matchesQuery(w.name_jp, query) || matchesQuery(w.name_en, query);
-      } else {
-        const q = query.toLowerCase().trim();
-        isExact = w.name_en.toLowerCase().includes(q) || w.name_jp.includes(query);
-      }
-      
       // Use actual wazalist list row structure
       row.innerHTML = `
         <span class="dnjp">${w.name_jp}</span>
