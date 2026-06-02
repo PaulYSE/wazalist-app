@@ -121,7 +121,6 @@
       _checkAutoImport();
     }
     if (token) initApp();
-    else startUsernamePlaceholderRotation();
 
     // ── Progress helpers ─────────────────────────────────────────
     var emptyP = function() { return { shapes: Array(6).fill(false), like: null }; };
