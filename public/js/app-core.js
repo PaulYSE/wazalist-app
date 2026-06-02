@@ -34,7 +34,7 @@
       if (res.error) { e.textContent = res.error; return; }
       e.className = 'aok'; e.textContent = 'Account created! Signing you in…';
       const li = await api('/api/login', 'POST', { username, password });
-      if (li.token) { token = li.token; localStorage.setItem('wl_token', token); currentUsername = li.user.username; localStorage.setItem('wl_username', currentUsername); initApp(); }
+      if (li.token) { token = li.token; localStorage.setItem('wl_token', token); currentUsername = li.user.username; localStorage.setItem('wl_username', currentUsername); initApp(); window.showWazaOnboarding?.(); }
     };
 
     const doLogout = () => { token = ''; isGuest = false; currentUsername = ''; localStorage.removeItem('wl_token'); localStorage.removeItem('wl_username'); location.reload(); };

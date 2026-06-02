@@ -494,44 +494,7 @@
   // ── Close button ──────────────────────────────────────────────
   document.getElementById('obClose').onclick = closeOnboarding;
 
-  // ── Trigger: show after new account registration ──────────────
-  // We patch the register flow: after initApp() is called following register,
-  // check a flag set by the register button.
-  function patchRegister() {
-    const rgBtn = document.getElementById('rg-btn');
-    if (!rgBtn) { setTimeout(patchRegister, 300); return; }
-    const originalOnclick = rgBtn.onclick;
-    rgBtn.addEventListener('click', function() {
-      window._wlJustRegistered = true;
-    }, true); // capture phase so it fires before existing handler
-  }
-
-  // Patch initApp to show onboarding when _wlJustRegistered is true
-  function patchInitApp() {
-    if (typeof initApp !== 'function') { setTimeout(patchInitApp, 100); return; }
-    const _orig = initApp;
-    window.initApp = async function() {
-      await _orig.apply(this, arguments);
-      if (window._wlJustRegistered) {
-        window._wlJustRegistered = false;
-        // Show onboarding after registration
-        setTimeout(showOnboarding, 600);
-      }
-    };
-  }
-
-  // Also expose a manual trigger for testing
+  // Manual trigger for newly registered users (see app-core.js)
   window.showWazaOnboarding = showOnboarding;
-
-  // ── Init ──────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    patchRegister();
-    patchInitApp();
-  });
-  // If DOM is already ready
-  if (document.readyState !== 'loading') {
-    patchRegister();
-    patchInitApp();
-  }
 
 })();
