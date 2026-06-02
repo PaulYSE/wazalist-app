@@ -16,9 +16,10 @@
       });
       const hue = Math.round((Math.atan2(sinSum, cosSum) * 180 / Math.PI + 360) % 360);
       const count = active.length;
-      const sat  = 44 + count * 4;          // 48–68%
-      const bgL  = 8.5 + count * 0.5;       // 9–11.5%
-      const bdL  = 57 + count * 2;          // 59–69%
+      const t = Math.pow((count - 1) / 5, 0.65); // 0 at count=1, 1 at count=6, front-weighted
+      const sat  = Math.round(38 + t * 57);  // 38% → 95%
+      const bgL  = Math.round(7.5 + t * 9);  // 7.5% → 16.5%
+      const bdL  = Math.round(42 + t * 44);  // 42% → 86%
       return {
         cls: 'sh-active',
         style: 'background:hsl(' + hue + ',' + sat + '%,' + bgL + '%);border-left-color:hsl(' + hue + ',70%,' + bdL + '%)'
