@@ -1,6 +1,7 @@
 /* render-helpers.js — small pure-ish helpers shared by the renderers:
    marking styles/pips and video/oEmbed handling. */
-    const SHAPE_HUES = [200, 45, 123, 280, 80, 330];
+    // const SHAPE_HUES = [200, 45, 123, 280, 80, 330];
+    const SHAPE_HUES = [4, 28, 54, 118, 212, 272];
 
     // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
     // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
