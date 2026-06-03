@@ -1,6 +1,7 @@
 /* export.js — exportToExcel(): builds a styled .xlsx of the user's list (ExcelJS). */
 import { state } from './state.js';
 import { showToast } from './import-ui.js';
+import { SHAPES } from './config.js';
 
 const EXPORT_MARK_COLORS = ['FF4F8FF7', 'FF4CAF82', 'FFE8A030', 'FFE0557F', 'FFF5C518', 'FF7C6FF7'];
 

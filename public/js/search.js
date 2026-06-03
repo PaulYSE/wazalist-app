@@ -112,7 +112,7 @@ const SEARCH_FIELDS = [
 ];
 
 // Returns true if the waza matches the search string in any of the specified fields
-function wazaMatchesSearch(w, search) {
+export function wazaMatchesSearch(w, search) {
   if (!search) return true;
   const isExact = search.startsWith('"') && search.endsWith('"');
   const matchFn = isExact ? matchesQuery : isFuzzyMatch;

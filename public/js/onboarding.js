@@ -4,6 +4,7 @@ import { saveLabels } from './core.js';
 import { renderDashStats } from './stats.js';
 import { state } from './state.js';
 import { SHAPES } from './config.js';
+import { wazaMatchesSearch } from './search.js';
 import {
   markingStyle,       // used in renderList() for all 3 view modes
   markingPips,        // used in renderList() and renderDetail()
@@ -420,7 +421,7 @@ function buildMarkingDemo() {
   }
 
   // Get state.markingLabels if available from main app
-  const labels = window.state.markingLabels || TEMPLATE;
+  const labels = state.markingLabels || TEMPLATE;
 
   container.innerHTML = '';
   // Use first 5 real waza for marking demo
