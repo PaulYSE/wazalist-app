@@ -221,14 +221,7 @@ export async function renderAccount() {
       if (loggedIn) {
         // For logged-in users, reset on server
         // Delete all progress entries for this user
-        const wazaIds = state.wazaData.map(w => w.id);
-        for (const wid of wazaIds) {
-          await api('/api/progress', 'POST', {
-            waza_id: wid,
-            markings: '[]',
-            like: null
-          });
-        }
+        await api('/api/progress', 'DELETE');
 
         // Reset custom labels to empty
         await api('/api/labels', 'POST', { labels: ['', '', '', '', '', ''] });
