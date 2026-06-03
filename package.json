@@ -16,7 +16,12 @@
 		"publish": true
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"concurrently": "^10.0.3",
+		"eslint": "^10.4.1",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.6.0",
+		"prettier": "^3.8.3",
 		"typescript": "5.9.3",
 		"vite": "^8.0.16",
 		"wrangler": "^4.97.0"
@@ -33,6 +38,9 @@
 		"dev:ui": "vite",
 		"dev": "npm run dev:seed && concurrently \"npm run dev:worker\" \"npm run dev:ui\"",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"lint": "eslint public/js",
+		"lint:fix": "eslint public/js --fix",
+		"format": "prettier --write \"public/**/*.{js,css,html}\""
 	}
 }
