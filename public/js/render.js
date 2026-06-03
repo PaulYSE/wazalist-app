@@ -12,7 +12,7 @@ import {
   embedCache,         // used in renderDetail() — needs export added
   oembedCache,        // used in renderDetail() — needs export added
 } from './render-helpers.js'
-import { state, loadLocal, saveLocal, LS_LABELS } from './state.js';
+import { state } from './state.js';
 import { SHAPES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config.js';
 import { filterWaza } from './search.js';
 import { escapeHtml } from './ui.js';

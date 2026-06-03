@@ -1,5 +1,8 @@
 /* contribute-modals.js — the Suggest-Edit and New-Waza modal dialogs
    (field lists SE_FIELDS / NW_FIELDS live here too). */
+
+import { api } from './core.js';
+
 const SE_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'tag', 'reference', 'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1', 'author_jp0', 'author_en0', 'author_jp1', 'author_en1', 'video0', 'video1', 'video2', 'video3', 'video4', 'video5', 'video6', 'video7', 'video8', 'video9'];
 
 export function openSuggestEdit(w) {

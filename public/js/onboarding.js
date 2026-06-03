@@ -2,7 +2,7 @@
 
 import { saveLabels } from './core.js';
 import { renderDashStats } from './stats.js';
-import { state } from './state.js';
+import { state, LS_LABELS } from './state.js';
 import { SHAPES } from './config.js';
 import { wazaMatchesSearch } from './search.js';
 import {

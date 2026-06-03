@@ -1,14 +1,14 @@
 /* core.js — the lifecycle: api() fetch wrapper, guest/login, initApp(),
    and progress saving (saveP/saveLabels). This is where the app boots its data. */
 
-import { state, loadLocal, saveLocal, LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from './state.js'
+import { state, loadLocal, saveLocal, LS_LABELS } from './state.js'
 import { renderList, renderDetail, selectWaza } from './render.js';
 import { renderDashStats } from './stats.js';
 import { startWazaPlaceholderRotation } from './ui.js';
 import { checkAutoImport } from './share.js'
 import { showOnboarding } from './onboarding.js';
 
-const api = async (path, method = 'GET', body = null) => {
+export const api = async (path, method = 'GET', body = null) => {
   const opts = { method, headers: { 'Content-Type': 'application/json', ...(state.token ? { 'Authorization': 'Bearer ' + state.token } : {}) } };
   if (body) opts.body = JSON.stringify(body);
   return (await fetch(path, opts)).json();

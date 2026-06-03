@@ -5,7 +5,7 @@ import { SHAPES } from './config.js';
 import { saveLabels } from './core.js';
 import { showToast } from './import-ui.js';
 import { escapeHtml } from './ui.js';
-import { getP, saveP } from './core.js';
+import { api, getP, saveP } from './core.js';
 import { dispName } from './search.js';
 import { markingPips } from './render-helpers.js';
 import { selectWaza, navigateToBrowse } from './render.js';

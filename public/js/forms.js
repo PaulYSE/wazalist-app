@@ -1,6 +1,6 @@
 /* forms.js — the Contribute and Account tab renderers. */
-import { state } from './state.js';
-import { doLogout } from './core.js';
+import { state, LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from './state.js'
+import { api, doLogout } from './core.js';
 import { renderImport } from './import-ui.js';
 import { exportToExcel } from './export.js';
 import { escapeHtml } from './ui.js';
@@ -292,7 +292,7 @@ export async function renderAccount() {
         return;
       }
       // Wipe local state and drop to a logged-out screen.
-      localStorage.removeItem('wl_state.token');
+      localStorage.removeItem('wl_token');
       localStorage.removeItem('wl_username');
       localStorage.removeItem(LS_KEY);
       localStorage.removeItem(LS_LABELS);
