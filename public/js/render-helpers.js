@@ -1,10 +1,8 @@
 /* render-helpers.js — small pure-ish helpers shared by the renderers:
    marking styles/pips and video/oEmbed handling. */
-import { SHAPES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config.js';
-import { state } from './state.js';
+import { SHAPES, SHAPES_HUES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config/constants.js';
+import { state } from './state/state.js';
 
-// const SHAPE_HUES = [200, 45, 123, 280, 80, 330];
-export const SHAPE_HUES = [4, 28, 54, 118, 212, 272];
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -13,7 +11,7 @@ export function markingStyle(markings) {
   if (!active.length) return { cls: '', style: '' };
   let sinSum = 0, cosSum = 0;
   active.forEach(i => {
-    const rad = SHAPE_HUES[i] * Math.PI / 180;
+    const rad = SHAPES_HUES[i] * Math.PI / 180;
     sinSum += Math.sin(rad);
     cosSum += Math.cos(rad);
   });

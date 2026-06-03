@@ -2,9 +2,9 @@
 
 import { saveLabels } from './core.js';
 import { renderDashStats } from './stats.js';
-import { state, LS_LABELS } from './state.js';
-import { SHAPES } from './config.js';
-import { wazaMatchesSearch } from './search.js';
+import { state, LS_LABELS } from './state/state.js';
+import { SHAPES, MARKING_LABELS_TEMPLATE } from './config/constants.js';
+import { wazaMatchesSearch } from './features/search.js';
 import {
   markingStyle,       // used in renderList() for all 3 view modes
   markingPips,        // used in renderList() and renderDetail()
@@ -12,7 +12,6 @@ import {
 } from './render-helpers.js'
 
 // ── Config ────────────────────────────────────────────────────
-const TEMPLATE = ['Want to Learn', 'Learning', 'Complete', 'Favourite', 'Oriwaza', 'Forgotten'];
 const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
 // Get real waza data from the main app
@@ -421,7 +420,7 @@ function buildMarkingDemo() {
   }
 
   // Get state.markingLabels if available from main app
-  const labels = state.markingLabels || TEMPLATE;
+  const labels = state.markingLabels || MARKING_LABELS_TEMPLATE;
 
   container.innerHTML = '';
   // Use first 5 real waza for marking demo
@@ -489,7 +488,7 @@ function buildLabelsPreview() {
 // ── Apply template ────────────────────────────────────────────
 function applyTemplate() {
   const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
-  inputs.forEach((inp, i) => { inp.value = TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
+  inputs.forEach((inp, i) => { inp.value = MARKING_LABELS_TEMPLATE[i] || ''; labelsValues[i] = inp.value; });
 }
 
 // ── Clear all labels ──────────────────────────────────────────
@@ -499,4 +498,6 @@ function clearAllLabels() {
 }
 
 // ── Close button ──────────────────────────────────────────────
-document.getElementById('obClose').onclick = closeOnboarding;
+export function initOnboarding() {
+  document.getElementById('obClose').onclick = closeOnboarding;
+}

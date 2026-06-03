@@ -1,9 +1,8 @@
-/* export.js — exportToExcel(): builds a styled .xlsx of the user's list (ExcelJS). */
-import { state } from './state.js';
-import { showToast } from './import-ui.js';
-import { SHAPES } from './config.js';
-
-const EXPORT_MARK_COLORS = ['FF4F8FF7', 'FF4CAF82', 'FFE8A030', 'FFE0557F', 'FFF5C518', 'FF7C6FF7'];
+/* export-to-excel.js — the Export to Excel feature: exportToExcel() collects the
+    user's marked waza, generates an .xlsx file with hyperlinks and cell colors, and triggers the download. */
+import { state } from '../state/state.js';
+import { showToast } from '../components/Toast.js';
+import { SHAPES, EXPORT_MARK_COLORS } from '../config/constants.js';
 
 function pickVideoUrl(w) {
   // User asked for video1; fall back to the first available video so links aren't broken.

@@ -1,10 +1,11 @@
-// state.js — mutable app state + localStorage helpers
+/* localStorage.js — constants and helpers for saving/loading from localStorage. */
 
 // ── Constants ────────────────────────────────────────────────
 export const LS_KEY    = 'wl_local_prog';
 export const LS_LABELS = 'wl_marking_labels';
 export const LS_SORT   = 'wl_sort_prefs';
 export const LS_VIEW   = 'wl_view_style';
+export const LS_IMPORTED = 'wl_imported_lists';
 
 // ── localStorage helpers ─────────────────────────────────────
 export const loadLocal = () => { 
@@ -21,21 +22,3 @@ const loadSortPrefs = () => {
   }
 };
 const savedSort = loadSortPrefs();
-
-// ── Shared mutable state ─────────────────────────────────────
-export const state = {
-  token:           localStorage.getItem('wl_token') || '',
-  isGuest:         false,
-  currentUsername: localStorage.getItem('wl_username') || '',
-  isAdmin:         false,
-  wazaData:        [],
-  prog:            {},
-  selectedId:      null,
-  savingIds:       new Set(),
-  filters:         { search: '', markings: Array(6).fill(false) },
-  browseFilterAny: false,
-  browseSortField: savedSort.field,
-  browseSortOrder: savedSort.order,
-  browseListView:  localStorage.getItem(LS_VIEW) || 'expanded',
-  markingLabels:   JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
-};

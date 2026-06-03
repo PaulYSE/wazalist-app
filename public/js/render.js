@@ -12,12 +12,12 @@ import {
   embedCache,         // used in renderDetail() — needs export added
   oembedCache,        // used in renderDetail() — needs export added
 } from './render-helpers.js'
-import { state } from './state.js';
-import { SHAPES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config.js';
-import { filterWaza } from './search.js';
+import { state } from './state/state.js';
+import { SHAPES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config/constants.js';
+import { filterWaza } from './features/search.js';
 import { escapeHtml } from './ui.js';
 import { getP, saveP } from './core.js';
-import { dispName } from './search.js';
+import { dispName } from './features/search.js';
 import { openSuggestEdit } from './contribute-modals.js';
 
 export function renderList() {
@@ -98,29 +98,30 @@ export function selectWaza(id) {
     history.pushState({ wazaOpen: true, wazaId: id }, '', url);
   }
 }
+export function initRender() {
+  document.getElementById('mobileBack').addEventListener('click', () => {
+    closeDetailPanel();
+  });
 
-document.getElementById('mobileBack').addEventListener('click', () => {
-  closeDetailPanel();
-});
+  // ── Browse view toggle group ──────────────────────────────────
+  document.getElementById('browseViewSelect').addEventListener('change', e => {
+    state.browseListView = e.target.value;
+    // Save to localStorage
+    localStorage.setItem('wl_view_style', state.browseListView);
+    renderList();
+  });
 
-// ── Browse view toggle group ──────────────────────────────────
-document.getElementById('browseViewSelect').addEventListener('change', e => {
-  state.browseListView = e.target.value;
-  // Save to localStorage
-  localStorage.setItem('wl_view_style', state.browseListView);
-  renderList();
-});
-
-// ── Mobile view style dropdown ─────────────────────────────────
-document.getElementById('viewStyleSelectMobile')?.addEventListener('change', e => {
-  state.browseListView = e.target.value;
-  // Save to localStorage
-  localStorage.setItem('wl_view_style', state.browseListView);
-  // Sync with desktop and mobile filter sheet selects
-  document.getElementById('browseViewSelect').value = state.browseListView;
-  document.getElementById('browseViewSelectMob').value = state.browseListView;
-  renderList();
-});
+  // ── Mobile view style dropdown ─────────────────────────────────
+  document.getElementById('viewStyleSelectMobile')?.addEventListener('change', e => {
+    state.browseListView = e.target.value;
+    // Save to localStorage
+    localStorage.setItem('wl_view_style', state.browseListView);
+    // Sync with desktop and mobile filter sheet selects
+    document.getElementById('browseViewSelect').value = state.browseListView;
+    document.getElementById('browseViewSelectMob').value = state.browseListView;
+    renderList();
+  });
+}
 
 // ── Render detail ─────────────────────────────────────────────
 // Track collapsed state per section key

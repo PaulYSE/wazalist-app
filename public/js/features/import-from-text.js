@@ -1,60 +1,9 @@
-/* import-parser.js — the text-import engine: column/status/label detection,
-   tab-separated parsing, and findWazaForLine()/parseTextImport(). No DOM here. */
-import { state } from './state.js';
+/* import-from-text.js — the text-import engine: column/status/label detection,
+   tab-separated parsing, findWazaForLine(), and parseTextImport(). No DOM here. */
+
+import { state, tiState } from '../state/state.js';
 import { normalizeForSearch, isFuzzyMatch } from './search.js';
-import { escapeHtml } from './ui.js';
-
-export const tiState = {
-  matched: [],   // [{waza, rawLine, category, manualMarkings}]
-  unmatched: [],   // [rawLine]
-  parsed: false,
-  foundLabels: [],   // ordered unique label strings found in text
-  autoMapping: {},   // { [labelStr]: markingIndex (-1 = none) }
-  labelNames: {},   // { [labelStr]: displayName } — user-editable
-  previewMode: false, // true when auto-labels applied to manualMarkings as preview
-  excelColors: {}, // { colorHex: [wazaNames] }
-  colorMapping: {}, // { colorHex: markingIndex }
-  excelColorLabels: {} // { colorHex: labelName }
-};
-
-// ── Phase 1 Import Enhancements ──────────────────────────────
-
-// Common status labels mapping to Wazalist markings
-const STATUS_TO_SHAPE_MAP = {
-  // Completed/Learnt → Marking 3 (Complete)
-  'learnt': 2, 'completed': 2, 'mastered': 2, 'done': 2, 'finished': 2,
-  // Learning/In Progress → Marking 2 (Learning)
-  'learning': 1, 'in progress': 1, 'wip': 1, 'practicing': 1,
-  // Forgot/Review → Marking 5 (Forgot)
-  'forgot': 4, 'forgotten': 4, 'review': 4, 'needs review': 4, 'outdated': 4,
-  // Want to Learn → Marking 1 (Want to Learn)
-  'want to learn': 0, 'planned': 0, 'not learnt': 0, 'todo': 0, 'future': 0,
-  // Original/Favourite → Marking 4 (My Favourite)
-  'original': 3, 'own skills': 3, 'oriwaza': 3, 'favourite': 3, 'favorite': 3, 'custom': 3,
-  // Decorative markers → Marking 4 (My Favourite)
-  '★': 3, '˗ˏˋ ★ ˎˊ˗': 3
-};
-
-// Common header keywords to skip
-const HEADER_KEYWORDS = [
-  'basic waza', 'learn first', 'learn after', 'useful to learn',
-  'fundamental', 'advanced', 'optional', 'niche', 'recommended',
-  'labels', 'completed', 'forgot', 'learning', 'want to learn',
-  'videos', 'channels', 'wazaren', 'tutorial', 'compilation',
-  'insert name here', '>>>'
-];
-
-// Decorative markers to strip
-const DECORATIVE_PATTERNS = [
-  /˗ˏˋ ★ ˎˊ˗/g,  // Star decorations
-  /\s*\(optional\)\s*/gi,  // (Optional) tags
-  /\s*-\s*(center|left|right)\s*/gi,  // Position markers
-  /\s*-\s*tutorial\s*\d+\s*/gi,  // Tutorial year markers
-  /\s*\(private\s*link\)\s*/gi,  // Private link markers
-  /\s*\(outdated\)\s*/gi  // Outdated markers
-];
-
-// ── Phase 2 Import Enhancements ──────────────────────────────
+import { STATUS_TO_SHAPE_MAP, HEADER_KEYWORDS, DECORATIVE_PATTERNS } from '../config/constants.js';
 
 // Fuzzy status matching - find closest known status label
 function fuzzyMatchStatus(text) {
@@ -324,7 +273,7 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // Fuzzy match - try Japanese first, then English (STRICT: maxDistance=1)
+  // Fuzzy match - try Japanese first, then English (maxDistance=2)
   if (japanese) {
     hit = state.wazaData.find(w => isFuzzyMatch(w.name_jp, japanese, 2));
     if (hit) return hit;
@@ -337,7 +286,7 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // Final fallback: fuzzy on full text (STRICT: maxDistance=1)
+  // Final fallback: fuzzy on full text (maxDistance=2)
   hit = state.wazaData.find(w =>
     isFuzzyMatch(w.name_jp, cleaned, 2) ||
     isFuzzyMatch(w.name_en, cleaned, 2) ||
@@ -447,4 +396,3 @@ export function parseTextImport(rawText) {
   });
   tiState.parsed = true;
 }
-

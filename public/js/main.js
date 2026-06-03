@@ -1,14 +1,17 @@
-/* main.js — BOOT / wiring. URL auto-import hook, Guide buttons, popstate.
-Loaded after every other app file but before onboarding.js. */
-import { showOnboarding } from './onboarding.js';
-import { state } from './state.js';
+/* main.js — BOOT / wiring entry point. Loaded last; nothing imports this file.
+   Every other module now only declares and exports — none wires DOM events on
+   import. main.js owns the boot order: wire each module's event listeners via
+   its initX(), wire the auth screen, then load the app if a session exists. */
 
-// ── URL auto-import (fires after initApp loads wazaData) ──────
-import { initApp } from './core.js';
-const _origInitApp = initApp;
+import { state } from './state/state.js';
+import { initAuth, initApp } from './core.js';
+import { initRender, renderList, renderDetail } from './render.js';
+import { initUi, closeMobMenu } from './ui.js';
+import { initShare } from './share.js';
+import { initContributeModals } from './contribute-modals.js';
+import { initOnboarding, showOnboarding } from './onboarding.js';
 
-// ── Modal ─────────────────────────────────────────────────────
-// Guide button triggers onboarding
+// ── Guide buttons ─────────────────────────────────────────────
 document.getElementById('helpBtn').addEventListener('click', () => {
   showOnboarding();
 });
@@ -17,16 +20,28 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
   showOnboarding();
 });
 
-// ── Popstate ─────────────────────────────────────── 
+// ── Popstate — back button closes the detail panel ────────────
 window.addEventListener('popstate', e => {
-  // When user presses back button, check if we should close the detail panel
-  // e.state will be null when going back to the initial page state
-  // or won't have wazaOpen when going back from the detail view
+  // e.state is null on the initial page state, or lacks wazaOpen when
+  // returning from the detail view.
   if (state.selectedId !== null && (!e.state || !e.state.wazaOpen)) {
-    // User pressed back while detail panel is open - close it
     document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
     state.selectedId = null;
     renderList(); renderDetail();
     document.querySelector('.main').classList.remove('waza-selected');
   }
 });
+
+// ── Boot ──────────────────────────────────────────────────────
+// All modules above have finished evaluating, so it is now safe to wire DOM
+// events and run cross-module logic. Order among the initX() calls is not
+// significant (each registers listeners on its own elements); auth is wired
+// before the possible initApp() so the login screen is usable on a cold start.
+initRender();
+initUi();
+initShare();
+initContributeModals();
+initOnboarding();
+initAuth();
+
+if (state.token) initApp();

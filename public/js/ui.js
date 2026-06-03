@@ -2,11 +2,13 @@
    slide-over menu, the mobile filter sheet, and the escHtml() helper. */
 // ── Rotating search placeholder ───────────────────────────────
 
-import { state } from './state.js';
+import { state } from './state/state.js';
 import { renderDashStats } from './stats.js';
 import { renderDashCompare } from './share.js';
 import { renderContribute, renderAccount } from './forms.js';
 import { renderList } from './render.js';
+import { doLogout } from './core.js';
+import { openNewWazaModal } from './contribute-modals.js';
 
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 
@@ -75,7 +77,6 @@ export function startWazaPlaceholderRotation() {
 }
 
 // ── Filter events ─────────────────────────────────────────────
-document.getElementById('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderList(); });
 
 export function updateMarkingFilterUI() {
   // Desktop
@@ -95,52 +96,6 @@ export function updateMarkingFilterUI() {
   document.getElementById('filterDot').classList.toggle('visible', hasFilter);
 }
 
-document.getElementById('filterMarkingAll').addEventListener('click', () => {
-  state.browseFilterAny = false;
-  const anyOn = state.filters.markings.some(Boolean);
-  state.filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
-  updateMarkingFilterUI(); renderList();
-});
-
-document.getElementById('filterMarkingAny').addEventListener('click', () => {
-  state.browseFilterAny = !state.browseFilterAny;
-  if (state.browseFilterAny) state.filters.markings = Array(6).fill(false); // clear specific state.filters when entering Any mode
-  updateMarkingFilterUI(); renderList();
-});
-
-document.querySelectorAll('.marking-filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    state.browseFilterAny = false; // specific marking filter exits Any mode
-    const i = +btn.dataset.si;
-    state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
-    updateMarkingFilterUI(); renderList();
-  });
-});
-
-document.getElementById('browseSortField').addEventListener('change', e => {
-  state.browseSortField = e.target.value;
-  const isDefault = state.browseSortField === 'default';
-  document.getElementById('browseSortOrder').disabled = isDefault;
-  document.getElementById('browseSortOrderMob').disabled = isDefault;
-  // Save to localStorage
-  localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
-  updateMarkingFilterUI(); renderList();
-});
-
-document.getElementById('browseSortOrder').addEventListener('change', e => {
-  state.browseSortOrder = e.target.value;
-  document.getElementById('browseSortOrderMob').value = e.target.value;
-  // Save to localStorage
-  localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
-  updateMarkingFilterUI(); renderList();
-});
-
-// ── Mobile ⋮ menu ─────────────────────────────────────────────
-const mobMenuBtn = document.getElementById('mobMenuBtn');
-const mobMenuOverlay = document.getElementById('mobMenuOverlay');
-const mobMenuSlideover = document.getElementById('mobMenuSlideover');
-const mobMenuClose = document.getElementById('mobMenuClose');
-
 const openMobMenu = () => {
   mobMenuOverlay.classList.add('open');
   mobMenuSlideover.classList.add('open');
@@ -148,7 +103,7 @@ const openMobMenu = () => {
   updateMobMenuActiveState();
 };
 
-const closeMobMenu = () => {
+export const closeMobMenu = () => {
   mobMenuOverlay.classList.remove('open');
   mobMenuSlideover.classList.remove('open');
 };
@@ -168,103 +123,155 @@ mobMenuBtn.addEventListener('click', e => {
 mobMenuOverlay.addEventListener('click', closeMobMenu);
 mobMenuClose.addEventListener('click', closeMobMenu);
 
-// Navigation items in slideover
-document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
-  item.addEventListener('click', () => {
-    const tab = item.dataset.menuTab;
-    document.querySelector(`.ntab[data-tab="${tab}"]`)?.click();
-    closeMobMenu();
-  });
-});
-
-document.getElementById('mobLogoutBtn').onclick = () => {
-  closeMobMenu();
-  doLogout();
-};
-
-document.getElementById('mobNewWazaBtn').onclick = () => {
-  closeMobMenu();
-  openNewWazaModal();
-};
 
 // ── Mobile filter sheet ───────────────────────────────────────
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
-document.getElementById('filterSheetBtn').addEventListener('click', () => {
-  filterSheetBg.classList.add('open');
-});
-filterSheetBg.addEventListener('click', e => {
-  if (!filterSheet.contains(e.target)) filterSheetBg.classList.remove('open');
-});
-
-// Mobile marking buttons — stage only, applied on Confirm
-document.getElementById('filterMarkingAllMob').addEventListener('click', () => {
-  state.browseFilterAny = false;
-  const anyOn = state.filters.markings.some(Boolean);
-  state.filters.markings = Array(6).fill(!anyOn);
-  updateMarkingFilterUI();
-});
-document.getElementById('filterMarkingAnyMob').addEventListener('click', () => {
-  state.browseFilterAny = !state.browseFilterAny;
-  if (state.browseFilterAny) state.filters.markings = Array(6).fill(false);
-  updateMarkingFilterUI();
-});
-document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
-  btn.addEventListener('click', () => {
-    state.browseFilterAny = false;
-    const i = +btn.dataset.si;
-    state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
-    updateMarkingFilterUI();
-  });
-});
-document.getElementById('browseSortFieldMob').addEventListener('change', e => {
-  const isDefault = e.target.value === 'default';
-  document.getElementById('browseSortOrderMob').disabled = isDefault;
-});
-document.getElementById('browseSortOrderMob').addEventListener('change', () => { });
-document.getElementById('browseViewSelectMob').addEventListener('change', () => { });
-
-document.getElementById('filterSheetConfirm').addEventListener('click', () => {
-  // Read staged values from mob selects
-  const newSortField = document.getElementById('browseSortFieldMob').value;
-  const newSortOrder = document.getElementById('browseSortOrderMob').value;
-  const newView = document.getElementById('browseViewSelectMob').value;
-  // Apply to state + sync desktop controls
-  state.browseSortField = newSortField;
-  state.browseSortOrder = newSortOrder;
-  state.browseListView = newView;
-  document.getElementById('browseSortField').value = newSortField;
-  const isDefault = newSortField === 'default';
-  document.getElementById('browseSortOrder').disabled = isDefault;
-  document.getElementById('browseSortOrder').value = newSortOrder;
-  document.getElementById('browseViewSelect').value = newView;
-  // Save to localStorage
-  localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
-  localStorage.setItem('wl_view_style', state.browseListView);
-  // Close sheet and re-render
-  filterSheetBg.classList.remove('open');
-  updateMarkingFilterUI();
-  renderList();
-});
-
-// ── Nav tabs ──────────────────────────────────────────────────
-document.querySelectorAll('.ntab').forEach(tab => tab.addEventListener('click', () => {
-  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
-  const t = tab.dataset.tab;
-  document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
-  document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
-  document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
-  document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
-  document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
-  if (t === 'stats') renderDashStats();
-  if (t === 'compare') renderDashCompare();
-  if (t === 'contribute') renderContribute();
-  if (t === 'account') renderAccount();
-  // Update mobile menu active state
-  if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
-}));
-
 export function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-// ── Suggest Edit modal ────────────────────────────────────────
+
+export function initUi() {
+
+  document.getElementById('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderList(); });
+
+  document.getElementById('filterMarkingAll').addEventListener('click', () => {
+    state.browseFilterAny = false;
+    const anyOn = state.filters.markings.some(Boolean);
+    state.filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
+    updateMarkingFilterUI(); renderList();
+  });
+
+  document.getElementById('filterMarkingAny').addEventListener('click', () => {
+    state.browseFilterAny = !state.browseFilterAny;
+    if (state.browseFilterAny) state.filters.markings = Array(6).fill(false); // clear specific state.filters when entering Any mode
+    updateMarkingFilterUI(); renderList();
+  });
+
+  document.querySelectorAll('.marking-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.browseFilterAny = false; // specific marking filter exits Any mode
+      const i = +btn.dataset.si;
+      state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
+      updateMarkingFilterUI(); renderList();
+    });
+  });
+
+  document.getElementById('browseSortField').addEventListener('change', e => {
+    state.browseSortField = e.target.value;
+    const isDefault = state.browseSortField === 'default';
+    document.getElementById('browseSortOrder').disabled = isDefault;
+    document.getElementById('browseSortOrderMob').disabled = isDefault;
+    // Save to localStorage
+    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
+    updateMarkingFilterUI(); renderList();
+  });
+
+  document.getElementById('browseSortOrder').addEventListener('change', e => {
+    state.browseSortOrder = e.target.value;
+    document.getElementById('browseSortOrderMob').value = e.target.value;
+    // Save to localStorage
+    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
+    updateMarkingFilterUI(); renderList();
+  });
+
+  // ── Mobile ⋮ menu ─────────────────────────────────────────────
+  const mobMenuBtn = document.getElementById('mobMenuBtn');
+  const mobMenuOverlay = document.getElementById('mobMenuOverlay');
+  const mobMenuSlideover = document.getElementById('mobMenuSlideover');
+  const mobMenuClose = document.getElementById('mobMenuClose');
+
+  // Navigation items in slideover
+  document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
+    item.addEventListener('click', () => {
+      const tab = item.dataset.menuTab;
+      document.querySelector(`.ntab[data-tab="${tab}"]`)?.click();
+      closeMobMenu();
+    });
+  });
+
+  document.getElementById('mobLogoutBtn').onclick = () => {
+    closeMobMenu();
+    doLogout();
+  };
+
+  document.getElementById('mobNewWazaBtn').onclick = () => {
+    closeMobMenu();
+    openNewWazaModal();
+  };
+
+
+  document.getElementById('filterSheetBtn').addEventListener('click', () => {
+    filterSheetBg.classList.add('open');
+  });
+  filterSheetBg.addEventListener('click', e => {
+    if (!filterSheet.contains(e.target)) filterSheetBg.classList.remove('open');
+  });
+
+  // Mobile marking buttons — stage only, applied on Confirm
+  document.getElementById('filterMarkingAllMob').addEventListener('click', () => {
+    state.browseFilterAny = false;
+    const anyOn = state.filters.markings.some(Boolean);
+    state.filters.markings = Array(6).fill(!anyOn);
+    updateMarkingFilterUI();
+  });
+  document.getElementById('filterMarkingAnyMob').addEventListener('click', () => {
+    state.browseFilterAny = !state.browseFilterAny;
+    if (state.browseFilterAny) state.filters.markings = Array(6).fill(false);
+    updateMarkingFilterUI();
+  });
+  document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.browseFilterAny = false;
+      const i = +btn.dataset.si;
+      state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
+      updateMarkingFilterUI();
+    });
+  });
+  document.getElementById('browseSortFieldMob').addEventListener('change', e => {
+    const isDefault = e.target.value === 'default';
+    document.getElementById('browseSortOrderMob').disabled = isDefault;
+  });
+  document.getElementById('browseSortOrderMob').addEventListener('change', () => { });
+  document.getElementById('browseViewSelectMob').addEventListener('change', () => { });
+
+  document.getElementById('filterSheetConfirm').addEventListener('click', () => {
+    // Read staged values from mob selects
+    const newSortField = document.getElementById('browseSortFieldMob').value;
+    const newSortOrder = document.getElementById('browseSortOrderMob').value;
+    const newView = document.getElementById('browseViewSelectMob').value;
+    // Apply to state + sync desktop controls
+    state.browseSortField = newSortField;
+    state.browseSortOrder = newSortOrder;
+    state.browseListView = newView;
+    document.getElementById('browseSortField').value = newSortField;
+    const isDefault = newSortField === 'default';
+    document.getElementById('browseSortOrder').disabled = isDefault;
+    document.getElementById('browseSortOrder').value = newSortOrder;
+    document.getElementById('browseViewSelect').value = newView;
+    // Save to localStorage
+    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
+    localStorage.setItem('wl_view_style', state.browseListView);
+    // Close sheet and re-render
+    filterSheetBg.classList.remove('open');
+    updateMarkingFilterUI();
+    renderList();
+  });
+
+  // ── Nav tabs ──────────────────────────────────────────────────
+  document.querySelectorAll('.ntab').forEach(tab => tab.addEventListener('click', () => {
+    document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
+    const t = tab.dataset.tab;
+    document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
+    document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
+    document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
+    document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
+    document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
+    if (t === 'stats') renderDashStats();
+    if (t === 'compare') renderDashCompare();
+    if (t === 'contribute') renderContribute();
+    if (t === 'account') renderAccount();
+    // Update mobile menu active state
+    if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
+  }));
+}

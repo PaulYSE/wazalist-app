@@ -1,16 +1,15 @@
 /* share.js — list serialization + SHA-256 hashing, the share/import modals,
    and the Compare tab (renderDashCompare). */
-import { state } from './state.js';
-import { SHAPES } from './config.js';
+import { state, LS_IMPORTED } from './state/state.js';
+import { SHAPES } from './config/constants.js';
 import { saveLabels } from './core.js';
-import { showToast } from './import-ui.js';
+import { showToast } from './components/Toast.js';
 import { escapeHtml } from './ui.js';
 import { api, getP, saveP } from './core.js';
-import { dispName } from './search.js';
+import { dispName } from './features/search.js';
 import { markingPips } from './render-helpers.js';
 import { selectWaza, navigateToBrowse } from './render.js';
 
-const LS_IMPORTED = 'wl_imported_lists';
 const loadImported = () => { try { return JSON.parse(localStorage.getItem(LS_IMPORTED) || '{}') } catch { return {} } };
 const saveImported = d => localStorage.setItem(LS_IMPORTED, JSON.stringify(d));
 let importedLists = loadImported(); // { [key]: { key, name, importedAt, labels, marks } }
@@ -61,21 +60,6 @@ async function openExportModal() {
   }
 }
 
-document.getElementById('exportClose').addEventListener('click', () => { document.getElementById('exportBg').style.display = 'none'; });
-document.getElementById('exportCancel').addEventListener('click', () => { document.getElementById('exportBg').style.display = 'none'; });
-document.getElementById('exportBg').addEventListener('click', e => { if (e.target === document.getElementById('exportBg')) document.getElementById('exportBg').style.display = 'none'; });
-
-document.getElementById('copyKeyBtn').addEventListener('click', async () => {
-  await navigator.clipboard.writeText(document.getElementById('exportKey').textContent);
-  document.getElementById('copyKeyBtn').textContent = 'Copied!';
-  setTimeout(() => document.getElementById('copyKeyBtn').textContent = 'Copy key', 1800);
-});
-document.getElementById('copyLinkBtn').addEventListener('click', async () => {
-  await navigator.clipboard.writeText(document.getElementById('exportUrl').textContent);
-  document.getElementById('copyLinkBtn').textContent = 'Copied!';
-  setTimeout(() => document.getElementById('copyLinkBtn').textContent = 'Copy link', 1800);
-});
-
 // ── Import flow ───────────────────────────────────────────────
 function openImportModal(prefillKey = '') {
   document.getElementById('importKeyInput').value = prefillKey;
@@ -84,63 +68,6 @@ function openImportModal(prefillKey = '') {
   if (prefillKey) document.getElementById('importFetchBtn').click();
 }
 
-document.getElementById('importClose').addEventListener('click', () => { document.getElementById('importBg').style.display = 'none'; });
-document.getElementById('importCancel').addEventListener('click', () => { document.getElementById('importBg').style.display = 'none'; });
-document.getElementById('importBg').addEventListener('click', e => { if (e.target === document.getElementById('importBg')) document.getElementById('importBg').style.display = 'none'; });
-
-document.getElementById('importFetchBtn').addEventListener('click', async () => {
-  const key = document.getElementById('importKeyInput').value.trim().toLowerCase();
-  const errEl = document.getElementById('importErr');
-  errEl.textContent = '';
-  if (!/^[0-9a-f]{64}$/.test(key)) { errEl.textContent = 'Key must be 64 hex characters.'; return; }
-  const btn = document.getElementById('importFetchBtn');
-  btn.disabled = true; btn.textContent = 'Fetching…';
-  try {
-    const res = await fetch('/api/list?key=' + key);
-    const json = await res.json();
-    btn.disabled = false; btn.textContent = 'Import';
-    if (json.error) { errEl.textContent = res.status === 404 ? 'List not found — the key may have expired (keys last 90 days).' : json.error; return; }
-    let parsed;
-    try { parsed = JSON.parse(json.data); } catch { errEl.textContent = 'Invalid list data.'; return; }
-    if (!parsed.v || !parsed.marks) { errEl.textContent = 'Unrecognised list format.'; return; }
-    _pendingImport = { key, ...parsed };
-    document.getElementById('importBg').style.display = 'none';
-    // Open name modal
-    const now = new Date();
-    const defaultName = 'Imported List ' + now.toLocaleString('en', { month: 'long', year: 'numeric' });
-    document.getElementById('importNameInput').value = importedLists[key]?.name || defaultName;
-    const dupWarn = document.getElementById('importDupWarning');
-    const dupSpan = document.getElementById('importDupName');
-    if (importedLists[key]) { dupWarn.style.display = ''; dupSpan.textContent = importedLists[key].name; }
-    else { dupWarn.style.display = 'none'; }
-    document.getElementById('nameImportBg').style.display = 'flex';
-  } catch (e) {
-    btn.disabled = false; btn.textContent = 'Import';
-    errEl.textContent = 'Network error. Please try again.';
-  }
-});
-
-document.getElementById('nameImportClose').addEventListener('click', () => { document.getElementById('nameImportBg').style.display = 'none'; });
-document.getElementById('importNameCancel').addEventListener('click', () => { document.getElementById('nameImportBg').style.display = 'none'; });
-document.getElementById('importSaveBtn').addEventListener('click', () => {
-  const name = document.getElementById('importNameInput').value.trim();
-  if (!name || !_pendingImport) return;
-  const { key, labels, marks } = _pendingImport;
-  importedLists[key] = { key, name, importedAt: new Date().toISOString(), labels: labels || Array(6).fill(''), marks: marks || {} };
-  saveImported(importedLists);
-  _pendingImport = null;
-  document.getElementById('nameImportBg').style.display = 'none';
-  showToast('List imported: ' + name, 'green');
-  // Switch to Compare top-level tab
-  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
-  document.querySelector('[data-tab="compare"]').classList.add('active');
-  document.getElementById('browseView').style.display = 'none';
-  document.getElementById('statsView').style.display = 'none';
-  document.getElementById('accountView').style.display = 'none';
-  document.getElementById('contributeView').style.display = 'none';
-  document.getElementById('compareView').style.display = 'block';
-  renderDashCompare();
-});
 
 // Check URL for ?import= key on load
 export function checkAutoImport() {
@@ -322,6 +249,77 @@ export function renderDashCompare() {
   });
 }
 
-// ── Compare sub-tab switching ─────────────────────────────────
-// ── Text Import ───────────────────────────────────────────────
-// State for the text-import sub-tab
+export function initShare() {
+  document.getElementById('exportClose').addEventListener('click', () => { document.getElementById('exportBg').style.display = 'none'; });
+  document.getElementById('exportCancel').addEventListener('click', () => { document.getElementById('exportBg').style.display = 'none'; });
+  document.getElementById('exportBg').addEventListener('click', e => { if (e.target === document.getElementById('exportBg')) document.getElementById('exportBg').style.display = 'none'; });
+
+  document.getElementById('copyKeyBtn').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(document.getElementById('exportKey').textContent);
+    document.getElementById('copyKeyBtn').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyKeyBtn').textContent = 'Copy key', 1800);
+  });
+  document.getElementById('copyLinkBtn').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(document.getElementById('exportUrl').textContent);
+    document.getElementById('copyLinkBtn').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('copyLinkBtn').textContent = 'Copy link', 1800);
+  });
+
+  document.getElementById('importClose').addEventListener('click', () => { document.getElementById('importBg').style.display = 'none'; });
+  document.getElementById('importCancel').addEventListener('click', () => { document.getElementById('importBg').style.display = 'none'; });
+  document.getElementById('importBg').addEventListener('click', e => { if (e.target === document.getElementById('importBg')) document.getElementById('importBg').style.display = 'none'; });
+
+  document.getElementById('importFetchBtn').addEventListener('click', async () => {
+    const key = document.getElementById('importKeyInput').value.trim().toLowerCase();
+    const errEl = document.getElementById('importErr');
+    errEl.textContent = '';
+    if (!/^[0-9a-f]{64}$/.test(key)) { errEl.textContent = 'Key must be 64 hex characters.'; return; }
+    const btn = document.getElementById('importFetchBtn');
+    btn.disabled = true; btn.textContent = 'Fetching…';
+    try {
+      const res = await fetch('/api/list?key=' + key);
+      const json = await res.json();
+      btn.disabled = false; btn.textContent = 'Import';
+      if (json.error) { errEl.textContent = res.status === 404 ? 'List not found — the key may have expired (keys last 90 days).' : json.error; return; }
+      let parsed;
+      try { parsed = JSON.parse(json.data); } catch { errEl.textContent = 'Invalid list data.'; return; }
+      if (!parsed.v || !parsed.marks) { errEl.textContent = 'Unrecognised list format.'; return; }
+      _pendingImport = { key, ...parsed };
+      document.getElementById('importBg').style.display = 'none';
+      // Open name modal
+      const now = new Date();
+      const defaultName = 'Imported List ' + now.toLocaleString('en', { month: 'long', year: 'numeric' });
+      document.getElementById('importNameInput').value = importedLists[key]?.name || defaultName;
+      const dupWarn = document.getElementById('importDupWarning');
+      const dupSpan = document.getElementById('importDupName');
+      if (importedLists[key]) { dupWarn.style.display = ''; dupSpan.textContent = importedLists[key].name; }
+      else { dupWarn.style.display = 'none'; }
+      document.getElementById('nameImportBg').style.display = 'flex';
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Import';
+      errEl.textContent = 'Network error. Please try again.';
+    }
+  });
+
+  document.getElementById('nameImportClose').addEventListener('click', () => { document.getElementById('nameImportBg').style.display = 'none'; });
+  document.getElementById('importNameCancel').addEventListener('click', () => { document.getElementById('nameImportBg').style.display = 'none'; });
+  document.getElementById('importSaveBtn').addEventListener('click', () => {
+    const name = document.getElementById('importNameInput').value.trim();
+    if (!name || !_pendingImport) return;
+    const { key, labels, marks } = _pendingImport;
+    importedLists[key] = { key, name, importedAt: new Date().toISOString(), labels: labels || Array(6).fill(''), marks: marks || {} };
+    saveImported(importedLists);
+    _pendingImport = null;
+    document.getElementById('nameImportBg').style.display = 'none';
+    showToast('List imported: ' + name, 'green');
+    // Switch to Compare top-level tab
+    document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-tab="compare"]').classList.add('active');
+    document.getElementById('browseView').style.display = 'none';
+    document.getElementById('statsView').style.display = 'none';
+    document.getElementById('accountView').style.display = 'none';
+    document.getElementById('contributeView').style.display = 'none';
+    document.getElementById('compareView').style.display = 'block';
+    renderDashCompare();
+  });
+}

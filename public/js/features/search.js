@@ -1,8 +1,8 @@
 /* search.js — search-string normalization, fuzzy (Levenshtein) matching,
    and filterWaza() which produces the currently-visible list. */
 
-import { state } from './state.js';
-import { getP } from './core.js';
+import { state } from '../state/state.js';
+import { getP } from '../core.js';
 
 // ── Normalize user search entry ───────────────────────────────
 export function normalizeForSearch(text) {

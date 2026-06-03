@@ -1,7 +1,7 @@
 /* stats.js — the Stats dashboard (counts, recently-updated, coverage). */
-import { state } from './state.js';
+import { state } from './state/state.js';
 import { getP } from './core.js';
-import { dispName } from './search.js';
+import { dispName } from './features/search.js';
 import { markingStyle, markingPips } from './render-helpers.js';
 import { selectWaza, navigateToBrowse } from './render.js';
 

@@ -1,7 +1,9 @@
 /* core.js — the lifecycle: api() fetch wrapper, guest/login, initApp(),
-   and progress saving (saveP/saveLabels). This is where the app boots its data. */
+   and progress saving (saveP/saveLabels). This is where the app boots its data.
+   No work happens on import — main.js calls initAuth()/initApp() in a defined order. */
 
-import { state, loadLocal, saveLocal, LS_LABELS } from './state.js'
+import { state } from './state/state.js'
+import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS, loadLocal, saveLocal } from './state/localStorage.js';
 import { renderList, renderDetail, selectWaza } from './render.js';
 import { renderDashStats } from './stats.js';
 import { startWazaPlaceholderRotation } from './ui.js';
@@ -15,38 +17,43 @@ export const api = async (path, method = 'GET', body = null) => {
 };
 
 // ── Auth ─────────────────────────────────────────────────────
-document.getElementById('toReg').onclick = () => { document.getElementById('loginBox').style.display = 'none'; document.getElementById('regBox').style.display = ''; };
-document.getElementById('toLi').onclick = () => { document.getElementById('regBox').style.display = 'none'; document.getElementById('loginBox').style.display = ''; };
-
 function startGuest() { state.isGuest = true; state.token = ''; Object.entries(loadLocal()).forEach(([id, p]) => { state.prog[+id] = p; }); initApp(); }
-document.getElementById('guestBtn').onclick = startGuest;
-document.getElementById('guestBtn2').onclick = startGuest;
-
-document.getElementById('li-btn').onclick = async () => {
-  const username = document.getElementById('li-username').value.trim(), password = document.getElementById('li-password').value;
-  const e = document.getElementById('li-err'); e.textContent = '';
-  if (!username || !password) { e.textContent = 'Please fill in both fields.'; return; }
-  const res = await api('/api/login', 'POST', { username, password });
-  if (res.error) { e.textContent = res.error; return; }
-  state.token = res.token; localStorage.setItem('wl_token', state.token);
-  state.currentUsername = res.user.username; localStorage.setItem('wl_username', state.currentUsername);
-  state.isAdmin = !!res.user.is_admin;
-  initApp();
-};
-
-document.getElementById('rg-btn').onclick = async () => {
-  const username = document.getElementById('rg-username').value.trim(), email = document.getElementById('rg-email').value.trim(), password = document.getElementById('rg-password').value;
-  const e = document.getElementById('rg-err'); e.className = 'aerr'; e.textContent = '';
-  if (!username || !password) { e.textContent = 'Username and password are required.'; return; }
-  const res = await api('/api/register', 'POST', { username, email: email || undefined, password });
-  if (res.error) { e.textContent = res.error; return; }
-  e.className = 'aok'; e.textContent = 'Account created! Signing you in…';
-  const li = await api('/api/login', 'POST', { username, password });
-  if (li.token) { state.token = li.token; localStorage.setItem('wl_token', state.token); state.currentUsername = li.user.username; localStorage.setItem('wl_username', state.currentUsername); initApp(); showOnboarding(); }
-};
 
 export const doLogout = () => { state.token = ''; state.isGuest = false; state.currentUsername = ''; localStorage.removeItem('wl_token'); localStorage.removeItem('wl_username'); location.reload(); };
-document.getElementById('logoutBtn').onclick = doLogout;
+
+// Wire up the auth screen (login/register/guest/logout). Called once from main.js.
+export function initAuth() {
+  document.getElementById('toReg').onclick = () => { document.getElementById('loginBox').style.display = 'none'; document.getElementById('regBox').style.display = ''; };
+  document.getElementById('toLi').onclick = () => { document.getElementById('regBox').style.display = 'none'; document.getElementById('loginBox').style.display = ''; };
+
+  document.getElementById('guestBtn').onclick = startGuest;
+  document.getElementById('guestBtn2').onclick = startGuest;
+
+  document.getElementById('li-btn').onclick = async () => {
+    const username = document.getElementById('li-username').value.trim(), password = document.getElementById('li-password').value;
+    const e = document.getElementById('li-err'); e.textContent = '';
+    if (!username || !password) { e.textContent = 'Please fill in both fields.'; return; }
+    const res = await api('/api/login', 'POST', { username, password });
+    if (res.error) { e.textContent = res.error; return; }
+    state.token = res.token; localStorage.setItem('wl_token', state.token);
+    state.currentUsername = res.user.username; localStorage.setItem('wl_username', state.currentUsername);
+    state.isAdmin = !!res.user.is_admin;
+    initApp();
+  };
+
+  document.getElementById('rg-btn').onclick = async () => {
+    const username = document.getElementById('rg-username').value.trim(), email = document.getElementById('rg-email').value.trim(), password = document.getElementById('rg-password').value;
+    const e = document.getElementById('rg-err'); e.className = 'aerr'; e.textContent = '';
+    if (!username || !password) { e.textContent = 'Username and password are required.'; return; }
+    const res = await api('/api/register', 'POST', { username, email: email || undefined, password });
+    if (res.error) { e.textContent = res.error; return; }
+    e.className = 'aok'; e.textContent = 'Account created! Signing you in…';
+    const li = await api('/api/login', 'POST', { username, password });
+    if (li.token) { state.token = li.token; localStorage.setItem('wl_token', state.token); state.currentUsername = li.user.username; localStorage.setItem('wl_username', state.currentUsername); initApp(); showOnboarding(); }
+  };
+
+  document.getElementById('logoutBtn').onclick = doLogout;
+}
 
 // ── Init ─────────────────────────────────────────────────────
 export async function initApp() {
@@ -128,7 +135,6 @@ export async function initApp() {
   startWazaPlaceholderRotation();
   checkAutoImport();
 }
-if (state.token) initApp();
 
 // ── Progress helpers ─────────────────────────────────────────
 export var emptyP = function () { return { shapes: Array(6).fill(false), like: null }; };
@@ -171,6 +177,3 @@ export async function saveP(id, patch) {
     if (indicator) { indicator.style.opacity = '1'; clearTimeout(indicator._t); indicator._t = setTimeout(() => { indicator.style.opacity = '0'; }, 1400); }
   }
 }
-
-// ── Populate filter dropdowns (removed) ─────────────────────────────────
-
