@@ -1,6 +1,7 @@
 /* share.js — list serialization + SHA-256 hashing, the share/import modals,
    and the Compare tab (renderDashCompare). */
-import { state, LS_IMPORTED } from './state/state.js';
+import { state } from './state/state.js';
+import { LS_IMPORTED } from './state/localStorage.js';
 import { SHAPES } from './config/constants.js';
 import { saveLabels } from './core.js';
 import { showToast } from './components/Toast.js';

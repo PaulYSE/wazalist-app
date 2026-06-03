@@ -1,6 +1,16 @@
 // state.js — mutable app state + localStorage helpers
 import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS } from './localStorage.js';
 
+const loadSortPrefs = () => {
+  try {
+    const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
+    return { field: prefs.field || 'default', order: prefs.order || 'asc' };
+  } catch {
+    return { field: 'default', order: 'asc' };
+  }
+};
+const savedSort = loadSortPrefs();
+
 // ── Shared mutable state ─────────────────────────────────────
 export const state = {
   token:           localStorage.getItem('wl_token') || '',

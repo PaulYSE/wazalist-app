@@ -12,13 +12,3 @@ export const loadLocal = () => {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} } 
 };
 export const saveLocal = d => localStorage.setItem(LS_KEY, JSON.stringify(d));
-
-const loadSortPrefs = () => {
-  try {
-    const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
-    return { field: prefs.field || 'default', order: prefs.order || 'asc' };
-  } catch {
-    return { field: 'default', order: 'asc' };
-  }
-};
-const savedSort = loadSortPrefs();

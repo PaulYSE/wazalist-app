@@ -1,6 +1,6 @@
 /* ui.js — UI chrome: rotating placeholders, marking-filter UI, the mobile
-   slide-over menu, the mobile filter sheet, and the escHtml() helper. */
-// ── Rotating search placeholder ───────────────────────────────
+   slide-over menu, the mobile filter sheet, and the escapeHtml() helper.
+   No work on import — main.js calls initUi() to wire all DOM events. */
 
 import { state } from './state/state.js';
 import { renderDashStats } from './stats.js';
@@ -10,6 +10,7 @@ import { renderList } from './render.js';
 import { doLogout } from './core.js';
 import { openNewWazaModal } from './contribute-modals.js';
 
+// ── Rotating search placeholder ───────────────────────────────
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 
 export function startWazaPlaceholderRotation() {
@@ -76,8 +77,7 @@ export function startWazaPlaceholderRotation() {
   input._rebuildPool = () => { pool = buildPool(); };
 }
 
-// ── Filter events ─────────────────────────────────────────────
-
+// ── Marking filter UI sync ────────────────────────────────────
 export function updateMarkingFilterUI() {
   // Desktop
   document.getElementById('filterMarkingAll').classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
@@ -95,6 +95,12 @@ export function updateMarkingFilterUI() {
   const hasFilter = state.browseFilterAny || state.filters.markings.some(Boolean) || state.browseSortField !== 'default' || state.browseSortOrder !== 'asc';
   document.getElementById('filterDot').classList.toggle('visible', hasFilter);
 }
+
+// ── Mobile ⋮ menu (element refs + helpers) ────────────────────
+const mobMenuBtn = document.getElementById('mobMenuBtn');
+const mobMenuOverlay = document.getElementById('mobMenuOverlay');
+const mobMenuSlideover = document.getElementById('mobMenuSlideover');
+const mobMenuClose = document.getElementById('mobMenuClose');
 
 const openMobMenu = () => {
   mobMenuOverlay.classList.add('open');
@@ -115,24 +121,16 @@ const updateMobMenuActiveState = () => {
   });
 };
 
-mobMenuBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  openMobMenu();
-});
-
-mobMenuOverlay.addEventListener('click', closeMobMenu);
-mobMenuClose.addEventListener('click', closeMobMenu);
-
-
-// ── Mobile filter sheet ───────────────────────────────────────
+// ── Mobile filter sheet (element refs) ────────────────────────
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
 export function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-
+// ── Wiring ────────────────────────────────────────────────────
+// Called once from main.js after every module has finished evaluating.
 export function initUi() {
-
+  // ── Filter events ───────────────────────────────────────────
   document.getElementById('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderList(); });
 
   document.getElementById('filterMarkingAll').addEventListener('click', () => {
@@ -175,11 +173,14 @@ export function initUi() {
     updateMarkingFilterUI(); renderList();
   });
 
-  // ── Mobile ⋮ menu ─────────────────────────────────────────────
-  const mobMenuBtn = document.getElementById('mobMenuBtn');
-  const mobMenuOverlay = document.getElementById('mobMenuOverlay');
-  const mobMenuSlideover = document.getElementById('mobMenuSlideover');
-  const mobMenuClose = document.getElementById('mobMenuClose');
+  // ── Mobile ⋮ menu ───────────────────────────────────────────
+  mobMenuBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openMobMenu();
+  });
+
+  mobMenuOverlay.addEventListener('click', closeMobMenu);
+  mobMenuClose.addEventListener('click', closeMobMenu);
 
   // Navigation items in slideover
   document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
@@ -200,7 +201,7 @@ export function initUi() {
     openNewWazaModal();
   };
 
-
+  // ── Mobile filter sheet ─────────────────────────────────────
   document.getElementById('filterSheetBtn').addEventListener('click', () => {
     filterSheetBg.classList.add('open');
   });
@@ -258,7 +259,7 @@ export function initUi() {
     renderList();
   });
 
-  // ── Nav tabs ──────────────────────────────────────────────────
+  // ── Nav tabs ────────────────────────────────────────────────
   document.querySelectorAll('.ntab').forEach(tab => tab.addEventListener('click', () => {
     document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
     const t = tab.dataset.tab;
@@ -272,6 +273,6 @@ export function initUi() {
     if (t === 'contribute') renderContribute();
     if (t === 'account') renderAccount();
     // Update mobile menu active state
-    if (typeof updateMobMenuActiveState !== 'undefined') updateMobMenuActiveState();
+    updateMobMenuActiveState();
   }));
 }

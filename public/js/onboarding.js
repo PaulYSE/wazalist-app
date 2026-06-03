@@ -2,7 +2,8 @@
 
 import { saveLabels } from './core.js';
 import { renderDashStats } from './stats.js';
-import { state, LS_LABELS } from './state/state.js';
+import { state } from './state/state.js';
+import { LS_LABELS } from './state/localStorage.js';
 import { SHAPES, MARKING_LABELS_TEMPLATE } from './config/constants.js';
 import { wazaMatchesSearch } from './features/search.js';
 import {
