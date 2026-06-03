@@ -208,7 +208,7 @@ export function renderDetail() {
 
     // Markings — not collapsible
     + '<div class="dsec"><h3>Markings</h3>'
-    + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="marking-btn' + (markings[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap">' + SHAPES.map((s, i) => '<button class="marking-btn' + (markings[i] ? ' on' : '') + '"' + savingAttr + ' data-si="' + i + '" title="' + (state.markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</button>').join('') + '</div>'
     + '<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of markings — meaning is up to you.</div></div>'
 
     // Videos — not collapsible

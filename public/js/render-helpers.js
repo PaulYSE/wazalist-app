@@ -1,6 +1,7 @@
 /* render-helpers.js — small pure-ish helpers shared by the renderers:
    marking styles/pips and video/oEmbed handling. */
 import { SHAPES, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config.js';
+import { state } from './state.js';
 
 // const SHAPE_HUES = [200, 45, 123, 280, 80, 330];
 export const SHAPE_HUES = [4, 28, 54, 118, 212, 272];
@@ -27,7 +28,7 @@ export function markingStyle(markings) {
     style: 'background:hsl(' + hue + ',' + sat + '%,' + bgL + '%);border-left-color:hsl(' + hue + ',70%,' + bdL + '%)'
   };
 }
-export const markingPips = markings => SHAPES.map((s, i) => '<span class="marking-pip' + (markings[i] ? ' on' : '') + '" title="' + (markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</span>').join('');
+export const markingPips = markings => SHAPES.map((s, i) => '<span class="marking-pip' + (markings[i] ? ' on' : '') + '" title="' + (state.markingLabels[i] || 'Marking ' + (i + 1)) + '">' + s + '</span>').join('');
 
 export function platform(url) {
   if (!url) return 'other';
