@@ -149,7 +149,7 @@ export async function saveLabels() {
   }
 }
 
-async function saveP(id, patch) {
+export async function saveP(id, patch) {
   state.prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
   if (state.isGuest) { const l = loadLocal(); l[id] = state.prog[id]; saveLocal(l); renderList(); renderDetail(); renderDashStats(); }
   else {
