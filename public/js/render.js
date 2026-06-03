@@ -183,7 +183,7 @@ export function renderDetail() {
       + inner + '</div></div>';
   };
 
-  const isSaving = savingIds.has(w.id);
+  const isSaving = state.savingIds.has(w.id);
   const savingAttr = isSaving ? ' disabled style="opacity:.5;cursor:default"' : '';
 
   panel.innerHTML =
@@ -192,12 +192,12 @@ export function renderDetail() {
 
     // Like/Dislike pill
     + '<div class="dsec"><h3>Community' + (isSaving ? ' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>' : '') + '</h3>'
-    + ((!token || isGuest) ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>' : '')
+    + ((!state.token || state.isGuest) ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>' : '')
     + '<div class="like-pill-wrap">'
     + '<div class="like-pill">'
-    + '<button class="like-pill-half' + (p.like === 1 ? ' like-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="likeBtn">'
+    + '<button class="like-pill-half' + (p.like === 1 ? ' like-on' : '') + '"' + ((!state.token || state.isGuest) || isSaving ? ' disabled' : '') + ' id="likeBtn">'
     + '👍 <span class="pill-count">' + (w.like_count || 0) + '</span></button>'
-    + '<button class="like-pill-half' + (p.like === -1 ? ' dislike-on' : '') + '"' + ((!token || isGuest) || isSaving ? ' disabled' : '') + ' id="dislikeBtn">'
+    + '<button class="like-pill-half' + (p.like === -1 ? ' dislike-on' : '') + '"' + ((!state.token || state.isGuest) || isSaving ? ' disabled' : '') + ' id="dislikeBtn">'
     + '👎 <span class="pill-count">' + (w.dislike_count || 0) + '</span></button>'
     + '</div>'
     + (() => {
@@ -247,7 +247,7 @@ export function renderDetail() {
       + '</div>') : '')
 
     + '<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div></div>'
-    + (!isGuest && token ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>' : '');
+    + (!state.isGuest && state.token ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>' : '');
 
   panel.querySelector('#likeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === 1 ? null : 1 }));
   panel.querySelector('#dislikeBtn')?.addEventListener('click', () => saveP(w.id, { like: p.like === -1 ? null : -1 }));

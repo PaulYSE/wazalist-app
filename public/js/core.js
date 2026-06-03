@@ -153,7 +153,7 @@ async function saveP(id, patch) {
   state.prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
   if (state.isGuest) { const l = loadLocal(); l[id] = state.prog[id]; saveLocal(l); renderList(); renderDetail(); renderDashStats(); }
   else {
-    savingIds.add(id);
+    state.savingIds.add(id);
     renderDetail(); // show spinning state immediately
     try {
       const res = await api('/api/progress', 'POST', { waza_id: id, markings: JSON.stringify(state.prog[id].markings), like: state.prog[id].like });
@@ -164,7 +164,7 @@ async function saveP(id, patch) {
         if (w) { w.like_count = res.like_count; w.dislike_count = res.dislike_count; }
       }
     } catch (err) { console.warn('Progress save error:', err); }
-    savingIds.delete(id);
+    state.savingIds.delete(id);
     renderList(); renderDetail(); renderDashStats();
     // Flash "Saved ✓" indicator
     const indicator = document.getElementById('saveIndicator');

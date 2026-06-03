@@ -22,7 +22,7 @@ export async function exportToExcel() {
   // Collect every waza the user has marked (at least one active marking).
   const rows = [];
   state.wazaData.forEach(w => {
-    const p = prog[w.id];
+    const p = state.prog[w.id];
     const markings = (p && p.markings) || null;
     if (!markings || !markings.some(Boolean)) return;
     const firstMark = markings.findIndex(Boolean); // colour by first active marking

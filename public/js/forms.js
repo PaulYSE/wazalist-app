@@ -220,7 +220,7 @@ export async function renderAccount() {
       if (loggedIn) {
         // For logged-in users, reset on server
         // Delete all progress entries for this user
-        const wazaIds = wazaData.map(w => w.id);
+        const wazaIds = state.wazaData.map(w => w.id);
         for (const wid of wazaIds) {
           await api('/api/progress', 'POST', {
             waza_id: wid,

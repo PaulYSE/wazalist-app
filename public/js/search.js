@@ -138,10 +138,10 @@ export function filterWaza() {
     return true;
   });
   // Sort
-  if (browseSortField !== 'default') {
+  if (state.browseSortField !== 'default') {
     results.sort((a, b) => {
       let cmp = 0;
-      if (browseSortField === 'likes') {
+      if (state.browseSortField === 'likes') {
         // Sort by total like count (aggregate from all users)
         const la = a.like_count || 0;
         const lb = b.like_count || 0;
@@ -151,7 +151,7 @@ export function filterWaza() {
         const nb = (b.name_jp || dispName(b) || '').toLowerCase();
         cmp = na.localeCompare(nb, 'ja');
       }
-      return browseSortOrder === 'desc' ? -cmp : cmp;
+      return state.browseSortOrder === 'desc' ? -cmp : cmp;
     });
   }
   return results;
