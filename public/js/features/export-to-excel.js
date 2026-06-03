@@ -12,7 +12,12 @@ function pickVideoUrl(w) {
 export async function exportToExcel() {
   const btn = document.getElementById('exportXlsxBtn');
   const status = document.getElementById('exportXlsxStatus');
-  const setStatus = (msg, color) => { if (status) { status.textContent = msg; status.style.color = color || 'var(--text3)'; } };
+  const setStatus = (msg, color) => {
+    if (status) {
+      status.textContent = msg;
+      status.style.color = color || 'var(--text3)';
+    }
+  };
 
   if (typeof ExcelJS === 'undefined') {
     setStatus('Excel library not loaded — please refresh and try again.', 'var(--red)');
@@ -21,7 +26,7 @@ export async function exportToExcel() {
 
   // Collect every waza the user has marked (at least one active marking).
   const rows = [];
-  state.wazaData.forEach(w => {
+  state.wazaData.forEach((w) => {
     const p = state.prog[w.id];
     const markings = (p && p.markings) || null;
     if (!markings || !markings.some(Boolean)) return;
@@ -34,9 +39,12 @@ export async function exportToExcel() {
     return;
   }
 
-  const headerName = (!state.isGuest && state.currentUsername) ? state.currentUsername : 'Guest';
+  const headerName = !state.isGuest && state.currentUsername ? state.currentUsername : 'Guest';
 
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating…';
+  }
   setStatus('');
 
   try {
@@ -58,7 +66,7 @@ export async function exportToExcel() {
     rows.forEach(({ waza: w, firstMark }) => {
       const en = (w.name_en || w.name_en_literal || w.name_en_gtranslate || '').trim();
       const jp = (w.name_jp || '').trim();
-      let disp = en && jp ? `${en}(${jp})` : (en || jp || ('Waza #' + w.id));
+      let disp = en && jp ? `${en}(${jp})` : en || jp || 'Waza #' + w.id;
       const url = pickVideoUrl(w);
 
       const cell = ws.getCell('A' + r);
@@ -85,17 +93,25 @@ export async function exportToExcel() {
     ws.getCell('A' + r).value = 'Legend';
     ws.getCell('A' + r).font = { bold: true, color: { argb: 'FF777777' } };
     r++;
-    [...usedMarks].sort((a, b) => a - b).forEach(mi => {
-      const label = (state.markingLabels[mi] || '').trim() || ('Marking ' + (mi + 1));
-      const cell = ws.getCell('A' + r);
-      cell.value = `${SHAPES[mi]}  ${label}`;
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: EXPORT_MARK_COLORS[mi] } };
-      cell.font = { color: { argb: 'FF1A1A1A' } };
-      r++;
-    });
+    [...usedMarks]
+      .sort((a, b) => a - b)
+      .forEach((mi) => {
+        const label = (state.markingLabels[mi] || '').trim() || 'Marking ' + (mi + 1);
+        const cell = ws.getCell('A' + r);
+        cell.value = `${SHAPES[mi]}  ${label}`;
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: EXPORT_MARK_COLORS[mi] },
+        };
+        cell.font = { color: { argb: 'FF1A1A1A' } };
+        r++;
+      });
 
     const buffer = await wb.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const dlUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const safeName = headerName.replace(/[^\w-]+/g, '_');
@@ -112,7 +128,10 @@ export async function exportToExcel() {
     console.error('Export error:', e);
     setStatus('Export failed — please try again.', 'var(--red)');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇️ Export to Excel'; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '⬇️ Export to Excel';
+    }
   }
 }
 

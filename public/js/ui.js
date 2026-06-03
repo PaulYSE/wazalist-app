@@ -20,7 +20,7 @@ export function startWazaPlaceholderRotation() {
   // Build a flat pool of name strings from name_jp and name_en only
   function buildPool() {
     const pool = [];
-    state.wazaData.forEach(w => {
+    state.wazaData.forEach((w) => {
       if (w.name_jp && w.name_jp.trim()) pool.push(w.name_jp.trim());
       if (w.name_en && w.name_en.trim()) pool.push(w.name_en.trim());
     });
@@ -33,7 +33,7 @@ export function startWazaPlaceholderRotation() {
   function pickRandom() {
     if (!pool.length) return PLACEHOLDER_DEFAULT;
     // Avoid repeating the same name twice in a row
-    let candidates = pool.filter(n => n !== lastPicked);
+    let candidates = pool.filter((n) => n !== lastPicked);
     if (!candidates.length) candidates = pool;
     const name = candidates[Math.floor(Math.random() * candidates.length)];
     lastPicked = name;
@@ -74,25 +74,41 @@ export function startWazaPlaceholderRotation() {
   input._phTimer = setTimeout(tick, 5000);
 
   // Rebuild pool if state.wazaData ever grows (contributions approved etc.)
-  input._rebuildPool = () => { pool = buildPool(); };
+  input._rebuildPool = () => {
+    pool = buildPool();
+  };
 }
 
 // ── Marking filter UI sync ────────────────────────────────────
 export function updateMarkingFilterUI() {
   // Desktop
-  document.getElementById('filterMarkingAll').classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
+  document
+    .getElementById('filterMarkingAll')
+    .classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
   document.getElementById('filterMarkingAny').classList.toggle('active', state.browseFilterAny);
-  document.querySelectorAll('.marking-filter-btn').forEach(btn => {
-    btn.classList.toggle('active', !state.browseFilterAny && state.filters.markings[+btn.dataset.si]);
+  document.querySelectorAll('.marking-filter-btn').forEach((btn) => {
+    btn.classList.toggle(
+      'active',
+      !state.browseFilterAny && state.filters.markings[+btn.dataset.si],
+    );
   });
   // Mobile sheet mirrors
-  document.getElementById('filterMarkingAllMob').classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
+  document
+    .getElementById('filterMarkingAllMob')
+    .classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
   document.getElementById('filterMarkingAnyMob').classList.toggle('active', state.browseFilterAny);
-  document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
-    btn.classList.toggle('active', !state.browseFilterAny && state.filters.markings[+btn.dataset.si]);
+  document.querySelectorAll('.marking-filter-btn-mob').forEach((btn) => {
+    btn.classList.toggle(
+      'active',
+      !state.browseFilterAny && state.filters.markings[+btn.dataset.si],
+    );
   });
   // Filter dot: visible when any non-default filter is active
-  const hasFilter = state.browseFilterAny || state.filters.markings.some(Boolean) || state.browseSortField !== 'default' || state.browseSortOrder !== 'asc';
+  const hasFilter =
+    state.browseFilterAny ||
+    state.filters.markings.some(Boolean) ||
+    state.browseSortField !== 'default' ||
+    state.browseSortOrder !== 'asc';
   document.getElementById('filterDot').classList.toggle('visible', hasFilter);
 }
 
@@ -116,7 +132,7 @@ export const closeMobMenu = () => {
 
 const updateMobMenuActiveState = () => {
   const currentTab = document.querySelector('.ntab.active')?.dataset.tab;
-  document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
+  document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach((item) => {
     item.classList.toggle('active', item.dataset.menuTab === currentTab);
   });
 };
@@ -125,56 +141,76 @@ const updateMobMenuActiveState = () => {
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
-export function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+export function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 // ── Wiring ────────────────────────────────────────────────────
 // Called once from main.js after every module has finished evaluating.
 export function initUi() {
   // ── Filter events ───────────────────────────────────────────
-  document.getElementById('searchInput').addEventListener('input', e => { state.filters.search = e.target.value; renderList(); });
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    state.filters.search = e.target.value;
+    renderList();
+  });
 
   document.getElementById('filterMarkingAll').addEventListener('click', () => {
     state.browseFilterAny = false;
     const anyOn = state.filters.markings.some(Boolean);
     state.filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
-    updateMarkingFilterUI(); renderList();
+    updateMarkingFilterUI();
+    renderList();
   });
 
   document.getElementById('filterMarkingAny').addEventListener('click', () => {
     state.browseFilterAny = !state.browseFilterAny;
     if (state.browseFilterAny) state.filters.markings = Array(6).fill(false); // clear specific state.filters when entering Any mode
-    updateMarkingFilterUI(); renderList();
+    updateMarkingFilterUI();
+    renderList();
   });
 
-  document.querySelectorAll('.marking-filter-btn').forEach(btn => {
+  document.querySelectorAll('.marking-filter-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.browseFilterAny = false; // specific marking filter exits Any mode
       const i = +btn.dataset.si;
-      state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
-      updateMarkingFilterUI(); renderList();
+      state.filters.markings = state.filters.markings.map((v, idx) => (idx === i ? !v : v));
+      updateMarkingFilterUI();
+      renderList();
     });
   });
 
-  document.getElementById('browseSortField').addEventListener('change', e => {
+  document.getElementById('browseSortField').addEventListener('change', (e) => {
     state.browseSortField = e.target.value;
     const isDefault = state.browseSortField === 'default';
     document.getElementById('browseSortOrder').disabled = isDefault;
     document.getElementById('browseSortOrderMob').disabled = isDefault;
     // Save to localStorage
-    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
-    updateMarkingFilterUI(); renderList();
+    localStorage.setItem(
+      'wl_sort_prefs',
+      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
+    );
+    updateMarkingFilterUI();
+    renderList();
   });
 
-  document.getElementById('browseSortOrder').addEventListener('change', e => {
+  document.getElementById('browseSortOrder').addEventListener('change', (e) => {
     state.browseSortOrder = e.target.value;
     document.getElementById('browseSortOrderMob').value = e.target.value;
     // Save to localStorage
-    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
-    updateMarkingFilterUI(); renderList();
+    localStorage.setItem(
+      'wl_sort_prefs',
+      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
+    );
+    updateMarkingFilterUI();
+    renderList();
   });
 
   // ── Mobile ⋮ menu ───────────────────────────────────────────
-  mobMenuBtn.addEventListener('click', e => {
+  mobMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     openMobMenu();
   });
@@ -183,7 +219,7 @@ export function initUi() {
   mobMenuClose.addEventListener('click', closeMobMenu);
 
   // Navigation items in slideover
-  document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach(item => {
+  document.querySelectorAll('.mob-menu-item[data-menu-tab]').forEach((item) => {
     item.addEventListener('click', () => {
       const tab = item.dataset.menuTab;
       document.querySelector(`.ntab[data-tab="${tab}"]`)?.click();
@@ -205,7 +241,7 @@ export function initUi() {
   document.getElementById('filterSheetBtn').addEventListener('click', () => {
     filterSheetBg.classList.add('open');
   });
-  filterSheetBg.addEventListener('click', e => {
+  filterSheetBg.addEventListener('click', (e) => {
     if (!filterSheet.contains(e.target)) filterSheetBg.classList.remove('open');
   });
 
@@ -221,20 +257,20 @@ export function initUi() {
     if (state.browseFilterAny) state.filters.markings = Array(6).fill(false);
     updateMarkingFilterUI();
   });
-  document.querySelectorAll('.marking-filter-btn-mob').forEach(btn => {
+  document.querySelectorAll('.marking-filter-btn-mob').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.browseFilterAny = false;
       const i = +btn.dataset.si;
-      state.filters.markings = state.filters.markings.map((v, idx) => idx === i ? !v : v);
+      state.filters.markings = state.filters.markings.map((v, idx) => (idx === i ? !v : v));
       updateMarkingFilterUI();
     });
   });
-  document.getElementById('browseSortFieldMob').addEventListener('change', e => {
+  document.getElementById('browseSortFieldMob').addEventListener('change', (e) => {
     const isDefault = e.target.value === 'default';
     document.getElementById('browseSortOrderMob').disabled = isDefault;
   });
-  document.getElementById('browseSortOrderMob').addEventListener('change', () => { });
-  document.getElementById('browseViewSelectMob').addEventListener('change', () => { });
+  document.getElementById('browseSortOrderMob').addEventListener('change', () => {});
+  document.getElementById('browseViewSelectMob').addEventListener('change', () => {});
 
   document.getElementById('filterSheetConfirm').addEventListener('click', () => {
     // Read staged values from mob selects
@@ -251,7 +287,10 @@ export function initUi() {
     document.getElementById('browseSortOrder').value = newSortOrder;
     document.getElementById('browseViewSelect').value = newView;
     // Save to localStorage
-    localStorage.setItem('wl_sort_prefs', JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }));
+    localStorage.setItem(
+      'wl_sort_prefs',
+      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
+    );
     localStorage.setItem('wl_view_style', state.browseListView);
     // Close sheet and re-render
     filterSheetBg.classList.remove('open');
@@ -260,19 +299,23 @@ export function initUi() {
   });
 
   // ── Nav tabs ────────────────────────────────────────────────
-  document.querySelectorAll('.ntab').forEach(tab => tab.addEventListener('click', () => {
-    document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active')); tab.classList.add('active');
-    const t = tab.dataset.tab;
-    document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
-    document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
-    document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
-    document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
-    document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
-    if (t === 'stats') renderDashStats();
-    if (t === 'compare') renderDashCompare();
-    if (t === 'contribute') renderContribute();
-    if (t === 'account') renderAccount();
-    // Update mobile menu active state
-    updateMobMenuActiveState();
-  }));
+  document.querySelectorAll('.ntab').forEach((tab) =>
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      const t = tab.dataset.tab;
+      document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
+      document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
+      document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
+      document.getElementById('contributeView').style.display =
+        t === 'contribute' ? 'block' : 'none';
+      document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
+      if (t === 'stats') renderDashStats();
+      if (t === 'compare') renderDashCompare();
+      if (t === 'contribute') renderContribute();
+      if (t === 'account') renderAccount();
+      // Update mobile menu active state
+      updateMobMenuActiveState();
+    }),
+  );
 }

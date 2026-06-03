@@ -1,503 +1,499 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Wazalist Admin</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0f0f14;
-      color: #e8e6f0;
-      min-height: 100vh
-    }
-
-    :root {
-      --bg0: #0f0f14;
-      --bg1: #17171f;
-      --bg2: #1e1e28;
-      --bg3: #262633;
-      --accent: #7c6ff7;
-      --accent2: #5a54c4;
-      --green: #4caf82;
-      --amber: #e8a030;
-      --red: #e05555;
-      --blue: #60b8f0;
-      --text1: #e8e6f0;
-      --text2: #a09dba;
-      --text3: #6a6880;
-      --border: #2e2c3e;
-      --r: 8px;
-      --rl: 12px
-    }
-
-    input,
-    select,
-    button,
-    textarea {
-      font-family: inherit
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none
-    }
-
-    /* ── Layout ── */
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 20px;
-      background: var(--bg1);
-      border-bottom: 1px solid var(--border)
-    }
-
-    .topbar h1 {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent)
-    }
-
-    .topbar .badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      background: #2a0040;
-      border: 1px solid var(--accent);
-      border-radius: 20px;
-      color: var(--accent)
-    }
-
-    #pendingCount {
-      font-size: 12px;
-      color: var(--text3);
-      margin-left: auto
-    }
-
-    .body {
-      display: flex;
-      height: calc(100vh - 45px);
-      overflow: hidden
-    }
-
-    /* ── Sidebar queue ── */
-    .sidebar {
-      width: 300px;
-      flex-shrink: 0;
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      background: var(--bg0)
-    }
-
-    .sidebar-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .stab {
-      flex: 1;
-      padding: 8px;
-      font-size: 12px;
-      color: var(--text2);
-      cursor: pointer;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      transition: all .12s
-    }
-
-    .stab:hover {
-      color: var(--text1)
-    }
-
-    .stab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent)
-    }
-
-    .queue-item {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background .1s
-    }
-
-    .queue-item:hover {
-      background: var(--bg2)
-    }
-
-    .queue-item.selected {
-      background: var(--bg2);
-      border-left: 3px solid var(--accent)
-    }
-
-    .qi-type {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      margin-bottom: 3px
-    }
-
-    .qi-type.edit {
-      color: var(--blue)
-    }
-
-    .qi-type.new {
-      color: var(--amber)
-    }
-
-    .qi-name {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 2px
-    }
-
-    .qi-meta {
-      font-size: 11px;
-      color: var(--text3)
-    }
-
-    .status-badge {
-      display: inline-block;
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-weight: 600
-    }
-
-    .s-pending {
-      background: #2a2000;
-      color: var(--amber);
-      border: 1px solid var(--amber)
-    }
-
-    .s-approved {
-      background: #002a10;
-      color: var(--green);
-      border: 1px solid var(--green)
-    }
-
-    .s-rejected {
-      background: #2a0000;
-      color: var(--red);
-      border: 1px solid var(--red)
-    }
-
-    .empty-queue {
-      padding: 30px;
-      text-align: center;
-      color: var(--text3);
-      font-size: 13px
-    }
-
-    /* ── Detail panel ── */
-    .detail {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      background: var(--bg1)
-    }
-
-    .d-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: var(--text3);
-      font-size: 15px
-    }
-
-    .d-header {
-      margin-bottom: 20px
-    }
-
-    .d-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px
-    }
-
-    .d-meta {
-      font-size: 13px;
-      color: var(--text2);
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center
-    }
-
-    .section {
-      margin-bottom: 20px
-    }
-
-    .section h3 {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text3);
-      margin-bottom: 10px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid var(--border)
-    }
-
-    /* ── Diff table ── */
-    .diff-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px
-    }
-
-    .diff-table th {
-      padding: 6px 10px;
-      text-align: left;
-      font-size: 11px;
-      color: var(--text3);
-      font-weight: 500;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .diff-table td {
-      padding: 7px 10px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top
-    }
-
-    .diff-table tr.changed td {
-      background: rgba(124, 111, 247, .07)
-    }
-
-    .field-name {
-      color: var(--text2);
-      width: 130px;
-      font-weight: 500
-    }
-
-    .val-current {
-      color: var(--text2)
-    }
-
-    .val-proposed {
-      color: var(--text1)
-    }
-
-    .val-proposed.changed {
-      color: var(--accent)
-    }
-
-    .val-empty {
-      color: var(--text3);
-      font-style: italic
-    }
-
-    /* ── Edit fields ── */
-    .edit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px
-    }
-
-    .efield {
-      display: flex;
-      flex-direction: column;
-      gap: 4px
-    }
-
-    .efield label {
-      font-size: 11px;
-      color: var(--text3)
-    }
-
-    .efield input,
-    .efield textarea {
-      padding: 7px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text1);
-      font-size: 13px;
-      outline: none;
-      resize: vertical
-    }
-
-    .efield input:focus,
-    .efield textarea:focus {
-      border-color: var(--accent)
-    }
-
-    .efield input.modified,
-    .efield textarea.modified {
-      border-color: var(--accent)
-    }
-
-    /* ── Actions ── */
-    .actions {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border)
-    }
-
-    .note-wrap {
-      flex: 1;
-      min-width: 200px
-    }
-
-    .note-wrap label {
-      display: block;
-      font-size: 11px;
-      color: var(--text3);
-      margin-bottom: 4px
-    }
-
-    .note-wrap textarea {
-      width: 100%;
-      padding: 7px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text1);
-      font-size: 13px;
-      outline: none;
-      resize: vertical;
-      min-height: 60px
-    }
-
-    .note-wrap textarea:focus {
-      border-color: var(--accent)
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-      padding-top: 18px
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      background: var(--bg2);
-      color: var(--text2);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all .12s
-    }
-
-    .btn:hover {
-      background: var(--bg3);
-      color: var(--text1)
-    }
-
-    .btn-approve {
-      background: #003a18;
-      border-color: var(--green);
-      color: var(--green)
-    }
-
-    .btn-approve:hover {
-      background: #004d20
-    }
-
-    .btn-reject {
-      background: #3a0000;
-      border-color: var(--red);
-      color: var(--red)
-    }
-
-    .btn-reject:hover {
-      background: #4d0000
-    }
-
-    .btn-approve:disabled,
-    .btn-reject:disabled {
-      opacity: .4;
-      cursor: default
-    }
-
-    .feedback {
-      font-size: 13px;
-      padding: 8px 12px;
-      border-radius: var(--r);
-      margin-top: 10px
-    }
-
-    .feedback.ok {
-      background: #002a10;
-      color: var(--green);
-      border: 1px solid var(--green)
-    }
-
-    .feedback.fail {
-      background: #2a0000;
-      color: var(--red);
-      border: 1px solid var(--red)
-    }
-
-    /* ── New waza payload view ── */
-    .payload-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px
-    }
-
-    .pfield {
-      background: var(--bg2);
-      border-radius: var(--r);
-      padding: 8px 12px
-    }
-
-    .pfield .lbl {
-      font-size: 11px;
-      color: var(--text3);
-      margin-bottom: 2px
-    }
-
-    .pfield .val {
-      font-size: 13px;
-      word-break: break-all
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="topbar">
-    <h1>⛩ Wazalist</h1>
-    <span class="badge">Admin</span>
-    <span id="pendingCount"></span>
-  </div>
-
-  <div class="body">
-    <!-- Queue sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-tabs">
-        <button class="stab active" data-status="pending">Pending</button>
-        <button class="stab" data-status="approved">Approved</button>
-        <button class="stab" data-status="rejected">Rejected</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Wazalist Admin</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0f0f14;
+        color: #e8e6f0;
+        min-height: 100vh;
+      }
+
+      :root {
+        --bg0: #0f0f14;
+        --bg1: #17171f;
+        --bg2: #1e1e28;
+        --bg3: #262633;
+        --accent: #7c6ff7;
+        --accent2: #5a54c4;
+        --green: #4caf82;
+        --amber: #e8a030;
+        --red: #e05555;
+        --blue: #60b8f0;
+        --text1: #e8e6f0;
+        --text2: #a09dba;
+        --text3: #6a6880;
+        --border: #2e2c3e;
+        --r: 8px;
+        --rl: 12px;
+      }
+
+      input,
+      select,
+      button,
+      textarea {
+        font-family: inherit;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      /* ── Layout ── */
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 20px;
+        background: var(--bg1);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .topbar h1 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .topbar .badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        background: #2a0040;
+        border: 1px solid var(--accent);
+        border-radius: 20px;
+        color: var(--accent);
+      }
+
+      #pendingCount {
+        font-size: 12px;
+        color: var(--text3);
+        margin-left: auto;
+      }
+
+      .body {
+        display: flex;
+        height: calc(100vh - 45px);
+        overflow: hidden;
+      }
+
+      /* ── Sidebar queue ── */
+      .sidebar {
+        width: 300px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        background: var(--bg0);
+      }
+
+      .sidebar-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .stab {
+        flex: 1;
+        padding: 8px;
+        font-size: 12px;
+        color: var(--text2);
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        transition: all 0.12s;
+      }
+
+      .stab:hover {
+        color: var(--text1);
+      }
+
+      .stab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      .queue-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .queue-item:hover {
+        background: var(--bg2);
+      }
+
+      .queue-item.selected {
+        background: var(--bg2);
+        border-left: 3px solid var(--accent);
+      }
+
+      .qi-type {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+
+      .qi-type.edit {
+        color: var(--blue);
+      }
+
+      .qi-type.new {
+        color: var(--amber);
+      }
+
+      .qi-name {
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .qi-meta {
+        font-size: 11px;
+        color: var(--text3);
+      }
+
+      .status-badge {
+        display: inline-block;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+
+      .s-pending {
+        background: #2a2000;
+        color: var(--amber);
+        border: 1px solid var(--amber);
+      }
+
+      .s-approved {
+        background: #002a10;
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+
+      .s-rejected {
+        background: #2a0000;
+        color: var(--red);
+        border: 1px solid var(--red);
+      }
+
+      .empty-queue {
+        padding: 30px;
+        text-align: center;
+        color: var(--text3);
+        font-size: 13px;
+      }
+
+      /* ── Detail panel ── */
+      .detail {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        background: var(--bg1);
+      }
+
+      .d-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text3);
+        font-size: 15px;
+      }
+
+      .d-header {
+        margin-bottom: 20px;
+      }
+
+      .d-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .d-meta {
+        font-size: 13px;
+        color: var(--text2);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .section {
+        margin-bottom: 20px;
+      }
+
+      .section h3 {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text3);
+        margin-bottom: 10px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* ── Diff table ── */
+      .diff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .diff-table th {
+        padding: 6px 10px;
+        text-align: left;
+        font-size: 11px;
+        color: var(--text3);
+        font-weight: 500;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .diff-table td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      .diff-table tr.changed td {
+        background: rgba(124, 111, 247, 0.07);
+      }
+
+      .field-name {
+        color: var(--text2);
+        width: 130px;
+        font-weight: 500;
+      }
+
+      .val-current {
+        color: var(--text2);
+      }
+
+      .val-proposed {
+        color: var(--text1);
+      }
+
+      .val-proposed.changed {
+        color: var(--accent);
+      }
+
+      .val-empty {
+        color: var(--text3);
+        font-style: italic;
+      }
+
+      /* ── Edit fields ── */
+      .edit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .efield {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .efield label {
+        font-size: 11px;
+        color: var(--text3);
+      }
+
+      .efield input,
+      .efield textarea {
+        padding: 7px 10px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        color: var(--text1);
+        font-size: 13px;
+        outline: none;
+        resize: vertical;
+      }
+
+      .efield input:focus,
+      .efield textarea:focus {
+        border-color: var(--accent);
+      }
+
+      .efield input.modified,
+      .efield textarea.modified {
+        border-color: var(--accent);
+      }
+
+      /* ── Actions ── */
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+
+      .note-wrap {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .note-wrap label {
+        display: block;
+        font-size: 11px;
+        color: var(--text3);
+        margin-bottom: 4px;
+      }
+
+      .note-wrap textarea {
+        width: 100%;
+        padding: 7px 10px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        color: var(--text1);
+        font-size: 13px;
+        outline: none;
+        resize: vertical;
+        min-height: 60px;
+      }
+
+      .note-wrap textarea:focus {
+        border-color: var(--accent);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 18px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: var(--r);
+        border: 1px solid var(--border);
+        background: var(--bg2);
+        color: var(--text2);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+
+      .btn:hover {
+        background: var(--bg3);
+        color: var(--text1);
+      }
+
+      .btn-approve {
+        background: #003a18;
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      .btn-approve:hover {
+        background: #004d20;
+      }
+
+      .btn-reject {
+        background: #3a0000;
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      .btn-reject:hover {
+        background: #4d0000;
+      }
+
+      .btn-approve:disabled,
+      .btn-reject:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .feedback {
+        font-size: 13px;
+        padding: 8px 12px;
+        border-radius: var(--r);
+        margin-top: 10px;
+      }
+
+      .feedback.ok {
+        background: #002a10;
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+
+      .feedback.fail {
+        background: #2a0000;
+        color: var(--red);
+        border: 1px solid var(--red);
+      }
+
+      /* ── New waza payload view ── */
+      .payload-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .pfield {
+        background: var(--bg2);
+        border-radius: var(--r);
+        padding: 8px 12px;
+      }
+
+      .pfield .lbl {
+        font-size: 11px;
+        color: var(--text3);
+        margin-bottom: 2px;
+      }
+
+      .pfield .val {
+        font-size: 13px;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="topbar">
+      <h1>⛩ Wazalist</h1>
+      <span class="badge">Admin</span>
+      <span id="pendingCount"></span>
+    </div>
+
+    <div class="body">
+      <!-- Queue sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="stab active" data-status="pending">Pending</button>
+          <button class="stab" data-status="approved">Approved</button>
+          <button class="stab" data-status="rejected">Rejected</button>
+        </div>
+        <div id="queueList"></div>
       </div>
-      <div id="queueList"></div>
+
+      <!-- Detail panel -->
+      <div class="detail" id="detailPanel">
+        <div class="d-empty">Select a contribution to review</div>
+      </div>
     </div>
 
-    <!-- Detail panel -->
-    <div class="detail" id="detailPanel">
-      <div class="d-empty">Select a contribution to review</div>
-    </div>
-  </div>
-
-  <script type="module" src="js/admin.js"></script>
-
-</body>
-
+    <script type="module" src="js/admin.js"></script>
+  </body>
 </html>

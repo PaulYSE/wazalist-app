@@ -1,5 +1,5 @@
 /* forms.js — the Contribute and Account tab renderers. */
-import { state } from './state/state.js'
+import { state } from './state/state.js';
 import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS } from './state/localStorage.js';
 import { api, doLogout } from './core.js';
 import { renderImport } from './import-ui.js';
@@ -12,29 +12,34 @@ export async function renderContribute() {
   const loggedIn = !state.isGuest && !!state.token;
 
   // Sign-in prompt for guests / logged-out users
-  const authPrompt = loggedIn ? '' :
-    '<div class="dsec2" style="text-align:center;padding:24px 0">'
-    + '<div style="font-size:28px;margin-bottom:8px">🔒</div>'
-    + '<div style="font-weight:600;margin-bottom:6px">Sign in to contribute</div>'
-    + '<div style="font-size:13px;color:var(--text3);margin-bottom:16px">You need an account to submit Waza or suggest edits.</div>'
-    + '<button class="btn" id="contribSignInBtn">Sign in / Register</button>'
-    + '</div>';
+  const authPrompt = loggedIn
+    ? ''
+    : '<div class="dsec2" style="text-align:center;padding:24px 0">' +
+      '<div style="font-size:28px;margin-bottom:8px">🔒</div>' +
+      '<div style="font-weight:600;margin-bottom:6px">Sign in to contribute</div>' +
+      '<div style="font-size:13px;color:var(--text3);margin-bottom:16px">You need an account to submit Waza or suggest edits.</div>' +
+      '<button class="btn" id="contribSignInBtn">Sign in / Register</button>' +
+      '</div>';
 
   // Actions (only shown when logged in)
-  const actionsHTML = loggedIn ?
-    '<div class="dsec2"><h3>Actions</h3>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:10px">'
-    + '<button class="btn" id="contribNewWazaBtn">+ Submit New Waza</button>'
-    + (state.isAdmin ? '<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>' : '')
-    + '</div></div>'
+  const actionsHTML = loggedIn
+    ? '<div class="dsec2"><h3>Actions</h3>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
+      '<button class="btn" id="contribNewWazaBtn">+ Submit New Waza</button>' +
+      (state.isAdmin
+        ? '<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>'
+        : '') +
+      '</div></div>'
     : '';
 
   // Contributions history
   let historyHTML = '<div class="dsec2"><h3>Your contributions</h3>';
   if (!loggedIn) {
-    historyHTML += '<div style="color:var(--text3);font-size:13px;padding:8px 0">Sign in to see your contribution history.</div></div>';
+    historyHTML +=
+      '<div style="color:var(--text3);font-size:13px;padding:8px 0">Sign in to see your contribution history.</div></div>';
   } else {
-    historyHTML += '<div id="contribHistoryList"><div style="color:var(--text3);font-size:13px">Loading…</div></div></div>';
+    historyHTML +=
+      '<div id="contribHistoryList"><div style="color:var(--text3);font-size:13px">Loading…</div></div></div>';
   }
 
   container.innerHTML = authPrompt + actionsHTML + historyHTML;
@@ -50,27 +55,54 @@ export async function renderContribute() {
   const histList = container.querySelector('#contribHistoryList');
   try {
     const contribs = await api('/api/contributions/mine');
-    if (!contribs.length) { histList.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">You haven\'t submitted any contributions yet.</div>'; return; }
+    if (!contribs.length) {
+      histList.innerHTML =
+        '<div style="color:var(--text3);font-size:13px;padding:8px 0">You haven\'t submitted any contributions yet.</div>';
+      return;
+    }
     const statusLabel = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
-    histList.innerHTML = contribs.map(c => {
-      const payload = JSON.parse(c.payload || '{}');
-      const isNew = c.type === 'new_waza';
-      const name = isNew ? (payload.name_jp || 'New Waza') : (c.waza_name_jp || 'Waza #' + c.waza_id);
-      const fields = Object.keys(payload).filter(k => !isNew || payload[k]);
-      const summary = isNew
-        ? 'New waza: ' + (fields.slice(0, 4).join(', ')) + (fields.length > 4 ? ' +' + (fields.length - 4) + ' more' : '')
-        : 'Edited: ' + (fields.slice(0, 4).join(', ')) + (fields.length > 4 ? ' +' + (fields.length - 4) + ' more' : '');
-      return '<div class="contrib-item">'
-        + '<div class="ci-header">'
-        + '<span class="contrib-type ' + (isNew ? 'ct-new' : 'ct-edit') + '">' + (isNew ? 'New Waza' : 'Edit') + '</span>'
-        + '<span style="font-size:13px;font-weight:500">' + escapeHtml(name) + '</span>'
-        + '<span class="contrib-status cs-' + c.status + '">' + statusLabel[c.status] + '</span>'
-        + '</div>'
-        + '<div class="ci-meta" style="font-size:12px;color:var(--text3)">' + summary + '</div>'
-        + (c.admin_note ? '<div class="ci-note">' + escapeHtml(c.admin_note) + '</div>' : '')
-        + '</div>';
-    }).join('');
-  } catch (e) { histList.innerHTML = '<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>'; }
+    histList.innerHTML = contribs
+      .map((c) => {
+        const payload = JSON.parse(c.payload || '{}');
+        const isNew = c.type === 'new_waza';
+        const name = isNew ? payload.name_jp || 'New Waza' : c.waza_name_jp || 'Waza #' + c.waza_id;
+        const fields = Object.keys(payload).filter((k) => !isNew || payload[k]);
+        const summary = isNew
+          ? 'New waza: ' +
+            fields.slice(0, 4).join(', ') +
+            (fields.length > 4 ? ' +' + (fields.length - 4) + ' more' : '')
+          : 'Edited: ' +
+            fields.slice(0, 4).join(', ') +
+            (fields.length > 4 ? ' +' + (fields.length - 4) + ' more' : '');
+        return (
+          '<div class="contrib-item">' +
+          '<div class="ci-header">' +
+          '<span class="contrib-type ' +
+          (isNew ? 'ct-new' : 'ct-edit') +
+          '">' +
+          (isNew ? 'New Waza' : 'Edit') +
+          '</span>' +
+          '<span style="font-size:13px;font-weight:500">' +
+          escapeHtml(name) +
+          '</span>' +
+          '<span class="contrib-status cs-' +
+          c.status +
+          '">' +
+          statusLabel[c.status] +
+          '</span>' +
+          '</div>' +
+          '<div class="ci-meta" style="font-size:12px;color:var(--text3)">' +
+          summary +
+          '</div>' +
+          (c.admin_note ? '<div class="ci-note">' + escapeHtml(c.admin_note) + '</div>' : '') +
+          '</div>'
+        );
+      })
+      .join('');
+  } catch (e) {
+    histList.innerHTML =
+      '<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>';
+  }
 }
 
 // ── Account ───────────────────────────────────────────────────
@@ -114,9 +146,9 @@ export async function renderAccount() {
 
   // Progress stats - state.prog is an object keyed by waza_id
   const progEntries = Object.values(state.prog);
-  const totalMarked = progEntries.filter(p => p.markings && p.markings.some(m => m)).length;
-  const totalLiked = progEntries.filter(p => p.like === 1).length;
-  const totalDisliked = progEntries.filter(p => p.like === -1).length;
+  const totalMarked = progEntries.filter((p) => p.markings && p.markings.some((m) => m)).length;
+  const totalLiked = progEntries.filter((p) => p.like === 1).length;
+  const totalDisliked = progEntries.filter((p) => p.like === -1).length;
 
   const statsHTML = `<div class="dsec2">
         <h3>Your Progress</h3>
@@ -180,7 +212,14 @@ export async function renderAccount() {
           </div>`
     : '';
 
-  container.innerHTML = accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + actionsHTML + deleteAccountHTML;
+  container.innerHTML =
+    accountInfoHTML +
+    statsHTML +
+    exportHTML +
+    importHTML +
+    dangerZoneHTML +
+    actionsHTML +
+    deleteAccountHTML;
 
   // Populate the moved import UI (renders into the #dashImport above)
   renderImport();
@@ -193,17 +232,17 @@ export async function renderAccount() {
   resetBtn?.addEventListener('click', async () => {
     const confirmMsg = loggedIn
       ? `⚠️ WARNING: This will permanently delete ALL your progress data:\n\n` +
-      `• ${totalMarked} marked Waza\n` +
-      `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
-      `• All custom marking labels\n\n` +
-      `This action CANNOT be undone.\n\n` +
-      `Type "RESET" to confirm:`
+        `• ${totalMarked} marked Waza\n` +
+        `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
+        `• All custom marking labels\n\n` +
+        `This action CANNOT be undone.\n\n` +
+        `Type "RESET" to confirm:`
       : `⚠️ WARNING: This will clear all your local progress data:\n\n` +
-      `• ${totalMarked} marked Waza\n` +
-      `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
-      `• All custom marking labels\n\n` +
-      `This action CANNOT be undone.\n\n` +
-      `Type "RESET" to confirm:`;
+        `• ${totalMarked} marked Waza\n` +
+        `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
+        `• All custom marking labels\n\n` +
+        `This action CANNOT be undone.\n\n` +
+        `Type "RESET" to confirm:`;
 
     const confirmation = prompt(confirmMsg);
 
@@ -240,7 +279,6 @@ export async function renderAccount() {
 
       // Reload to refresh everything
       location.reload();
-
     } catch (e) {
       alert('❌ Failed to reset progress. Please try again.');
       resetBtn.disabled = false;
@@ -263,11 +301,11 @@ export async function renderAccount() {
   deleteBtn?.addEventListener('click', async () => {
     const sure = confirm(
       '⚠️ This permanently deletes your account and ALL associated data:\n\n' +
-      '• Your login\n' +
-      `• ${totalMarked} marked Waza\n` +
-      `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
-      '• Custom labels and contribution history\n\n' +
-      'This CANNOT be undone. Continue?'
+        '• Your login\n' +
+        `• ${totalMarked} marked Waza\n` +
+        `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
+        '• Custom labels and contribution history\n\n' +
+        'This CANNOT be undone. Continue?',
     );
     if (!sure) return;
 

@@ -1,547 +1,556 @@
 /* modals.css — contribution modal, compare tab, text-import panel,
    and the share/import modals. */
-    /* ── Contribution modal ── */
-    .cmodal-bg {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 16px
-    }
-
-    .cmodal {
-      background: var(--bg1);
-      border: 1px solid var(--border);
-      border-radius: var(--rl);
-      width: 100%;
-      max-width: 560px;
-      max-height: 90vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column
-    }
-
-    .cmodal-header {
-      display: flex;
-      align-items: center;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0
-    }
-
-    .cmodal-header h2 {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent);
-      flex: 1
-    }
-
-    .cmodal-close {
-      background: none;
-      border: none;
-      color: var(--text3);
-      font-size: 18px;
-      cursor: pointer;
-      padding: 2px 6px;
-      line-height: 1
-    }
-
-    .cmodal-close:hover {
-      color: var(--text1)
-    }
-
-    .cmodal-body {
-      padding: 20px;
-      flex: 1
-    }
-
-    .cfield {
-      margin-bottom: 12px
-    }
-
-    .cfield label {
-      display: block;
-      font-size: 12px;
-      color: var(--text2);
-      margin-bottom: 4px
-    }
-
-    .cfield input,
-    .cfield textarea,
-    .cfield select {
-      width: 100%;
-      padding: 8px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text1);
-      font-size: 13px;
-      outline: none;
-      resize: vertical
-    }
-
-    .cfield input:focus,
-    .cfield textarea:focus,
-    .cfield select:focus {
-      border-color: var(--accent)
-    }
-
-    .cfield .hint {
-      font-size: 11px;
-      color: var(--text3);
-      margin-top: 3px
-    }
-
-    .cfield-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px
-    }
-
-    .cmodal-footer {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0
-    }
-
-    .cbtn {
-      padding: 9px 18px;
-      border-radius: var(--r);
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all .12s
-    }
-
-    .cbtn-primary {
-      background: var(--accent2);
-      color: #fff
-    }
-
-    .cbtn-primary:hover {
-      background: var(--accent)
-    }
-
-    .cbtn-primary:disabled {
-      opacity: .5;
-      cursor: default
-    }
-
-    .cbtn-ghost {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text2)
-    }
-
-    .cbtn-ghost:hover {
-      background: var(--bg2);
-      color: var(--text1)
-    }
-
-    .cmodal-err {
-      font-size: 13px;
-      color: var(--red);
-      margin-top: 8px;
-      min-height: 18px
-    }
-
-    .cmodal-ok {
-      font-size: 13px;
-      color: var(--green);
-      margin-top: 8px
-    }
-
-    .suggest-btn {
-      padding: 4px 10px;
-      font-size: 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      background: var(--bg2);
-      color: var(--text2);
-      cursor: pointer;
-      transition: all .12s
-    }
-
-    .suggest-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent)
-    }
-
-    /* ── Compare tab ── */
-    .cmp-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .cmp-select {
-      padding: 6px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text1);
-      font-size: 13px;
-      outline: none;
-      min-width: 160px;
-      max-width: 260px
-    }
-
-    .cmp-select:focus {
-      border-color: var(--accent)
-    }
-
-    .cmp-labels-strip {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding: 8px 12px;
-      background: var(--bg2);
-      border-radius: var(--r);
-      margin-bottom: 14px;
-      font-size: 12px;
-      color: var(--text3)
-    }
-
-    .cmp-labels-item {
-      display: flex;
-      align-items: center;
-      gap: 4px
-    }
-
-    .cmp-col-headers {
-      display: grid;
-      grid-template-columns: 2fr 1.2fr 1.8fr;
-      gap: 8px;
-      padding: 4px 0 8px;
-      margin-bottom: 4px;
-      border-bottom: 1px solid var(--border);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      color: var(--text3)
-    }
-
-    .cmp-row {
-      display: grid;
-      grid-template-columns: 2fr 1.2fr 1.8fr;
-      gap: 8px;
-      align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer
-    }
-
-    .cmp-row:hover .cmp-name-jp {
-      color: var(--accent)
-    }
-
-    .cmp-name-jp {
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 1.2
-    }
-
-    .cmp-name-en {
-      font-size: 11px;
-      color: var(--text2)
-    }
-
-    .cmp-markings-imported {
-      display: flex;
-      gap: 3px;
-      align-items: center
-    }
-
-    .cmp-markings-mine {
-      display: flex;
-      gap: 4px;
-      align-items: center
-    }
-
-    .cmp-marking-btn {
-      padding: 3px 7px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      background: var(--bg2);
-      color: var(--text2);
-      font-size: 14px;
-      cursor: pointer;
-      line-height: 1;
-      transition: all .12s
-    }
-
-    .cmp-marking-btn:hover {
-      background: var(--bg3)
-    }
-
-    .cmp-marking-btn.on {
-      background: var(--bg3);
-      border-color: var(--accent);
-      color: var(--text1)
-    }
-
-    /* ── Compare sub-tabs ── */
-    .cmp-subtabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .cmp-stab {
-      padding: 8px 16px;
-      font-size: 13px;
-      color: var(--text2);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      background: none;
-      border-top: none;
-      border-left: none;
-      border-right: none;
-      transition: all .12s;
-      font-family: inherit
-    }
-
-    .cmp-stab:hover { color: var(--text1) }
-
-    .cmp-stab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent)
-    }
-
-    /* ── Text import panel ── */
-    .ti-panel { display: none }
-    .ti-panel.active { 
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0
-    }
-
-    .ti-textarea {
-      width: 100%;
-      min-height: 160px;
-      flex: 1;
-      padding: 10px 12px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text1);
-      font-size: 13px;
-      font-family: inherit;
-      line-height: 1.6;
-      outline: none;
-      resize: vertical
-    }
-
-    .ti-textarea:focus { border-color: var(--accent) }
-
-    .ti-hint {
-      font-size: 12px;
-      color: var(--text3);
-      margin-top: 6px;
-      line-height: 1.6
-    }
-
-    .ti-hint code {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-size: 11px;
-      color: var(--text2)
-    }
-
-    .ti-section-head {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text3);
-      padding: 10px 0 6px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .ti-badge {
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      font-weight: 600
-    }
-
-    .ti-badge-ok {
-      background: #002a10;
-      color: var(--green);
-      border: 1px solid var(--green)
-    }
-
-    .ti-badge-miss {
-      background: #2a1800;
-      color: var(--amber);
-      border: 1px solid var(--amber)
-    }
-
-    .ti-unmatched-row {
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-      color: var(--text3);
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .ti-unmatched-row .ti-raw {
-      flex: 1;
-      font-style: italic
-    }
-
-    .ti-match-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .ti-match-row .ti-names { min-width: 0 }
-
-    .ti-match-row .ti-njp {
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 1.2
-    }
-
-    .ti-match-row .ti-nen {
-      font-size: 11px;
-      color: var(--text2)
-    }
-
-    .ti-match-row .ti-category-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-weight: 600;
-      white-space: nowrap;
-      flex-shrink: 0
-    }
-
-    .ti-cat-dynamic {
-      background: #1a1a2e;
-      color: var(--accent);
-      border: 1px solid var(--accent2)
-    }
-
-    .ti-manual-markings {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      align-items: center
-    }
-
-    .ti-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border)
-    }
-
-    .ti-auto-mapping {
-      margin-top: 14px;
-      padding: 12px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r)
-    }
-
-    .ti-auto-mapping h4 {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text2);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: .5px
-    }
-
-    .ti-map-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      flex-wrap: wrap
-    }
-
-    .ti-map-label {
-      font-size: 12px;
-      color: var(--text2);
-      min-width: 110px;
-      flex-shrink: 0
-    }
-
-    .ti-map-markings {
-      display: flex;
-      gap: 4px
-    }
-
-    .ti-map-marking-btn {
-      padding: 3px 7px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      background: var(--bg3);
-      color: var(--text2);
-      font-size: 14px;
-      cursor: pointer;
-      line-height: 1;
-      transition: all .12s
-    }
-
-    .ti-map-marking-btn:hover { background: var(--bg2) }
-
-    .ti-map-marking-btn.on {
-      border-color: var(--accent);
-      color: var(--text1);
-      background: var(--bg2)
-    }
-
-    /* ── Share / Import modals ── */
-    .share-key {
-      font-family: monospace;
-      font-size: 13px;
-      padding: 10px 12px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      word-break: break-all;
-      color: var(--text1);
-      margin-bottom: 10px;
-      user-select: all;
-      cursor: text
-    }
-
-    .share-url {
-      font-size: 12px;
-      color: var(--text3);
-      padding: 6px 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      word-break: break-all;
-      margin-bottom: 12px;
-      user-select: all
-    }
-
+/* ── Contribution modal ── */
+.cmodal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 16px;
+}
+
+.cmodal {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.cmodal-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cmodal-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  flex: 1;
+}
+
+.cmodal-close {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.cmodal-close:hover {
+  color: var(--text1);
+}
+
+.cmodal-body {
+  padding: 20px;
+  flex: 1;
+}
+
+.cfield {
+  margin-bottom: 12px;
+}
+
+.cfield label {
+  display: block;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+
+.cfield input,
+.cfield textarea,
+.cfield select {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+}
+
+.cfield input:focus,
+.cfield textarea:focus,
+.cfield select:focus {
+  border-color: var(--accent);
+}
+
+.cfield .hint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 3px;
+}
+
+.cfield-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cmodal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cbtn {
+  padding: 9px 18px;
+  border-radius: var(--r);
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.cbtn-primary {
+  background: var(--accent2);
+  color: #fff;
+}
+
+.cbtn-primary:hover {
+  background: var(--accent);
+}
+
+.cbtn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cbtn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.cbtn-ghost:hover {
+  background: var(--bg2);
+  color: var(--text1);
+}
+
+.cmodal-err {
+  font-size: 13px;
+  color: var(--red);
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.cmodal-ok {
+  font-size: 13px;
+  color: var(--green);
+  margin-top: 8px;
+}
+
+.suggest-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.suggest-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Compare tab ── */
+.cmp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cmp-select {
+  padding: 6px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  outline: none;
+  min-width: 160px;
+  max-width: 260px;
+}
+
+.cmp-select:focus {
+  border-color: var(--accent);
+}
+
+.cmp-labels-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border-radius: var(--r);
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.cmp-labels-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cmp-col-headers {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.8fr;
+  gap: 8px;
+  padding: 4px 0 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text3);
+}
+
+.cmp-row {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.8fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.cmp-row:hover .cmp-name-jp {
+  color: var(--accent);
+}
+
+.cmp-name-jp {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.cmp-name-en {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.cmp-markings-imported {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.cmp-markings-mine {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cmp-marking-btn {
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.12s;
+}
+
+.cmp-marking-btn:hover {
+  background: var(--bg3);
+}
+
+.cmp-marking-btn.on {
+  background: var(--bg3);
+  border-color: var(--accent);
+  color: var(--text1);
+}
+
+/* ── Compare sub-tabs ── */
+.cmp-subtabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cmp-stab {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+
+.cmp-stab:hover {
+  color: var(--text1);
+}
+
+.cmp-stab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Text import panel ── */
+.ti-panel {
+  display: none;
+}
+.ti-panel.active {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.ti-textarea {
+  width: 100%;
+  min-height: 160px;
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+}
+
+.ti-textarea:focus {
+  border-color: var(--accent);
+}
+
+.ti-hint {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.ti-hint code {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.ti-section-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text3);
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ti-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.ti-badge-ok {
+  background: #002a10;
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+.ti-badge-miss {
+  background: #2a1800;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+}
+
+.ti-unmatched-row {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ti-unmatched-row .ti-raw {
+  flex: 1;
+  font-style: italic;
+}
+
+.ti-match-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ti-match-row .ti-names {
+  min-width: 0;
+}
+
+.ti-match-row .ti-njp {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.ti-match-row .ti-nen {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.ti-match-row .ti-category-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ti-cat-dynamic {
+  background: #1a1a2e;
+  color: var(--accent);
+  border: 1px solid var(--accent2);
+}
+
+.ti-manual-markings {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ti-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.ti-auto-mapping {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.ti-auto-mapping h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ti-map-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.ti-map-label {
+  font-size: 12px;
+  color: var(--text2);
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.ti-map-markings {
+  display: flex;
+  gap: 4px;
+}
+
+.ti-map-marking-btn {
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.12s;
+}
+
+.ti-map-marking-btn:hover {
+  background: var(--bg2);
+}
+
+.ti-map-marking-btn.on {
+  border-color: var(--accent);
+  color: var(--text1);
+  background: var(--bg2);
+}
+
+/* ── Share / Import modals ── */
+.share-key {
+  font-family: monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  word-break: break-all;
+  color: var(--text1);
+  margin-bottom: 10px;
+  user-select: all;
+  cursor: text;
+}
+
+.share-url {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 6px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  word-break: break-all;
+  margin-bottom: 12px;
+  user-select: all;
+}

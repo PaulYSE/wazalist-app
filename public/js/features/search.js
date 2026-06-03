@@ -9,8 +9,8 @@ export function normalizeForSearch(text) {
   return text
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, ' ')           // collapse multiple spaces
-    .normalize('NFD')                // decompose accents (é → e + ́)
+    .replace(/\s+/g, ' ') // collapse multiple spaces
+    .normalize('NFD') // decompose accents (é → e + ́)
     .replace(/[\u0300-\u036f]/g, ''); // remove diacritical marks
 }
 
@@ -25,8 +25,8 @@ function matchesQuery(text, query) {
   if (normalizedText.includes(normalizedQuery)) return true;
 
   // Level 2: All query words must appear somewhere in the text
-  const queryWords = normalizedQuery.split(' ').filter(w => w.length > 0);
-  if (queryWords.every(word => normalizedText.includes(word))) return true;
+  const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 0);
+  if (queryWords.every((word) => normalizedText.includes(word))) return true;
 
   return false;
 }
@@ -47,8 +47,8 @@ function levenshteinDistance(a, b) {
       } else {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1, // deletion
         );
       }
     }
@@ -79,7 +79,7 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
   for (let i = 0; i <= normalizedText.length - normalizedQuery.length + actualMaxDist; i++) {
     const substring = normalizedText.substring(
       Math.max(0, i - actualMaxDist),
-      Math.min(normalizedText.length, i + normalizedQuery.length + actualMaxDist)
+      Math.min(normalizedText.length, i + normalizedQuery.length + actualMaxDist),
     );
     if (levenshteinDistance(substring, normalizedQuery) <= actualMaxDist) {
       return true;
@@ -87,13 +87,11 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
   }
 
   // Also check word-by-word for multi-word queries
-  const queryWords = normalizedQuery.split(' ').filter(w => w.length > 1);
+  const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
   if (queryWords.length > 1) {
     const textWords = normalizedText.split(' ');
-    return queryWords.some(queryWord =>
-      textWords.some(textWord =>
-        levenshteinDistance(textWord, queryWord) <= actualMaxDist
-      )
+    return queryWords.some((queryWord) =>
+      textWords.some((textWord) => levenshteinDistance(textWord, queryWord) <= actualMaxDist),
     );
   }
 
@@ -101,14 +99,26 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
 }
 
 // ── Filter logic ─────────────────────────────────────────────
-export const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
+export const dispName = (w) =>
+  w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
 // Fields to search within each waza for the search query
 const SEARCH_FIELDS = [
-  'name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'name_cn_gtranslate',
-  'reference', 'tag',
-  'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1',
-  'author_jp0', 'author_en0', 'author_jp1', 'author_en1',
+  'name_jp',
+  'name_en',
+  'name_en_literal',
+  'name_en_gtranslate',
+  'name_cn_gtranslate',
+  'reference',
+  'tag',
+  'parent_jp0',
+  'parent_en0',
+  'parent_jp1',
+  'parent_en1',
+  'author_jp0',
+  'author_en0',
+  'author_jp1',
+  'author_en1',
 ];
 
 // Returns true if the waza matches the search string in any of the specified fields
@@ -117,13 +127,13 @@ export function wazaMatchesSearch(w, search) {
   const isExact = search.startsWith('"') && search.endsWith('"');
   const matchFn = isExact ? matchesQuery : isFuzzyMatch;
   const query = isExact ? search.slice(1, -1).trim() : search;
-  return SEARCH_FIELDS.some(f => w[f] && matchFn(w[f], query));
+  return SEARCH_FIELDS.some((f) => w[f] && matchFn(w[f], query));
 }
 
 export function filterWaza() {
   const { search, markings } = state.filters;
   const anyMarkingActive = markings.some(Boolean);
-  let results = state.wazaData.filter(w => {
+  let results = state.wazaData.filter((w) => {
     // "Any" mode: only show waza that have at least one marking
     if (state.browseFilterAny) {
       const p = getP(w.id);
@@ -140,7 +150,7 @@ export function filterWaza() {
   // Sort
   if (state.browseSortField !== 'default') {
     results.sort((a, b) => {
-      let cmp = 0;
+      let cmp;
       if (state.browseSortField === 'likes') {
         // Sort by total like count (aggregate from all users)
         const la = a.like_count || 0;

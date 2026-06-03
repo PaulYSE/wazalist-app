@@ -35,7 +35,7 @@ function fuzzyMatchStatus(text) {
 
 // Enhanced multi-column detection with better heuristics
 function detectColumnLayout(lines) {
-  const tabLines = lines.filter(l => l.includes('\t'));
+  const tabLines = lines.filter((l) => l.includes('\t'));
   if (tabLines.length === 0) return null;
 
   // Sample first few tab-separated lines to detect pattern
@@ -43,8 +43,11 @@ function detectColumnLayout(lines) {
   let wazaFirstCount = 0;
   let statusFirstCount = 0;
 
-  samples.forEach(line => {
-    const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+  samples.forEach((line) => {
+    const parts = line
+      .split('\t')
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length < 2) return;
 
     const firstHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[0]);
@@ -57,10 +60,16 @@ function detectColumnLayout(lines) {
     const secondIsStatus = fuzzyMatchStatus(parts[1]) !== null;
 
     // Heuristic: waza names have Japanese + parentheses, statuses don't
-    if ((firstHasParens && firstHasJapanese) || (firstIsStatus === false && secondIsStatus === true)) {
+    if (
+      (firstHasParens && firstHasJapanese) ||
+      (firstIsStatus === false && secondIsStatus === true)
+    ) {
       wazaFirstCount++;
     }
-    if ((secondHasParens && secondHasJapanese) || (secondIsStatus === false && firstIsStatus === true)) {
+    if (
+      (secondHasParens && secondHasJapanese) ||
+      (secondIsStatus === false && firstIsStatus === true)
+    ) {
       statusFirstCount++;
     }
   });
@@ -86,7 +95,7 @@ function detectCategory(line) {
     { pattern: /advanced|expert|master/i, category: 'Advanced' },
     { pattern: /intermediate/i, category: 'Intermediate' },
     { pattern: /optional|niche/i, category: 'Optional' },
-    { pattern: /favourite|favorite|custom|original|own/i, category: 'Favourite' }
+    { pattern: /favourite|favorite|custom|original|own/i, category: 'Favourite' },
   ];
 
   for (const { pattern, category } of categoryPatterns) {
@@ -101,7 +110,7 @@ function detectCategory(line) {
 // Check if line is a header/instruction row (should be skipped)
 function isHeaderLine(line) {
   const lower = line.toLowerCase();
-  return HEADER_KEYWORDS.some(keyword => lower.includes(keyword));
+  return HEADER_KEYWORDS.some((keyword) => lower.includes(keyword));
 }
 
 // Strip decorative markers and return cleaned text + detected favorite flag
@@ -115,7 +124,7 @@ function stripDecorations(text) {
   }
 
   // Strip all decorative patterns
-  DECORATIVE_PATTERNS.forEach(pattern => {
+  DECORATIVE_PATTERNS.forEach((pattern) => {
     cleaned = cleaned.replace(pattern, '');
   });
 
@@ -145,7 +154,10 @@ function parseWazaName(text) {
 function parseTabSeparated(line, columnLayout = null) {
   if (!line.includes('\t')) return null;
 
-  const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+  const parts = line
+    .split('\t')
+    .map((p) => p.trim())
+    .filter(Boolean);
   if (parts.length < 2) return null;
 
   // Phase 2: Use detected layout if available
@@ -199,7 +211,10 @@ function extractEncapsulations(line) {
 // Strip ALL encapsulated state.tokens from a line to get the bare waza name
 // Note: () are NOT stripped - they're part of the "English(Japanese)" format
 function stripAllLabels(line) {
-  return line.replace(/\[([^[\]]+)\]|\{([^{}]+)\}/g, '').replace(/\s+/g, ' ').trim();
+  return line
+    .replace(/\[([^[\]]+)\]|\{([^{}]+)\}/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 // Detect which known label(s) appear on this line; returns first match or null
@@ -215,10 +230,13 @@ function detectLabelOnLine(line) {
 function collectLabels(rawText) {
   const seen = new Set();
   const ordered = [];
-  rawText.split('\n').forEach(line => {
-    extractEncapsulations(line.trim()).forEach(tok => {
+  rawText.split('\n').forEach((line) => {
+    extractEncapsulations(line.trim()).forEach((tok) => {
       const key = tok.toLowerCase();
-      if (!seen.has(key)) { seen.add(key); ordered.push(tok); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        ordered.push(tok);
+      }
     });
   });
   return ordered;
@@ -247,50 +265,52 @@ function findWazaForLine(line) {
   const normJapanese = normalizeForSearch(japanese);
 
   // Exact match - prioritize Japanese, then English, then full text
-  let hit = null;
+  let hit;
 
   // 1. Try exact Japanese match
   if (japanese) {
-    hit = state.wazaData.find(w =>
-      normalizeForSearch(w.name_jp || '') === normJapanese
-    );
+    hit = state.wazaData.find((w) => normalizeForSearch(w.name_jp || '') === normJapanese);
     if (hit) return hit;
   }
 
   // 2. Try exact English match
-  hit = state.wazaData.find(w =>
-    normalizeForSearch(w.name_en || '') === normEnglish ||
-    normalizeForSearch(w.name_en_literal || '') === normEnglish ||
-    normalizeForSearch(w.name_en_gtranslate || '') === normEnglish
+  hit = state.wazaData.find(
+    (w) =>
+      normalizeForSearch(w.name_en || '') === normEnglish ||
+      normalizeForSearch(w.name_en_literal || '') === normEnglish ||
+      normalizeForSearch(w.name_en_gtranslate || '') === normEnglish,
   );
   if (hit) return hit;
 
   // 3. Try exact match on full cleaned text (fallback)
-  hit = state.wazaData.find(w =>
-    normalizeForSearch(w.name_jp || '') === norm ||
-    normalizeForSearch(w.name_en || '') === norm ||
-    normalizeForSearch(w.name_en_literal || '') === norm
+  hit = state.wazaData.find(
+    (w) =>
+      normalizeForSearch(w.name_jp || '') === norm ||
+      normalizeForSearch(w.name_en || '') === norm ||
+      normalizeForSearch(w.name_en_literal || '') === norm,
   );
   if (hit) return hit;
 
   // Fuzzy match - try Japanese first, then English (maxDistance=2)
   if (japanese) {
-    hit = state.wazaData.find(w => isFuzzyMatch(w.name_jp, japanese, 2));
+    hit = state.wazaData.find((w) => isFuzzyMatch(w.name_jp, japanese, 2));
     if (hit) return hit;
   }
 
-  hit = state.wazaData.find(w =>
-    isFuzzyMatch(w.name_en, english, 2) ||
-    isFuzzyMatch(w.name_en_literal, english, 2) ||
-    isFuzzyMatch(w.name_en_gtranslate, english, 2)
+  hit = state.wazaData.find(
+    (w) =>
+      isFuzzyMatch(w.name_en, english, 2) ||
+      isFuzzyMatch(w.name_en_literal, english, 2) ||
+      isFuzzyMatch(w.name_en_gtranslate, english, 2),
   );
   if (hit) return hit;
 
   // Final fallback: fuzzy on full text (maxDistance=2)
-  hit = state.wazaData.find(w =>
-    isFuzzyMatch(w.name_jp, cleaned, 2) ||
-    isFuzzyMatch(w.name_en, cleaned, 2) ||
-    isFuzzyMatch(w.name_en_literal, cleaned, 2)
+  hit = state.wazaData.find(
+    (w) =>
+      isFuzzyMatch(w.name_jp, cleaned, 2) ||
+      isFuzzyMatch(w.name_en, cleaned, 2) ||
+      isFuzzyMatch(w.name_en_literal, cleaned, 2),
   );
   return hit || null;
 }
@@ -304,19 +324,22 @@ export function parseTextImport(rawText) {
     if (tiState.autoMapping[lbl] === undefined) {
       // Phase 1: Try to map known status labels automatically
       const statusMarking = mapStatusToMarking(lbl.slice(1, -1)); // Remove brackets
-      tiState.autoMapping[lbl] = statusMarking !== null ? statusMarking : (i < 6 ? i : -1);
+      tiState.autoMapping[lbl] = statusMarking !== null ? statusMarking : i < 6 ? i : -1;
     }
   });
 
   // 3. Seed tiState.labelNames for new labels (default = inner text without brackets)
-  tiState.foundLabels.forEach(lbl => {
+  tiState.foundLabels.forEach((lbl) => {
     if (tiState.labelNames[lbl] === undefined) {
       tiState.labelNames[lbl] = lbl.slice(1, -1); // strip outer bracket pair
     }
   });
 
   // 4. Parse lines
-  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = rawText
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   // Phase 2: Detect column layout for tab-separated format
   const columnLayout = detectColumnLayout(lines);
@@ -326,7 +349,7 @@ export function parseTextImport(rawText) {
   tiState.matched = [];
   tiState.unmatched = [];
 
-  lines.forEach(line => {
+  lines.forEach((line) => {
     // Phase 1: Skip header lines
     if (isHeaderLine(line)) {
       return;
@@ -375,7 +398,7 @@ export function parseTextImport(rawText) {
         waza,
         rawLine: line,
         category: effectiveLabel,
-        manualMarkings: Array(6).fill(false)
+        manualMarkings: Array(6).fill(false),
       };
 
       // Phase 1: Auto-assign markings from status or decorations

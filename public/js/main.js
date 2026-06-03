@@ -21,13 +21,16 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 });
 
 // ── Popstate — back button closes the detail panel ────────────
-window.addEventListener('popstate', e => {
+window.addEventListener('popstate', (e) => {
   // e.state is null on the initial page state, or lacks wazaOpen when
   // returning from the detail view.
   if (state.selectedId !== null && (!e.state || !e.state.wazaOpen)) {
-    document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
+    document.querySelectorAll('.embed-wrap.open iframe').forEach((f) => {
+      f.src = '';
+    });
     state.selectedId = null;
-    renderList(); renderDetail();
+    renderList();
+    renderDetail();
     document.querySelector('.main').classList.remove('waza-selected');
   }
 });
