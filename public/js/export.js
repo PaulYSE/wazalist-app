@@ -34,7 +34,7 @@ export async function exportToExcel() {
     return;
   }
 
-  const headerName = (!state.isGuest && currentUsername) ? currentUsername : 'Guest';
+  const headerName = (!state.isGuest && state.currentUsername) ? state.currentUsername : 'Guest';
 
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
   setStatus('');

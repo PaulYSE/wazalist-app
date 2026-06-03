@@ -4,6 +4,11 @@ import { saveLabels } from './core.js';
 import { renderDashStats } from './stats.js';
 import { state } from './state.js';
 import { SHAPES } from './config.js';
+import {
+  markingStyle,       // used in renderList() for all 3 view modes
+  markingPips,        // used in renderList() and renderDetail()
+  cardLikePill,       // used in renderList()
+} from './render-helpers.js'
 
 // ── Config ────────────────────────────────────────────────────
 const TEMPLATE = ['Want to Learn', 'Learning', 'Complete', 'Favourite', 'Oriwaza', 'Forgotten'];

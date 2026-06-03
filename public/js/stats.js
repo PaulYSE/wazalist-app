@@ -30,12 +30,12 @@ export function renderDashStats() {
   const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
   const recent = state.wazaData
     .filter(w => {
-      const p = prog[w.id];
+      const p = state.prog[w.id];
       if (!p || !p.updated_at) return false;
       const updatedTime = new Date(p.updated_at).getTime();
       return updatedTime >= oneYearAgo;
     })
-    .sort((a, b) => new Date(prog[b.id].updated_at) - new Date(prog[a.id].updated_at));
+    .sort((a, b) => new Date(state.prog[b.id].updated_at) - new Date(state.prog[a.id].updated_at));
 
   const recentHTML = '<div class="dsec2"><h3>Recent activity (past year)</h3>'
     + (recent.length

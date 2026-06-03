@@ -23,7 +23,7 @@ export async function renderContribute() {
     '<div class="dsec2"><h3>Actions</h3>'
     + '<div style="display:flex;flex-wrap:wrap;gap:10px">'
     + '<button class="btn" id="contribNewWazaBtn">+ Submit New Waza</button>'
-    + (isAdmin ? '<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>' : '')
+    + (state.isAdmin ? '<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>' : '')
     + '</div></div>'
     : '';
 
@@ -83,11 +83,11 @@ export async function renderAccount() {
             <div style="display:grid;gap:10px;font-size:13px">
               <div style="display:flex;gap:8px">
                 <span style="color:var(--text3);min-width:100px">Username:</span>
-                <span style="font-weight:500">${escapeHtml(currentUsername)}</span>
+                <span style="font-weight:500">${escapeHtml(state.currentUsername)}</span>
               </div>
               <div style="display:flex;gap:8px">
                 <span style="color:var(--text3);min-width:100px">Account type:</span>
-                <span>${isAdmin ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
+                <span>${state.isAdmin ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
               </div>
             </div>
           </div>`

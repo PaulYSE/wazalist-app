@@ -16,6 +16,7 @@ import { state, loadLocal, saveLocal, LS_LABELS } from './state.js';
 import { SHAPES, LIKE_UP, LIKE_DOWN, platColor, platLabel } from './config.js';
 import { filterWaza } from './search.js';
 import { escapeHtml } from './ui.js';
+import { getP } from './core.js';
 
 export function renderList() {
   const filtered = filterWaza();
