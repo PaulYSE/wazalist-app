@@ -93,7 +93,7 @@
         <h3>Menu</h3>
         <button class="mob-menu-close" id="mobMenuClose" aria-label="Close">×</button>
       </div>
-      
+
       <div class="mob-menu-section">
         <div class="mob-menu-section-title">Navigation</div>
         <button class="mob-menu-item" data-menu-tab="browse">
@@ -457,275 +457,309 @@
 
   <!-- ===== Onboarding overlay markup ===== -->
 
-<!-- Onboarding HTML -->
-<div id="wlOnboarding" style="display:none">
-  <div class="ob-card">
+  <!-- Onboarding HTML -->
+  <div id="wlOnboarding" style="display:none">
+    <div class="ob-card">
 
-    <!-- Progress dots + close -->
-    <div class="ob-progress">
-      <div class="ob-dot active" id="obDot0"></div>
-      <div class="ob-dot" id="obDot1"></div>
-      <div class="ob-dot" id="obDot2"></div>
-      <div class="ob-dot" id="obDot3"></div>
-      <div class="ob-dot" id="obDot4"></div>
-      <div class="ob-dot" id="obDot5"></div>
-      <div class="ob-dot" id="obDot6"></div>
-      <div class="ob-dot" id="obDot7"></div>
-      <div class="ob-dot" id="obDot8"></div>
-      <div class="ob-dot" id="obDot9"></div>
-      <button class="ob-close" id="obClose" title="Skip onboarding">✕</button>
-    </div>
+      <!-- Progress dots + close -->
+      <div class="ob-progress">
+        <div class="ob-dot active" id="obDot0"></div>
+        <div class="ob-dot" id="obDot1"></div>
+        <div class="ob-dot" id="obDot2"></div>
+        <div class="ob-dot" id="obDot3"></div>
+        <div class="ob-dot" id="obDot4"></div>
+        <div class="ob-dot" id="obDot5"></div>
+        <div class="ob-dot" id="obDot6"></div>
+        <div class="ob-dot" id="obDot7"></div>
+        <div class="ob-dot" id="obDot8"></div>
+        <div class="ob-dot" id="obDot9"></div>
+        <button class="ob-close" id="obClose" title="Skip onboarding">✕</button>
+      </div>
 
-    <!-- Slides viewport -->
-    <div class="ob-viewport">
-      <div class="ob-slides" id="obSlides">
+      <!-- Slides viewport -->
+      <div class="ob-viewport">
+        <div class="ob-slides" id="obSlides">
 
-        <!-- SLIDE 0: Welcome -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">⛩</div>
-          <div class="ob-slide-title">Welcome to <span>Wazalist</span></div>
-          <div class="ob-slide-sub">
-            Your personal database for Wotagei techniques — browse every Waza, track your learning, and build your own list.
-          </div>
-          <div class="ob-slide-sub" style="color:var(--text3);font-size:13px">
-            This quick tour covers all the key features. It takes about 90 seconds.
-          </div>
-        </div>
-
-        <!-- SLIDE 1: Explore tab -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">🔍</div>
-          <div class="ob-slide-title">Explore all <span>Waza</span></div>
-          <div class="ob-slide-sub">
-            Use the <b>Explore</b> tab to search the full database. Every Waza has its Japanese name, English translation, skill level, parent techniques, and reference videos.
-          </div>
-          <div class="ob-demo" id="obBrowseDemo">
-            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Browse panel</div>
-            <div id="obBrowseList">
-              <!-- Real waza-list components built by JS -->
+          <!-- SLIDE 0: Welcome -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">⛩</div>
+            <div class="ob-slide-title">Welcome to <span>Wazalist</span></div>
+            <div class="ob-slide-sub">
+              Your personal database for Wotagei techniques — browse every Waza, track your learning, and build your own
+              list.
+            </div>
+            <div class="ob-slide-sub" style="color:var(--text3);font-size:13px">
+              This quick tour covers all the key features. It takes about 90 seconds.
             </div>
           </div>
-        </div>
 
-        <!-- SLIDE 2: Fuzzy search -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">💬</div>
-          <div class="ob-slide-title">Can't write in <span>Japanese?</span></div>
-          <div class="ob-slide-sub">
-            No problem — search in English or Romaji. Minor spelling mistakes are handled automatically.
-          </div>
-          <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
-          <div class="ob-demo ob-search-demo">
-            <input type="text" id="obSearchInput" placeholder="Try searching for a waza..." autocomplete="off" spellcheck="false">
-            <div class="ob-search-results" id="obSearchResults">
-              <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing above to see fuzzy matching in action…</div>
+          <!-- SLIDE 1: Explore tab -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">🔍</div>
+            <div class="ob-slide-title">Explore all <span>Waza</span></div>
+            <div class="ob-slide-sub">
+              Use the <b>Explore</b> tab to search the full database. Every Waza has its Japanese name, English
+              translation, skill level, parent techniques, and reference videos.
             </div>
-          </div>
-        </div>
-
-        <!-- SLIDE 3: Card style -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">🃏</div>
-          <div class="ob-slide-title">Choose a <span>card style</span></div>
-          <div class="ob-slide-sub">Click a style to select it. You can change this anytime in the filter bar.</div>
-          <div class="ob-style-demo" id="obStyleDemo">
-            <!-- Demo styles built by JS using real app components -->
-          </div>
-        </div>
-
-        <!-- SLIDE 4: Markings demo -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">🏷️</div>
-          <div class="ob-slide-title">Build your <span>Wazalist</span></div>
-          <div class="ob-slide-sub">
-            Use the 6 marking markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off — try it below!
-          </div>
-          <div class="ob-demo ob-marking-demo" id="obMarkingDemo">
-            <!-- rows built by JS -->
-          </div>
-        </div>
-
-        <!-- SLIDE 5: Label markings + template -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">✍️</div>
-          <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
-          <div class="ob-slide-sub">
-            Label each marking however suits your learning style — or use the suggested template below. You can rename them anytime.
-          </div>
-          <div class="ob-demo">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
-              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)">Your labels</span>
-              <div style="display:flex;gap:6px">
-                <button id="obClearAll" style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='var(--bg3)';this.style.color='var(--text1)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--text2)'">Clear All</button>
-                <button id="obUseTemplate" style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use template</button>
+            <div class="ob-demo" id="obBrowseDemo">
+              <div
+                style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">
+                Browse panel</div>
+              <div id="obBrowseList">
+                <!-- Real waza-list components built by JS -->
               </div>
             </div>
-            <div class="ob-labels" id="obLabelsPreview">
+          </div>
+
+          <!-- SLIDE 2: Fuzzy search -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">💬</div>
+            <div class="ob-slide-title">Can't write in <span>Japanese?</span></div>
+            <div class="ob-slide-sub">
+              No problem — search in English or Romaji. Minor spelling mistakes are handled automatically.
+            </div>
+            <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
+            <div class="ob-demo ob-search-demo">
+              <input type="text" id="obSearchInput" placeholder="Try searching for a waza..." autocomplete="off"
+                spellcheck="false">
+              <div class="ob-search-results" id="obSearchResults">
+                <div class="ob-no-results" id="obSearchHint" style="color:var(--text3);font-size:13px">Start typing
+                  above to see fuzzy matching in action…</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 3: Card style -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">🃏</div>
+            <div class="ob-slide-title">Choose a <span>card style</span></div>
+            <div class="ob-slide-sub">Click a style to select it. You can change this anytime in the filter bar.</div>
+            <div class="ob-style-demo" id="obStyleDemo">
+              <!-- Demo styles built by JS using real app components -->
+            </div>
+          </div>
+
+          <!-- SLIDE 4: Markings demo -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">🏷️</div>
+            <div class="ob-slide-title">Build your <span>Wazalist</span></div>
+            <div class="ob-slide-sub">
+              Use the 6 marking markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off — try it below!
+            </div>
+            <div class="ob-demo ob-marking-demo" id="obMarkingDemo">
               <!-- rows built by JS -->
             </div>
           </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-top:0">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Suggested template</div>
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">●</span><span style="color:var(--text2)">Want to Learn</span></div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">▲</span><span style="color:var(--text2)">Learning</span></div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">■</span><span style="color:var(--text2)">Complete</span></div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">♥</span><span style="color:var(--text2)">Favourite</span></div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">★</span><span style="color:var(--text2)">Oriwaza</span></div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="width:20px;text-align:center">◆</span><span style="color:var(--text2)">Forgotten</span></div>
-            </div>
-          </div>
-        </div>
 
-        <!-- SLIDE 6: Stats -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">📊</div>
-          <div class="ob-slide-title">Track your <span>Progress</span></div>
-          <div class="ob-slide-sub">
-            The <b>Stats</b> tab shows your marking history and recent activity. See which Waza you've marked, when you last updated them, and your coverage by technique family.
-          </div>
-          <div class="ob-demo" style="padding:14px">
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Overview</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
-                  <div style="font-size:24px;font-weight:700;color:var(--accent)">23</div>
-                  <div style="font-size:12px;color:var(--text3)">Marked</div>
-                </div>
-                <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
-                  <div style="font-size:24px;font-weight:700">150</div>
-                  <div style="font-size:12px;color:var(--text3)">Total Waza</div>
+          <!-- SLIDE 5: Label markings + template -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">✍️</div>
+            <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
+            <div class="ob-slide-sub">
+              Label each marking however suits your learning style — or use the suggested template below. You can rename
+              them anytime.
+            </div>
+            <div class="ob-demo">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">
+                <span style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)">Your
+                  labels</span>
+                <div style="display:flex;gap:6px">
+                  <button id="obClearAll"
+                    style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s"
+                    onmouseover="this.style.background='var(--bg3)';this.style.color='var(--text1)'"
+                    onmouseout="this.style.background='var(--bg2)';this.style.color='var(--text2)'">Clear All</button>
+                  <button id="obUseTemplate"
+                    style="padding:4px 10px;border-radius:6px;border:1px solid var(--green);background:#002a10;color:var(--green);font-size:11px;cursor:pointer;font-family:inherit;transition:background .15s"
+                    onmouseover="this.style.background='#003d18'" onmouseout="this.style.background='#002a10'">✓ Use
+                    template</button>
                 </div>
               </div>
+              <div class="ob-labels" id="obLabelsPreview">
+                <!-- rows built by JS -->
+              </div>
             </div>
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Recent Activity</div>
-              <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">Updated Romance <span style="color:var(--text3);margin-left:auto;float:right">2h ago</span></div>
-              <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">Updated Muramasa <span style="color:var(--text3);margin-left:auto;float:right">1d ago</span></div>
-              <div style="font-size:13px;color:var(--text2);padding:6px 0">Updated Double Mix <span style="color:var(--text3);margin-left:auto;float:right">3d ago</span></div>
+            <div
+              style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-top:0">
+              <div
+                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">
+                Suggested template</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">●</span><span style="color:var(--text2)">Want to Learn</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">▲</span><span style="color:var(--text2)">Learning</span></div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">■</span><span style="color:var(--text2)">Complete</span></div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">♥</span><span style="color:var(--text2)">Favourite</span></div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">★</span><span style="color:var(--text2)">Oriwaza</span></div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px"><span
+                    style="width:20px;text-align:center">◆</span><span style="color:var(--text2)">Forgotten</span></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- SLIDE 7: Compare -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">🔄</div>
-          <div class="ob-slide-title">Share & <span>Compare</span> lists</div>
-          <div class="ob-slide-sub">
-            <b>Any user</b> can export their list with custom labels to get a shareable key. <b>Anyone (including guests)</b> can import these lists in the <b>Compare</b> tab to do side-by-side comparisons.
+          <!-- SLIDE 6: Stats -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">📊</div>
+            <div class="ob-slide-title">Track your <span>Progress</span></div>
+            <div class="ob-slide-sub">
+              The <b>Stats</b> tab shows your marking history and recent activity. See which Waza you've marked, when
+              you last updated them, and your coverage by technique family.
+            </div>
+            <div class="ob-demo" style="padding:14px">
+              <div
+                style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+                <div
+                  style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">
+                  Overview</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
+                    <div style="font-size:24px;font-weight:700;color:var(--accent)">23</div>
+                    <div style="font-size:12px;color:var(--text3)">Marked</div>
+                  </div>
+                  <div style="text-align:center;padding:12px;background:var(--bg1);border-radius:6px">
+                    <div style="font-size:24px;font-weight:700">150</div>
+                    <div style="font-size:12px;color:var(--text3)">Total Waza</div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+                <div
+                  style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">
+                  Recent Activity</div>
+                <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">
+                  Updated Romance <span style="color:var(--text3);margin-left:auto;float:right">2h ago</span></div>
+                <div style="font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">
+                  Updated Muramasa <span style="color:var(--text3);margin-left:auto;float:right">1d ago</span></div>
+                <div style="font-size:13px;color:var(--text2);padding:6px 0">Updated Double Mix <span
+                    style="color:var(--text3);margin-left:auto;float:right">3d ago</span></div>
+              </div>
+            </div>
           </div>
-          <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:20px">📤</span>
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Export Your List</div>
-                  <div style="font-size:12px;color:var(--text3)">Generate a shareable URL with your markings & labels</div>
+
+          <!-- SLIDE 7: Compare -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">🔄</div>
+            <div class="ob-slide-title">Share & <span>Compare</span> lists</div>
+            <div class="ob-slide-sub">
+              <b>Any user</b> can export their list with custom labels to get a shareable key. <b>Anyone (including
+                guests)</b> can import these lists in the <b>Compare</b> tab to do side-by-side comparisons.
+            </div>
+            <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
+              <div
+                style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:20px">📤</span>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Export Your List</div>
+                    <div style="font-size:12px;color:var(--text3)">Generate a shareable URL with your markings & labels
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:20px">📥</span>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Import & Compare</div>
+                    <div style="font-size:12px;color:var(--text3)">Paste a list URL to see differences side-by-side
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="background:rgba(124,111,247,.1);border:1px solid var(--accent);border-radius:var(--r);padding:8px 10px;margin-top:4px">
+                <div style="font-size:12px;color:var(--accent)">💡 <b>Tip:</b> Works for guest accounts too — no sign-in
+                  required!</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 8: Contribute -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">✏️</div>
+            <div class="ob-slide-title">Help grow the <span>Database</span></div>
+            <div class="ob-slide-sub">
+              Any <b>logged-in user</b> can suggest edits to existing Waza or add new ones via the <b>Contribute</b>
+              tab. All contributions are reviewed by admins before being added to the database.
+            </div>
+            <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
+              <div
+                style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:20px">📝</span>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Suggest Edits</div>
+                    <div style="font-size:12px;color:var(--text3)">Fix typos, add translations, or update video links
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:20px">➕</span>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:2px">Add New Waza</div>
+                    <div style="font-size:12px;color:var(--text3)">Submit a new technique with all its details</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="background:rgba(76,175,130,.1);border:1px solid var(--green);border-radius:var(--r);padding:8px 10px;margin-top:4px">
+                <div style="font-size:12px;color:var(--green)">✓ All contributions reviewed by admins for quality</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SLIDE 9: Import -->
+          <div class="ob-slide">
+            <div class="ob-slide-icon">📥</div>
+            <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
+            <div class="ob-slide-sub">
+              Already have a list? Import it instantly. Excel files with coloured cells are supported, as well as plain
+              text paste.
+            </div>
+            <div class="ob-slide-note">Excel and text import supported — colours are detected automatically.</div>
+            <div class="ob-demo" style="display:flex;flex-direction:column;gap:8px;padding:14px">
+              <div
+                style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
+                <span style="font-size:18px">📊</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600">Excel Upload</div>
+                  <div style="font-size:12px;color:var(--text3)">Cell colours detected automatically</div>
+                </div>
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
+                <span style="font-size:18px">📋</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600">Paste Text</div>
+                  <div style="font-size:12px;color:var(--text3)">Labels in [square] or {curly} brackets auto-detected
+                  </div>
                 </div>
               </div>
             </div>
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:20px">📥</span>
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Import & Compare</div>
-                  <div style="font-size:12px;color:var(--text3)">Paste a list URL to see differences side-by-side</div>
-                </div>
-              </div>
-            </div>
-            <div style="background:rgba(124,111,247,.1);border:1px solid var(--accent);border-radius:var(--r);padding:8px 10px;margin-top:4px">
-              <div style="font-size:12px;color:var(--accent)">💡 <b>Tip:</b> Works for guest accounts too — no sign-in required!</div>
-            </div>
           </div>
-        </div>
 
-        <!-- SLIDE 8: Contribute -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">✏️</div>
-          <div class="ob-slide-title">Help grow the <span>Database</span></div>
-          <div class="ob-slide-sub">
-            Any <b>logged-in user</b> can suggest edits to existing Waza or add new ones via the <b>Contribute</b> tab. All contributions are reviewed by admins before being added to the database.
-          </div>
-          <div class="ob-demo" style="display:flex;flex-direction:column;gap:10px;padding:14px">
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:20px">📝</span>
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Suggest Edits</div>
-                  <div style="font-size:12px;color:var(--text3)">Fix typos, add translations, or update video links</div>
-                </div>
-              </div>
-            </div>
-            <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:20px">➕</span>
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:2px">Add New Waza</div>
-                  <div style="font-size:12px;color:var(--text3)">Submit a new technique with all its details</div>
-                </div>
-              </div>
-            </div>
-            <div style="background:rgba(76,175,130,.1);border:1px solid var(--green);border-radius:var(--r);padding:8px 10px;margin-top:4px">
-              <div style="font-size:12px;color:var(--green)">✓ All contributions reviewed by admins for quality</div>
-            </div>
-          </div>
-        </div>
+        </div><!-- /ob-slides -->
+      </div><!-- /ob-viewport -->
 
-        <!-- SLIDE 9: Import -->
-        <div class="ob-slide">
-          <div class="ob-slide-icon">📥</div>
-          <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
-          <div class="ob-slide-sub">
-            Already have a list? Import it instantly. Excel files with coloured cells are supported, as well as plain text paste.
-          </div>
-          <div class="ob-slide-note">Excel and text import supported — colours are detected automatically.</div>
-          <div class="ob-demo" style="display:flex;flex-direction:column;gap:8px;padding:14px">
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
-              <span style="font-size:18px">📊</span>
-              <div>
-                <div style="font-size:13px;font-weight:600">Excel Upload</div>
-                <div style="font-size:12px;color:var(--text3)">Cell colours detected automatically</div>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);border-radius:6px;">
-              <span style="font-size:18px">📋</span>
-              <div>
-                <div style="font-size:13px;font-weight:600">Paste Text</div>
-                <div style="font-size:12px;color:var(--text3)">Labels in [square] or {curly} brackets auto-detected</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Footer buttons -->
+      <div class="ob-footer" id="obFooter">
+        <!-- dynamically populated -->
+      </div>
 
-      </div><!-- /ob-slides -->
-    </div><!-- /ob-viewport -->
+    </div><!-- /ob-card -->
+  </div><!-- /wlOnboarding -->
 
-    <!-- Footer buttons -->
-    <div class="ob-footer" id="obFooter">
-      <!-- dynamically populated -->
-    </div>
+  <!-- Main application script with Vite -->
+  <script type="module" src="js/main.js"></script>
 
-  </div><!-- /ob-card -->
-</div><!-- /wlOnboarding -->
-
-  <!-- App scripts. These are plain (classic) <script> tags, NOT modules, so they
-       share one global scope. They MUST stay in this order. See CONTRIBUTING.md. -->
-  <script src="js/config.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/app-core.js"></script>
-  <script src="js/search.js"></script>
-  <script src="js/render-helpers.js"></script>
-  <script src="js/render.js"></script>
-  <script src="js/forms.js"></script>
-  <script src="js/export.js"></script>
-  <script src="js/stats.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/contribute-modals.js"></script>
-  <script src="js/share.js"></script>
-  <script src="js/import-parser.js"></script>
-  <script src="js/import-ui.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/onboarding.js"></script>
 </body>
 
 </html>

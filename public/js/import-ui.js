@@ -1,537 +1,538 @@
 /* import-ui.js — the Import tab UI (renderImport + helpers), Excel-file
    parsing, and the showToast() helper. */
-    function renderImport() {
-      const container = document.getElementById('dashImport');
 
-      if (!_tiParsed) {
-        container.innerHTML = renderTiInput('');
-        bindTiInputEvents(container);
-        return;
-      }
-      
-      // ── Excel color mapping mode ──────────────────────────────────
-      if (_tiParsed === 'excel' && Object.keys(_tiExcelColors).length > 1) {
-        const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
-        
-        if (colorKeys.length > 0) {
-          const colorMappingHtml = '<div>'
-            + '<div class="dsec2"><h3>📊 Excel Colors Detected</h3></div>'
-            + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Rename the label for each color and choose which marking to assign:</p>'
-            + '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">'
-            + colorKeys.map(colorHex => {
-              const wazaCount = _tiExcelColors[colorHex].length;
-              const rgb = hexToRgb(colorHex);
-              const colorDisplay = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-              return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">'
-                + '<div style="width:40px;height:40px;flex-shrink:0;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
-                + '<div style="flex:1;display:flex;flex-direction:column;gap:6px">'
-                + '<input type="text" class="excel-color-label-input" data-color="' + colorHex + '" placeholder="Label name (e.g., Learning, Mastered...)" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;width:100%">'
-                + '<div style="font-size:11px;color:var(--text3)">' + wazaCount + ' waza · #' + colorHex + '</div>'
-                + '</div>'
-                + '<select class="color-marking-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;flex-shrink:0">'
-                + '<option value="-1">No marking</option>'
-                + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (markingLabels[i] || 'Marking ' + (i + 1)) + '</option>').join('')
-                + '</select>'
-                + '</div>';
-            }).join('')
+import { state } from './state.js';
+import { tiState, parseTextImport } from './import-parser.js';
+import { escapeHtml } from './ui.js';
+import { SHAPES } from './config.js';
+
+export function renderImport() {
+  const container = document.getElementById('dashImport');
+
+  if (!tiState.parsed) {
+    container.innerHTML = renderTiInput('');
+    bindTiInputEvents(container);
+    return;
+  }
+
+  // ── Excel color mapping mode ──────────────────────────────────
+  if (tiState.parsed === 'excel' && Object.keys(tiState.excelColors).length > 1) {
+    const colorKeys = Object.keys(tiState.excelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
+
+    if (colorKeys.length > 0) {
+      const colorMappingHtml = '<div>'
+        + '<div class="dsec2"><h3>📊 Excel Colors Detected</h3></div>'
+        + '<p style="font-size:13px;color:var(--text2);margin-bottom:16px">We found waza with different cell colors. Rename the label for each color and choose which marking to assign:</p>'
+        + '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">'
+        + colorKeys.map(colorHex => {
+          const wazaCount = tiState.excelColors[colorHex].length;
+          const rgb = hexToRgb(colorHex);
+          const colorDisplay = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+          return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">'
+            + '<div style="width:40px;height:40px;flex-shrink:0;border-radius:var(--r);border:1px solid var(--border);background:' + colorDisplay + '"></div>'
+            + '<div style="flex:1;display:flex;flex-direction:column;gap:6px">'
+            + '<input type="text" class="excel-color-label-input" data-color="' + colorHex + '" placeholder="Label name (e.g., Learning, Mastered...)" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;width:100%">'
+            + '<div style="font-size:11px;color:var(--text3)">' + wazaCount + ' waza · #' + colorHex + '</div>'
             + '</div>'
-            + '<div style="display:flex;gap:8px">'
-            + '<button class="cbtn cbtn-primary" id="tiApplyColorMapBtn">Apply Color Mapping →</button>'
-            + '<button class="cbtn cbtn-ghost" id="tiCancelExcelBtn">← Cancel</button>'
-            + '</div>'
+            + '<select class="color-marking-map" data-color="' + colorHex + '" style="padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px;flex-shrink:0">'
+            + '<option value="-1">No marking</option>'
+            + SHAPES.map((s, i) => '<option value="' + i + '">' + s + ' ' + (state.markingLabels[i] || 'Marking ' + (i + 1)) + '</option>').join('')
+            + '</select>'
             + '</div>';
-          
-          container.innerHTML = colorMappingHtml;
-          
-          // Bind color mapping events
-          container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', async () => {
-            console.log('[COLOR MAP] Starting color mapping application...');
-            console.log('[COLOR MAP] _tiExcelColors:', _tiExcelColors);
-            console.log('[COLOR MAP] _tiMatched before mapping:', _tiMatched.map(i => ({ name: i.waza.name_jp, rawLine: i.rawLine, markings: i.manualMarkings })));
-            
-            // Read label names
-            container.querySelectorAll('.excel-color-label-input').forEach(input => {
-              const color = input.dataset.color;
-              const labelName = input.value.trim();
-              if (labelName) {
-                _tiExcelColorLabels[color] = labelName;
-              }
-            });
-            
-            // Read mappings
-            container.querySelectorAll('.color-marking-map').forEach(select => {
-              const color = select.dataset.color;
-              const markingIdx = parseInt(select.value);
-              _tiColorMapping[color] = markingIdx;
-              console.log('[COLOR MAP] Mapping color', color, 'to marking index', markingIdx);
-            });
-            
-            console.log('[COLOR MAP] Final _tiColorMapping:', _tiColorMapping);
-            console.log('[COLOR MAP] Final _tiExcelColorLabels:', _tiExcelColorLabels);
-            
-            // Check if user wants to update their marking labels
-            const hasLabelNames = Object.keys(_tiExcelColorLabels).length > 0;
-            const usedMarkings = new Set(Object.values(_tiColorMapping).filter(idx => idx >= 0));
-            
-            if (hasLabelNames && usedMarkings.size > 0 && !isGuest && token) {
-              // Build a list of changes
-              const changes = [];
-              for (const [color, markingIdx] of Object.entries(_tiColorMapping)) {
-                if (markingIdx >= 0 && _tiExcelColorLabels[color]) {
-                  const currentLabel = markingLabels[markingIdx] || '';
-                  const newLabel = _tiExcelColorLabels[color];
-                  if (currentLabel !== newLabel) {
-                    changes.push({
-                      markingIdx,
-                      oldLabel: currentLabel || '(empty)',
-                      newLabel: newLabel
-                    });
-                  }
-                }
-              }
-              
-              if (changes.length > 0) {
-                const changesList = changes.map(c => 
-                  `${SHAPES[c.markingIdx]} ${c.oldLabel} → ${c.newLabel}`
-                ).join('\n');
-                
-                const shouldUpdate = confirm(
-                  `Update your marking labels with the names you entered?\n\n${changesList}\n\nThis will save to your account and affect all your waza.`
-                );
-                
-                if (shouldUpdate) {
-                  // Update local marking labels
-                  for (const [color, markingIdx] of Object.entries(_tiColorMapping)) {
-                    if (markingIdx >= 0 && _tiExcelColorLabels[color]) {
-                      markingLabels[markingIdx] = _tiExcelColorLabels[color];
-                    }
-                  }
-                  
-                  // Save to server
-                  try {
-                    await saveMarkingLabels();
-                    console.log('[COLOR MAP] Marking labels updated successfully');
-                  } catch (err) {
-                    console.error('[COLOR MAP] Failed to save marking labels:', err);
-                    alert('Failed to save marking labels. Your selections will still be applied to this import.');
-                  }
-                }
-              }
-            }
-            
-            // Apply color mappings to matched waza
-            _tiMatched.forEach(item => {
-              // Find which color this waza belongs to
-              // Normalize both sides for comparison (trim whitespace)
-              const normalizedRawLine = item.rawLine.trim();
-              
-              for (const [color, wazaNames] of Object.entries(_tiExcelColors)) {
-                // Check if any of the waza names from this color match this item
-                const matchFound = wazaNames.some(name => name.trim() === normalizedRawLine);
-                
-                if (matchFound) {
-                  const markingIdx = _tiColorMapping[color];
-                  console.log('[COLOR MAP] Match found for', item.waza.name_jp, '- color:', color, 'marking:', markingIdx);
-                  
-                  if (markingIdx === -1) {
-                    // Explicitly clear all markings when "no marking" is selected
-                    item.manualMarkings = Array(6).fill(false);
-                    item.category = null;
-                    console.log('[COLOR MAP] Cleared markings (no marking selected)');
-                  } else if (markingIdx >= 0 && markingIdx < 6) {
-                    item.manualMarkings = Array(6).fill(false);
-                    item.manualMarkings[markingIdx] = true;
-                    item.category = markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
-                    console.log('[COLOR MAP] Set markings to:', item.manualMarkings);
-                  }
-                  break;
-                }
-              }
-            });
-            
-            console.log('[COLOR MAP] _tiMatched after mapping:', _tiMatched.map(i => ({ name: i.waza.name_jp, markings: i.manualMarkings })));
-            
-            _tiParsed = true; // Switch to normal mode
-            _tiPreviewMode = true; // Enable preview mode
-            renderImport();
-          });
-          
-          container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
-            _tiParsed = false;
-            _tiExcelColors = {};
-            _tiColorMapping = {};
-            _tiExcelColorLabels = {};
-            renderImport();
-          });
-          
-          return;
-        }
-      }
-
-      const hasCategories = _tiFoundLabels.length > 0 && _tiMatched.some(m => m.category);
-
-      // ── Unmatched section ────────────────────────────────────────
-      const unmatchedHtml = _tiUnmatched.length
-        ? '<div class="ti-section-head"><span>Not found in database</span><span class="ti-badge ti-badge-miss">' + _tiUnmatched.length + '</span></div>'
-          + _tiUnmatched.map(l => '<div class="ti-unmatched-row"><span class="ti-raw">' + escHtml(l) + '</span><span style="font-size:11px;color:var(--text3)">No match</span></div>').join('')
-        : '';
-
-      // ── Matched rows ─────────────────────────────────────────────
-      const matchedHeaderHtml = '<div class="ti-section-head"><span>Matched waza</span><span class="ti-badge ti-badge-ok">' + _tiMatched.length + '</span></div>';
-
-      const matchedRowsHtml = _tiMatched.map((item, idx) => {
-        const lbl = item.category;
-        const dispLbl = lbl ? (_tiLabelNames[lbl] || lbl) : null;
-        const catBadge = dispLbl
-          ? '<span class="ti-match-row ti-category-badge ti-cat-dynamic">' + escHtml(dispLbl) + '</span>'
-          : '';
-        const markingsBtns = SHAPES.map((s, si) =>
-          '<button class="cmp-marking-btn' + (item.manualMarkings[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
-        ).join('');
-        return '<div class="ti-match-row" data-idx="' + idx + '">'
-          + '<div class="ti-names"><div class="ti-njp">' + escHtml(item.waza.name_jp || '—') + '</div>'
-          + '<div class="ti-nen">' + escHtml(dispName(item.waza)) + '</div>'
-          + (catBadge ? '<div style="margin-top:4px">' + catBadge + '</div>' : '')
-          + '</div>'
-          + '<div class="ti-manual-markings">' + markingsBtns + '</div>'
-          + '</div>';
-      }).join('');
-
-      // ── Auto-mapping section (labels-style) ───────────────────────
-      let autoMapHtml = '';
-      if (hasCategories) {
-        const mapRows = _tiFoundLabels.map((lbl, li) => {
-          const assigned = _tiAutoMapping[lbl] !== undefined ? _tiAutoMapping[lbl] : -1;
-          const dispName_ = _tiLabelNames[lbl] !== undefined ? _tiLabelNames[lbl] : lbl.slice(1, -1);
-          const markingBtns = SHAPES.map((s, si) =>
-            '<button class="ti-map-marking-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
-          ).join('');
-          return '<div class="labels-row">'
-            + '<span class="labels-marking" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escHtml(lbl[0]) + escHtml(lbl[lbl.length-1]) + '</span>'
-            + '<input class="labels-input ti-label-name-input" data-lbl="' + escHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escHtml(dispName_) + '">'
-            + '<div class="ti-map-markings">' + markingBtns + '</div>'
-            + '</div>';
-        }).join('');
-
-        const wazaCountPerLabel = {};
-        _tiFoundLabels.forEach(l => { wazaCountPerLabel[l] = _tiMatched.filter(m => m.category === l).length; });
-        const countsNote = _tiFoundLabels.map(l =>
-          '<span style="font-size:11px;color:var(--text3)">' + escHtml(_tiLabelNames[l] || l.slice(1,-1)) + ': ' + wazaCountPerLabel[l] + ' waza</span>'
-        ).join(' &nbsp;·&nbsp; ');
-
-        autoMapHtml = '<div class="ti-auto-mapping">'
-          + '<h4>Auto-import: map labels to markings</h4>'
-          + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which marking each maps to. Click a marking to assign, click again to unassign.</p>'
-          + '<div style="margin-bottom:10px;line-height:2">' + countsNote + '</div>'
-          + mapRows
-          + '</div>';
-      }
-
-      // ── Actions ──────────────────────────────────────────────────
-      let previewBannerHtml = '';
-      let actionsHtml = '';
-      
-      if (_tiPreviewMode) {
-        // In preview mode - show banner at top and commit/cancel buttons at bottom
-        previewBannerHtml = '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:16px">'
-          + '<p style="font-size:13px;color:var(--accent);margin-bottom:8px">✨ <b>Preview Mode:</b> Auto-labels have been applied to the markings below.</p>'
-          + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked markings. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
-          + '</div>';
-        
-        actionsHtml = '<div class="ti-actions">'
-          + '<button class="cbtn cbtn-primary" id="tiCommitBtn">✓ Commit Markings to Database</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiClearPreviewBtn">✕ Clear Preview</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
-          + '</div>';
-      } else {
-        // Normal mode - show auto-import and manual import buttons
-        actionsHtml = '<div class="ti-actions">'
-          + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Preview Auto-Labels</button>' : '')
-          + '<button class="cbtn cbtn-primary" id="tiManualImportBtn">✓ Apply Manual Markings</button>'
-          + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
-          + '</div>';
-      }
-
-      container.innerHTML = previewBannerHtml + unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !_tiPreviewMode ? autoMapHtml : '') + actionsHtml;
-
-      // Manual marking toggles
-      container.querySelectorAll('.ti-manual-markings .cmp-marking-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const idx = +btn.dataset.idx, si = +btn.dataset.si;
-          _tiMatched[idx].manualMarkings[si] = !_tiMatched[idx].manualMarkings[si];
-          btn.classList.toggle('on', _tiMatched[idx].manualMarkings[si]);
-        });
-      });
-
-      // Label name inputs
-      container.querySelectorAll('.ti-label-name-input').forEach(inp => {
-        inp.addEventListener('input', () => {
-          _tiLabelNames[inp.dataset.lbl] = inp.value;
-          // Update badges in matched rows without full re-render
-          container.querySelectorAll('.ti-match-row').forEach(row => {
-            const idx2 = +row.dataset.idx;
-            if (isNaN(idx2)) return;
-            const item = _tiMatched[idx2];
-            if (item && item.category === inp.dataset.lbl) {
-              const badge = row.querySelector('.ti-cat-dynamic');
-              if (badge) badge.textContent = inp.value || inp.dataset.lbl.slice(1,-1);
-            }
-          });
-        });
-      });
-
-      // Auto-map marking selectors
-      container.querySelectorAll('.ti-map-marking-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const lbl = btn.dataset.lbl, si = +btn.dataset.si;
-          _tiAutoMapping[lbl] = _tiAutoMapping[lbl] === si ? -1 : si;
-          // Update only the marking buttons in this row
-          const row = btn.closest('.labels-row');
-          row.querySelectorAll('.ti-map-marking-btn').forEach((b, bsi) => {
-            b.classList.toggle('on', _tiAutoMapping[lbl] === bsi);
-          });
-        });
-      });
-
-      // Auto import (now preview mode)
-      container.querySelector('#tiAutoImportBtn')?.addEventListener('click', () => {
-        // Apply auto-mapping to manualMarkings as a preview
-        for (const item of _tiMatched) {
-          const si = item.category != null ? (_tiAutoMapping[item.category] !== undefined ? _tiAutoMapping[item.category] : -1) : -1;
-          // Reset manual markings first
-          item.manualMarkings = Array(6).fill(false);
-          // Apply the auto-detected label
-          if (si >= 0) item.manualMarkings[si] = true;
-        }
-        _tiPreviewMode = true;
-        renderImport();
-        // Scroll to top where preview banner is
-        setTimeout(() => {
-          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      });
-
-      // Manual import
-      container.querySelector('#tiManualImportBtn')?.addEventListener('click', async () => {
-        let count = 0;
-        for (const item of _tiMatched) {
-          if (item.manualMarkings.some(Boolean)) {
-            // REPLACE markings entirely (don't merge with existing)
-            const newMarkings = [...item.manualMarkings];
-            await saveP(item.waza.id, { markings: newMarkings });
-            count++;
-          }
-        }
-        if (count) {
-          showToast('Applied markings to ' + count + ' waza!', 'green');
-          _tiParsed = false;
-          _tiPreviewMode = false;
-          _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderImport();
-        } else {
-          showToast('No markings were toggled on — toggle at least one marking per waza.', 'amber');
-        }
-      });
-
-      // Commit preview (save to database)
-      container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
-        console.log('[COMMIT] Starting commit process...');
-        console.log('[COMMIT] _tiMatched length:', _tiMatched.length);
-        
-        let count = 0;
-        for (const item of _tiMatched) {
-          console.log('[COMMIT] Processing:', item.waza.name_jp, 'manualMarkings:', item.manualMarkings);
-          
-          if (item.manualMarkings.some(Boolean)) {
-            const cur = getP(item.waza.id);
-            
-            // REPLACE markings entirely (don't merge with existing)
-            const newMarkings = [...item.manualMarkings];
-            
-            console.log('[COMMIT] Current markings:', cur.markings);
-            console.log('[COMMIT] Manual markings:', item.manualMarkings);
-            console.log('[COMMIT] New markings (REPLACE):', newMarkings);
-            
-            await saveP(item.waza.id, { markings: newMarkings });
-            count++;
-          } else {
-            console.log('[COMMIT] Skipping (no markings):', item.waza.name_jp);
-          }
-        }
-        
-        if (count) {
-          showToast('Committed ' + count + ' waza markings to database!', 'green');
-          _tiParsed = false;
-          _tiPreviewMode = false;
-          _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-          renderImport();
-        } else {
-          showToast('No markings were marked — adjust the markings or clear preview.', 'amber');
-        }
-      });
-
-      // Clear preview (reset manualMarkings back to empty, return to label mapping UI)
-      container.querySelector('#tiClearPreviewBtn')?.addEventListener('click', () => {
-        // Clear all manual markings
-        _tiMatched.forEach(item => {
-          item.manualMarkings = Array(6).fill(false);
-        });
-        _tiPreviewMode = false;
-        renderImport();
-        // Scroll to auto-mapping section
-        setTimeout(() => {
-          const autoMapSection = container.querySelector('.ti-auto-mapping');
-          if (autoMapSection) autoMapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      });
-
-      // Reset
-      container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
-        _tiParsed = false;
-        _tiPreviewMode = false;
-        _tiFoundLabels = []; _tiAutoMapping = {}; _tiLabelNames = {};
-        renderImport();
-      });
-    }
-
-    function renderTiInput(prefill) {
-      return '<div style="display:flex;flex-direction:column;height:100%">'
-
-        // ── Import from Excel ──────────────────────────────────────
-        + '<div class="dsec2"><h3>📊 Import from Excel</h3></div>'
-        + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px">'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to your markings.</p>'
-        + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-        + '<input type="file" id="tiFileInput" accept=".xlsx,.xls" style="display:none">'
-        + '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>'
-        + '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>'
+        }).join('')
         + '</div>'
-        + '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button class="cbtn cbtn-primary" id="tiApplyColorMapBtn">Apply Color Mapping →</button>'
+        + '<button class="cbtn cbtn-ghost" id="tiCancelExcelBtn">← Cancel</button>'
         + '</div>'
-
-        // ── Import from Text ───────────────────────────────────────
-        + '<div class="dsec2"><h3>📋 Import from Text</h3></div>'
-        + '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'
-        + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>'
-        + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nSupported label formats:\n[Learning]\nDouble Rainbow (ダブルレインボー)\nMix\n\n{Performance Ready}\nNami (波)\n\nHyper Mix (ハイパーミックス)"></textarea>'
-        + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
-        + '<div style="margin-top:12px;display:flex;gap:8px">'
-        + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
-        + '</div>'
-        + '</div>'
-
         + '</div>';
-    }
 
-    function bindTiInputEvents(container) {
-      // Text paste handler
-      container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
-        const text = container.querySelector('#tiPasteArea')?.value || '';
-        if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
-        parseTextImport(text);
+      container.innerHTML = colorMappingHtml;
+
+      // Bind color mapping events
+      container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', async () => {
+        console.log('[COLOR MAP] Starting color mapping application...');
+        console.log('[COLOR MAP] tiState.excelColors:', tiState.excelColors);
+        console.log('[COLOR MAP] tiState.matched before mapping:', tiState.matched.map(i => ({ name: i.waza.name_jp, rawLine: i.rawLine, markings: i.manualMarkings })));
+
+        // Read label names
+        container.querySelectorAll('.excel-color-label-input').forEach(input => {
+          const color = input.dataset.color;
+          const labelName = input.value.trim();
+          if (labelName) {
+            tiState.excelColorLabels[color] = labelName;
+          }
+        });
+
+        // Read mappings
+        container.querySelectorAll('.color-marking-map').forEach(select => {
+          const color = select.dataset.color;
+          const markingIdx = parseInt(select.value);
+          tiState.colorMapping[color] = markingIdx;
+          console.log('[COLOR MAP] Mapping color', color, 'to marking index', markingIdx);
+        });
+
+        console.log('[COLOR MAP] Final tiState.colorMapping:', tiState.colorMapping);
+        console.log('[COLOR MAP] Final tiState.excelColorLabels:', tiState.excelColorLabels);
+
+        // Check if user wants to update their marking labels
+        const hasLabelNames = Object.keys(tiState.excelColorLabels).length > 0;
+        const usedMarkings = new Set(Object.values(tiState.colorMapping).filter(idx => idx >= 0));
+
+        if (hasLabelNames && usedMarkings.size > 0 && !state.isGuest && state.token) {
+          // Build a list of changes
+          const changes = [];
+          for (const [color, markingIdx] of Object.entries(tiState.colorMapping)) {
+            if (markingIdx >= 0 && tiState.excelColorLabels[color]) {
+              const currentLabel = state.markingLabels[markingIdx] || '';
+              const newLabel = tiState.excelColorLabels[color];
+              if (currentLabel !== newLabel) {
+                changes.push({
+                  markingIdx,
+                  oldLabel: currentLabel || '(empty)',
+                  newLabel: newLabel
+                });
+              }
+            }
+          }
+
+          if (changes.length > 0) {
+            const changesList = changes.map(c =>
+              `${SHAPES[c.markingIdx]} ${c.oldLabel} → ${c.newLabel}`
+            ).join('\n');
+
+            const shouldUpdate = confirm(
+              `Update your marking labels with the names you entered?\n\n${changesList}\n\nThis will save to your account and affect all your waza.`
+            );
+
+            if (shouldUpdate) {
+              // Update local marking labels
+              for (const [color, markingIdx] of Object.entries(tiState.colorMapping)) {
+                if (markingIdx >= 0 && tiState.excelColorLabels[color]) {
+                  state.markingLabels[markingIdx] = tiState.excelColorLabels[color];
+                }
+              }
+
+              // Save to server
+              try {
+                await savestate.markingLabels();
+                console.log('[COLOR MAP] Marking labels updated successfully');
+              } catch (err) {
+                console.error('[COLOR MAP] Failed to save marking labels:', err);
+                alert('Failed to save marking labels. Your selections will still be applied to this import.');
+              }
+            }
+          }
+        }
+
+        // Apply color mappings to matched waza
+        tiState.matched.forEach(item => {
+          // Find which color this waza belongs to
+          // Normalize both sides for comparison (trim whitespace)
+          const normalizedRawLine = item.rawLine.trim();
+
+          for (const [color, wazaNames] of Object.entries(tiState.excelColors)) {
+            // Check if any of the waza names from this color match this item
+            const matchFound = wazaNames.some(name => name.trim() === normalizedRawLine);
+
+            if (matchFound) {
+              const markingIdx = tiState.colorMapping[color];
+              console.log('[COLOR MAP] Match found for', item.waza.name_jp, '- color:', color, 'marking:', markingIdx);
+
+              if (markingIdx === -1) {
+                // Explicitly clear all markings when "no marking" is selected
+                item.manualMarkings = Array(6).fill(false);
+                item.category = null;
+                console.log('[COLOR MAP] Cleared markings (no marking selected)');
+              } else if (markingIdx >= 0 && markingIdx < 6) {
+                item.manualMarkings = Array(6).fill(false);
+                item.manualMarkings[markingIdx] = true;
+                item.category = state.markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
+                console.log('[COLOR MAP] Set markings to:', item.manualMarkings);
+              }
+              break;
+            }
+          }
+        });
+
+        console.log('[COLOR MAP] tiState.matched after mapping:', tiState.matched.map(i => ({ name: i.waza.name_jp, markings: i.manualMarkings })));
+
+        tiState.parsed = true; // Switch to normal mode
+        tiState.previewMode = true; // Enable preview mode
         renderImport();
       });
-      
-      // Excel file upload handlers
-      const fileInput = container.querySelector('#tiFileInput');
-      const fileBtn = container.querySelector('#tiFileBtn');
-      const fileName = container.querySelector('#tiFileName');
-      
-      fileBtn?.addEventListener('click', () => fileInput?.click());
-      
-      fileInput?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        fileName.textContent = file.name;
-        fileName.style.color = 'var(--text1)';
-        
-        try {
-          // Check if XLSX library is loaded
-          if (typeof XLSX === 'undefined') {
-            throw new Error('Excel library not loaded. Please refresh the page and try again.');
-          }
-          await parseExcelFile(file);
-          renderImport();
-        } catch (err) {
-          console.error('Excel parse error:', err);
-          const errorMsg = err.message || 'Error reading Excel file. Please try text paste instead.';
-          showToast(errorMsg, 'red');
+
+      container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
+        tiState.parsed = false;
+        tiState.excelColors = {};
+        tiState.colorMapping = {};
+        tiState.excelColorLabels = {};
+        renderImport();
+      });
+
+      return;
+    }
+  }
+
+  const hasCategories = tiState.foundLabels.length > 0 && tiState.matched.some(m => m.category);
+
+  // ── Unmatched section ────────────────────────────────────────
+  const unmatchedHtml = tiState.unmatched.length
+    ? '<div class="ti-section-head"><span>Not found in database</span><span class="ti-badge ti-badge-miss">' + tiState.unmatched.length + '</span></div>'
+    + tiState.unmatched.map(l => '<div class="ti-unmatched-row"><span class="ti-raw">' + escapeHtml(l) + '</span><span style="font-size:11px;color:var(--text3)">No match</span></div>').join('')
+    : '';
+
+  // ── Matched rows ─────────────────────────────────────────────
+  const matchedHeaderHtml = '<div class="ti-section-head"><span>Matched waza</span><span class="ti-badge ti-badge-ok">' + tiState.matched.length + '</span></div>';
+
+  const matchedRowsHtml = tiState.matched.map((item, idx) => {
+    const lbl = item.category;
+    const dispLbl = lbl ? (tiState.labelNames[lbl] || lbl) : null;
+    const catBadge = dispLbl
+      ? '<span class="ti-match-row ti-category-badge ti-cat-dynamic">' + escapeHtml(dispLbl) + '</span>'
+      : '';
+    const markingsBtns = SHAPES.map((s, si) =>
+      '<button class="cmp-marking-btn' + (item.manualMarkings[si] ? ' on' : '') + '" data-idx="' + idx + '" data-si="' + si + '">' + s + '</button>'
+    ).join('');
+    return '<div class="ti-match-row" data-idx="' + idx + '">'
+      + '<div class="ti-names"><div class="ti-njp">' + escapeHtml(item.waza.name_jp || '—') + '</div>'
+      + '<div class="ti-nen">' + escapeHtml(dispName(item.waza)) + '</div>'
+      + (catBadge ? '<div style="margin-top:4px">' + catBadge + '</div>' : '')
+      + '</div>'
+      + '<div class="ti-manual-markings">' + markingsBtns + '</div>'
+      + '</div>';
+  }).join('');
+
+  // ── Auto-mapping section (labels-style) ───────────────────────
+  let autoMapHtml = '';
+  if (hasCategories) {
+    const mapRows = tiState.foundLabels.map((lbl, li) => {
+      const assigned = tiState.autoMapping[lbl] !== undefined ? tiState.autoMapping[lbl] : -1;
+      const dispName_ = tiState.labelNames[lbl] !== undefined ? tiState.labelNames[lbl] : lbl.slice(1, -1);
+      const markingBtns = SHAPES.map((s, si) =>
+        '<button class="ti-map-marking-btn' + (assigned === si ? ' on' : '') + '" data-lbl="' + escapeHtml(lbl) + '" data-si="' + si + '">' + s + '</button>'
+      ).join('');
+      return '<div class="labels-row">'
+        + '<span class="labels-marking" style="font-size:13px;color:var(--text3);width:auto;min-width:20px">' + escapeHtml(lbl[0]) + escapeHtml(lbl[lbl.length - 1]) + '</span>'
+        + '<input class="labels-input ti-label-name-input" data-lbl="' + escapeHtml(lbl) + '" type="text" maxlength="40" placeholder="Label name…" value="' + escapeHtml(dispName_) + '">'
+        + '<div class="ti-map-markings">' + markingBtns + '</div>'
+        + '</div>';
+    }).join('');
+
+    const wazaCountPerLabel = {};
+    tiState.foundLabels.forEach(l => { wazaCountPerLabel[l] = tiState.matched.filter(m => m.category === l).length; });
+    const countsNote = tiState.foundLabels.map(l =>
+      '<span style="font-size:11px;color:var(--text3)">' + escapeHtml(tiState.labelNames[l] || l.slice(1, -1)) + ': ' + wazaCountPerLabel[l] + ' waza</span>'
+    ).join(' &nbsp;·&nbsp; ');
+
+    autoMapHtml = '<div class="ti-auto-mapping">'
+      + '<h4>Auto-import: map labels to markings</h4>'
+      + '<p style="font-size:12px;color:var(--text3);margin-bottom:10px">Rename labels and choose which marking each maps to. Click a marking to assign, click again to unassign.</p>'
+      + '<div style="margin-bottom:10px;line-height:2">' + countsNote + '</div>'
+      + mapRows
+      + '</div>';
+  }
+
+  // ── Actions ──────────────────────────────────────────────────
+  let previewBannerHtml = '';
+  let actionsHtml = '';
+
+  if (tiState.previewMode) {
+    // In preview mode - show banner at top and commit/cancel buttons at bottom
+    previewBannerHtml = '<div style="background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:12px;margin-bottom:16px">'
+      + '<p style="font-size:13px;color:var(--accent);margin-bottom:8px">✨ <b>Preview Mode:</b> Auto-labels have been applied to the markings below.</p>'
+      + '<p style="font-size:12px;color:var(--text2)">Review and adjust the marked markings. Scroll down and click <b>Commit</b> when ready, or <b>Clear Preview</b> to start over.</p>'
+      + '</div>';
+
+    actionsHtml = '<div class="ti-actions">'
+      + '<button class="cbtn cbtn-primary" id="tiCommitBtn">✓ Commit Markings to Database</button>'
+      + '<button class="cbtn cbtn-ghost" id="tiClearPreviewBtn">✕ Clear Preview</button>'
+      + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
+      + '</div>';
+  } else {
+    // Normal mode - show auto-import and manual import buttons
+    actionsHtml = '<div class="ti-actions">'
+      + (hasCategories ? '<button class="cbtn cbtn-primary" id="tiAutoImportBtn">⚡ Preview Auto-Labels</button>' : '')
+      + '<button class="cbtn cbtn-primary" id="tiManualImportBtn">✓ Apply Manual Markings</button>'
+      + '<button class="cbtn cbtn-ghost" id="tiResetBtn">← Back / Re-paste</button>'
+      + '</div>';
+  }
+
+  container.innerHTML = previewBannerHtml + unmatchedHtml + matchedHeaderHtml + matchedRowsHtml + (hasCategories && !tiState.previewMode ? autoMapHtml : '') + actionsHtml;
+
+  // Manual marking toggles
+  container.querySelectorAll('.ti-manual-markings .cmp-marking-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = +btn.dataset.idx, si = +btn.dataset.si;
+      tiState.matched[idx].manualMarkings[si] = !tiState.matched[idx].manualMarkings[si];
+      btn.classList.toggle('on', tiState.matched[idx].manualMarkings[si]);
+    });
+  });
+
+  // Label name inputs
+  container.querySelectorAll('.ti-label-name-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      tiState.labelNames[inp.dataset.lbl] = inp.value;
+      // Update badges in matched rows without full re-render
+      container.querySelectorAll('.ti-match-row').forEach(row => {
+        const idx2 = +row.dataset.idx;
+        if (isNaN(idx2)) return;
+        const item = tiState.matched[idx2];
+        if (item && item.category === inp.dataset.lbl) {
+          const badge = row.querySelector('.ti-cat-dynamic');
+          if (badge) badge.textContent = inp.value || inp.dataset.lbl.slice(1, -1);
         }
       });
+    });
+  });
+
+  // Auto-map marking selectors
+  container.querySelectorAll('.ti-map-marking-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lbl = btn.dataset.lbl, si = +btn.dataset.si;
+      tiState.autoMapping[lbl] = tiState.autoMapping[lbl] === si ? -1 : si;
+      // Update only the marking buttons in this row
+      const row = btn.closest('.labels-row');
+      row.querySelectorAll('.ti-map-marking-btn').forEach((b, bsi) => {
+        b.classList.toggle('on', tiState.autoMapping[lbl] === bsi);
+      });
+    });
+  });
+
+  // Auto import (now preview mode)
+  container.querySelector('#tiAutoImportBtn')?.addEventListener('click', () => {
+    // Apply auto-mapping to manualMarkings as a preview
+    for (const item of tiState.matched) {
+      const si = item.category != null ? (tiState.autoMapping[item.category] !== undefined ? tiState.autoMapping[item.category] : -1) : -1;
+      // Reset manual markings first
+      item.manualMarkings = Array(6).fill(false);
+      // Apply the auto-detected label
+      if (si >= 0) item.manualMarkings[si] = true;
     }
-    
-    // Excel parsing with cell color detection
-    let _tiExcelColors = {}; // { colorHex: [wazaNames] }
-    let _tiColorMapping = {}; // { colorHex: markingIndex }
-    let _tiExcelColorLabels = {}; // { colorHex: labelName }
-    
-    function hexToRgb(hex) {
-      // Remove # if present and handle 6-digit hex
-      hex = hex.replace('#', '');
-      if (hex.length === 8) hex = hex.substring(0, 6); // Remove alpha if present
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return { r, g, b };
-    }
-    
-    async function parseExcelFile(file) {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const range = XLSX.utils.decode_range(firstSheet['!ref']);
-      
-      _tiExcelColors = {};
-      const allLines = [];
-      
-      // Read cells with color information
-      for (let row = range.s.r; row <= range.e.r; row++) {
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
-          const cell = firstSheet[cellAddr];
-          
-          if (!cell || !cell.v) continue;
-          
-          const text = String(cell.v).trim();
-          if (!text) continue;
-          
-          // Extract fill color (if any)
-          let fillColor = 'FFFFFF'; // default white
-          if (cell.s && cell.s.fgColor && cell.s.fgColor.rgb) {
-            fillColor = cell.s.fgColor.rgb;
-          } else if (cell.s && cell.s.bgColor && cell.s.bgColor.rgb) {
-            fillColor = cell.s.bgColor.rgb;
-          }
-          
-          // Group by color
-          if (!_tiExcelColors[fillColor]) _tiExcelColors[fillColor] = [];
-          _tiExcelColors[fillColor].push(text);
-          allLines.push(text);
-        }
+    tiState.previewMode = true;
+    renderImport();
+    // Scroll to top where preview banner is
+    setTimeout(() => {
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  });
+
+  // Manual import
+  container.querySelector('#tiManualImportBtn')?.addEventListener('click', async () => {
+    let count = 0;
+    for (const item of tiState.matched) {
+      if (item.manualMarkings.some(Boolean)) {
+        // REPLACE markings entirely (don't merge with existing)
+        const newMarkings = [...item.manualMarkings];
+        await saveP(item.waza.id, { markings: newMarkings });
+        count++;
       }
-      
-      // If we detected colors other than white, show color mapping UI
-      const colorKeys = Object.keys(_tiExcelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
-      if (colorKeys.length > 0) {
-        // Parse the text to match waza
-        parseTextImport(allLines.join('\n'));
-        _tiParsed = 'excel'; // Special mode for color mapping
+    }
+    if (count) {
+      showToast('Applied markings to ' + count + ' waza!', 'green');
+      tiState.parsed = false;
+      tiState.previewMode = false;
+      tiState.foundLabels = []; tiState.autoMapping = {}; tiState.labelNames = {};
+      renderImport();
+    } else {
+      showToast('No markings were toggled on — toggle at least one marking per waza.', 'amber');
+    }
+  });
+
+  // Commit preview (save to database)
+  container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
+    console.log('[COMMIT] Starting commit process...');
+    console.log('[COMMIT] tiState.matched length:', tiState.matched.length);
+
+    let count = 0;
+    for (const item of tiState.matched) {
+      console.log('[COMMIT] Processing:', item.waza.name_jp, 'manualMarkings:', item.manualMarkings);
+
+      if (item.manualMarkings.some(Boolean)) {
+        const cur = getP(item.waza.id);
+
+        // REPLACE markings entirely (don't merge with existing)
+        const newMarkings = [...item.manualMarkings];
+
+        console.log('[COMMIT] Current markings:', cur.markings);
+        console.log('[COMMIT] Manual markings:', item.manualMarkings);
+        console.log('[COMMIT] New markings (REPLACE):', newMarkings);
+
+        await saveP(item.waza.id, { markings: newMarkings });
+        count++;
       } else {
-        // No colors detected, treat as regular text import
-        parseTextImport(allLines.join('\n'));
+        console.log('[COMMIT] Skipping (no markings):', item.waza.name_jp);
       }
     }
 
-
-    // ── Toast helper ─────────────────────────────────────────────
-    function showToast(msg, color = 'green') {
-      const colors = { green: ['#002a10', '#4caf82', '#4caf82'], amber: ['#2a1800', '#e8a030', '#e8a030'], red: ['#2a0000', '#e05555', '#e05555'] };
-      const [bg, fg, border] = colors[color] || colors.green;
-      const fb = document.createElement('div');
-      fb.style.cssText = 'position:fixed;bottom:20px;right:20px;background:' + bg + ';color:' + fg + ';border:1px solid ' + border + ';border-radius:8px;padding:10px 16px;font-size:13px;z-index:300;max-width:320px';
-      fb.textContent = msg;
-      document.body.appendChild(fb); setTimeout(() => fb.remove(), 3000);
+    if (count) {
+      showToast('Committed ' + count + ' waza markings to database!', 'green');
+      tiState.parsed = false;
+      tiState.previewMode = false;
+      tiState.foundLabels = []; tiState.autoMapping = {}; tiState.labelNames = {};
+      renderImport();
+    } else {
+      showToast('No markings were marked — adjust the markings or clear preview.', 'amber');
     }
+  });
+
+  // Clear preview (reset manualMarkings back to empty, return to label mapping UI)
+  container.querySelector('#tiClearPreviewBtn')?.addEventListener('click', () => {
+    // Clear all manual markings
+    tiState.matched.forEach(item => {
+      item.manualMarkings = Array(6).fill(false);
+    });
+    tiState.previewMode = false;
+    renderImport();
+    // Scroll to auto-mapping section
+    setTimeout(() => {
+      const autoMapSection = container.querySelector('.ti-auto-mapping');
+      if (autoMapSection) autoMapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  });
+
+  // Reset
+  container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
+    tiState.parsed = false;
+    tiState.previewMode = false;
+    tiState.foundLabels = []; tiState.autoMapping = {}; tiState.labelNames = {};
+    renderImport();
+  });
+}
+
+function renderTiInput(prefill) {
+  return '<div style="display:flex;flex-direction:column;height:100%">'
+
+    // ── Import from Excel ──────────────────────────────────────
+    + '<div class="dsec2"><h3>📊 Import from Excel</h3></div>'
+    + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px">'
+    + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to your markings.</p>'
+    + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    + '<input type="file" id="tiFileInput" accept=".xlsx,.xls" style="display:none">'
+    + '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>'
+    + '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>'
+    + '</div>'
+    + '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>'
+    + '</div>'
+
+    // ── Import from Text ───────────────────────────────────────
+    + '<div class="dsec2"><h3>📋 Import from Text</h3></div>'
+    + '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'
+    + '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>'
+    + '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nSupported label formats:\n[Learning]\nDouble Rainbow (ダブルレインボー)\nMix\n\n{Performance Ready}\nNami (波)\n\nHyper Mix (ハイパーミックス)"></textarea>'
+    + '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>'
+    + '<div style="margin-top:12px;display:flex;gap:8px">'
+    + '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>'
+    + '</div>'
+    + '</div>'
+
+    + '</div>';
+}
+
+function bindTiInputEvents(container) {
+  // Text paste handler
+  container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
+    const text = container.querySelector('#tiPasteArea')?.value || '';
+    if (!text.trim()) { showToast('Paste some waza names first.', 'amber'); return; }
+    parseTextImport(text);
+    renderImport();
+  });
+
+  // Excel file upload handlers
+  const fileInput = container.querySelector('#tiFileInput');
+  const fileBtn = container.querySelector('#tiFileBtn');
+  const fileName = container.querySelector('#tiFileName');
+
+  fileBtn?.addEventListener('click', () => fileInput?.click());
+
+  fileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    fileName.textContent = file.name;
+    fileName.style.color = 'var(--text1)';
+
+    try {
+      // Check if XLSX library is loaded
+      if (typeof XLSX === 'undefined') {
+        throw new Error('Excel library not loaded. Please refresh the page and try again.');
+      }
+      await parseExcelFile(file);
+      renderImport();
+    } catch (err) {
+      console.error('Excel parse error:', err);
+      const errorMsg = err.message || 'Error reading Excel file. Please try text paste instead.';
+      showToast(errorMsg, 'red');
+    }
+  });
+}
+
+function hexToRgb(hex) {
+  // Remove # if present and handle 6-digit hex
+  hex = hex.replace('#', '');
+  if (hex.length === 8) hex = hex.substring(0, 6); // Remove alpha if present
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return { r, g, b };
+}
+
+async function parseExcelFile(file) {
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  const range = XLSX.utils.decode_range(firstSheet['!ref']);
+
+  tiState.excelColors = {};
+  const allLines = [];
+
+  // Read cells with color information
+  for (let row = range.s.r; row <= range.e.r; row++) {
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = firstSheet[cellAddr];
+
+      if (!cell || !cell.v) continue;
+
+      const text = String(cell.v).trim();
+      if (!text) continue;
+
+      // Extract fill color (if any)
+      let fillColor = 'FFFFFF'; // default white
+      if (cell.s && cell.s.fgColor && cell.s.fgColor.rgb) {
+        fillColor = cell.s.fgColor.rgb;
+      } else if (cell.s && cell.s.bgColor && cell.s.bgColor.rgb) {
+        fillColor = cell.s.bgColor.rgb;
+      }
+
+      // Group by color
+      if (!tiState.excelColors[fillColor]) tiState.excelColors[fillColor] = [];
+      tiState.excelColors[fillColor].push(text);
+      allLines.push(text);
+    }
+  }
+
+  // If we detected colors other than white, show color mapping UI
+  const colorKeys = Object.keys(tiState.excelColors).filter(c => c !== 'FFFFFF' && c !== 'ffffff');
+  if (colorKeys.length > 0) {
+    // Parse the text to match waza
+    parseTextImport(allLines.join('\n'));
+    tiState.parsed = 'excel'; // Special mode for color mapping
+  } else {
+    // No colors detected, treat as regular text import
+    parseTextImport(allLines.join('\n'));
+  }
+}
+
+
+// ── Toast helper ─────────────────────────────────────────────
+export function showToast(msg, color = 'green') {
+  const colors = { green: ['#002a10', '#4caf82', '#4caf82'], amber: ['#2a1800', '#e8a030', '#e8a030'], red: ['#2a0000', '#e05555', '#e05555'] };
+  const [bg, fg, border] = colors[color] || colors.green;
+  const fb = document.createElement('div');
+  fb.style.cssText = 'position:fixed;bottom:20px;right:20px;background:' + bg + ';color:' + fg + ';border:1px solid ' + border + ';border-radius:8px;padding:10px 16px;font-size:13px;z-index:300;max-width:320px';
+  fb.textContent = msg;
+  document.body.appendChild(fb); setTimeout(() => fb.remove(), 3000);
+}
 
