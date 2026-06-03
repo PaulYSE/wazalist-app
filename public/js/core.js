@@ -3,7 +3,7 @@
    No work happens on import — main.js calls initAuth()/initApp() in a defined order. */
 
 import { state } from './state/state.js'
-import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS, loadLocal, saveLocal } from './state/localStorage.js';
+import { LS_LABELS, loadLocal, saveLocal } from './state/localStorage.js';
 import { renderList, renderDetail, selectWaza } from './render.js';
 import { renderDashStats } from './stats.js';
 import { startWazaPlaceholderRotation } from './ui.js';
@@ -57,10 +57,6 @@ export function initAuth() {
 
 // ── Init ─────────────────────────────────────────────────────
 export async function initApp() {
-  // Stop username placeholder rotation if it's running
-  if (typeof stopUsernamePlaceholderRotation === 'function') {
-    stopUsernamePlaceholderRotation();
-  }
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('guestBadge').style.display = state.isGuest ? '' : 'none';
@@ -83,7 +79,7 @@ export async function initApp() {
       const progRes = await api('/api/progress');
       if (Array.isArray(progRes)) progRes.forEach(p => {
         let markings = Array(6).fill(false);
-        try { if (p.markings) markings = JSON.parse(p.markings); } catch { }
+        try { if (p.markings) markings = JSON.parse(p.markings); } catch (err) { console.warn('Error parsing progress markings:', err); }
         state.prog[p.waza_id] = { markings, like: p.like || null, updated_at: p.updated_at || null };
       });
     } catch (err) { console.warn('Progress load error:', err); }

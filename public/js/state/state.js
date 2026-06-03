@@ -1,5 +1,5 @@
 // state.js — mutable app state + localStorage helpers
-import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS } from './localStorage.js';
+import { LS_SORT, LS_VIEW, LS_LABELS } from './localStorage.js';
 
 const loadSortPrefs = () => {
   try {

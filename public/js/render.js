@@ -13,7 +13,7 @@ import {
   oembedCache,        // used in renderDetail() — needs export added
 } from './render-helpers.js'
 import { state } from './state/state.js';
-import { SHAPES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config/constants.js';
+import { SHAPES, platLabel, platColor } from './config/constants.js';
 import { filterWaza } from './features/search.js';
 import { escapeHtml } from './ui.js';
 import { getP, saveP } from './core.js';
@@ -30,7 +30,6 @@ export function renderList() {
     list.innerHTML = filtered.map(w => {
       const p = getP(w.id);
       const markings = p.markings || Array(6).fill(false);
-      const hasMarking = markings.some(Boolean);
       const pill = cardLikePill(w, p);
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
@@ -49,7 +48,6 @@ export function renderList() {
     list.innerHTML = filtered.map(w => {
       const p = getP(w.id);
       const markings = p.markings || Array(6).fill(false);
-      const hasMarking = markings.some(Boolean);
       const pill = cardLikePill(w, p);
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'

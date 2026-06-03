@@ -190,7 +190,7 @@ function mapStatusToMarking(statusText) {
 // Note: () are reserved for "English(Japanese)" naming convention
 function extractEncapsulations(line) {
   const matches = [];
-  const re = /\[([^\[\]]+)\]|\{([^{}]+)\}/g;
+  const re = /\[([^[\]]+)\]|\{([^{}]+)\}/g;
   let m;
   while ((m = re.exec(line)) !== null) matches.push(m[0]);
   return matches;
@@ -199,7 +199,7 @@ function extractEncapsulations(line) {
 // Strip ALL encapsulated state.tokens from a line to get the bare waza name
 // Note: () are NOT stripped - they're part of the "English(Japanese)" format
 function stripAllLabels(line) {
-  return line.replace(/\[([^\[\]]+)\]|\{([^{}]+)\}/g, '').replace(/\s+/g, ' ').trim();
+  return line.replace(/\[([^[\]]+)\]|\{([^{}]+)\}/g, '').replace(/\s+/g, ' ').trim();
 }
 
 // Detect which known label(s) appear on this line; returns first match or null

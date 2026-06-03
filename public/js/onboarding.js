@@ -420,9 +420,6 @@ function buildMarkingDemo() {
     return;
   }
 
-  // Get state.markingLabels if available from main app
-  const labels = state.markingLabels || MARKING_LABELS_TEMPLATE;
-
   container.innerHTML = '';
   // Use first 5 real waza for marking demo
   realWaza.forEach((w, wi) => {
@@ -469,7 +466,8 @@ function buildLabelsPreview() {
   container.innerHTML = '';
   // Load existing labels from app
   let existing = ['', '', '', '', '', ''];
-  try { existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'); } catch { }
+  try { existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'); }
+  catch (err) { console.warn('Error loading labels from localStorage:', err); }
   SHAPES.forEach((sh, i) => {
     const row = document.createElement('div');
     row.className = 'ob-labels-row';

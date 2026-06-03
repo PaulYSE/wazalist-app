@@ -1,6 +1,6 @@
 /* forms.js — the Contribute and Account tab renderers. */
 import { state } from './state/state.js'
-import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS, loadLocal, saveLocal } from './state/localStorage.js';
+import { LS_KEY, LS_SORT, LS_VIEW, LS_LABELS } from './state/localStorage.js';
 import { api, doLogout } from './core.js';
 import { renderImport } from './import-ui.js';
 import { exportToExcel } from './features/export-to-excel.js';

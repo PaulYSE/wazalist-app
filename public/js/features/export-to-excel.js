@@ -98,7 +98,7 @@ export async function exportToExcel() {
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const dlUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const safeName = headerName.replace(/[^\w\-]+/g, '_');
+    const safeName = headerName.replace(/[^\w-]+/g, '_');
     a.href = dlUrl;
     a.download = `wazalist_${safeName}.xlsx`;
     document.body.appendChild(a);

@@ -1,6 +1,6 @@
 /* render-helpers.js — small pure-ish helpers shared by the renderers:
    marking styles/pips and video/oEmbed handling. */
-import { SHAPES, SHAPES_HUES, platLabel, platColor, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config/constants.js';
+import { SHAPES, SHAPES_HUES, platLabel, platColor, LIKE_UP, LIKE_DOWN } from './config/constants.js';
 import { state } from './state/state.js';
 
 
