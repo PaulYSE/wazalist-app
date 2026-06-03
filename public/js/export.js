@@ -21,7 +21,7 @@ export async function exportToExcel() {
 
   // Collect every waza the user has marked (at least one active marking).
   const rows = [];
-  wazaData.forEach(w => {
+  state.wazaData.forEach(w => {
     const p = prog[w.id];
     const markings = (p && p.markings) || null;
     if (!markings || !markings.some(Boolean)) return;

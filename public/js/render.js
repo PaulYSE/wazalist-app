@@ -17,6 +17,7 @@ import { SHAPES, LIKE_UP, LIKE_DOWN, platColor, platLabel } from './config.js';
 import { filterWaza } from './search.js';
 import { escapeHtml } from './ui.js';
 import { getP } from './core.js';
+import { dispName } from './search.js';
 
 export function renderList() {
   const filtered = filterWaza();
@@ -33,7 +34,7 @@ export function renderList() {
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
         + pill + '</div>';
-      const _ms1 = markingStyle(markings); return '<div class="waza-card ' + _ms1.cls + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms1.style + '">'
+      const _ms1 = markingStyle(markings); return '<div class="waza-card ' + _ms1.cls + (state.selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms1.style + '">'
         + '<div class="wce-header">'
         + '<div class="njp">' + (w.name_jp || '—') + '</div>'
         + '<div class="nen">' + dispName(w) + '</div>'
@@ -52,7 +53,7 @@ export function renderList() {
       const bottomRow = '<div class="card-bottom-row">'
         + '<div class="markings-row wce-markings">' + markingPips(markings) + '</div>'
         + pill + '</div>';
-      const _ms2 = markingStyle(markings); return '<div class="waza-list ' + _ms2.cls + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms2.style + '">'
+      const _ms2 = markingStyle(markings); return '<div class="waza-list ' + _ms2.cls + (state.selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms2.style + '">'
         + '<div class="njp">' + (w.name_jp || '—') + '</div>'
         + '<div class="nen">' + dispName(w) + '</div>'
         + bottomRow + '</div>';
@@ -64,7 +65,7 @@ export function renderList() {
     list.innerHTML = filtered.map(w => {
       const p = getP(w.id);
       const markings = p.markings || Array(6).fill(false);
-      const _ms3 = markingStyle(markings); return '<div class="waza-compact ' + _ms3.cls + (selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms3.style + '">'
+      const _ms3 = markingStyle(markings); return '<div class="waza-compact ' + _ms3.cls + (state.selectedId === w.id ? ' selected' : '') + '" data-id="' + w.id + '" style="' + _ms3.style + '">'
         + '<span class="drn">' + (w.name_jp || '—') + '</span>'
         + '<span class="drs">' + dispName(w) + '</span>'
         + '<div class="markings-row" style="flex-shrink:0">' + markingPips(markings) + '</div>'
@@ -77,7 +78,7 @@ export function renderList() {
 export function selectWaza(id) {
   // Stop any currently playing embeds before switching
   document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
-  selectedId = id;
+  state.selectedId = id;
   renderList(); renderDetail();
   document.querySelector('.main').classList.toggle('waza-selected', id !== null);
 
@@ -126,8 +127,8 @@ const collapsed = { names: false, classif: false, parents: false, creator: false
 
 export function renderDetail() {
   const panel = document.getElementById('detailContent');
-  if (selectedId === null) { panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>'; return; }
-  const w = state.wazaData.find(x => x.id === selectedId); if (!w) return;
+  if (state.selectedId === null) { panel.innerHTML = '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>'; return; }
+  const w = state.wazaData.find(x => x.id === state.selectedId); if (!w) return;
   const p = getP(w.id);
   const markings = p.markings || Array(6).fill(false);
 
@@ -299,7 +300,7 @@ export function renderDetail() {
 export function closeDetailPanel() {
   // Stop any playing embeds
   document.querySelectorAll('.embed-wrap.open iframe').forEach(f => { f.src = ''; });
-  selectedId = null;
+  state.selectedId = null;
   renderList(); renderDetail();
   document.querySelector('.main').classList.remove('waza-selected');
 

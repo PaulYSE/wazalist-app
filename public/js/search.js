@@ -2,6 +2,7 @@
    and filterWaza() which produces the currently-visible list. */
 
 import { state } from './state.js';
+import { getP } from './core.js';
 
 // ── Normalize user search entry ───────────────────────────────
 export function normalizeForSearch(text) {
@@ -100,7 +101,7 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
 }
 
 // ── Filter logic ─────────────────────────────────────────────
-const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
+export const dispName = w => w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
 // Fields to search within each waza for the search query
 const SEARCH_FIELDS = [

@@ -1,5 +1,7 @@
 /* render-helpers.js — small pure-ish helpers shared by the renderers:
    marking styles/pips and video/oEmbed handling. */
+import { SHAPES, LIKE_NONE, LIKE_UP, LIKE_DOWN } from './config.js';
+
 // const SHAPE_HUES = [200, 45, 123, 280, 80, 330];
 export const SHAPE_HUES = [4, 28, 54, 118, 212, 272];
 
