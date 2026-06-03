@@ -2,7 +2,7 @@
    (field lists SE_FIELDS / NW_FIELDS live here too). */
 const SE_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'tag', 'reference', 'parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1', 'author_jp0', 'author_en0', 'author_jp1', 'author_en1', 'video0', 'video1', 'video2', 'video3', 'video4', 'video5', 'video6', 'video7', 'video8', 'video9'];
 
-function openSuggestEdit(w) {
+export function openSuggestEdit(w) {
   // Pre-fill with current values as placeholders
   SE_FIELDS.forEach(f => {
     const el = document.getElementById('se-' + f);
@@ -43,7 +43,7 @@ document.getElementById('se-submit').addEventListener('click', async () => {
 // ── New Waza modal ────────────────────────────────────────────
 const NW_FIELDS = ['name_jp', 'name_en', 'name_en_literal', 'tag', 'parent_jp0', 'parent_en0', 'author_jp0', 'author_en0', 'author_jp1', 'author_en1', 'video0', 'video1', 'video2', 'video3', 'video4', 'reference'];
 
-function openNewWazaModal() {
+export function openNewWazaModal() {
   NW_FIELDS.forEach(f => { const el = document.getElementById('nw-' + f); if (el) el.value = ''; });
   document.getElementById('nw-err').textContent = '';
   document.getElementById('newWazaBg').style.display = 'flex';

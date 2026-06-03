@@ -4,6 +4,7 @@ import { doLogout } from './core.js';
 import { renderImport } from './import-ui.js';
 import { exportToExcel } from './export.js';
 import { escapeHtml } from './ui.js';
+import { openNewWazaModal } from './contribute-modals.js';
 
 export async function renderContribute() {
   const container = document.getElementById('contributeContent');

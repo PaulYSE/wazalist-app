@@ -2,7 +2,7 @@
    and progress saving (saveP/saveLabels). This is where the app boots its data. */
 
 import { state, loadLocal, saveLocal, LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from './state.js'
-import { renderList, renderDetail } from './render.js';
+import { renderList, renderDetail, selectWaza } from './render.js';
 import { renderDashStats } from './stats.js';
 import { startWazaPlaceholderRotation } from './ui.js';
 import { checkAutoImport } from './share.js'

@@ -18,6 +18,7 @@ import { filterWaza } from './search.js';
 import { escapeHtml } from './ui.js';
 import { getP, saveP } from './core.js';
 import { dispName } from './search.js';
+import { openSuggestEdit } from './contribute-modals.js';
 
 export function renderList() {
   const filtered = filterWaza();
