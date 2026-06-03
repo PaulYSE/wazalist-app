@@ -2,6 +2,7 @@
 import { state } from './state.js';
 import { getP } from './core.js';
 import { dispName } from './search.js';
+import {markingStyle, markingPips} from './render-helpers.js';
 
 function timeAgo(iso) {
   if (!iso) return '—';

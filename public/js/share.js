@@ -7,6 +7,7 @@ import { showToast } from './import-ui.js';
 import { escapeHtml } from './ui.js';
 import { getP } from './core.js';
 import { dispName } from './search.js';
+import { markingPips } from './render-helpers.js';
 
 const LS_IMPORTED = 'wl_imported_lists';
 const loadImported = () => { try { return JSON.parse(localStorage.getItem(LS_IMPORTED) || '{}') } catch { return {} } };

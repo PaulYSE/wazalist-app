@@ -6,6 +6,7 @@ import { tiState, parseTextImport } from './import-parser.js';
 import { escapeHtml } from './ui.js';
 import { SHAPES } from './config.js';
 import { dispName } from './search.js';
+import { getP, saveP } from './core.js';
 
 export function renderImport() {
   const container = document.getElementById('dashImport');
