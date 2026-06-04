@@ -579,8 +579,8 @@ function buildLabelsPreview() {
   let existing = ['', '', '', '', '', ''];
   try {
     existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]');
-  } catch (err) {
-    console.warn('Error loading labels from localStorage:', err);
+  } catch {
+    // corrupt localStorage value — fall back to six empty labels
   }
   SHAPES.forEach((sh, i) => {
     const row = document.createElement('div');

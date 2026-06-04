@@ -80,17 +80,6 @@ export function renderImport() {
 
       // Bind color mapping events
       container.querySelector('#tiApplyColorMapBtn')?.addEventListener('click', async () => {
-        console.log('[COLOR MAP] Starting color mapping application...');
-        console.log('[COLOR MAP] tiState.excelColors:', tiState.excelColors);
-        console.log(
-          '[COLOR MAP] tiState.matched before mapping:',
-          tiState.matched.map((i) => ({
-            name: i.waza.name_jp,
-            rawLine: i.rawLine,
-            markings: i.manualMarkings,
-          })),
-        );
-
         // Read label names
         container.querySelectorAll('.excel-color-label-input').forEach((input) => {
           const color = input.dataset.color;

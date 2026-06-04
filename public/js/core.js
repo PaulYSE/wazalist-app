@@ -145,8 +145,8 @@ export async function initApp() {
           let markings = Array(6).fill(false);
           try {
             if (p.markings) markings = JSON.parse(p.markings);
-          } catch (err) {
-            console.warn('Error parsing progress markings:', err);
+          } catch {
+            // malformed markings JSON from the server — keep the empty default
           }
           state.prog[p.waza_id] = {
             markings,
