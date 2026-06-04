@@ -13,7 +13,7 @@ export function renderImport() {
   const container = document.getElementById('dashImport');
 
   if (!tiState.parsed) {
-    container.innerHTML = renderTiInput('');
+    container.innerHTML = renderTiInput();
     bindTiInputEvents(container);
     return;
   }
@@ -290,7 +290,7 @@ export function renderImport() {
   let autoMapHtml = '';
   if (hasCategories) {
     const mapRows = tiState.foundLabels
-      .map((lbl, li) => {
+      .map((lbl) => {
         const assigned = tiState.autoMapping[lbl] !== undefined ? tiState.autoMapping[lbl] : -1;
         const dispName_ =
           tiState.labelNames[lbl] !== undefined ? tiState.labelNames[lbl] : lbl.slice(1, -1);
@@ -548,7 +548,7 @@ export function renderImport() {
   });
 }
 
-function renderTiInput(prefill) {
+function renderTiInput() {
   return (
     '<div style="display:flex;flex-direction:column;height:100%">' +
     // ── Import from Excel ──────────────────────────────────────

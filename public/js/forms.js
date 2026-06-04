@@ -100,6 +100,7 @@ export async function renderContribute() {
       })
       .join('');
   } catch (e) {
+    console.error('Failed to load contributions:', e);
     histList.innerHTML =
       '<div style="color:var(--red);font-size:13px">Failed to load contributions.</div>';
   }
@@ -280,6 +281,7 @@ export async function renderAccount() {
       // Reload to refresh everything
       location.reload();
     } catch (e) {
+      console.error('Reset progress failed:', e);
       alert('❌ Failed to reset progress. Please try again.');
       resetBtn.disabled = false;
       resetBtn.textContent = '🗑️ Reset All Progress';
@@ -333,6 +335,7 @@ export async function renderAccount() {
       alert('Your account has been deleted.');
       location.reload();
     } catch (e) {
+      console.error('Delete account failed:', e);
       alert('❌ Failed to delete account. Please try again.');
       deleteBtn.disabled = false;
       deleteBtn.textContent = 'Delete My Account';

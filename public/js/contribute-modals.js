@@ -126,6 +126,7 @@ export function initContributeModals() {
       document.body.appendChild(fb);
       setTimeout(() => fb.remove(), 3000);
     } catch (e) {
+      console.error('Suggestion submit failed:', e);
       errEl.textContent = 'Network error. Please try again.';
       btn.disabled = false;
       btn.textContent = 'Submit suggestion';
@@ -181,6 +182,7 @@ export function initContributeModals() {
       document.body.appendChild(fb);
       setTimeout(() => fb.remove(), 3000);
     } catch (e) {
+      console.error('Waza submit failed:', e);
       errEl.textContent = 'Network error. Please try again.';
       btn.disabled = false;
       btn.textContent = 'Submit Waza';

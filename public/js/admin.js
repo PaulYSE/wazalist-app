@@ -219,6 +219,7 @@ async function doAction(c, action) {
   try {
     res = await api(`/api/admin/contributions/${c.id}/${action}`, 'POST', { payload, note });
   } catch (e) {
+    console.error(`Admin action "${action}" failed for contribution ${c.id}:`, e);
     res = { error: 'Network error' };
   }
 

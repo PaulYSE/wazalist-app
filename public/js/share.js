@@ -78,6 +78,7 @@ async function openExportModal() {
     document.getElementById('exportUrl').textContent = location.origin + '/?import=' + key;
     document.getElementById('exportKeyWrap').style.display = '';
   } catch (e) {
+    console.error('List export upload failed:', e);
     document.getElementById('exportErr').textContent = 'Upload failed. Please try again.';
     document.getElementById('exportStatus').style.display = 'none';
   }
@@ -469,6 +470,7 @@ export function initShare() {
       }
       document.getElementById('nameImportBg').style.display = 'flex';
     } catch (e) {
+      console.error('List import fetch failed:', e);
       btn.disabled = false;
       btn.textContent = 'Import';
       errEl.textContent = 'Network error. Please try again.';
