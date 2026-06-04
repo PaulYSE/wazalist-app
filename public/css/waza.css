@@ -169,7 +169,6 @@
 .waza-card {
   border-radius: var(--r);
   border: 1px solid var(--border);
-  margin-bottom: 1px;
   overflow: hidden;
   cursor: pointer;
   transition: filter 0.12s;
@@ -343,6 +342,76 @@
 .chip:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* ── Two-line chips (parent waza, similar waza) ── */
+/* Reuses .chip for shape/border/hover; stacks EN over JP. */
+.chip-2line {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.chip-2line .chip-en {
+  font-size: 12px;
+  color: inherit; /* follows .chip / .chip:hover color */
+}
+
+.chip-2line .chip-jp {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* On hover the whole chip goes accent; keep the JP line legible but tinted. */
+.chip-2line:hover .chip-jp {
+  color: var(--accent);
+  opacity: 0.75;
+}
+
+/* Empty JP line (parent/sibling with no name_jp) shouldn't reserve space. */
+.chip-2line .chip-jp:empty {
+  display: none;
+}
+
+/* ── Tag pill (classification category) ── */
+/* A non-interactive label pill. Distinct fill from .chip so it doesn't look
+   clickable, and a hook for future per-category colors when tag becomes a filter. */
+.tag-pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #2a2040;
+  color: #b3a8f0;
+  border: 1px solid #3d3560;
+  cursor: default;
+}
+
+/* ── Creator (two-line author blocks) ── */
+.author-2line {
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: 8px 12px;
+  line-height: 1.3;
+}
+
+.author-2line .author-en {
+  font-size: 14px;
+  color: var(--text1);
+}
+
+.author-2line .author-jp {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 1px;
+}
+
+.author-2line .author-jp:empty {
+  display: none;
 }
 
 /* ── Video references ── */

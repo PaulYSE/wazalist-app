@@ -149,13 +149,15 @@ export function renderDetail() {
         x.id !== w.id &&
         ((w.parent_en0 && (x.parent_en0 === w.parent_en0 || x.parent_en1 === w.parent_en0)) ||
           (w.parent_en1 && (x.parent_en0 === w.parent_en1 || x.parent_en1 === w.parent_en1))),
-    )
-    .slice(0, 12);
+    );
   const sibHTML = siblings.length
     ? siblings
         .map(
           (s) =>
-            '<span class="chip" data-id="' + s.id + '">' + (s.name_jp || dispName(s)) + '</span>',
+            '<span class="chip chip-2line" data-id="' + s.id + '">' +
+            '<span class="chip-en">' + escapeHtml(dispName(s)) + '</span>' +
+            '<span class="chip-jp">' + escapeHtml(s.name_jp || '') + '</span>' +
+            '</span>',
         )
         .join('')
     : '<span style="color:var(--text3);font-size:13px">None found</span>';
@@ -192,11 +194,10 @@ export function renderDetail() {
     dispName(w) +
     '</div>' +
     // Like/Dislike pill
-    '<div class="dsec"><h3>Community' +
+    '<div class="dsec">' +
     (isSaving
       ? ' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>'
       : '') +
-    '</h3>' +
     (!state.token || state.isGuest
       ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>'
       : '') +
@@ -249,7 +250,7 @@ export function renderDetail() {
         '</button>',
     ).join('') +
     '</div>' +
-    '<div style="font-size:11px;color:var(--text3);margin-top:6px">Toggle any combination of markings — meaning is up to you.</div></div>' +
+    '</div>' +    
     // Videos — not collapsible
     '<div class="dsec"><h3>Video references</h3><div class="vlinks">' +
     videoHTML +
@@ -265,11 +266,14 @@ export function renderDetail() {
         '<div class="dfield"><div class="lbl">English</div><div class="val">' +
         (w.name_en || '—') +
         '</div></div>' +
-        '<div class="dfield"><div class="lbl">Literal</div><div class="val">' +
+        '<div class="dfield"><div class="lbl">Romaji</div><div class="val">' +
         (w.name_en_literal || '—') +
         '</div></div>' +
-        '<div class="dfield"><div class="lbl">Google translate</div><div class="val">' +
+        '<div class="dfield"><div class="lbl">Google Translate EN</div><div class="val">' +
         (w.name_en_gtranslate || '—') +
+        '</div></div>' +
+        '<div class="dfield"><div class="lbl">Google Translate CN</div><div class="val">' +
+        (w.name_cn_gtranslate || '—') +
         '</div></div>' +
         '</div>',
     ) +
@@ -277,24 +281,18 @@ export function renderDetail() {
       ? sec(
           'classif',
           'Classification',
-          '<div class="dgrid">' +
-            (w.tag
-              ? '<div class="dfield"><div class="lbl">Skill level</div><div class="val">' +
-                w.tag +
-                '</div></div>'
-              : '') +
+          (w.tag ? '<div style="margin-bottom:10px"><span class="chip tag-pill">' + escapeHtml(w.tag) + '</span></div>' : '') +
             (w.reference
-              ? '<div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
+              ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
                 w.reference +
-                '</div></div>'
-              : '') +
-            '</div>',
+                '</div></div></div>'
+              : ''),
         )
       : '') +
     (w.parent_jp0 || w.parent_en0 || w.parent_jp1 || w.parent_en1
       ? sec(
           'parents',
-          'Parent techniques (prerequisites)',
+          'Parent Waza',
           (w.parent_jp0 || w.parent_en0
             ? (() => {
                 const parent = state.wazaData.find(
@@ -303,13 +301,13 @@ export function renderDetail() {
                       (x.name_en === w.parent_en0 || x.name_en_literal === w.parent_en0)) ||
                     (w.parent_jp0 && x.name_jp === w.parent_jp0),
                 );
+                const inner =
+                  '<span class="chip-en">' + escapeHtml(w.parent_en0 || '') + '</span>' +
+                  '<span class="chip-jp">' + escapeHtml(w.parent_jp0 || '') + '</span>';
                 return (
-                  '<span class="chip" ' +
-                  (parent ? 'data-id="' + parent.id + '"' : 'data-parent="' + w.parent_en0 + '"') +
-                  '>' +
-                  (w.parent_jp0 ? w.parent_jp0 : '') +
-                  (w.parent_en0 ? ' (' + w.parent_en0 + ')' : '') +
-                  '</span>'
+                  '<span class="chip chip-2line" ' +
+                  (parent ? 'data-id="' + parent.id + '"' : 'data-parent="' + escapeHtml(w.parent_en0 || '') + '"') +
+                  '>' + inner + '</span>'
                 );
               })()
             : '') +
@@ -321,15 +319,13 @@ export function renderDetail() {
                         (x.name_en === w.parent_en1 || x.name_en_literal === w.parent_en1)) ||
                       (w.parent_jp1 && x.name_jp === w.parent_jp1),
                   );
+                  const inner =
+                    '<span class="chip-en">' + escapeHtml(w.parent_en1 || '') + '</span>' +
+                    '<span class="chip-jp">' + escapeHtml(w.parent_jp1 || '') + '</span>';
                   return (
-                    '<span class="chip" ' +
-                    (parent
-                      ? 'data-id="' + parent.id + '"'
-                      : 'data-parent="' + w.parent_en1 + '"') +
-                    '>' +
-                    (w.parent_jp1 ? w.parent_jp1 : '') +
-                    (w.parent_en1 ? ' (' + w.parent_en1 + ')' : '') +
-                    '</span>'
+                    '<span class="chip chip-2line" ' +
+                    (parent ? 'data-id="' + parent.id + '"' : 'data-parent="' + escapeHtml(w.parent_en1 || '') + '"') +
+                    '>' + inner + '</span>'
                   );
                 })()
               : ''),
@@ -339,23 +335,23 @@ export function renderDetail() {
       ? sec(
           'creator',
           'Creator',
-          '<div class="dgrid">' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
             (w.author_jp0 || w.author_en0
-              ? '<div class="dfield"><div class="lbl">Author 0</div><div class="val">' +
-                (w.author_jp0 || '') +
-                (w.author_en0 ? ' / ' + w.author_en0 : '') +
-                '</div></div>'
+              ? '<div class="author-2line">' +
+                '<div class="author-en">' + escapeHtml(w.author_en0 || '—') + '</div>' +
+                '<div class="author-jp">' + escapeHtml(w.author_jp0 || '') + '</div>' +
+                '</div>'
               : '') +
             (w.author_jp1 || w.author_en1
-              ? '<div class="dfield"><div class="lbl">Author 1</div><div class="val">' +
-                (w.author_jp1 || '') +
-                (w.author_en1 ? ' / ' + w.author_en1 : '') +
-                '</div></div>'
+              ? '<div class="author-2line">' +
+                '<div class="author-en">' + escapeHtml(w.author_en1 || '—') + '</div>' +
+                '<div class="author-jp">' + escapeHtml(w.author_jp1 || '') + '</div>' +
+                '</div>'
               : '') +
             '</div>',
         )
       : '') +
-    '<div class="dsec"><h3>Related Waza (same family)</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' +
+    '<div class="dsec"><h3>Similar Waza</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' +
     sibHTML +
     '</div></div>' +
     (!state.isGuest && state.token
