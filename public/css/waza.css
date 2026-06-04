@@ -169,7 +169,7 @@
 .waza-card {
   border-radius: var(--r);
   border: 1px solid var(--border);
-  margin-bottom: 10px;
+  margin-bottom: 1px;
   overflow: hidden;
   cursor: pointer;
   transition: filter 0.12s;
