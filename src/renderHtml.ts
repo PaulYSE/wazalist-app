@@ -1,5 +1,4 @@
-export async function renderHtml(env: Env) {
-	// Just serve the HTML file from assets
-	const response = await env.ASSETS.fetch('index.html');
+export async function renderHtml(env: Env, request: Request) {
+	const response = await env.ASSETS.fetch(new URL("/index.html", request.url));
 	return response.text();
 }

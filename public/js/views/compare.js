@@ -9,7 +9,12 @@ import { dispName } from '../lib/search.js';
 import { markingPips } from '../components/render-helpers.js';
 import { navigateToBrowse } from '../app/shell.js';
 import { selectWaza } from './waza-detail.js';
-import { openImportModal, importedLists, saveImported, openExportModal } from '../features/share-list.js';
+import {
+  openImportModal,
+  importedLists,
+  saveImported,
+  openExportModal,
+} from '../features/share-list.js';
 
 // ── Compare tab ───────────────────────────────────────────────
 let compareSelectedKey = null;

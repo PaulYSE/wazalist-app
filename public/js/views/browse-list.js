@@ -25,7 +25,7 @@ export function setBrowseSort({ field, order } = {}) {
     LS_SORT,
     JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
   );
-  updateMarkingFilterUI()
+  updateMarkingFilterUI();
   syncBrowseSortControls();
   renderList();
 }

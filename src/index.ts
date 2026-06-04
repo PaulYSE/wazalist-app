@@ -12,7 +12,13 @@ const err = (msg: string, status = 400) => json({ error: msg }, status);
 
 export default {
 	async fetch(request, env) {
-		const url = new URL(request.url);
+		let url: URL;
+		try {
+			url = new URL(request.url);
+		} catch {
+			console.error("Bad request.url:", JSON.stringify(request.url), "referer:", request.headers.get("referer"));
+			return new Response("Bad Request", { status: 400 });
+		}
 		const path = url.pathname;
 
 		// ── Auth helpers ──────────────────────────────────────────

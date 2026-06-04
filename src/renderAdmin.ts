@@ -1,4 +1,4 @@
-export async function renderAdmin(env: Env) {
-	const response = await env.ASSETS.fetch('admin.html');
+export async function renderAdmin(env: Env, request: Request) {
+	const response = await env.ASSETS.fetch(new URL("/admin.html", request.url));
 	return response.text();
 }

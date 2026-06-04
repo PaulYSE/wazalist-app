@@ -3,7 +3,11 @@
 import { api } from '../services/api.js';
 import { state } from '../state/state.js';
 import { LS_LABELS } from '../state/localStorage.js';
-import { renderList, syncBrowseViewControls, syncBrowseSortControls } from '../views/browse-list.js';
+import {
+  renderList,
+  syncBrowseViewControls,
+  syncBrowseSortControls,
+} from '../views/browse-list.js';
 import { selectWaza } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
 import { startWazaPlaceholderRotation } from './shell.js';

@@ -92,7 +92,6 @@ export function openImportModal(prefillKey = '') {
   if (prefillKey) document.getElementById('importFetchBtn').click();
 }
 
-
 export function initShare() {
   document.getElementById('exportClose').addEventListener('click', () => {
     document.getElementById('exportBg').style.display = 'none';

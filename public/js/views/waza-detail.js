@@ -445,5 +445,4 @@ export function closeDetailPanel() {
   history.replaceState(null, '', url);
 }
 
-
 // ── Contribute tab ────────────────────────────────────────────

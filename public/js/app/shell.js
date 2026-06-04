@@ -140,8 +140,6 @@ const updateMobMenuActiveState = () => {
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
-
-
 // ── Wiring ────────────────────────────────────────────────────
 // Called once from main.js after every module has finished evaluating.
 export function initUi() {
