@@ -1,147 +1,21 @@
-/* render.js — the two main views: renderList() (browse) and
-   renderDetail()/selectWaza() (the single-waza panel). */
+/* waza-detail.js — renders the detail panel for a selected Waza, and handles all related interactions. */
+
 import {
-  markingStyle, // used in renderList() for all 3 view modes
-  markingPips, // used in renderList() and renderDetail()
-  cardLikePill, // used in renderList()
-  videoButtons, // used in renderList() expanded view
-  platform, // used in renderDetail()
-  embedUrl, // used in renderDetail()
-  oembedEndpoint, // used in renderDetail()
-  prefetchOembeds, // used in renderDetail()
-  embedCache, // used in renderDetail() — needs export added
-  oembedCache, // used in renderDetail() — needs export added
-} from './render-helpers.js';
-import { state } from './state/state.js';
-import { SHAPES, platLabel, platColor } from './config/constants.js';
-import { filterWaza } from './features/search.js';
-import { escapeHtml } from './ui.js';
-import { getP, saveP } from './core.js';
-import { dispName } from './features/search.js';
-import { openSuggestEdit } from './contribute-modals.js';
-
-export function renderList() {
-  const filtered = filterWaza();
-  document.getElementById('countBar').textContent =
-    filtered.length + ' of ' + state.wazaData.length + ' Waza';
-  const list = document.getElementById('wazaList');
-  if (!filtered.length) {
-    list.innerHTML =
-      '<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';
-    return;
-  }
-
-  if (state.browseListView === 'expanded') {
-    list.innerHTML = filtered
-      .map((w) => {
-        const p = getP(w.id);
-        const markings = p.markings || Array(6).fill(false);
-        const pill = cardLikePill(w, p);
-        const bottomRow =
-          '<div class="card-bottom-row">' +
-          '<div class="markings-row wce-markings">' +
-          markingPips(markings) +
-          '</div>' +
-          pill +
-          '</div>';
-        const _ms1 = markingStyle(markings);
-        return (
-          '<div class="waza-card ' +
-          _ms1.cls +
-          (state.selectedId === w.id ? ' selected' : '') +
-          '" data-id="' +
-          w.id +
-          '" style="' +
-          _ms1.style +
-          '">' +
-          '<div class="wce-header">' +
-          '<div class="njp">' +
-          (w.name_jp || '—') +
-          '</div>' +
-          '<div class="nen">' +
-          dispName(w) +
-          '</div>' +
-          bottomRow +
-          '</div>' +
-          videoButtons(w) +
-          '</div>'
-        );
-      })
-      .join('');
-    list
-      .querySelectorAll('.waza-card')
-      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
-  } else if (state.browseListView === 'list') {
-    list.innerHTML = filtered
-      .map((w) => {
-        const p = getP(w.id);
-        const markings = p.markings || Array(6).fill(false);
-        const pill = cardLikePill(w, p);
-        const bottomRow =
-          '<div class="card-bottom-row">' +
-          '<div class="markings-row wce-markings">' +
-          markingPips(markings) +
-          '</div>' +
-          pill +
-          '</div>';
-        const _ms2 = markingStyle(markings);
-        return (
-          '<div class="waza-list ' +
-          _ms2.cls +
-          (state.selectedId === w.id ? ' selected' : '') +
-          '" data-id="' +
-          w.id +
-          '" style="' +
-          _ms2.style +
-          '">' +
-          '<div class="njp">' +
-          (w.name_jp || '—') +
-          '</div>' +
-          '<div class="nen">' +
-          dispName(w) +
-          '</div>' +
-          bottomRow +
-          '</div>'
-        );
-      })
-      .join('');
-    list
-      .querySelectorAll('.waza-list')
-      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
-  } else {
-    // Compact — no likes, equal truncating names
-    list.innerHTML = filtered
-      .map((w) => {
-        const p = getP(w.id);
-        const markings = p.markings || Array(6).fill(false);
-        const _ms3 = markingStyle(markings);
-        return (
-          '<div class="waza-compact ' +
-          _ms3.cls +
-          (state.selectedId === w.id ? ' selected' : '') +
-          '" data-id="' +
-          w.id +
-          '" style="' +
-          _ms3.style +
-          '">' +
-          '<span class="drn">' +
-          (w.name_jp || '—') +
-          '</span>' +
-          '<span class="drs">' +
-          dispName(w) +
-          '</span>' +
-          '<div class="markings-row" style="flex-shrink:0">' +
-          markingPips(markings) +
-          '</div>' +
-          '</div>'
-        );
-      })
-      .join('');
-    list
-      .querySelectorAll('.waza-compact')
-      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
-  }
-}
+  markingPips,
+  platform,
+  embedUrl,
+  oembedEndpoint,
+  prefetchOembeds,
+  embedCache,
+  oembedCache,
+} from '../components/render-helpers.js';
+import { state } from '../state/state.js';
+import { SHAPES, platLabel, platColor } from '../config/constants.js';
+import { escapeHtml } from '../lib/escape.js';
+import { dispName } from '../lib/search.js';
+import { getP, saveP } from '../services/progress.js';
+import { openSuggestEdit } from '../modals/suggest-edit.js';
+import { renderList } from './browse-list.js';
 
 export function selectWaza(id) {
   // Stop any currently playing embeds before switching
@@ -168,6 +42,7 @@ export function selectWaza(id) {
     history.pushState({ wazaOpen: true, wazaId: id }, '', url);
   }
 }
+
 export function initRender() {
   document.getElementById('mobileBack').addEventListener('click', () => {
     closeDetailPanel();
@@ -590,15 +465,5 @@ export function closeDetailPanel() {
   history.replaceState(null, '', url);
 }
 
-// ── Navigation helper ─────────────────────────────────────────
-export function navigateToBrowse() {
-  document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
-  document.querySelector('[data-tab="browse"]').classList.add('active');
-  document.getElementById('browseView').style.display = 'flex';
-  document.getElementById('statsView').style.display = 'none';
-  document.getElementById('compareView').style.display = 'none';
-  document.getElementById('accountView').style.display = 'none';
-  document.getElementById('contributeView').style.display = 'none';
-}
 
 // ── Contribute tab ────────────────────────────────────────────

@@ -1,9 +1,10 @@
 /* stats.js — the Stats dashboard (counts, recently-updated, coverage). */
-import { state } from './state/state.js';
-import { getP } from './core.js';
-import { dispName } from './features/search.js';
-import { markingStyle, markingPips } from './render-helpers.js';
-import { selectWaza, navigateToBrowse } from './render.js';
+import { state } from '../state/state.js';
+import { getP } from '../services/progress.js';
+import { dispName } from '../lib/search.js';
+import { markingStyle, markingPips } from '../components/render-helpers.js';
+import { selectWaza } from './waza-detail.js';
+import { navigateToBrowse } from '../app/shell.js';
 
 function timeAgo(iso) {
   if (!iso) return '—';

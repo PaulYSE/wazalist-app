@@ -1,14 +1,13 @@
-/* ui.js — UI chrome: rotating placeholders, marking-filter UI, the mobile
-   slide-over menu, the mobile filter sheet, and the escapeHtml() helper.
-   No work on import — main.js calls initUi() to wire all DOM events. */
+/* shell.js */
 
-import { state } from './state/state.js';
-import { renderDashStats } from './stats.js';
-import { renderDashCompare } from './share.js';
-import { renderContribute, renderAccount } from './forms.js';
-import { renderList } from './render.js';
-import { doLogout } from './core.js';
-import { openNewWazaModal } from './contribute-modals.js';
+import { state } from '../state/state.js';
+import { renderDashStats } from '../views/stats.js';
+import { renderDashCompare } from '../views/compare.js';
+import { renderAccount } from '../views/account.js';
+import { renderContribute } from '../views/contribute.js';
+import { renderList } from '../views/browse-list.js';
+import { doLogout } from '../services/auth.js';
+import { openNewWazaModal } from '../modals/new-waza.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
@@ -141,13 +140,7 @@ const updateMobMenuActiveState = () => {
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
-export function escapeHtml(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+
 
 // ── Wiring ────────────────────────────────────────────────────
 // Called once from main.js after every module has finished evaluating.
@@ -318,4 +311,15 @@ export function initUi() {
       updateMobMenuActiveState();
     }),
   );
+}
+
+// ── Navigation helper ─────────────────────────────────────────
+export function navigateToBrowse() {
+  document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
+  document.querySelector('[data-tab="browse"]').classList.add('active');
+  document.getElementById('browseView').style.display = 'flex';
+  document.getElementById('statsView').style.display = 'none';
+  document.getElementById('compareView').style.display = 'none';
+  document.getElementById('accountView').style.display = 'none';
+  document.getElementById('contributeView').style.display = 'none';
 }

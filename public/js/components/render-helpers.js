@@ -7,8 +7,8 @@ import {
   platColor,
   LIKE_UP,
   LIKE_DOWN,
-} from './config/constants.js';
-import { state } from './state/state.js';
+} from '../config/constants.js';
+import { state } from '../state/state.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.

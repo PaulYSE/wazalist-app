@@ -1,15 +1,15 @@
-/* main.js — BOOT / wiring entry point. Loaded last; nothing imports this file.
-   Every other module now only declares and exports — none wires DOM events on
-   import. main.js owns the boot order: wire each module's event listeners via
-   its initX(), wire the auth screen, then load the app if a session exists. */
+/* main.js */
 
 import { state } from './state/state.js';
-import { initAuth, initApp } from './core.js';
-import { initRender, renderList, renderDetail } from './render.js';
-import { initUi, closeMobMenu } from './ui.js';
-import { initShare } from './share.js';
-import { initContributeModals } from './contribute-modals.js';
-import { initOnboarding, showOnboarding } from './onboarding.js';
+import { initApp } from './app/init.js';
+import { initAuth } from './services/auth.js';
+import { renderList } from './views/browse-list.js';
+import { initRender, renderDetail } from './views/waza-detail.js';
+import { initUi, closeMobMenu } from './app/shell.js';
+import { initShare } from './features/share-list.js';
+import { initNewWaza } from './modals/new-waza.js';
+import { initSuggestEdit } from './modals/suggest-edit.js';
+import { initOnboarding, showOnboarding } from './features/onboarding.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 document.getElementById('helpBtn').addEventListener('click', () => {
@@ -43,7 +43,8 @@ window.addEventListener('popstate', (e) => {
 initRender();
 initUi();
 initShare();
-initContributeModals();
+initNewWaza();
+initSuggestEdit();
 initOnboarding();
 initAuth();
 

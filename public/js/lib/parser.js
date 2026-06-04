@@ -2,7 +2,7 @@
    tab-separated parsing, findWazaForLine(), and parseTextImport(). No DOM here. */
 
 import { state, tiState } from '../state/state.js';
-import { normalizeForSearch, isFuzzyMatch } from './search.js';
+import { normalizeForSearch, isFuzzyMatch } from '../lib/search.js';
 import { STATUS_TO_SHAPE_MAP, HEADER_KEYWORDS, DECORATIVE_PATTERNS } from '../config/constants.js';
 
 // Fuzzy status matching - find closest known status label

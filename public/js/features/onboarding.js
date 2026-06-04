@@ -1,16 +1,16 @@
 /* onboarding.js — feature by feature user guide */
 
-import { saveLabels } from './core.js';
-import { renderDashStats } from './stats.js';
-import { state } from './state/state.js';
-import { LS_LABELS } from './state/localStorage.js';
-import { SHAPES, MARKING_LABELS_TEMPLATE } from './config/constants.js';
-import { wazaMatchesSearch } from './features/search.js';
+import { saveLabels } from '../services/progress.js';
+import { renderDashStats } from '../views/stats.js';
+import { state } from '../state/state.js';
+import { LS_LABELS } from '../state/localStorage.js';
+import { SHAPES, MARKING_LABELS_TEMPLATE } from '../config/constants.js';
+import { wazaMatchesSearch } from '../lib/search.js';
 import {
   markingStyle, // used in renderList() for all 3 view modes
   markingPips, // used in renderList() and renderDetail()
   cardLikePill, // used in renderList()
-} from './render-helpers.js';
+} from '../components/render-helpers.js';
 
 // ── Config ────────────────────────────────────────────────────
 const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides

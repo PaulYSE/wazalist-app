@@ -2,7 +2,7 @@
    and filterWaza() which produces the currently-visible list. */
 
 import { state } from '../state/state.js';
-import { getP } from '../core.js';
+import { getP } from '../services/progress.js';
 
 // ── Normalize user search entry ───────────────────────────────
 export function normalizeForSearch(text) {
