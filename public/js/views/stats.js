@@ -37,18 +37,18 @@ export function renderDashStats() {
     '</div>';
 
   // ── Recently updated (past year) ──────────────────────────
-  const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+  const historyRange = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const recent = state.wazaData
     .filter((w) => {
       const p = state.prog[w.id];
       if (!p || !p.updated_at) return false;
       const updatedTime = new Date(p.updated_at).getTime();
-      return updatedTime >= oneYearAgo;
+      return updatedTime >= historyRange;
     })
     .sort((a, b) => new Date(state.prog[b.id].updated_at) - new Date(state.prog[a.id].updated_at));
 
   const recentHTML =
-    '<div class="dsec2"><h3>Recent activity (past year)</h3>' +
+    '<div class="dsec2"><h3>Recent activity (past month)</h3>' +
     (recent.length
       ? recent
           .map((w) => {
@@ -56,7 +56,7 @@ export function renderDashStats() {
             const markings = p.markings || Array(6).fill(false);
             const _ms4 = markingStyle(markings);
             return (
-              '<div class="recent-row ' +
+              '<div class="waza-compact ' +
               _ms4.cls +
               '" data-id="' +
               w.id +
@@ -69,9 +69,9 @@ export function renderDashStats() {
               '<span class="drs">' +
               dispName(w) +
               '</span>' +
-              '<span style="margin-left:auto;display:flex;gap:2px">' +
+              '<div class="markings-row" style="flex-shrink:0">' +
               markingPips(markings) +
-              '</span>' +
+              '</div>' +
               '<span class="recent-time">' +
               timeAgo(p.updated_at) +
               '</span>' +
@@ -79,7 +79,7 @@ export function renderDashStats() {
             );
           })
           .join('')
-      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No activity in the past year.</div>') +
+      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No activity in the past month.</div>') +
     '</div>';
 
   // ── Coverage by family (sorted by % completion) ───────────
@@ -140,7 +140,7 @@ export function renderDashStats() {
   const container = document.getElementById('dashStats');
   container.innerHTML = overviewHTML + recentHTML + covHTML;
 
-  container.querySelectorAll('.recent-row').forEach((el) => {
+  container.querySelectorAll('.waza-compact').forEach((el) => {
     el.addEventListener('click', () => {
       navigateToBrowse();
       selectWaza(+el.dataset.id);

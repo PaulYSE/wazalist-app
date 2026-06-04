@@ -454,19 +454,6 @@
   justify-content: flex-end;
 }
 
-.recent-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-}
-
-.recent-row:hover .drn {
-  color: var(--accent);
-}
-
 .recent-time {
   font-size: 11px;
   color: var(--text3);
