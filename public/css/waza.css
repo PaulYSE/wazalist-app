@@ -353,6 +353,8 @@
   gap: 1px;
   line-height: 1.25;
   text-align: left;
+  border-radius: var(--r); /* rectangle w/ rounded corners, overrides .chip's 20px */
+  padding: 5px 12px; /* a touch more vertical room than the pill's 3px */
 }
 
 .chip-2line .chip-en {
@@ -374,6 +376,22 @@
 /* Empty JP line (parent/sibling with no name_jp) shouldn't reserve space. */
 .chip-2line .chip-jp:empty {
   display: none;
+}
+
+.author-2line.author-click {
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+  border: 1px solid var(--border);
+}
+
+.author-2line.author-click:hover {
+  border-color: var(--accent);
+}
+
+.author-2line.author-click:hover .author-en {
+  color: var(--accent);
 }
 
 /* ── Tag pill (classification category) ── */
