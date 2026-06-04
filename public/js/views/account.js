@@ -1,3 +1,5 @@
+/* account.js */
+
 import { state } from '../state/state.js';
 import { LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from '../state/localStorage.js';
 import { api } from '../services/api.js';
@@ -242,6 +244,3 @@ export async function renderAccount() {
     }
   });
 }
-
-// ── Export to Excel ───────────────────────────────────────────
-// One ARGB fill per marking index (matches the ● ▲ ■ ♥ ★ ◆ order).

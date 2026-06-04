@@ -1,3 +1,5 @@
+/* contribute.js */
+
 import { state } from '../state/state.js';
 import { api } from '../services/api.js';
 import { doLogout } from '../services/auth.js';
