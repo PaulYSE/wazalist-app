@@ -38,6 +38,17 @@ export async function initApp() {
   const wazaRes = await api('/api/waza');
   state.wazaData = Array.isArray(wazaRes) ? wazaRes : [];
   if (!state.isGuest) {
+    // Re-derive identity (incl. admin status) from the session token.
+    // This is what fixes admin status vanishing on refresh.
+    try {
+      const meRes = await api('/api/me');
+      if (meRes && meRes.user) {
+        state.isAdmin = !!meRes.user.is_admin;
+        state.currentUsername = meRes.user.username;
+      }
+    } catch (err) {
+      console.warn('Session restore error:', err);
+    }
     try {
       const progRes = await api('/api/progress');
       if (Array.isArray(progRes))
@@ -72,6 +83,12 @@ export async function initApp() {
   }
   renderList();
   renderDashStats();
+
+  // Show admin-only chrome now that isAdmin is known from the session.
+  if (state.isAdmin) {
+    document.getElementById('adminLink').style.display = '';
+    document.getElementById('mobAdminLink').style.display = '';
+  }
 
   // Sync sort dropdowns with loaded preferences
   syncBrowseSortControls();
