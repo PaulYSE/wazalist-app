@@ -1,3 +1,5 @@
+/* admin.js */
+
 const token = localStorage.getItem('wl_token') || '';
 const api = async (path, method = 'GET', body = null) => {
   const opts = {
@@ -48,7 +50,19 @@ let queue = [],
 // ── Load queue ────────────────────────────────────────────────
 async function loadQueue(status = 'pending') {
   currentStatus = status;
-  queue = await api('/api/admin/contributions?status=' + status);
+  const res = await api('/api/admin/contributions?status=' + status);
+  if (!Array.isArray(res)) {
+    document.getElementById('queueList').innerHTML =
+      '<div class="empty-queue">' +
+      (res?.error === 'Forbidden'
+        ? 'Session expired or not an admin. Sign in to the main app again.'
+        : 'Failed to load queue.') +
+      '</div>';
+    queue = [];
+    selectedId = null;
+    return;
+  }
+  queue = res;
   renderQueue();
   document.getElementById('detailPanel').innerHTML =
     '<div class="d-empty">Select a contribution to review</div>';
@@ -67,9 +81,18 @@ function renderQueue() {
   el.innerHTML = queue
     .map((c) => {
       const isNew = c.type === 'new_waza';
-      const label = isNew
-        ? JSON.parse(c.payload).name_jp || 'New Waza'
-        : c.waza_name_jp || 'Waza #' + c.waza_id;
+      let label;
+      if (isNew) {
+        let parsed = {};
+        try {
+          parsed = JSON.parse(c.payload);
+        } catch {
+          /* malformed row — fall through */
+        }
+        label = parsed.name_jp || 'New Waza';
+      } else {
+        label = c.waza_name_jp || 'Waza #' + c.waza_id;
+      }
       const ago = timeAgo(c.created_at);
       return `<div class="queue-item${selectedId === c.id ? ' selected' : ''}" data-id="${c.id}">
       <div class="qi-type ${isNew ? 'new' : 'edit'}">${isNew ? 'New Waza' : 'Edit'}</div>
@@ -93,7 +116,12 @@ async function selectItem(id) {
   const panel = document.getElementById('detailPanel');
   panel.innerHTML = '<div class="d-empty" style="font-size:13px;color:var(--text3)">Loading…</div>';
 
-  const payload = JSON.parse(c.payload);
+  let payload = {};
+  try {
+    payload = JSON.parse(c.payload);
+  } catch {
+    /* malformed row — show empty */
+  }
   const isNew = c.type === 'new_waza';
   const isPending = c.status === 'pending';
 
@@ -101,6 +129,7 @@ async function selectItem(id) {
   let currentWaza = null;
   if (!isNew && c.waza_id) {
     currentWaza = await api('/api/admin/waza/' + c.waza_id);
+    if (currentWaza && currentWaza.error) currentWaza = null;
   }
 
   const statusBadge = `<span class="status-badge s-${c.status}">${c.status}</span>`;

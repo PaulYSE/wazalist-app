@@ -4,7 +4,7 @@ import { parseExcelFile } from './import-excel.js';
 import { escapeHtml } from '../../lib/escape.js';
 import { SHAPES } from '../../config/constants.js';
 import { dispName } from '../../lib/search.js';
-import { getP, saveP, saveLabels } from '../../services/progress.js';
+import { saveP, saveLabels } from '../../services/progress.js';
 import { showToast } from '../../components/Toast.js';
 
 export function renderImport() {
