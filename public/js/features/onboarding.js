@@ -6,6 +6,7 @@ import { state } from '../state/state.js';
 import { LS_LABELS } from '../state/localStorage.js';
 import { SHAPES, MARKING_LABELS_TEMPLATE } from '../config/constants.js';
 import { wazaMatchesSearch } from '../lib/search.js';
+import { setBrowseView } from '../views/browse-list.js';
 import {
   markingStyle, // used in renderList() for all 3 view modes
   markingPips, // used in renderList() and renderDetail()
@@ -484,11 +485,7 @@ function buildStyleDemo() {
   container.querySelectorAll('.ob-style-pill').forEach((pill) => {
     pill.addEventListener('click', () => {
       chosenStyle = pill.dataset.style;
-      localStorage.setItem('wl_view_style', chosenStyle);
-      const sel = document.getElementById('browseViewSelect');
-      const selMob = document.getElementById('browseViewSelectMob');
-      if (sel) sel.value = chosenStyle;
-      if (selMob) selMob.value = chosenStyle;
+      setBrowseView(chosenStyle);
       buildStyleDemo();
     });
   });

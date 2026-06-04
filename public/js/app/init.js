@@ -3,7 +3,8 @@
 import { api } from '../services/api.js';
 import { state } from '../state/state.js';
 import { LS_LABELS } from '../state/localStorage.js';
-import { renderList, selectWaza } from '../views/browse-list.js';
+import { renderList, syncBrowseViewControls, syncBrowseSortControls } from '../views/browse-list.js';
+import { selectWaza } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
 import { startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
@@ -69,20 +70,10 @@ export async function initApp() {
   renderDashStats();
 
   // Sync sort dropdowns with loaded preferences
-  document.getElementById('browseSortField').value = state.browseSortField;
-  document.getElementById('browseSortFieldMob').value = state.browseSortField;
-  document.getElementById('browseSortOrder').value = state.browseSortOrder;
-  document.getElementById('browseSortOrderMob').value = state.browseSortOrder;
-  const isDefault = state.browseSortField === 'default';
-  document.getElementById('browseSortOrder').disabled = isDefault;
-  document.getElementById('browseSortOrderMob').disabled = isDefault;
+  syncBrowseSortControls();
 
   // Sync view style dropdowns with loaded preference
-  document.getElementById('browseViewSelect').value = state.browseListView;
-  document.getElementById('browseViewSelectMob').value = state.browseListView;
-  // Sync mobile view style dropdown
-  const mobileViewSelect = document.getElementById('viewStyleSelectMobile');
-  if (mobileViewSelect) mobileViewSelect.value = state.browseListView;
+  syncBrowseViewControls();
 
   // Check for ?waza= in URL (from shared links or back navigation)
   const wazaParam = new URL(location.href).searchParams.get('waza');

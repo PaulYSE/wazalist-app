@@ -1,51 +1,5 @@
 /* constants.js — shared constants for field names, label templates, shape symbols, and mappings. */
 
-// Waza fields
-export const SE_FIELDS = [
-  'name_jp',
-  'name_en',
-  'name_en_literal',
-  'name_en_gtranslate',
-  'tag',
-  'reference',
-  'parent_jp0',
-  'parent_en0',
-  'parent_jp1',
-  'parent_en1',
-  'author_jp0',
-  'author_en0',
-  'author_jp1',
-  'author_en1',
-  'video0',
-  'video1',
-  'video2',
-  'video3',
-  'video4',
-  'video5',
-  'video6',
-  'video7',
-  'video8',
-  'video9',
-];
-export const NW_FIELDS = [
-  'name_jp',
-  'name_en',
-  'name_en_literal',
-  'tag',
-  'parent_jp0',
-  'parent_en0',
-  'author_jp0',
-  'author_en0',
-  'author_jp1',
-  'author_en1',
-  'video0',
-  'video1',
-  'video2',
-  'video3',
-  'video4',
-  'reference',
-];
-
 // Template for Marking Labels
 export const MARKING_LABELS_TEMPLATE = [
   'Want to Learn',

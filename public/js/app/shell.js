@@ -5,7 +5,7 @@ import { renderDashStats } from '../views/stats.js';
 import { renderDashCompare } from '../views/compare.js';
 import { renderAccount } from '../views/account.js';
 import { renderContribute } from '../views/contribute.js';
-import { renderList } from '../views/browse-list.js';
+import { renderList, setBrowseView, setBrowseSort } from '../views/browse-list.js';
 import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 
@@ -270,25 +270,11 @@ export function initUi() {
     const newSortField = document.getElementById('browseSortFieldMob').value;
     const newSortOrder = document.getElementById('browseSortOrderMob').value;
     const newView = document.getElementById('browseViewSelectMob').value;
+
     // Apply to state + sync desktop controls
-    state.browseSortField = newSortField;
-    state.browseSortOrder = newSortOrder;
-    state.browseListView = newView;
-    document.getElementById('browseSortField').value = newSortField;
-    const isDefault = newSortField === 'default';
-    document.getElementById('browseSortOrder').disabled = isDefault;
-    document.getElementById('browseSortOrder').value = newSortOrder;
-    document.getElementById('browseViewSelect').value = newView;
-    // Save to localStorage
-    localStorage.setItem(
-      'wl_sort_prefs',
-      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
-    );
-    localStorage.setItem('wl_view_style', state.browseListView);
-    // Close sheet and re-render
     filterSheetBg.classList.remove('open');
-    updateMarkingFilterUI();
-    renderList();
+    setBrowseSort({ field: newSortField, order: newSortOrder });
+    setBrowseView(newView); // applies state + persists + syncs all selects + renders once
   });
 
   // ── Nav tabs ────────────────────────────────────────────────

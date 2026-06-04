@@ -1,7 +1,6 @@
 /* waza-detail.js — renders the detail panel for a selected Waza, and handles all related interactions. */
 
 import {
-  markingPips,
   platform,
   embedUrl,
   oembedEndpoint,
@@ -43,28 +42,9 @@ export function selectWaza(id) {
   }
 }
 
-export function initRender() {
+export function initWazaDetail() {
   document.getElementById('mobileBack').addEventListener('click', () => {
     closeDetailPanel();
-  });
-
-  // ── Browse view toggle group ──────────────────────────────────
-  document.getElementById('browseViewSelect').addEventListener('change', (e) => {
-    state.browseListView = e.target.value;
-    // Save to localStorage
-    localStorage.setItem('wl_view_style', state.browseListView);
-    renderList();
-  });
-
-  // ── Mobile view style dropdown ─────────────────────────────────
-  document.getElementById('viewStyleSelectMobile')?.addEventListener('change', (e) => {
-    state.browseListView = e.target.value;
-    // Save to localStorage
-    localStorage.setItem('wl_view_style', state.browseListView);
-    // Sync with desktop and mobile filter sheet selects
-    document.getElementById('browseViewSelect').value = state.browseListView;
-    document.getElementById('browseViewSelectMob').value = state.browseListView;
-    renderList();
   });
 }
 

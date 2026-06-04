@@ -3,8 +3,8 @@
 import { state } from './state/state.js';
 import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
-import { renderList } from './views/browse-list.js';
-import { initRender, renderDetail } from './views/waza-detail.js';
+import { initBrowseList, renderList } from './views/browse-list.js';
+import { initWazaDetail, renderDetail } from './views/waza-detail.js';
 import { initUi, closeMobMenu } from './app/shell.js';
 import { initShare } from './features/share-list.js';
 import { initNewWaza } from './modals/new-waza.js';
@@ -40,7 +40,8 @@ window.addEventListener('popstate', (e) => {
 // events and run cross-module logic. Order among the initX() calls is not
 // significant (each registers listeners on its own elements); auth is wired
 // before the possible initApp() so the login screen is usable on a cold start.
-initRender();
+initBrowseList();
+initWazaDetail();
 initUi();
 initShare();
 initNewWaza();

@@ -1,7 +1,8 @@
 import { state } from '../state/state.js';
 import { LS_LABELS, loadLocal, saveLocal } from '../state/localStorage.js';
 import { api } from './api.js';
-import { renderList, renderDetail } from '../views/browse-list.js';
+import { renderList } from '../views/browse-list.js';
+import { renderDetail } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
 
 // ── Progress helpers ─────────────────────────────────────────
