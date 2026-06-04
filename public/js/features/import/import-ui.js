@@ -92,11 +92,7 @@ export function renderImport() {
           const color = select.dataset.color;
           const markingIdx = parseInt(select.value);
           tiState.colorMapping[color] = markingIdx;
-          console.log('[COLOR MAP] Mapping color', color, 'to marking index', markingIdx);
         });
-
-        console.log('[COLOR MAP] Final tiState.colorMapping:', tiState.colorMapping);
-        console.log('[COLOR MAP] Final tiState.excelColorLabels:', tiState.excelColorLabels);
 
         // Check if user wants to update their marking labels
         const hasLabelNames = Object.keys(tiState.excelColorLabels).length > 0;
@@ -139,7 +135,6 @@ export function renderImport() {
               // Save to server
               try {
                 await saveLabels();
-                console.log('[COLOR MAP] Marking labels updated successfully');
               } catch (err) {
                 console.error('[COLOR MAP] Failed to save marking labels:', err);
                 alert(
@@ -162,35 +157,20 @@ export function renderImport() {
 
             if (matchFound) {
               const markingIdx = tiState.colorMapping[color];
-              console.log(
-                '[COLOR MAP] Match found for',
-                item.waza.name_jp,
-                '- color:',
-                color,
-                'marking:',
-                markingIdx,
-              );
 
               if (markingIdx === -1) {
                 // Explicitly clear all markings when "no marking" is selected
                 item.manualMarkings = Array(6).fill(false);
                 item.category = null;
-                console.log('[COLOR MAP] Cleared markings (no marking selected)');
               } else if (markingIdx >= 0 && markingIdx < 6) {
                 item.manualMarkings = Array(6).fill(false);
                 item.manualMarkings[markingIdx] = true;
                 item.category = state.markingLabels[markingIdx] || `Marking ${markingIdx + 1}`;
-                console.log('[COLOR MAP] Set markings to:', item.manualMarkings);
               }
               break;
             }
           }
         });
-
-        console.log(
-          '[COLOR MAP] tiState.matched after mapping:',
-          tiState.matched.map((i) => ({ name: i.waza.name_jp, markings: i.manualMarkings })),
-        );
 
         tiState.parsed = true; // Switch to normal mode
         tiState.previewMode = true; // Enable preview mode
@@ -467,32 +447,13 @@ export function renderImport() {
 
   // Commit preview (save to database)
   container.querySelector('#tiCommitBtn')?.addEventListener('click', async () => {
-    console.log('[COMMIT] Starting commit process...');
-    console.log('[COMMIT] tiState.matched length:', tiState.matched.length);
-
     let count = 0;
     for (const item of tiState.matched) {
-      console.log(
-        '[COMMIT] Processing:',
-        item.waza.name_jp,
-        'manualMarkings:',
-        item.manualMarkings,
-      );
-
       if (item.manualMarkings.some(Boolean)) {
-        const cur = getP(item.waza.id);
-
         // REPLACE markings entirely (don't merge with existing)
         const newMarkings = [...item.manualMarkings];
-
-        console.log('[COMMIT] Current markings:', cur.markings);
-        console.log('[COMMIT] Manual markings:', item.manualMarkings);
-        console.log('[COMMIT] New markings (REPLACE):', newMarkings);
-
         await saveP(item.waza.id, { markings: newMarkings });
         count++;
-      } else {
-        console.log('[COMMIT] Skipping (no markings):', item.waza.name_jp);
       }
     }
 
