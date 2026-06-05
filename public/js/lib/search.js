@@ -42,7 +42,13 @@ export function normalizeForSearch(text) {
     .replace(/[\u0300-\u036f]/g, ''); // remove diacritical marks
 }
 
-// ── Word-based matching ───────────────────────────────────────
+// String Matching
+function matchesExactField(text, query) {
+  if (!text || !query) return false;
+  return normalizeForSearch(text) === normalizeForSearch(query);
+}
+
+// ── Substring Matching ───────────────────────────────────────
 function matchesQuery(text, query) {
   if (!text || !query) return false;
 
@@ -84,7 +90,7 @@ function levenshteinDistance(a, b) {
   return matrix[b.length][a.length];
 }
 
-// ── More advanced Word-based matching (Replaces matchesQuery()) ───
+// ── Fuzzy String Matching ───
 export function isFuzzyMatch(text, query, maxDistance = 2) {
   if (!text || !query) return false;
 
@@ -151,15 +157,15 @@ function parseScopedSearch(search) {
 export function wazaMatchesSearch(w, search) {
   if (!search) return true;
 
-  // Scoped search: PREFIX:query restricts to that prefix's fields only.
+  // (Scoped search): PREFIX:QUERY = fuzzy, PREFIX:"QUERY" = exact
   const scoped = parseScopedSearch(search);
   if (scoped) {
     if (!scoped.query) return true; // "AUTHOR:" with nothing yet → don't filter
-    const matchFn = scoped.exact ? matchesQuery : isFuzzyMatch;
+    const matchFn = scoped.exact ? matchesExactField : isFuzzyMatch;
     return scoped.fields.some((f) => w[f] && matchFn(w[f], scoped.query));
   }
 
-  // Global search (unchanged): quoted = exact substring, else fuzzy across all fields.
+  // (Global search): QUERY = fuzzy, "QUERY" = substring
   const isExact = search.startsWith('"') && search.endsWith('"');
   const matchFn = isExact ? matchesQuery : isFuzzyMatch;
   const query = isExact ? search.slice(1, -1).trim() : search;
