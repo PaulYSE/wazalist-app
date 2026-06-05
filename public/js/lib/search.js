@@ -4,6 +4,34 @@
 import { state } from '../state/state.js';
 import { getP } from '../services/progress.js';
 
+// Fields to search within each waza for the search query
+const SEARCH_FIELDS = [
+  'name_jp',
+  'name_en',
+  'name_en_literal',
+  'name_en_gtranslate',
+  'name_cn_gtranslate',
+  'reference',
+  'tag',
+  'parent_jp0',
+  'parent_en0',
+  'parent_jp1',
+  'parent_en1',
+  'author_jp0',
+  'author_en0',
+  'author_jp1',
+  'author_en1',
+];
+
+// Scoped-search prefixes: PREFIX:query restricts matching to these fields only.
+// Add a new scoped filter by adding an entry here — nothing else changes.
+const SEARCH_SCOPES = {
+  author: ['author_jp0', 'author_en0', 'author_jp1', 'author_en1'],
+  parent: ['parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1'],
+  name: ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'name_cn_gtranslate'],
+  tag: ['tag'],
+};
+
 // ── Normalize user search entry ───────────────────────────────
 export function normalizeForSearch(text) {
   return text
@@ -102,28 +130,36 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
 export const dispName = (w) =>
   w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
-// Fields to search within each waza for the search query
-const SEARCH_FIELDS = [
-  'name_jp',
-  'name_en',
-  'name_en_literal',
-  'name_en_gtranslate',
-  'name_cn_gtranslate',
-  'reference',
-  'tag',
-  'parent_jp0',
-  'parent_en0',
-  'parent_jp1',
-  'parent_en1',
-  'author_jp0',
-  'author_en0',
-  'author_jp1',
-  'author_en1',
-];
+// Parse a scoped search like AUTHOR:"PERIKAN" or PARENT:OUKA.
+// Returns { fields, query, exact } or null if no recognized PREFIX: is present.
+function parseScopedSearch(search) {
+  const m = search.match(/^([a-z]+)\s*:\s*(.*)$/i);
+  if (!m) return null;
+  const scope = m[1].toLowerCase();
+  const fields = SEARCH_SCOPES[scope];
+  if (!fields) return null; // unknown prefix → treat as a normal search, not scoped
+
+  let rest = m[2].trim();
+  // Honour the same "quoted = exact" convention as the global search.
+  const exact = rest.startsWith('"') && rest.endsWith('"') && rest.length >= 2;
+  if (exact) rest = rest.slice(1, -1).trim();
+
+  return { fields, query: rest, exact };
+}
 
 // Returns true if the waza matches the search string in any of the specified fields
 export function wazaMatchesSearch(w, search) {
   if (!search) return true;
+
+  // Scoped search: PREFIX:query restricts to that prefix's fields only.
+  const scoped = parseScopedSearch(search);
+  if (scoped) {
+    if (!scoped.query) return true; // "AUTHOR:" with nothing yet → don't filter
+    const matchFn = scoped.exact ? matchesQuery : isFuzzyMatch;
+    return scoped.fields.some((f) => w[f] && matchFn(w[f], scoped.query));
+  }
+
+  // Global search (unchanged): quoted = exact substring, else fuzzy across all fields.
   const isExact = search.startsWith('"') && search.endsWith('"');
   const matchFn = isExact ? matchesQuery : isFuzzyMatch;
   const query = isExact ? search.slice(1, -1).trim() : search;
