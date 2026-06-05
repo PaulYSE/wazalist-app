@@ -44,8 +44,6 @@ button {
 a {
   color: var(--accent);
   text-decoration: none;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ── Auth ── */
@@ -340,6 +338,9 @@ select.active {
 .btn {
   height: var(--filter-h);
   padding: 0 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
