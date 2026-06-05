@@ -421,17 +421,22 @@ export function renderDetail() {
     }),
   );
   // Search-and-exit: set the search term, then drop back to the list panel.
-  const searchAndExit = (term) => {
+  const searchAndExit = (term, scope = null) => {
+    const query = scope ? `${scope.toUpperCase()}:"${term}"` : term;
     state.filters.search = term;
-    document.getElementById('searchInput').value = term;
+    document.getElementById('searchInput').value = query;
     closeDetailPanel(); // clears selection, re-renders list, removes overlay on mobile
   };
   panel
     .querySelectorAll('.chip[data-parent]')
-    .forEach((chip) => chip.addEventListener('click', () => searchAndExit(chip.dataset.parent)));
+    .forEach((chip) =>
+      chip.addEventListener('click', () => searchAndExit(chip.dataset.parent, 'PARENT')),
+    );
   panel
     .querySelectorAll('.author-click[data-author]')
-    .forEach((el) => el.addEventListener('click', () => searchAndExit(el.dataset.author)));
+    .forEach((el) =>
+      el.addEventListener('click', () => searchAndExit(el.dataset.author, 'AUTHOR')),
+    );
   panel
     .querySelectorAll('.chip[data-id]')
     .forEach((chip) => chip.addEventListener('click', () => selectWaza(+chip.dataset.id)));
