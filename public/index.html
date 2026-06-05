@@ -4,8 +4,8 @@
     <!-- Meta tags, title, and favicon -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="icons/app-icon-orange.svg" />
+    <link rel="apple-touch-icon" href="icons/app-icon-orange.png" />
 
     <title>Wazalist</title>
 
@@ -223,20 +223,8 @@
             autocomplete="off"
           />
           <button class="btn filter-sheet-btn" id="filterSheetBtn" aria-label="Filters">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              style="display: block"
-            >
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg
-            ><span class="filter-dot" id="filterDot"></span>
+            <svg class="icon" aria-hidden="true"><use href="icons/filter-funnel.svg"></use></svg>
+            <span class="filter-dot" id="filterDot"></span>
           </button>
           <!-- Mobile view style dropdown -->
           <select class="view-style-select-mobile" id="viewStyleSelectMobile">
