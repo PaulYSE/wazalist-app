@@ -174,6 +174,7 @@ function mkBackBtn() {
   btn.className = 'ob-btn';
   btn.textContent = '← Back';
   btn.onclick = () => {
+    if (currentSlide === 2) cancelAutoType(); // Cancel search demo autotyping if going back from that slide
     goToSlide(currentSlide - 1);
   };
   return btn;
@@ -184,6 +185,7 @@ function mkNextBtn() {
   btn.className = 'ob-btn ob-btn-primary';
   btn.textContent = currentSlide === SLIDE_COUNT - 2 ? 'Almost done →' : 'Next →';
   btn.onclick = () => {
+    if (currentSlide === 2) cancelAutoType(); // Cancel
     goToSlide(currentSlide + 1);
   };
   return btn;
@@ -286,13 +288,27 @@ function initSearchDemo() {
   autoTypeDemo(input);
 }
 
+// Call this on slide change and on onboarding close
+function cancelAutoType() {
+  const input = document.getElementById('obSearchInput');
+  if (input?._autoTypeToken) {
+    input._autoTypeToken.active = false;
+    input._autoTypeToken = null;
+  }
+}
+
 function autoTypeDemo(input) {
   // Search for a Snake waza
   let phrase = 'suneiku';
 
+  // Token tied to this specific run — cancelling sets active to false
+  const token = { active: true };
+  input._autoTypeToken = token; // store on element so caller can cancel it
+
   // Autotype
   let i = 0;
   function type() {
+    if (!token.active) return; // cancelled externally
     if (input !== document.getElementById('obSearchInput')) return; // slide changed
     if (document.getElementById('obSearchInput') !== document.activeElement) {
       if (i < phrase.length) {
@@ -617,5 +633,8 @@ function clearAllLabels() {
 
 // ── Close button ──────────────────────────────────────────────
 export function initOnboarding() {
-  document.getElementById('obClose').onclick = closeOnboarding;
+  document.getElementById('obClose').addEventListener('click', () => {
+    if (currentSlide === 2) cancelAutoType();
+    closeOnboarding();
+  });
 }
