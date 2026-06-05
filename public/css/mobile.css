@@ -164,6 +164,12 @@
   min-width: auto;
 }
 
+.filter-sheet-btn .icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
 .view-style-select-mobile {
   display: none;
   padding: 7px 10px;
