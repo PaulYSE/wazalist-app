@@ -178,6 +178,41 @@ a {
   color: var(--text3);
 }
 
+/* Search bar */
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-wrap #searchInput {
+  width: 100%;
+  padding-right: 28px; /* room for the ✕ button */
+}
+
+.search-clear {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: none; /* hidden by default */
+  line-height: 1;
+}
+
+.search-clear:hover {
+  color: var(--text1);
+  background: var(--bg3);
+}
+
+.search-wrap.has-value .search-clear {
+  display: block;
+}
+
 /* ── Rotating Placeholders ── */
 #searchInput::placeholder {
   color: var(--text3);

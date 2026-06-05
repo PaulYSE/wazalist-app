@@ -144,8 +144,23 @@ const filterSheet = document.getElementById('filterSheet');
 // Called once from main.js after every module has finished evaluating.
 export function initUi() {
   // ── Filter events ───────────────────────────────────────────
-  document.getElementById('searchInput').addEventListener('input', (e) => {
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  const searchWrap = searchInput.closest('.search-wrap');
+
+  // Show/hide clear button based on input value
+  searchInput.addEventListener('input', (e) => {
     state.filters.search = e.target.value;
+    searchWrap.classList.toggle('has-value', !!e.target.value);
+    renderList();
+  });
+
+  // Clear button resets input and search state
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    state.filters.search = '';
+    searchWrap.classList.remove('has-value');
+    searchInput.focus();
     renderList();
   });
 

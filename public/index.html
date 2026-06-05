@@ -216,12 +216,15 @@
       <!-- BROWSE -->
       <div id="browseView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden">
         <div class="filter-row">
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Search Waza by name (JP / EN)…"
-            autocomplete="off"
-          />
+          <div class="search-wrap">
+  <input
+    id="searchInput"
+    type="search"
+    placeholder="Search Waza by name (JP / EN)…"
+    autocomplete="off"
+  />
+  <button class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
+</div>
           <button class="btn filter-sheet-btn" id="filterSheetBtn">
             <img class="icon" src="icons/filter-funnel-icon.svg" alt="" aria-hidden="true" />
             <span class="filter-dot" id="filterDot"></span>
