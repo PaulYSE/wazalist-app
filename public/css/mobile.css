@@ -326,7 +326,13 @@
     flex: 1;
   }
 
-  .filter-row {
+  .search-wrap {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .search-row {
     gap: 5px;
   }
 
@@ -350,16 +356,23 @@
   }
 
   /* Filter row: hide all controls, show Filters pill */
-  .filter-row .view-toggle-group,
-  .filter-row select {
+  .filter-controls .view-toggle-group,
+  .filter-controls select {
     display: none;
   }
 
   .filter-sheet-btn {
+    height: var(--filter-h);
+    width: var(--filter-h);
+    padding: 0;
     display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .view-style-select-mobile {
+    height: var(--filter-h);
+    padding: 0 0.625rem;
     display: block;
   }
 }

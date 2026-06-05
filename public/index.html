@@ -215,7 +215,7 @@
 
       <!-- BROWSE -->
       <div id="browseView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden">
-        <div class="filter-row">
+        <div class="search-row">
           <div class="search-wrap">
   <input
     id="searchInput"
@@ -225,6 +225,7 @@
   />
   <button class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
 </div>
+        <div class="filter-controls">
           <button class="btn filter-sheet-btn" id="filterSheetBtn">
             <img class="icon" src="icons/filter-funnel-icon.svg" alt="" aria-hidden="true" />
             <span class="filter-dot" id="filterDot"></span>
@@ -259,6 +260,7 @@
             <option value="expanded" selected>Cards</option>
             <option value="compact">Compact</option>
           </select>
+        </div>
         </div>
 
         <!-- FILTER BOTTOM SHEET (mobile) -->
