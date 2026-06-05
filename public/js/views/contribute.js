@@ -25,9 +25,6 @@ export async function renderContribute() {
     ? '<div class="dsec2"><h3>Actions</h3>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
       '<button class="btn" id="contribNewWazaBtn">+ Submit New Waza</button>' +
-      (state.isAdmin
-        ? '<a class="btn" href="/admin" target="_blank" style="text-decoration:none">⚙ Admin Panel</a>'
-        : '') +
       '</div></div>'
     : '';
 

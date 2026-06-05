@@ -3,7 +3,6 @@
 import { state } from '../state/state.js';
 import { LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from '../state/localStorage.js';
 import { api } from '../services/api.js';
-import { doLogout } from '../services/auth.js';
 import { escapeHtml } from '../lib/escape.js';
 import { exportToExcel } from '../features/export-to-excel.js';
 import { renderImport } from '../features/import/import-ui.js';
@@ -32,19 +31,6 @@ export async function renderAccount() {
             <div style="font-size:28px;margin-bottom:8px">👤</div>
             <div style="font-weight:600;margin-bottom:6px">Guest Mode</div>
             <div style="font-size:13px;color:var(--text3);margin-bottom:16px">You're using guest mode. Your data is stored locally in your browser.</div>
-          </div>`;
-
-  // Actions section (logout/sign out)
-  const actionsHTML = loggedIn
-    ? `<div class="dsec2" style="margin-top:20px">
-            <button class="btn" id="logoutBtn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2)">
-              Sign Out
-            </button>
-          </div>`
-    : `<div class="dsec2" style="margin-top:20px">
-            <button class="btn" id="signInBtn" style="background:var(--accent);border:1px solid var(--accent);color:white">
-              Sign In / Register
-            </button>
           </div>`;
 
   // Progress stats - state.prog is an object keyed by waza_id
@@ -116,13 +102,7 @@ export async function renderAccount() {
     : '';
 
   container.innerHTML =
-    accountInfoHTML +
-    statsHTML +
-    exportHTML +
-    importHTML +
-    dangerZoneHTML +
-    actionsHTML +
-    deleteAccountHTML;
+    accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + deleteAccountHTML;
 
   // Populate the moved import UI (renders into the #dashImport above)
   renderImport();
@@ -189,16 +169,6 @@ export async function renderAccount() {
       resetBtn.textContent = '🗑️ Reset All Progress';
     }
   });
-
-  // Bind logout button
-  container.querySelector('#logoutBtn')?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to sign out?')) {
-      doLogout();
-    }
-  });
-
-  // Bind sign in button
-  container.querySelector('#signInBtn')?.addEventListener('click', doLogout);
 
   // Bind delete-account button
   const deleteBtn = container.querySelector('#deleteAccountBtn');
