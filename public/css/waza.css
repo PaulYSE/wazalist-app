@@ -31,7 +31,7 @@
   background: var(--bg1);
 }
 
-/* ── Waza (List Style) ── */
+/* ── List Waza Style ── */
 .waza-list {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
@@ -165,10 +165,11 @@
   opacity: 1;
 }
 
-/* ── Expanded waza card (My List) ── */
+/* ── Card Waza Style ── */
 .waza-card {
   border-radius: var(--r);
   border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   overflow: hidden;
   cursor: pointer;
   transition: filter 0.12s;
@@ -212,6 +213,41 @@
   padding: 8px 14px;
   border-top: 1px solid var(--border);
   background: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Compact Waza Style ── */
+
+.drn {
+  font-size: 14px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drs {
+  font-size: 12px;
+  color: var(--text2);
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.waza-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.waza-compact:hover .drn {
+  color: var(--accent);
 }
 
 .vid-btn {

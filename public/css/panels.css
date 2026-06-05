@@ -112,38 +112,6 @@
   color: #e080a0;
 }
 
-.waza-compact {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-}
-
-.waza-compact:hover .drn {
-  color: var(--accent);
-}
-
-.drn {
-  font-size: 14px;
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.drs {
-  font-size: 12px;
-  color: var(--text2);
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .stat-bar-wrap {
   margin-bottom: 12px;
 }
