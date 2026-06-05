@@ -5,13 +5,14 @@ import { renderDashStats } from '../views/stats.js';
 import { state } from '../state/state.js';
 import { LS_LABELS } from '../state/localStorage.js';
 import { SHAPES, MARKING_LABELS_TEMPLATE } from '../config/constants.js';
-import { wazaMatchesSearch } from '../lib/search.js';
+import { wazaMatchesSearch, dispName } from '../lib/search.js';
 import { setBrowseView } from '../views/browse-list.js';
 import {
   markingStyle, // used in renderList() for all 3 view modes
   markingPips, // used in renderList() and renderDetail()
   cardLikePill, // used in renderList()
 } from '../components/render-helpers.js';
+import { escapeHtml } from '../lib/escape.js';
 
 // ── Config ────────────────────────────────────────────────────
 const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
@@ -32,13 +33,19 @@ function getRealWaza(limit = 20) {
 
 let currentSlide = 0;
 let chosenStyle = localStorage.getItem('wl_view_style') || 'expanded';
-// Demo marking state: [wazaIndex][markingIndex] - combined markings to show they're not mutually exclusive
+// Demo marking state: first 6 show each mark's pure colour in isolation,
+// last 4 show blends (markingStyle() mixes the hues automatically).
 const demoMarkings = [
-  [true, false, true, false, false, false], // Thundersnake: ● ■
-  [false, true, false, false, false, false], // Amaterasu: ▲
-  [false, false, false, true, true, false], // Muramasa: ♥ ★
-  [true, true, false, false, false, false], // Double Mix: ● ▲
-  [false, false, true, true, false, false], // Romance: ■ ♥
+  [true, false, false, false, false, false], // ● pure
+  [false, true, false, false, false, false], // ▲ pure
+  [false, false, true, false, false, false], // ■ pure
+  [false, false, false, true, false, false], // ♥ pure
+  [false, false, false, false, true, false], // ★ pure
+  [false, false, false, false, false, true], // ◆ pure
+  [true, true, false, false, false, false], // ●▲ blend
+  [false, false, true, true, false, false], // ■♥ blend
+  [true, false, false, false, true, false], // ●★ blend
+  [false, true, false, false, false, true], // ▲◆ blend
 ];
 // Labels inputs state
 const labelsValues = ['', '', '', '', '', ''];
@@ -97,6 +104,8 @@ function goToSlide(n) {
       };
     }
   }
+  if (currentSlide === 6) buildStatsDemo();
+  if (currentSlide === 7) buildCompareDemo();
 }
 
 function renderSlide(n) {
@@ -513,7 +522,7 @@ function buildMarkingDemo() {
   if (!container) return;
 
   // Get real waza data
-  const realWaza = getRealWaza(5);
+  const realWaza = getRealWaza(10);
   if (realWaza.length === 0) {
     container.innerHTML =
       '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
@@ -629,6 +638,109 @@ function clearAllLabels() {
     inp.value = '';
     labelsValues[i] = '';
   });
+}
+
+// ── Stats demo (slide 7) ──────────────────────────────────────
+function buildStatsDemo() {
+  const container = document.getElementById('obStatsRecent');
+  if (!container) return;
+  const realWaza = getRealWaza(3);
+  if (realWaza.length === 0) {
+    container.innerHTML =
+      '<div style="color:var(--text3);padding:12px;text-align:center">Loading waza…</div>';
+    return;
+  }
+  // Fabricated sample markings + relative times (onboarding has no real progress).
+  const sample = [
+    { waza: realWaza[0], markings: [true, false, false, true, false, false], time: '2h ago' },
+    { waza: realWaza[1], markings: [false, true, false, false, true, false], time: '1d ago' },
+    { waza: realWaza[2], markings: [false, false, true, false, false, false], time: '3d ago' },
+  ];
+  container.innerHTML = sample
+    .map(({ waza: w, markings, time }) => {
+      const ms = markingStyle(markings);
+      return (
+        '<div class="waza-compact ' +
+        ms.cls +
+        '" style="' +
+        ms.style +
+        '">' +
+        '<span class="drn">' +
+        escapeHtml(w.name_jp || '—') +
+        '</span>' +
+        '<span class="drs">' +
+        escapeHtml(dispName(w)) +
+        '</span>' +
+        '<div class="markings-row" style="flex-shrink:0">' +
+        markingPips(markings) +
+        '</div>' +
+        '<span class="recent-time">' +
+        timeAgoDemo(time) +
+        '</span>' +
+        '</div>'
+      );
+    })
+    .join('');
+}
+
+// Local relative-time formatter for demo rows (no real timestamps in onboarding).
+function timeAgoDemo(label) {
+  return label; // demo passes literal strings like "2h ago"
+}
+
+// ── Compare demo (slide 8) ────────────────────────────────────
+function buildCompareDemo() {
+  const container = document.getElementById('obCompareDemo');
+  if (!container) return;
+  const realWaza = getRealWaza(3);
+  if (realWaza.length === 0) {
+    container.innerHTML =
+      '<div style="color:var(--text3);padding:12px;text-align:center">Loading waza…</div>';
+    return;
+  }
+  // Sample: their marks (pips) vs your marks (buttons), like the real cmp-row.
+  const sample = [
+    {
+      waza: realWaza[0],
+      theirs: [true, false, false, true, false, false],
+      mine: [true, false, false, false, false, false],
+    },
+    {
+      waza: realWaza[1],
+      theirs: [false, true, false, false, false, false],
+      mine: [false, true, false, false, true, false],
+    },
+    {
+      waza: realWaza[2],
+      theirs: [false, false, true, false, false, false],
+      mine: [false, false, false, false, false, false],
+    },
+  ];
+  container.innerHTML = sample
+    .map(
+      ({ waza: w, theirs, mine }) =>
+        '<div class="cmp-row">' +
+        '<div><div class="cmp-name-jp">' +
+        escapeHtml(w.name_jp || '—') +
+        '</div>' +
+        '<div class="cmp-name-en">' +
+        escapeHtml(dispName(w)) +
+        '</div></div>' +
+        '<div class="cmp-markings-imported">' +
+        markingPips(theirs) +
+        '</div>' +
+        '<div class="cmp-markings-mine">' +
+        SHAPES.map(
+          (s, i) =>
+            '<button class="cmp-marking-btn' +
+            (mine[i] ? ' on' : '') +
+            '" disabled>' +
+            s +
+            '</button>',
+        ).join('') +
+        '</div></div>',
+    )
+    .join('');
 }
 
 // ── Close button ──────────────────────────────────────────────

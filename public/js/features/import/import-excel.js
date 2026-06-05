@@ -1,3 +1,5 @@
+/* import-excel.js: Logic for parsing Excel files and extracting text with color information */
+
 import { tiState } from '../../state/state.js';
 import { parseTextImport } from '../../lib/parser.js';
 

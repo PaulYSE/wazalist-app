@@ -958,32 +958,7 @@
                   >
                     Recent Activity
                   </div>
-                  <div
-                    style="
-                      font-size: 13px;
-                      color: var(--text2);
-                      padding: 6px 0;
-                      border-bottom: 1px solid var(--border);
-                    "
-                  >
-                    Updated Romance
-                    <span style="color: var(--text3); margin-left: auto; float: right">2h ago</span>
-                  </div>
-                  <div
-                    style="
-                      font-size: 13px;
-                      color: var(--text2);
-                      padding: 6px 0;
-                      border-bottom: 1px solid var(--border);
-                    "
-                  >
-                    Updated Muramasa
-                    <span style="color: var(--text3); margin-left: auto; float: right">1d ago</span>
-                  </div>
-                  <div style="font-size: 13px; color: var(--text2); padding: 6px 0">
-                    Updated Double Mix
-                    <span style="color: var(--text3); margin-left: auto; float: right">3d ago</span>
-                  </div>
+                  <div id="obStatsRecent"></div>
                 </div>
               </div>
             </div>
@@ -997,63 +972,11 @@
                 <b>Anyone (including guests)</b> can import these lists in the <b>Compare</b> tab to
                 do side-by-side comparisons.
               </div>
-              <div
-                class="ob-demo"
-                style="display: flex; flex-direction: column; gap: 10px; padding: 14px"
-              >
-                <div
-                  style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 10px 12px;
-                  "
-                >
-                  <div style="display: flex; align-items: center; gap: 10px">
-                    <span style="font-size: 20px">📤</span>
-                    <div style="flex: 1">
-                      <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px">
-                        Export Your List
-                      </div>
-                      <div style="font-size: 12px; color: var(--text3)">
-                        Generate a shareable URL with your markings & labels
-                      </div>
-                    </div>
-                  </div>
+              <div class="ob-demo" style="padding: 14px">
+                <div class="cmp-col-headers">
+                  <span>Waza</span><span>Their marks</span><span>Your marks</span>
                 </div>
-                <div
-                  style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 10px 12px;
-                  "
-                >
-                  <div style="display: flex; align-items: center; gap: 10px">
-                    <span style="font-size: 20px">📥</span>
-                    <div style="flex: 1">
-                      <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px">
-                        Import & Compare
-                      </div>
-                      <div style="font-size: 12px; color: var(--text3)">
-                        Paste a list URL to see differences side-by-side
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style="
-                    background: rgba(124, 111, 247, 0.1);
-                    border: 1px solid var(--accent);
-                    border-radius: var(--r);
-                    padding: 8px 10px;
-                    margin-top: 4px;
-                  "
-                >
-                  <div style="font-size: 12px; color: var(--accent)">
-                    💡 <b>Tip:</b> Works for guest accounts too — no sign-in required!
-                  </div>
-                </div>
+                <div id="obCompareDemo"></div>
               </div>
             </div>
 
@@ -1066,61 +989,40 @@
                 <b>Contribute</b>
                 tab. All contributions are reviewed by admins before being added to the database.
               </div>
-              <div
-                class="ob-demo"
-                style="display: flex; flex-direction: column; gap: 10px; padding: 14px"
-              >
-                <div
-                  style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 10px 12px;
-                  "
-                >
-                  <div style="display: flex; align-items: center; gap: 10px">
-                    <span style="font-size: 20px">📝</span>
-                    <div style="flex: 1">
-                      <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px">
-                        Suggest Edits
-                      </div>
-                      <div style="font-size: 12px; color: var(--text3)">
-                        Fix typos, add translations, or update video links
-                      </div>
-                    </div>
+              <div class="ob-demo" style="padding: 14px">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+                  <div class="ob-field-preview">
+                    <label>Name (JP) *</label>
+                    <div class="ob-fake-input">技名</div>
+                  </div>
+                  <div class="ob-field-preview">
+                    <label>Name (EN)</label>
+                    <div class="ob-fake-input">Waza name</div>
+                  </div>
+                  <div class="ob-field-preview">
+                    <label>Romaji</label>
+                    <div class="ob-fake-input">waza mei</div>
+                  </div>
+                  <div class="ob-field-preview">
+                    <label>Skill level</label>
+                    <div class="ob-fake-input">Beginner</div>
+                  </div>
+                  <div class="ob-field-preview" style="grid-column: 1/-1">
+                    <label>Video 1 *</label>
+                    <div class="ob-fake-input">https://youtube.com/…</div>
                   </div>
                 </div>
                 <div
                   style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 10px 12px;
-                  "
-                >
-                  <div style="display: flex; align-items: center; gap: 10px">
-                    <span style="font-size: 20px">➕</span>
-                    <div style="flex: 1">
-                      <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px">
-                        Add New Waza
-                      </div>
-                      <div style="font-size: 12px; color: var(--text3)">
-                        Submit a new technique with all its details
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style="
+                    margin-top: 12px;
                     background: rgba(76, 175, 130, 0.1);
                     border: 1px solid var(--green);
                     border-radius: var(--r);
                     padding: 8px 10px;
-                    margin-top: 4px;
                   "
                 >
                   <div style="font-size: 12px; color: var(--green)">
-                    ✓ All contributions reviewed by admins for quality
+                    ✓ Submitted waza are reviewed by admins before going live
                   </div>
                 </div>
               </div>
@@ -1137,47 +1039,28 @@
               <div class="ob-slide-note">
                 Excel and text import supported — colours are detected automatically.
               </div>
-              <div
-                class="ob-demo"
-                style="display: flex; flex-direction: column; gap: 8px; padding: 14px"
-              >
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 8px 10px;
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: 6px;
-                  "
-                >
-                  <span style="font-size: 18px">📊</span>
-                  <div>
-                    <div style="font-size: 13px; font-weight: 600">Excel Upload</div>
-                    <div style="font-size: 12px; color: var(--text3)">
-                      Cell colours detected automatically
-                    </div>
-                  </div>
+              <div class="ob-demo" style="padding: 14px">
+                <div style="font-size: 12px; color: var(--text3); margin-bottom: 8px">
+                  Your Excel might look like this:
                 </div>
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 8px 10px;
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: 6px;
-                  "
-                >
-                  <span style="font-size: 18px">📋</span>
-                  <div>
-                    <div style="font-size: 13px; font-weight: 600">Paste Text</div>
-                    <div style="font-size: 12px; color: var(--text3)">
-                      Labels in [square] or {curly} brackets auto-detected
-                    </div>
+                <div class="ob-xls">
+                  <div class="ob-xls-cell" style="background: #fde08680; color: #1a1a1a">
+                    サンダースネイク
                   </div>
+                  <div class="ob-xls-cell" style="background: #fde08680; color: #1a1a1a">
+                    アマテラス
+                  </div>
+                  <div class="ob-xls-cell" style="background: #a8d8b980; color: #1a1a1a">
+                    ロマンス
+                  </div>
+                  <div class="ob-xls-cell" style="background: #a8d8b980; color: #1a1a1a">村正</div>
+                  <div class="ob-xls-cell" style="background: #f4a8a880; color: #1a1a1a">
+                    ダブルミックス
+                  </div>
+                  <div class="ob-xls-cell" style="background: #ffffff; color: #1a1a1a">波</div>
+                </div>
+                <div style="font-size: 12px; color: var(--text3); margin-top: 8px">
+                  Each colour becomes a marking you assign on import.
                 </div>
               </div>
             </div>

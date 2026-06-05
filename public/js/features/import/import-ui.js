@@ -1,3 +1,5 @@
+/* import-ui.js: UI rendering and event handling for the import feature */
+
 import { state, tiState } from '../../state/state.js';
 import { parseTextImport } from '../../lib/parser.js';
 import { parseExcelFile } from './import-excel.js';

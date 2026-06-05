@@ -1,4 +1,4 @@
-/* share.js — list serialization + SHA-256 hashing, the share/import modals,
+/* compare.js — list serialization + SHA-256 hashing, the share/import modals,
    and the Compare tab (renderDashCompare). */
 import { state } from '../state/state.js';
 import { SHAPES } from '../config/constants.js';
