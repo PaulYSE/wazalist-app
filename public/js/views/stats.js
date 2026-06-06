@@ -24,6 +24,11 @@ export function renderDashStats() {
   let markingd = 0,
     liked = 0,
     disliked = 0;
+
+  // Persisted toggle state for the combined rankings table (survives re-render).
+  let rankByFamily = false; // false = rank by author, true = rank by family
+  let compareCommunity = false; // false = your stats only, true = side-by-side with community
+
   state.wazaData.forEach((w) => {
     const p = getP(w.id);
     if (p.markings && p.markings.some(Boolean)) markingd++;
@@ -32,6 +37,7 @@ export function renderDashStats() {
   });
 
   const overviewHTML =
+    '<div class="dsec2"><h3>Your Progress</h3>' +
     '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">' +
     '<div class="scard"><div class="n" style="color:var(--accent)">' +
     markingd +
@@ -45,48 +51,10 @@ export function renderDashStats() {
     '<div class="scard"><div class="n">' +
     state.wazaData.length +
     '</div><div class="l">Total Waza</div></div>' +
-    '</div>';
+    '</div></div>';
 
-  // ── Trend: marking activity bucketed by recency ─────────────
-  // No event history exists (only a single updated_at per waza), so this is
-  // "activity by recency" — how many of your marked waza were last touched
-  // within each window — not a true longitudinal series.
   const now = Date.now();
   const DAY = 24 * 60 * 60 * 1000;
-  const buckets = [
-    { label: 'Past week', max: 7 * DAY, n: 0 },
-    { label: 'Past month', max: 30 * DAY, n: 0 },
-    { label: 'Past 3 months', max: 90 * DAY, n: 0 },
-    { label: 'Older', max: Infinity, n: 0 },
-  ];
-  state.wazaData.forEach((w) => {
-    const p = state.prog[w.id];
-    if (!p || !p.updated_at) return;
-    if (!(p.markings && p.markings.some(Boolean))) return;
-    const age = now - new Date(p.updated_at).getTime();
-    const bucket = buckets.find((b) => age < b.max) || buckets[buckets.length - 1];
-    bucket.n++;
-  });
-  const trendMax = Math.max(1, ...buckets.map((b) => b.n));
-  const trendHTML =
-    '<div class="dsec2"><h3>Marking activity</h3>' +
-    buckets
-      .map(
-        (b) =>
-          '<div class="cov-row">' +
-          '<div class="cov-label"><span>' +
-          b.label +
-          '</span>' +
-          '<span style="color:var(--text3)">' +
-          b.n +
-          '</span></div>' +
-          '<div class="cov-track"><div class="cov-fill" style="width:' +
-          Math.round((b.n / trendMax) * 100) +
-          '%"></div></div>' +
-          '</div>',
-      )
-      .join('') +
-    '</div>';
 
   // ── Generic top-N aggregator over a set of entity fields ────
   // For each waza, reads the given fields (e.g. the two author slots) and
@@ -127,43 +95,72 @@ export function renderDashStats() {
     ['parent_en1', 'parent_jp1'],
   ];
 
-  // Side-by-side top-5: each row shows the entity, YOUR marks, and COMMUNITY likes.
-  // Clickable → scoped exact search in Browse.
-  const rankListHTML = (title, rows, scope) =>
-    '<div class="dsec2"><h3>' +
-    title +
-    '</h3>' +
-    '<div class="rank-head"><span>#</span><span></span>' +
-    '<span title="Your marks">You</span><span title="Community likes">Likes</span></div>' +
-    (rows.length
-      ? rows
-          .map(
-            (e, i) =>
-              '<div class="rank-row" data-term="' +
-              escapeHtml(e.name) +
-              '" data-scope="' +
-              scope +
-              '">' +
-              '<span class="rank-pos">' +
-              (i + 1) +
-              '</span>' +
-              '<span class="rank-name">' +
-              escapeHtml(e.name) +
-              '</span>' +
-              '<span class="rank-mine">' +
+  // ── Combined rankings table (authors | family, toggleable) ──
+  const rankFields = rankByFamily ? PARENT_FIELDS : AUTHOR_FIELDS;
+  const rankScope = rankByFamily ? 'parent' : 'author';
+  const rankRows = topBy(rankFields, 'marks');
+
+  const rankToggles =
+    '<div class="rank-toggles">' +
+    '<button class="rank-toggle' +
+    (rankByFamily ? '' : ' on') +
+    '" id="rankByAuthorBtn">By author</button>' +
+    '<button class="rank-toggle' +
+    (rankByFamily ? ' on' : '') +
+    '" id="rankByFamilyBtn">By family</button>' +
+    '<button class="rank-toggle rank-toggle-compare' +
+    (compareCommunity ? ' on' : '') +
+    '" id="rankCompareBtn">' +
+    (compareCommunity ? '✓ ' : '') +
+    'Compare to community</button>' +
+    '</div>';
+
+  // Column header adapts to compare mode.
+  const rankHead = compareCommunity
+    ? '<div class="rank-head rank-head-compare"><span>#</span><span></span>' +
+      '<span title="Your marks">You</span><span title="Community likes">Likes</span></div>'
+    : '<div class="rank-head"><span>#</span><span></span><span title="Your marks">You</span></div>';
+
+  const rankBody = rankRows.length
+    ? rankRows
+        .map((e, i) => {
+          const cells = compareCommunity
+            ? '<span class="rank-mine">' +
               e.marks +
               '</span>' +
               '<span class="rank-comm">' +
               e.likes +
-              '</span>' +
-              '</div>',
-          )
-          .join('')
-      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>') +
-    '</div>';
+              '</span>'
+            : '<span class="rank-mine">' + e.marks + '</span>';
+          return (
+            '<div class="rank-row' +
+            (compareCommunity ? ' rank-row-compare' : '') +
+            '" data-term="' +
+            escapeHtml(e.name) +
+            '" data-scope="' +
+            rankScope +
+            '">' +
+            '<span class="rank-pos">' +
+            (i + 1) +
+            '</span>' +
+            '<span class="rank-name">' +
+            escapeHtml(e.name) +
+            '</span>' +
+            cells +
+            '</div>'
+          );
+        })
+        .join('')
+    : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>';
 
-  const authorsHTML = rankListHTML('Top waza authors', topBy(AUTHOR_FIELDS, 'marks'), 'author');
-  const familyHTML = rankListHTML('Top waza family', topBy(PARENT_FIELDS, 'marks'), 'parent');
+  const rankHTML =
+    '<div class="dsec2"><h3>' +
+    (rankByFamily ? 'Top waza family' : 'Top waza authors') +
+    '</h3>' +
+    rankToggles +
+    rankHead +
+    rankBody +
+    '</div>';
 
   // ── Recently updated (past month) ───────────────────────────
   const historyRange = now - 30 * DAY;
@@ -262,7 +259,7 @@ export function renderDashStats() {
 
   // ── Assemble ────────────────────────────────────────────────
   const container = document.getElementById('dashStats');
-  container.innerHTML = overviewHTML + trendHTML + authorsHTML + familyHTML + covHTML + recentHTML;
+  container.innerHTML = overviewHTML + rankHTML + covHTML + recentHTML;
 
   // Search-and-exit from Stats: set a scoped exact search, jump to Browse.
   const searchAndExit = (term, scope) => {
@@ -281,5 +278,18 @@ export function renderDashStats() {
 
   container.querySelectorAll('.rank-row[data-term]').forEach((el) => {
     el.addEventListener('click', () => searchAndExit(el.dataset.term, el.dataset.scope));
+  });
+
+  container.querySelector('#rankByAuthorBtn')?.addEventListener('click', () => {
+    rankByFamily = false;
+    renderDashStats();
+  });
+  container.querySelector('#rankByFamilyBtn')?.addEventListener('click', () => {
+    rankByFamily = true;
+    renderDashStats();
+  });
+  container.querySelector('#rankCompareBtn')?.addEventListener('click', () => {
+    compareCommunity = !compareCommunity;
+    renderDashStats();
   });
 }

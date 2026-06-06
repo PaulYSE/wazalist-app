@@ -507,6 +507,89 @@
   font-weight: 600;
 }
 
+.rank-toggles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.rank-toggle {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s;
+}
+.rank-toggle:hover {
+  color: var(--text1);
+  border-color: var(--accent);
+}
+.rank-toggle.on {
+  background: var(--bg3);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.rank-toggle-compare {
+  margin-left: auto; /* push compare toggle to the right */
+}
+
+/* Single-value layout (your stats only) */
+.rank-head,
+.rank-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+/* Two-value layout (compare mode) */
+.rank-head-compare,
+.rank-row-compare {
+  grid-template-columns: 24px 1fr 48px 56px;
+}
+.rank-head {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+.rank-head span:nth-child(n + 3),
+.rank-mine,
+.rank-comm {
+  text-align: right;
+}
+.rank-row {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.rank-row:hover {
+  background: var(--bg2);
+}
+.rank-pos {
+  color: var(--text3);
+  font-weight: 600;
+}
+.rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rank-mine {
+  color: var(--accent);
+  font-weight: 600;
+}
+.rank-comm {
+  color: var(--green);
+  font-weight: 600;
+}
+
 /* ── Contributions ── */
 .contrib-item {
   padding: 10px 14px;
