@@ -5,6 +5,7 @@ import { dispName } from '../lib/search.js';
 import { markingStyle, markingPips } from '../components/render-helpers.js';
 import { selectWaza } from './waza-detail.js';
 import { navigateToBrowse } from '../app/shell.js';
+import { escapeHtml } from '../lib/escape.js';
 
 function timeAgo(iso) {
   if (!iso) return '—';
@@ -19,31 +20,169 @@ function timeAgo(iso) {
 }
 
 export function renderDashStats() {
-  let markingd = 0;
+  // ── Overview counts: marked / liked / disliked / total ──────
+  let markingd = 0,
+    liked = 0,
+    disliked = 0;
   state.wazaData.forEach((w) => {
     const p = getP(w.id);
     if (p.markings && p.markings.some(Boolean)) markingd++;
+    if (p.like === 1) liked++;
+    else if (p.like === -1) disliked++;
   });
 
-  // ── Overview cards (only marked and total) ────────────────
   const overviewHTML =
-    '<div class="dstats" style="grid-template-columns:repeat(2,1fr)">' +
+    '<div class="dstats" style="grid-template-columns:repeat(4,1fr)">' +
     '<div class="scard"><div class="n" style="color:var(--accent)">' +
     markingd +
     '</div><div class="l">Marked</div></div>' +
+    '<div class="scard"><div class="n" style="color:var(--green)">' +
+    liked +
+    '</div><div class="l">Liked</div></div>' +
+    '<div class="scard"><div class="n" style="color:var(--red)">' +
+    disliked +
+    '</div><div class="l">Disliked</div></div>' +
     '<div class="scard"><div class="n">' +
     state.wazaData.length +
     '</div><div class="l">Total Waza</div></div>' +
     '</div>';
 
-  // ── Recently updated (past year) ──────────────────────────
-  const historyRange = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  // ── Trend: marking activity bucketed by recency ─────────────
+  // No event history exists (only a single updated_at per waza), so this is
+  // "activity by recency" — how many of your marked waza were last touched
+  // within each window — not a true longitudinal series.
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+  const buckets = [
+    { label: 'Past week', max: 7 * DAY, n: 0 },
+    { label: 'Past month', max: 30 * DAY, n: 0 },
+    { label: 'Past 3 months', max: 90 * DAY, n: 0 },
+    { label: 'Older', max: Infinity, n: 0 },
+  ];
+  state.wazaData.forEach((w) => {
+    const p = state.prog[w.id];
+    if (!p || !p.updated_at) return;
+    if (!(p.markings && p.markings.some(Boolean))) return;
+    const age = now - new Date(p.updated_at).getTime();
+    const bucket = buckets.find((b) => age < b.max) || buckets[buckets.length - 1];
+    bucket.n++;
+  });
+  const trendMax = Math.max(1, ...buckets.map((b) => b.n));
+  const trendHTML =
+    '<div class="dsec2"><h3>Marking activity</h3>' +
+    buckets
+      .map(
+        (b) =>
+          '<div class="cov-row">' +
+          '<div class="cov-label"><span>' +
+          b.label +
+          '</span>' +
+          '<span style="color:var(--text3)">' +
+          b.n +
+          '</span></div>' +
+          '<div class="cov-track"><div class="cov-fill" style="width:' +
+          Math.round((b.n / trendMax) * 100) +
+          '%"></div></div>' +
+          '</div>',
+      )
+      .join('') +
+    '</div>';
+
+  // ── Generic top-N aggregator over a set of entity fields ────
+  // For each waza, reads the given fields (e.g. the two author slots) and
+  // accumulates per distinct entity:
+  //   marks  = count of MY marked waza crediting that entity (personal)
+  //   likes  = sum of like_count across that entity's waza (global community)
+  // Keyed by EN name (fallback JP). Returns top `limit` for the chosen metric.
+  function topBy(fieldPairs, metric, limit = 5) {
+    const acc = {}; // key → { name, marks, likes }
+    state.wazaData.forEach((w) => {
+      const p = getP(w.id);
+      const isMarked = p.markings && p.markings.some(Boolean);
+      const likeCount = w.like_count || 0;
+      // Collect this waza's distinct entity names from the field pairs.
+      const names = new Set();
+      fieldPairs.forEach(([en, jp]) => {
+        const name = (w[en] || w[jp] || '').trim();
+        if (name) names.add(name);
+      });
+      names.forEach((name) => {
+        if (!acc[name]) acc[name] = { name, marks: 0, likes: 0 };
+        if (isMarked) acc[name].marks++;
+        acc[name].likes += likeCount;
+      });
+    });
+    return Object.values(acc)
+      .filter((e) => e[metric] > 0)
+      .sort((a, b) => b[metric] - a[metric] || b.marks - a.marks)
+      .slice(0, limit);
+  }
+
+  const AUTHOR_FIELDS = [
+    ['author_en0', 'author_jp0'],
+    ['author_en1', 'author_jp1'],
+  ];
+  const PARENT_FIELDS = [
+    ['parent_en0', 'parent_jp0'],
+    ['parent_en1', 'parent_jp1'],
+  ];
+
+  // Renders a top-5 list with one metric value shown per row.
+  const topListHTML = (title, rows, metric, unit) =>
+    '<div class="dsec2"><h3>' +
+    title +
+    '</h3>' +
+    (rows.length
+      ? rows
+          .map(
+            (e) =>
+              '<div class="cov-row"><div class="cov-label">' +
+              '<span>' +
+              escapeHtml(e.name) +
+              '</span>' +
+              '<span style="color:var(--text3)">' +
+              e[metric] +
+              ' ' +
+              unit +
+              '</span>' +
+              '</div></div>',
+          )
+          .join('')
+      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>') +
+    '</div>';
+
+  const topAuthorsMarks = topListHTML(
+    'Top authors — by your marks',
+    topBy(AUTHOR_FIELDS, 'marks'),
+    'marks',
+    'marked',
+  );
+  const topAuthorsLikes = topListHTML(
+    'Top authors — by community likes',
+    topBy(AUTHOR_FIELDS, 'likes'),
+    'likes',
+    'likes',
+  );
+  const topParentsMarks = topListHTML(
+    'Top parent waza — by your marks',
+    topBy(PARENT_FIELDS, 'marks'),
+    'marks',
+    'marked',
+  );
+  const topParentsLikes = topListHTML(
+    'Top parent waza — by community likes',
+    topBy(PARENT_FIELDS, 'likes'),
+    'likes',
+    'likes',
+  );
+
+  // ── Recently updated (past month) ───────────────────────────
+  const historyRange = now - 30 * DAY;
   const recent = state.wazaData
     .filter((w) => {
       const p = state.prog[w.id];
       if (!p || !p.updated_at) return false;
-      const updatedTime = new Date(p.updated_at).getTime();
-      return updatedTime >= historyRange;
+      return new Date(p.updated_at).getTime() >= historyRange;
     })
     .sort((a, b) => new Date(state.prog[b.id].updated_at) - new Date(state.prog[a.id].updated_at));
 
@@ -64,10 +203,10 @@ export function renderDashStats() {
               _ms4.style +
               '">' +
               '<span class="drn">' +
-              (w.name_jp || '—') +
+              escapeHtml(w.name_jp || '—') +
               '</span>' +
               '<span class="drs">' +
-              dispName(w) +
+              escapeHtml(dispName(w)) +
               '</span>' +
               '<div class="markings-row" style="flex-shrink:0">' +
               markingPips(markings) +
@@ -82,7 +221,7 @@ export function renderDashStats() {
       : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No activity in the past month.</div>') +
     '</div>';
 
-  // ── Coverage by family (sorted by % completion) ───────────
+  // ── Coverage by family (≥3 members, sorted by % completion) ─
   const families = {};
   state.wazaData.forEach((w) => {
     [w.parent_en0, w.parent_en1].filter(Boolean).forEach((fam) => {
@@ -103,42 +242,55 @@ export function renderDashStats() {
     };
   }
 
-  // Sort by coverage percentage (descending), then by total count
-  const famEntries = Object.entries(families).sort((a, b) => {
-    const pctA = a[1].total ? a[1].touched / a[1].total : 0;
-    const pctB = b[1].total ? b[1].touched / b[1].total : 0;
-    if (pctB !== pctA) return pctB - pctA; // Higher % first
-    return b[1].total - a[1].total; // Then by total count
-  });
+  // Exclude small families (≤2 members), then sort by % then size.
+  const famEntries = Object.entries(families)
+    .filter(([, { total }]) => total > 2)
+    .sort((a, b) => {
+      const pctA = a[1].total ? a[1].touched / a[1].total : 0;
+      const pctB = b[1].total ? b[1].touched / b[1].total : 0;
+      if (pctB !== pctA) return pctB - pctA;
+      return b[1].total - a[1].total;
+    });
 
   const covHTML =
-    '<div class="dsec2"><h3>Coverage by family</h3>' +
-    famEntries
-      .map(([fam, { total, touched }]) => {
-        const pct = total ? Math.round((touched / total) * 100) : 0;
-        const hasZeroCoverage = touched === 0;
-        return (
-          '<div class="cov-row' +
-          (hasZeroCoverage ? ' cov-row-zero' : '') +
-          '">' +
-          '<div class="cov-label"><span>' +
-          fam +
-          '</span><span style="color:var(--text3)">' +
-          touched +
-          ' / ' +
-          total +
-          '</span></div>' +
-          '<div class="cov-track"><div class="cov-fill" style="width:' +
-          pct +
-          '%"></div></div>' +
-          '</div>'
-        );
-      })
-      .join('') +
+    '<div class="dsec2"><h3>Top family completion (3+ members)</h3>' +
+    (famEntries.length
+      ? famEntries
+          .map(([fam, { total, touched }]) => {
+            const pct = total ? Math.round((touched / total) * 100) : 0;
+            return (
+              '<div class="cov-row' +
+              (touched === 0 ? ' cov-row-zero' : '') +
+              '">' +
+              '<div class="cov-label"><span>' +
+              escapeHtml(fam) +
+              '</span>' +
+              '<span style="color:var(--text3)">' +
+              touched +
+              ' / ' +
+              total +
+              '</span></div>' +
+              '<div class="cov-track"><div class="cov-fill" style="width:' +
+              pct +
+              '%"></div></div>' +
+              '</div>'
+            );
+          })
+          .join('')
+      : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families with 3+ members yet.</div>') +
     '</div>';
 
+  // ── Assemble ────────────────────────────────────────────────
   const container = document.getElementById('dashStats');
-  container.innerHTML = overviewHTML + recentHTML + covHTML;
+  container.innerHTML =
+    overviewHTML +
+    trendHTML +
+    topAuthorsMarks +
+    topAuthorsLikes +
+    topParentsMarks +
+    topParentsLikes +
+    covHTML +
+    recentHTML;
 
   container.querySelectorAll('.waza-compact').forEach((el) => {
     el.addEventListener('click', () => {
@@ -147,5 +299,3 @@ export function renderDashStats() {
     });
   });
 }
-
-// ── Rotating username placeholder ───────────────────────────────
