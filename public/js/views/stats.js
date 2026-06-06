@@ -7,6 +7,10 @@ import { selectWaza } from './waza-detail.js';
 import { navigateToBrowse } from '../app/shell.js';
 import { escapeHtml } from '../lib/escape.js';
 
+// Persisted toggle state for the combined rankings table (survives re-render).
+let rankByFamily = false; // false = rank by author, true = rank by family
+let compareCommunity = false; // false = your stats only, true = side-by-side with community
+
 function timeAgo(iso) {
   if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
@@ -24,10 +28,6 @@ export function renderDashStats() {
   let markingd = 0,
     liked = 0,
     disliked = 0;
-
-  // Persisted toggle state for the combined rankings table (survives re-render).
-  let rankByFamily = false; // false = rank by author, true = rank by family
-  let compareCommunity = false; // false = your stats only, true = side-by-side with community
 
   state.wazaData.forEach((w) => {
     const p = getP(w.id);
