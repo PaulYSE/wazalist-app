@@ -127,54 +127,43 @@ export function renderDashStats() {
     ['parent_en1', 'parent_jp1'],
   ];
 
-  // Renders a top-5 list with one metric value shown per row.
-  const topListHTML = (title, rows, metric, unit) =>
+  // Side-by-side top-5: each row shows the entity, YOUR marks, and COMMUNITY likes.
+  // Clickable → scoped exact search in Browse.
+  const rankListHTML = (title, rows, scope) =>
     '<div class="dsec2"><h3>' +
     title +
     '</h3>' +
+    '<div class="rank-head"><span>#</span><span></span>' +
+    '<span title="Your marks">You</span><span title="Community likes">Likes</span></div>' +
     (rows.length
       ? rows
           .map(
-            (e) =>
-              '<div class="cov-row"><div class="cov-label">' +
-              '<span>' +
+            (e, i) =>
+              '<div class="rank-row" data-term="' +
+              escapeHtml(e.name) +
+              '" data-scope="' +
+              scope +
+              '">' +
+              '<span class="rank-pos">' +
+              (i + 1) +
+              '</span>' +
+              '<span class="rank-name">' +
               escapeHtml(e.name) +
               '</span>' +
-              '<span style="color:var(--text3)">' +
-              e[metric] +
-              ' ' +
-              unit +
+              '<span class="rank-mine">' +
+              e.marks +
               '</span>' +
-              '</div></div>',
+              '<span class="rank-comm">' +
+              e.likes +
+              '</span>' +
+              '</div>',
           )
           .join('')
       : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>') +
     '</div>';
 
-  const topAuthorsMarks = topListHTML(
-    'Top authors — by your marks',
-    topBy(AUTHOR_FIELDS, 'marks'),
-    'marks',
-    'marked',
-  );
-  const topAuthorsLikes = topListHTML(
-    'Top authors — by community likes',
-    topBy(AUTHOR_FIELDS, 'likes'),
-    'likes',
-    'likes',
-  );
-  const topParentsMarks = topListHTML(
-    'Top parent waza — by your marks',
-    topBy(PARENT_FIELDS, 'marks'),
-    'marks',
-    'marked',
-  );
-  const topParentsLikes = topListHTML(
-    'Top parent waza — by community likes',
-    topBy(PARENT_FIELDS, 'likes'),
-    'likes',
-    'likes',
-  );
+  const authorsHTML = rankListHTML('Top waza authors', topBy(AUTHOR_FIELDS, 'marks'), 'author');
+  const familyHTML = rankListHTML('Top waza family', topBy(PARENT_FIELDS, 'marks'), 'parent');
 
   // ── Recently updated (past month) ───────────────────────────
   const historyRange = now - 30 * DAY;
@@ -184,7 +173,8 @@ export function renderDashStats() {
       if (!p || !p.updated_at) return false;
       return new Date(p.updated_at).getTime() >= historyRange;
     })
-    .sort((a, b) => new Date(state.prog[b.id].updated_at) - new Date(state.prog[a.id].updated_at));
+    .sort((a, b) => new Date(state.prog[b.id].updated_at) - new Date(state.prog[a.id].updated_at))
+    .slice(0, 30);
 
   const recentHTML =
     '<div class="dsec2"><h3>Recent activity (past month)</h3>' +
@@ -231,16 +221,6 @@ export function renderDashStats() {
       if (p.markings && p.markings.some(Boolean)) families[fam].touched++;
     });
   });
-  const noFamily = state.wazaData.filter((w) => !w.parent_en0 && !w.parent_en1);
-  if (noFamily.length) {
-    families['Uncategorised'] = {
-      total: noFamily.length,
-      touched: noFamily.filter((w) => {
-        const p = getP(w.id);
-        return p.markings && p.markings.some(Boolean);
-      }).length,
-    };
-  }
 
   // Exclude small families (≤2 members), then sort by % then size.
   const famEntries = Object.entries(families)
@@ -282,20 +262,24 @@ export function renderDashStats() {
 
   // ── Assemble ────────────────────────────────────────────────
   const container = document.getElementById('dashStats');
-  container.innerHTML =
-    overviewHTML +
-    trendHTML +
-    topAuthorsMarks +
-    topAuthorsLikes +
-    topParentsMarks +
-    topParentsLikes +
-    covHTML +
-    recentHTML;
+  container.innerHTML = overviewHTML + trendHTML + authorsHTML + familyHTML + covHTML + recentHTML;
+
+  // Search-and-exit from Stats: set a scoped exact search, jump to Browse.
+  const searchAndExit = (term, scope) => {
+    const query = scope ? `${scope.toUpperCase()}:"${term}"` : term;
+    state.filters.search = query;
+    document.getElementById('searchInput').value = query;
+    navigateToBrowse();
+  };
 
   container.querySelectorAll('.waza-compact').forEach((el) => {
     el.addEventListener('click', () => {
       navigateToBrowse();
       selectWaza(+el.dataset.id);
     });
+  });
+
+  container.querySelectorAll('.rank-row[data-term]').forEach((el) => {
+    el.addEventListener('click', () => searchAndExit(el.dataset.term, el.dataset.scope));
   });
 }
