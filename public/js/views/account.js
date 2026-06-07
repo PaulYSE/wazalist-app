@@ -39,24 +39,6 @@ export async function renderAccount() {
   const totalLiked = progEntries.filter((p) => p.like === 1).length;
   const totalDisliked = progEntries.filter((p) => p.like === -1).length;
 
-  const statsHTML = `<div class="dsec2">
-        <h3>Your Progress</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px">
-          <div style="padding:12px;background:var(--bg2);border-radius:var(--r);text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--accent)">${totalMarked}</div>
-            <div style="font-size:12px;color:var(--text3)">Waza marked</div>
-          </div>
-          <div style="padding:12px;background:var(--bg2);border-radius:var(--r);text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--green)">${totalLiked}</div>
-            <div style="font-size:12px;color:var(--text3)">Liked</div>
-          </div>
-          <div style="padding:12px;background:var(--bg2);border-radius:var(--r);text-align:center">
-            <div style="font-size:24px;font-weight:700;color:var(--red)">${totalDisliked}</div>
-            <div style="font-size:12px;color:var(--text3)">Disliked</div>
-          </div>
-        </div>
-      </div>`;
-
   // ── Export to Excel ───────────────────────────────────────────
   const exportHTML = `<div class="dsec2" style="margin-top:20px">
         <h3>Export to Excel</h3>
@@ -102,7 +84,7 @@ export async function renderAccount() {
     : '';
 
   container.innerHTML =
-    accountInfoHTML + statsHTML + exportHTML + importHTML + dangerZoneHTML + deleteAccountHTML;
+    accountInfoHTML + exportHTML + importHTML + dangerZoneHTML + deleteAccountHTML;
 
   // Populate the moved import UI (renders into the #dashImport above)
   renderImport();
