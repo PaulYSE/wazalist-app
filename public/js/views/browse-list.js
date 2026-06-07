@@ -84,12 +84,6 @@ export function initBrowseList() {
   document.getElementById('browseSortOrder').addEventListener('change', (e) => {
     setBrowseSort({ order: e.target.value });
   });
-
-  // One delegated click handler for all rows, all view modes. Attached once.
-  document.getElementById('wazaList').addEventListener('click', (e) => {
-    const row = e.target.closest('[data-id]');
-    if (row) selectWaza(+row.dataset.id);
-  });
 }
 
 export function renderList() {
@@ -140,6 +134,9 @@ export function renderList() {
         );
       })
       .join('');
+    list
+      .querySelectorAll('.waza-card')
+      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
   } else if (state.browseListView === 'list') {
     list.innerHTML = filtered
       .map((w) => {
@@ -174,6 +171,9 @@ export function renderList() {
         );
       })
       .join('');
+    list
+      .querySelectorAll('.waza-list')
+      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
   } else {
     // Compact — no likes, equal truncating names
     list.innerHTML = filtered
@@ -203,5 +203,8 @@ export function renderList() {
         );
       })
       .join('');
+    list
+      .querySelectorAll('.waza-compact')
+      .forEach((el) => el.addEventListener('click', () => selectWaza(+el.dataset.id)));
   }
 }
