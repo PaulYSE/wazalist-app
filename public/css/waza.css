@@ -38,6 +38,8 @@
   cursor: pointer;
   transition: background 0.12s;
   border-left: 3px solid transparent;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 .waza-list:hover {
@@ -173,6 +175,8 @@
   overflow: hidden;
   cursor: pointer;
   transition: filter 0.12s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 .waza-card:hover {
@@ -244,6 +248,8 @@
   border-bottom: 1px solid var(--border);
   border-left: 3px solid transparent;
   cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 .waza-compact:hover .drn {
