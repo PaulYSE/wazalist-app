@@ -1,6 +1,6 @@
 import { state } from '../state/state.js';
 import { LS_IMPORTED } from '../state/localStorage.js';
-import { showToast } from '../components/Toast.js';
+import { showToast } from '../components/toast.js';
 import { renderDashCompare } from '../views/compare.js';
 
 // Check URL for ?import= key on load

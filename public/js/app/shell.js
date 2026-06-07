@@ -15,6 +15,7 @@ const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 export function startWazaPlaceholderRotation() {
   const input = document.getElementById('searchInput');
   if (!input) return;
+  if (input._phTimer) clearTimeout(input._phTimer); // cancel any prior chain
 
   // Build a flat pool of name strings from name_jp and name_en only
   function buildPool() {

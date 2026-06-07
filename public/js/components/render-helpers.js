@@ -12,7 +12,20 @@ import { state } from '../state/state.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
+// Memoized: there are only 64 possible markings combos, and the all-false case
+// dominates a typical list, so caching collapses most calls to a Map lookup.
+const _msCache = new Map();
+
 export function markingStyle(markings) {
+  const key = (markings || []).map((b) => (b ? '1' : '0')).join('');
+  const hit = _msCache.get(key);
+  if (hit) return hit;
+  const v = _computeMarkingStyle(markings);
+  _msCache.set(key, v);
+  return v;
+}
+
+function _computeMarkingStyle(markings) {
   const active = (markings || []).map((on, i) => (on ? i : -1)).filter((i) => i >= 0);
   if (!active.length) return { cls: '', style: '' };
   let sinSum = 0,
@@ -24,10 +37,10 @@ export function markingStyle(markings) {
   });
   const hue = Math.round(((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360);
   const count = active.length;
-  const t = Math.pow((count - 1) / 5, 0.65); // 0 at count=1, 1 at count=6, front-weighted
-  const sat = Math.round(38 + t * 57); // 38% → 95%
-  const bgL = Math.round(7.5 + t * 9); // 7.5% → 16.5%
-  const bdL = Math.round(42 + t * 44); // 42% → 86%
+  const t = Math.pow((count - 1) / 5, 0.65);
+  const sat = Math.round(38 + t * 57);
+  const bgL = Math.round(7.5 + t * 9);
+  const bdL = Math.round(42 + t * 44);
   return {
     cls: 'sh-active',
     style:
@@ -44,6 +57,7 @@ export function markingStyle(markings) {
       '%)',
   };
 }
+
 export const markingPips = (markings) =>
   SHAPES.map(
     (s, i) =>

@@ -3,7 +3,7 @@
 import { state } from '../state/state.js';
 import { SHAPES } from '../config/constants.js';
 import { saveLabels, getP, saveP } from '../services/progress.js';
-import { showToast } from '../components/Toast.js';
+import { showToast } from '../components/toast.js';
 import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { markingPips } from '../components/render-helpers.js';

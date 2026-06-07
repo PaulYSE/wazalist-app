@@ -7,7 +7,7 @@ import { escapeHtml } from '../../lib/escape.js';
 import { SHAPES } from '../../config/constants.js';
 import { dispName } from '../../lib/search.js';
 import { saveP, saveLabels } from '../../services/progress.js';
-import { showToast } from '../../components/Toast.js';
+import { showToast } from '../../components/toast.js';
 
 export function renderImport() {
   const container = document.getElementById('dashImport');

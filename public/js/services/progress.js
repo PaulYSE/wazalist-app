@@ -3,7 +3,6 @@ import { LS_LABELS, loadLocal, saveLocal } from '../state/localStorage.js';
 import { api } from './api.js';
 import { renderList } from '../views/browse-list.js';
 import { renderDetail } from '../views/waza-detail.js';
-import { renderDashStats } from '../views/stats.js';
 
 // ── Progress helpers ─────────────────────────────────────────
 export var emptyP = function () {
@@ -36,7 +35,6 @@ export async function saveP(id, patch) {
     saveLocal(l);
     renderList();
     renderDetail();
-    renderDashStats();
   } else {
     state.savingIds.add(id);
     renderDetail(); // show spinning state immediately
@@ -62,7 +60,6 @@ export async function saveP(id, patch) {
     state.savingIds.delete(id);
     renderList();
     renderDetail();
-    renderDashStats();
     // Flash "Saved ✓" indicator
     const indicator = document.getElementById('saveIndicator');
     if (indicator) {
