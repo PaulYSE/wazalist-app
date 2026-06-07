@@ -22,7 +22,19 @@ export function selectWaza(id) {
     f.src = '';
   });
   state.selectedId = id;
-  renderList();
+
+  // Move the selection highlight in place instead of rebuilding the whole list.
+  // A full renderList() resets the browse list's scrollTop, and with
+  // content-visibility the position can't be reliably preserved across it.
+  const listEl = document.getElementById('wazaList');
+  if (listEl) {
+    listEl.querySelectorAll('.selected').forEach((el) => el.classList.remove('selected'));
+    if (id !== null) {
+      const row = listEl.querySelector(`[data-id="${id}"]`);
+      if (row) row.classList.add('selected');
+    }
+  }
+
   renderDetail();
   document.querySelector('.main').classList.toggle('waza-selected', id !== null);
 
@@ -37,7 +49,7 @@ export function selectWaza(id) {
   // Push history state so back button closes detail instead of exiting app
   if (id !== null) {
     const url = new URL(location.href);
-    url.searchParams.set('waza', id); // Use ID directly as slug
+    url.searchParams.set('waza', id);
     history.pushState({ wazaOpen: true, wazaId: id }, '', url);
   }
 }
@@ -423,9 +435,15 @@ export function renderDetail() {
   // Search-and-exit: set the search term, then drop back to the list panel.
   const searchAndExit = (term, scope = null) => {
     const query = scope ? `${scope.toUpperCase()}:"${term}"` : term;
-    state.filters.search = term;
+    state.filters.search = query; // scoped query, so the filter actually scopes
     document.getElementById('searchInput').value = query;
-    closeDetailPanel(); // clears selection, re-renders list, removes overlay on mobile
+    state.selectedId = null;
+    document.querySelector('.main').classList.remove('waza-selected');
+    const url = new URL(location.href);
+    url.searchParams.delete('waza');
+    history.replaceState(null, '', url);
+    renderList(); // content changed (new filter) — re-render is correct here
+    renderDetail();
   };
   panel
     .querySelectorAll('.chip[data-parent]')
@@ -445,19 +463,21 @@ export function renderDetail() {
 
 // ── History popstate handler to support back button closing detail view ──
 export function closeDetailPanel() {
-  // Stop any playing embeds
   document.querySelectorAll('.embed-wrap.open iframe').forEach((f) => {
     f.src = '';
   });
   state.selectedId = null;
-  renderList();
+
+  // Drop the highlight in place; no full re-render (preserves scroll).
+  const listEl = document.getElementById('wazaList');
+  if (listEl) {
+    listEl.querySelectorAll('.selected').forEach((el) => el.classList.remove('selected'));
+  }
+
   renderDetail();
   document.querySelector('.main').classList.remove('waza-selected');
 
-  // Clean up URL without creating history entry
   const url = new URL(location.href);
   url.searchParams.delete('waza');
   history.replaceState(null, '', url);
 }
-
-// ── Contribute tab ────────────────────────────────────────────
