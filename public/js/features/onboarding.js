@@ -13,6 +13,7 @@ import {
   cardLikePill, // used in renderList()
 } from '../components/render-helpers.js';
 import { escapeHtml } from '../lib/escape.js';
+import { openAccountSection } from '../views/account.js';
 
 // ── Config ────────────────────────────────────────────────────
 const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
@@ -168,6 +169,7 @@ function renderFooter() {
     importBtn.onclick = () => {
       closeOnboarding();
       setTimeout(() => {
+        openAccountSection('import');
         const navAcc = document.querySelector('[data-tab="account"]');
         if (navAcc) navAcc.click();
       }, 400);
