@@ -1,13 +1,36 @@
+/**
+ * @file index.ts (Cloudflare Worker)
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Main Cloudflare Worker entry point. Handles all API routes for authentication, waza data, progress tracking, labels, list sharing (KV), account management, contributions, admin panel, and serves the HTML frontend.
+ */
+
 import { renderHtml } from "./renderHtml";
 import { renderAdmin } from "./renderAdmin";
 import { hashPassword, generateToken, getUserFromSession } from "./auth";
 
+/**
+ * @brief Helper to return JSON response.
+ *
+ * @param {unknown} data - Data to stringify.
+ * @param {number} status - HTTP status code (default 200).
+ * @return {Response} JSON response.
+ */
 const json = (data: unknown, status = 200) =>
 	new Response(JSON.stringify(data), {
 		status,
 		headers: { "Content-Type": "application/json" },
 	});
 
+/**
+ * @brief Helper to return error JSON response.
+ *
+ * @param {string} msg - Error message.
+ * @param {number} status - HTTP status code (default 400).
+ * @return {Response} JSON error response.
+ */
 const err = (msg: string, status = 400) => json({ error: msg }, status);
 
 export default {

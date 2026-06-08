@@ -1,3 +1,19 @@
+/**
+ * @file auth.ts (Cloudflare Worker)
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Server-side authentication utilities for password hashing (PBKDF2), session token generation, and session validation against D1 database.
+ */
+
+/**
+ * @brief Hashes a password with PBKDF2 using an optional or newly generated salt.
+ *
+ * @param {string} password - Plain-text password to hash.
+ * @param {string} [salt] - Optional salt string (16 bytes as hex). If not provided, a random salt is generated.
+ * @return {Promise<{ hash: string; salt: string }>} Object containing hex-encoded hash and salt.
+ */
 export async function hashPassword(password: string, salt?: string): Promise<{ hash: string; salt: string }> {
     const encoder = new TextEncoder();
 
@@ -32,6 +48,11 @@ export async function hashPassword(password: string, salt?: string): Promise<{ h
     return { hash, salt };
 }
 
+/**
+ * @brief Generates a cryptographically secure random session token.
+ *
+ * @return {string} Hex-encoded 32-byte random token (64 characters).
+ */
 export function generateToken(): string {
     const buffer = crypto.getRandomValues(new Uint8Array(32));
     return Array.from(buffer)
@@ -39,6 +60,15 @@ export function generateToken(): string {
         .join('');
 }
 
+/**
+ * @brief Retrieves a user from a valid session token.
+ *
+ * Queries the D1 database for a non-expired session and returns the associated user.
+ *
+ * @param {Env} env - Cloudflare Workers environment bindings (includes D1 database).
+ * @param {string} token - Session token (hex string).
+ * @return {Promise<Object|null>} User object with id, username, email, is_admin, or null if session invalid/expired.
+ */
 export async function getUserFromSession(env: Env, token: string) {
     if (!token) return null;
 
