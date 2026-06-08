@@ -3,8 +3,8 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
- * @brief Renders the detail panel for a selected waza, handles like/dislike, marking toggles, video embedding with oEmbed metadata, collapsible sections, and navigation to similar waza.
+ * @date 2026-06-09
+ * @brief Renders the detail panel for a selected waza, handles like/dislike, marking toggles, video embedding with oEmbed metadata, collapsible sections, navigation to similar waza, and history API integration.
  */
 
 import {
@@ -22,6 +22,11 @@ import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit } from '../modals/suggest-edit.js';
 import { renderList } from './browse-list.js';
+
+// Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
+// update the UI without writing NEW history entries (which would corrupt the
+// back/forward stack).
+let isPopping = false;
 
 /**
  * @brief Selects a waza by ID and updates the UI.
@@ -63,7 +68,7 @@ export function selectWaza(id) {
   }
 
   // Push history state so back button closes detail instead of exiting app
-  if (id !== null) {
+  if (id !== null && !isPopping) {
     const url = new URL(location.href);
     url.searchParams.set('waza', id);
     history.pushState({ wazaOpen: true, wazaId: id }, '', url);
@@ -168,7 +173,7 @@ export function renderDetail() {
               : '<span class="vlink-author"></span>') +
             '</div>' +
             '</a>' +
-            '<div class="vlink-actions">' + // ← New wrapper
+            '<div class="vlink-actions">' +
             (canEmbed
               ? '<button class="play-btn" data-vi="' + i + '">▶ Open In-App Player</button>'
               : '') +
@@ -515,7 +520,40 @@ export function closeDetailPanel() {
   renderDetail();
   document.querySelector('.main').classList.remove('waza-selected');
 
-  const url = new URL(location.href);
-  url.searchParams.delete('waza');
-  history.replaceState(null, '', url);
+  if (!isPopping) {
+    const url = new URL(location.href);
+    url.searchParams.delete('waza');
+    history.replaceState(null, '', url);
+  }
+}
+
+// Called by the popstate handler — drive selection/close WITHOUT writing history.
+
+/**
+ * @brief Selects a waza from history navigation without pushing a new history entry.
+ *
+ * @param {number} id - Waza ID to select.
+ * @return {void}
+ */
+export function selectWazaFromHistory(id) {
+  isPopping = true;
+  try {
+    selectWaza(id);
+  } finally {
+    isPopping = false;
+  }
+}
+
+/**
+ * @brief Closes the detail panel from history navigation without pushing a new history entry.
+ *
+ * @return {void}
+ */
+export function closeDetailPanelFromHistory() {
+  isPopping = true;
+  try {
+    closeDetailPanel();
+  } finally {
+    isPopping = false;
+  }
 }

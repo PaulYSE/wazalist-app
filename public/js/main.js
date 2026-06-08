@@ -3,15 +3,19 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-09
  * @brief Application entry point. Initializes all modules, sets up event listeners, and boots the app based on authentication state.
  */
 
 import { state } from './state/state.js';
 import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
-import { initBrowseList, renderList } from './views/browse-list.js';
-import { initWazaDetail, renderDetail } from './views/waza-detail.js';
+import { initBrowseList } from './views/browse-list.js';
+import {
+  initWazaDetail,
+  selectWazaFromHistory,
+  closeDetailPanelFromHistory,
+} from './views/waza-detail.js';
 import { initUi, closeMobMenu } from './app/shell.js';
 import { initShare } from './features/share-list.js';
 import { initNewWaza } from './modals/new-waza.js';
@@ -38,19 +42,24 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 // ── Popstate — back button closes the detail panel ────────────
 
 /**
- * @brief Handles browser back/forward navigation to close detail panel when appropriate.
+ * @brief Handles browser back/forward navigation to sync detail panel with URL.
+ *
+ * Reads the ?waza= URL parameter and opens/closes the detail panel accordingly.
+ * This ensures the back/forward buttons maintain correct state without full page reloads.
  */
-window.addEventListener('popstate', (e) => {
-  // e.state is null on the initial page state, or lacks wazaOpen when
-  // returning from the detail view.
-  if (state.selectedId !== null && (!e.state || !e.state.wazaOpen)) {
-    document.querySelectorAll('.embed-wrap.open iframe').forEach((f) => {
-      f.src = '';
-    });
-    state.selectedId = null;
-    renderList();
-    renderDetail();
-    document.querySelector('.main').classList.remove('waza-selected');
+window.addEventListener('popstate', () => {
+  // Reconcile the detail panel to whatever the URL now says, rather than only
+  // handling the close case. The URL is authoritative (e.state is null for
+  // entries we didn't create, e.g. the initial load).
+  const wazaParam = new URL(location.href).searchParams.get('waza');
+  const targetId = wazaParam ? parseInt(wazaParam) : null;
+
+  if (targetId && !isNaN(targetId) && state.wazaData.some((w) => w.id === targetId)) {
+    // URL points at a waza — open it if it isn't already the one shown.
+    if (state.selectedId !== targetId) selectWazaFromHistory(targetId);
+  } else if (state.selectedId !== null) {
+    // URL has no waza — close the panel if one is open.
+    closeDetailPanelFromHistory();
   }
 });
 
