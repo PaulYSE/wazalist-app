@@ -1,17 +1,38 @@
-// state.js — mutable app state + localStorage helpers
+/**
+ * @file state.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Manages global mutable application state and localStorage synchronization helpers.
+ */
+
 import { LS_SORT, LS_VIEW, LS_LABELS } from './localStorage.js';
 
+/**
+ * @brief Loads saved sort preferences from localStorage.
+ *
+ * @return {object} An object with `field` and `order` properties, defaulting to { field: 'default', order: 'asc' } if none exist or parsing fails.
+ */
 const loadSortPrefs = () => {
   try {
     const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
     return { field: prefs.field || 'default', order: prefs.order || 'asc' };
   } catch {
+    // If parsing fails, fall back to default sort preferences
     return { field: 'default', order: 'asc' };
   }
 };
 const savedSort = loadSortPrefs();
 
 // ── Shared mutable state ─────────────────────────────────────
+
+/**
+ * @brief Global application state object.
+ *
+ * Stores authentication status, user data, waza list, progress, UI filters,
+ * sort preferences, view mode, and custom marking labels.
+ */
 export const state = {
   token: localStorage.getItem('wl_token') || '',
   isGuest: false,
@@ -29,7 +50,16 @@ export const state = {
   markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
 };
 
-// tiState is the shared mutable state for the import-from-text feature, which is complex enough to warrant its own module. It tracks found labels and auto-mapping state across the multi-phase parsing process. This keeps the import-ui.js module focused on DOM and user interaction, while tiState and related functions in import-from-text.js handle the parsing logic,
+// ── Import-from-text shared state ─────────────────────────────
+
+/**
+ * @brief Shared mutable state for the import-from-text feature.
+ *
+ * Tracks found labels, auto-mapping, unmatched lines, preview mode,
+ * and Excel color mappings across the multi-phase parsing process.
+ * This keeps the import-ui.js module focused on DOM and user interaction,
+ * while tiState and related functions in import-from-text.js handle the parsing logic.
+ */
 export const tiState = {
   matched: [], // [{waza, rawLine, category, manualMarkings}]
   unmatched: [], // [rawLine]

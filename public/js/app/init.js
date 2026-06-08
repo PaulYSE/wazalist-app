@@ -1,4 +1,11 @@
-/* init.js */
+/**
+ * @file init.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Application initialization module. Sets up UI, loads user session, waza data, progress, labels, and handles URL parameters.
+ */
 
 import { api } from '../services/api.js';
 import { state } from '../state/state.js';
@@ -13,7 +20,18 @@ import { renderDashStats } from '../views/stats.js';
 import { startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
 
-// ── Init ─────────────────────────────────────────────────────
+// ── Initialization entry point ─────────────────────────────────────
+
+/**
+ * @brief Initializes the entire application.
+ *
+ * Hides auth UI, shows main app, applies guest/admin chrome, loads waza data,
+ * fetches user progress and labels (if authenticated), renders browse list and stats,
+ * syncs sort/view controls, handles waza URL parameters, starts placeholder rotation,
+ * and checks for auto-import from share links.
+ *
+ * @return {Promise<void>}
+ */
 export async function initApp() {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';

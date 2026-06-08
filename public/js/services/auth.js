@@ -7,6 +7,15 @@ import { initApp } from '../app/init.js';
 import { showOnboarding } from '../features/onboarding.js';
 
 // ── Auth actions ──────────────────────────────────────────────
+
+/**
+ * @brief Initializes the application in guest mode without authentication.
+ *
+ * Loads locally stored progress data and starts the app with guest privileges.
+ *
+ * @see loadLocal
+ * @see initApp
+ */
 function startGuest() {
   state.isGuest = true;
   state.token = '';
@@ -16,6 +25,9 @@ function startGuest() {
   initApp();
 }
 
+/**
+ * @brief Logs the user out by clearing authentication state and local storage, then reloads the page.
+ */
 export const doLogout = () => {
   state.token = '';
   state.isGuest = false;
@@ -25,6 +37,15 @@ export const doLogout = () => {
   location.reload();
 };
 
+/**
+ * @brief Authenticates a user with username and password via the login API.
+ *
+ * Retrieves credentials from login form fields, sends them to the backend,
+ * and stores the returned authentication token in state and local storage upon success.
+ *
+ * @see api
+ * @see initApp
+ */
 async function doLogin() {
   const username = document.getElementById('li-username').value.trim(),
     password = document.getElementById('li-password').value;
@@ -47,6 +68,16 @@ async function doLogin() {
   initApp();
 }
 
+/**
+ * @brief Registers a new user account and automatically logs them in upon success.
+ *
+ * Validates username and password, sends registration data to the API,
+ * then authenticates the newly created account and initializes the app.
+ *
+ * @see api
+ * @see initApp
+ * @see showOnboarding
+ */
 async function doRegister() {
   const username = document.getElementById('rg-username').value.trim(),
     email = document.getElementById('rg-email').value.trim(),
@@ -81,7 +112,18 @@ async function doRegister() {
 }
 
 // ── Wiring ────────────────────────────────────────────────────
-// Wire up the auth screen (login/register/guest/logout). Called once from main.js.
+
+/**
+ * @brief Initializes authentication UI event handlers for login, registration, guest access, and logout.
+ *
+ * Sets up click and enter-key listeners for authentication forms, toggles between login and registration panels,
+ * and binds the guest and logout buttons to their respective functions.
+ *
+ * @see startGuest
+ * @see doLogin
+ * @see doRegister
+ * @see doLogout
+ */
 export function initAuth() {
   document.getElementById('toReg').onclick = () => {
     document.getElementById('loginBox').style.display = 'none';

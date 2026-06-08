@@ -106,7 +106,6 @@ export async function renderAccount() {
       </div>`
     : '';
 
-
   // Change Password (logged-in only) — same: form now, backend pending.
   const changePasswordBlock = loggedIn
     ? `<div class="acc-form">
@@ -163,7 +162,7 @@ export async function renderAccount() {
   renderImport();
 
   // ── Accordion toggles ─────────────────────────────────────────
-container.querySelectorAll('.acc-toggle').forEach((el) => {
+  container.querySelectorAll('.acc-toggle').forEach((el) => {
     el.addEventListener('click', () => {
       const key = el.dataset.acc;
       if (accOpen[key]) {
@@ -179,24 +178,57 @@ container.querySelectorAll('.acc-toggle').forEach((el) => {
   // ── Export ────────────────────────────────────────────────────
   container.querySelector('#exportXlsxBtn')?.addEventListener('click', () => exportToExcel());
 
-  // ── Change Username / Password (stubs until backend routes exist) ──
-  container.querySelector('#changeUsernameBtn')?.addEventListener('click', () => {
-const msg = container.querySelector('#changeUsernameMsg');
+  container.querySelector('#changeUsernameBtn')?.addEventListener('click', async () => {
+    const msg = container.querySelector('#changeUsernameMsg');
+    const newUsername = container.querySelector('#acc-new-username').value.trim();
+    const password = prompt('Enter your current password to confirm the username change:');
+    if (!password) return;
     msg.className = 'acc-form-msg';
     msg.style.color = 'var(--text3)';
-    msg.textContent = 'Username changes are coming soon.';    // TODO: when /api/account/username exists, replace the line above with the
-    // POST call (send { username } with the new value), handle res.error, and
-    // update state.currentUsername + the badge on success.
+    msg.textContent = 'Updating…';
+    const res = await api('/api/account/username', 'POST', { username: newUsername, password });
+    if (res.error) {
+      msg.className = 'acc-form-msg err';
+      msg.textContent = res.error;
+      return;
+    }
+    // Update local identity to match the server.
+    state.currentUsername = res.username;
+    localStorage.setItem('wl_username', res.username);
+    const badge = document.getElementById('usernameBadge');
+    if (badge) badge.textContent = '@' + res.username;
+    msg.className = 'acc-form-msg ok';
+    msg.textContent = 'Username updated.';
+    container.querySelector('#acc-new-username').value = '';
+    renderAccount(); // refresh the Account Information block
   });
 
-  container.querySelector('#changePasswordBtn')?.addEventListener('click', () => {
+  container.querySelector('#changePasswordBtn')?.addEventListener('click', async () => {
     const msg = container.querySelector('#changePasswordMsg');
+    const current = container.querySelector('#acc-cur-pw').value;
+    const next = container.querySelector('#acc-new-pw').value;
+    if (!current || !next) {
+      msg.className = 'acc-form-msg err';
+      msg.textContent = 'Both fields are required.';
+      return;
+    }
     msg.className = 'acc-form-msg';
     msg.style.color = 'var(--text3)';
-    msg.textContent = 'Password changes are coming soon.';
-
-    // TODO: when /api/account/password exists, replace with the POST call
-    // (send { current, next }), handle res.error, clear the fields on success.
+    msg.textContent = 'Updating…';
+    const res = await api('/api/account/password', 'POST', { current, next });
+    if (res.error) {
+      msg.className = 'acc-form-msg err';
+      msg.textContent = res.error;
+      return;
+    }
+    // Password changed → backend killed all sessions. We're logged out now.
+    msg.className = 'acc-form-msg ok';
+    msg.textContent = 'Password changed. Signing you out…';
+    setTimeout(() => {
+      localStorage.removeItem('wl_token');
+      localStorage.removeItem('wl_username');
+      location.reload();
+    }, 1200);
   });
 
   // ── Reset All Progress ────────────────────────────────────────
