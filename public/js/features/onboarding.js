@@ -1,4 +1,11 @@
-/* onboarding.js — feature by feature user guide */
+/**
+ * @file onboarding.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Feature-by-feature user onboarding guide with interactive demos for browse, search, card styles, markings, labels, stats, and compare.
+ */
 
 import { saveLabels } from '../services/progress.js';
 import { renderDashStats } from '../views/stats.js';
@@ -16,9 +23,17 @@ import { escapeHtml } from '../lib/escape.js';
 import { openAccountSection } from '../views/account.js';
 
 // ── Config ────────────────────────────────────────────────────
+
 const SLIDE_COUNT = 10; // Updated to include Stats, Compare, and Contribute slides
 
 // Get real waza data from the main app
+
+/**
+ * @brief Retrieves real waza data from application state.
+ *
+ * @param {number} limit - Maximum number of waza to return.
+ * @return {Array} Array of waza objects.
+ */
 function getRealWaza(limit = 20) {
   // Access the global state.wazaData from the main app
   if (
@@ -52,6 +67,12 @@ const demoMarkings = [
 const labelsValues = ['', '', '', '', '', ''];
 
 // ── Show / hide ───────────────────────────────────────────────
+
+/**
+ * @brief Displays the onboarding modal with fade-in animation.
+ *
+ * @return {void}
+ */
 export function showOnboarding() {
   const el = document.getElementById('wlOnboarding');
   el.style.display = 'flex';
@@ -66,6 +87,11 @@ export function showOnboarding() {
   renderSlide(0);
 }
 
+/**
+ * @brief Closes the onboarding modal with fade-out animation.
+ *
+ * @return {void}
+ */
 function closeOnboarding() {
   const el = document.getElementById('wlOnboarding');
   el.classList.remove('ob-visible');
@@ -75,6 +101,15 @@ function closeOnboarding() {
 }
 
 // ── Slide navigation ──────────────────────────────────────────
+
+/**
+ * @brief Navigates to a specific slide index.
+ *
+ * Updates transform position, progress dots, and initializes slide-specific content.
+ *
+ * @param {number} n - Target slide index.
+ * @return {void}
+ */
 function goToSlide(n) {
   currentSlide = Math.max(0, Math.min(SLIDE_COUNT - 1, n));
   document.getElementById('obSlides').style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -109,11 +144,23 @@ function goToSlide(n) {
   if (currentSlide === 7) buildCompareDemo();
 }
 
+/**
+ * @brief Renders a specific slide by index.
+ *
+ * @param {number} n - Slide index.
+ * @return {void}
+ */
 function renderSlide(n) {
   goToSlide(n);
 }
 
 // ── Footer buttons ────────────────────────────────────────────
+
+/**
+ * @brief Renders the footer navigation buttons based on current slide.
+ *
+ * @return {void}
+ */
 function renderFooter() {
   const footer = document.getElementById('obFooter');
   footer.innerHTML = '';
@@ -180,6 +227,11 @@ function renderFooter() {
   }
 }
 
+/**
+ * @brief Creates the "Back" navigation button.
+ *
+ * @return {HTMLButtonElement} Back button element.
+ */
 function mkBackBtn() {
   const btn = document.createElement('button');
   btn.className = 'ob-btn';
@@ -191,6 +243,11 @@ function mkBackBtn() {
   return btn;
 }
 
+/**
+ * @brief Creates the "Next" navigation button.
+ *
+ * @return {HTMLButtonElement} Next button element.
+ */
 function mkNextBtn() {
   const btn = document.createElement('button');
   btn.className = 'ob-btn ob-btn-primary';
@@ -203,6 +260,12 @@ function mkNextBtn() {
 }
 
 // ── Browse demo (slide 1) ─────────────────────────────────────
+
+/**
+ * @brief Builds the browse list demo with real waza data.
+ *
+ * @return {void}
+ */
 function buildBrowseDemo() {
   const container = document.getElementById('obBrowseList');
   if (!container) return;
@@ -280,7 +343,14 @@ function buildBrowseDemo() {
 }
 
 // ── Fuzzy search demo (slide 2) ───────────────────────────────
+
 let searchTimer = null;
+
+/**
+ * @brief Initializes the search demo with auto-typing.
+ *
+ * @return {void}
+ */
 function initSearchDemo() {
   const input = document.getElementById('obSearchInput');
   const resultsEl = document.getElementById('obSearchResults');
@@ -300,6 +370,12 @@ function initSearchDemo() {
 }
 
 // Call this on slide change and on onboarding close
+
+/**
+ * @brief Cancels the auto-type animation for search demo.
+ *
+ * @return {void}
+ */
 function cancelAutoType() {
   const input = document.getElementById('obSearchInput');
   if (input?._autoTypeToken) {
@@ -308,6 +384,12 @@ function cancelAutoType() {
   }
 }
 
+/**
+ * @brief Plays auto-typing animation for search demo.
+ *
+ * @param {HTMLInputElement} input - Search input element.
+ * @return {void}
+ */
 function autoTypeDemo(input) {
   // Search for a Snake waza
   let phrase = 'suneiku';
@@ -332,6 +414,12 @@ function autoTypeDemo(input) {
   setTimeout(type, 800);
 }
 
+/**
+ * @brief Runs fuzzy search demo with the current query.
+ *
+ * @param {string} query - Search query string.
+ * @return {void}
+ */
 function runSearchDemo(query) {
   const resultsEl = document.getElementById('obSearchResults');
   if (!resultsEl) return;
@@ -374,10 +462,21 @@ function runSearchDemo(query) {
 }
 
 // ── Card style demo (slide 3) ─────────────────────────────────
+
+/**
+ * @brief Initializes the card style demo.
+ *
+ * @return {void}
+ */
 function initStyleDemo() {
   buildStyleDemo();
 }
 
+/**
+ * @brief Builds the card style comparison demo.
+ *
+ * @return {void}
+ */
 function buildStyleDemo() {
   const container = document.getElementById('obStyleDemo');
   if (!container) return;
@@ -519,6 +618,12 @@ function buildStyleDemo() {
 }
 
 // ── Marking demo (slide 4) ────────────────────────────────────
+
+/**
+ * @brief Builds the interactive marking demo.
+ *
+ * @return {void}
+ */
 function buildMarkingDemo() {
   const container = document.getElementById('obMarkingDemo');
   if (!container) return;
@@ -595,6 +700,12 @@ function buildMarkingDemo() {
 }
 
 // ── Labels preview (slide 5) ──────────────────────────────────
+
+/**
+ * @brief Builds the marking labels preview/edit interface.
+ *
+ * @return {void}
+ */
 function buildLabelsPreview() {
   const container = document.getElementById('obLabelsPreview');
   if (!container) return;
@@ -625,6 +736,12 @@ function buildLabelsPreview() {
 }
 
 // ── Apply template ────────────────────────────────────────────
+
+/**
+ * @brief Applies the default marking labels template.
+ *
+ * @return {void}
+ */
 function applyTemplate() {
   const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
   inputs.forEach((inp, i) => {
@@ -634,6 +751,12 @@ function applyTemplate() {
 }
 
 // ── Clear all labels ──────────────────────────────────────────
+
+/**
+ * @brief Clears all marking label inputs.
+ *
+ * @return {void}
+ */
 function clearAllLabels() {
   const inputs = document.querySelectorAll('#obLabelsPreview .ob-labels-input');
   inputs.forEach((inp, i) => {
@@ -643,6 +766,12 @@ function clearAllLabels() {
 }
 
 // ── Stats demo (slide 7) ──────────────────────────────────────
+
+/**
+ * @brief Builds the stats recent activity demo.
+ *
+ * @return {void}
+ */
 function buildStatsDemo() {
   const container = document.getElementById('obStatsRecent');
   if (!container) return;
@@ -686,11 +815,24 @@ function buildStatsDemo() {
 }
 
 // Local relative-time formatter for demo rows (no real timestamps in onboarding).
+
+/**
+ * @brief Formats time label for stats demo.
+ *
+ * @param {string} label - Time label string.
+ * @return {string} Same label.
+ */
 function timeAgoDemo(label) {
   return label; // demo passes literal strings like "2h ago"
 }
 
 // ── Compare demo (slide 8) ────────────────────────────────────
+
+/**
+ * @brief Builds the compare view demo.
+ *
+ * @return {void}
+ */
 function buildCompareDemo() {
   const container = document.getElementById('obCompareDemo');
   if (!container) return;
@@ -746,6 +888,12 @@ function buildCompareDemo() {
 }
 
 // ── Close button ──────────────────────────────────────────────
+
+/**
+ * @brief Initializes onboarding close button event listener.
+ *
+ * @return {void}
+ */
 export function initOnboarding() {
   document.getElementById('obClose').addEventListener('click', () => {
     if (currentSlide === 2) cancelAutoType();

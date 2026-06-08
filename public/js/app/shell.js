@@ -1,4 +1,11 @@
-/* shell.js */
+/**
+ * @file shell.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Core UI shell module. Manages search placeholder rotation, marking filter UI sync, mobile menu, filter sheet, and navigation tabs.
+ */
 
 import { state } from '../state/state.js';
 import { renderDashStats } from '../views/stats.js';
@@ -10,8 +17,17 @@ import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 
 // ── Rotating search placeholder ───────────────────────────────
+
 const PLACEHOLDER_DEFAULT = 'Search Waza by name (JP / EN)…';
 
+/**
+ * @brief Starts rotating search input placeholder with random waza names.
+ *
+ * Cycles between showing a random waza name (JP or EN) for 4 seconds,
+ * then the default prompt for 2.5 seconds. Pool rebuilds when wazaData changes.
+ *
+ * @return {void}
+ */
 export function startWazaPlaceholderRotation() {
   const input = document.getElementById('searchInput');
   if (!input) return;
@@ -80,6 +96,14 @@ export function startWazaPlaceholderRotation() {
 }
 
 // ── Marking filter UI sync ────────────────────────────────────
+
+/**
+ * @brief Updates UI for marking filters across desktop and mobile.
+ *
+ * Toggles active classes on filter buttons and shows/hides the filter dot indicator.
+ *
+ * @return {void}
+ */
 export function updateMarkingFilterUI() {
   // Desktop
   document
@@ -113,11 +137,19 @@ export function updateMarkingFilterUI() {
 }
 
 // ── Mobile ⋮ menu (element refs + helpers) ────────────────────
+
 const mobMenuBtn = document.getElementById('mobMenuBtn');
 const mobMenuOverlay = document.getElementById('mobMenuOverlay');
 const mobMenuSlideover = document.getElementById('mobMenuSlideover');
 const mobMenuClose = document.getElementById('mobMenuClose');
 
+/**
+ * @brief Opens the mobile menu slideover.
+ *
+ * Adds 'open' class to overlay and slideover elements, then updates the active menu item state.
+ *
+ * @return {void}
+ */
 const openMobMenu = () => {
   mobMenuOverlay.classList.add('open');
   mobMenuSlideover.classList.add('open');
@@ -125,6 +157,11 @@ const openMobMenu = () => {
   updateMobMenuActiveState();
 };
 
+/**
+ * @brief Closes the mobile menu slideover.
+ *
+ * @return {void}
+ */
 export const closeMobMenu = () => {
   mobMenuOverlay.classList.remove('open');
   mobMenuSlideover.classList.remove('open');
@@ -138,11 +175,20 @@ const updateMobMenuActiveState = () => {
 };
 
 // ── Mobile filter sheet (element refs) ────────────────────────
+
 const filterSheetBg = document.getElementById('filterSheetBg');
 const filterSheet = document.getElementById('filterSheet');
 
 // ── Wiring ────────────────────────────────────────────────────
-// Called once from main.js after every module has finished evaluating.
+
+/**
+ * @brief Initializes all UI event listeners and interactive components.
+ *
+ * Sets up search input, filter buttons, sort controls, mobile menu,
+ * mobile filter sheet, and navigation tab switching. Called once from main.js.
+ *
+ * @return {void}
+ */
 export function initUi() {
   // ── Filter events ───────────────────────────────────────────
   const searchInput = document.getElementById('searchInput');
@@ -168,7 +214,8 @@ export function initUi() {
   document.getElementById('filterMarkingAll').addEventListener('click', () => {
     state.browseFilterAny = false;
     const anyOn = state.filters.markings.some(Boolean);
-    state.filters.markings = Array(6).fill(!anyOn); // if any on → turn all off; if all off → turn all on
+    // If any on → turn all off; if all off → turn all on
+    state.filters.markings = Array(6).fill(!anyOn);
     updateMarkingFilterUI();
     renderList();
   });
@@ -285,7 +332,6 @@ export function initUi() {
     const newSortOrder = document.getElementById('browseSortOrderMob').value;
     const newView = document.getElementById('browseViewSelectMob').value;
 
-    // Apply to state + sync desktop controls
     filterSheetBg.classList.remove('open');
     setBrowseSort({ field: newSortField, order: newSortOrder });
     setBrowseView(newView); // applies state + persists + syncs all selects + renders once
@@ -314,6 +360,14 @@ export function initUi() {
 }
 
 // ── Navigation helper ─────────────────────────────────────────
+
+/**
+ * @brief Programmatically navigates to the browse tab.
+ *
+ * Activates the browse tab UI and hides all other views.
+ *
+ * @return {void}
+ */
 export function navigateToBrowse() {
   document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
   document.querySelector('[data-tab="browse"]').classList.add('active');

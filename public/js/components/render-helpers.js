@@ -1,5 +1,12 @@
-/* render-helpers.js — small pure-ish helpers shared by the renderers:
-   marking styles/pips and video/oEmbed handling. */
+/**
+ * @file render-helpers.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Shared rendering utilities for marking styles/pips, video platform detection, oEmbed handling, and UI components like video buttons and like pills.
+ */
+
 import {
   SHAPES,
   SHAPES_HUES,
@@ -16,6 +23,12 @@ import { state } from '../state/state.js';
 // dominates a typical list, so caching collapses most calls to a Map lookup.
 const _msCache = new Map();
 
+/**
+ * @brief Computes marking style with memoization.
+ *
+ * @param {Array<boolean>} markings - Array of 6 boolean marking states.
+ * @return {Object} Object containing CSS class and inline style string.
+ */
 export function markingStyle(markings) {
   const key = (markings || []).map((b) => (b ? '1' : '0')).join('');
   const hit = _msCache.get(key);
@@ -25,6 +38,12 @@ export function markingStyle(markings) {
   return v;
 }
 
+/**
+ * @brief Computes marking style without memoization.
+ *
+ * @param {Array<boolean>} markings - Array of 6 boolean marking states.
+ * @return {Object} Object containing CSS class and inline style string.
+ */
 function _computeMarkingStyle(markings) {
   const active = (markings || []).map((on, i) => (on ? i : -1)).filter((i) => i >= 0);
   if (!active.length) return { cls: '', style: '' };
@@ -58,6 +77,12 @@ function _computeMarkingStyle(markings) {
   };
 }
 
+/**
+ * @brief Generates HTML for marking pips.
+ *
+ * @param {Array<boolean>} markings - Array of 6 boolean marking states.
+ * @return {string} HTML string of pip spans.
+ */
 export const markingPips = (markings) =>
   SHAPES.map(
     (s, i) =>
@@ -70,6 +95,12 @@ export const markingPips = (markings) =>
       '</span>',
   ).join('');
 
+/**
+ * @brief Detects video platform from URL.
+ *
+ * @param {string} url - Video URL.
+ * @return {string} Platform identifier: 'yt', 'bili', 'tw', 'nico', 'fb', or 'other'.
+ */
 export function platform(url) {
   if (!url) return 'other';
   if (/youtu\.be|youtube\.com/.test(url)) return 'yt';
@@ -81,6 +112,15 @@ export function platform(url) {
 }
 
 // Helper: extract timestamp from URL (handles ?t=90, &t=90, #t=1m30s)
+
+/**
+ * @brief Extracts timestamp parameter from video URL.
+ *
+ * Supports formats: ?t=90, &t=90s, ?t=1m30s, etc.
+ *
+ * @param {string} url - Video URL.
+ * @return {number|null} Timestamp in seconds, or null if not found.
+ */
 export function extractTimestamp(url) {
   // Seconds format: ?t=90 or &t=90s
   let m = url.match(/(?:\?|&)t=(\d+)s?/);
@@ -97,6 +137,15 @@ export function extractTimestamp(url) {
 }
 
 // Embed URL resolver — returns null for platforms with no iframe support
+
+/**
+ * @brief Converts video URL to embeddable iframe URL.
+ *
+ * Supports YouTube, Bilibili, and NicoNico. Returns null for platforms without iframe support (Twitter/X).
+ *
+ * @param {string} url - Video URL.
+ * @return {string|null} Embed URL or null.
+ */
 export function embedUrl(url) {
   if (!url) return null;
 
@@ -147,12 +196,31 @@ export function embedUrl(url) {
 }
 
 // Per-session embed cache: wazaId → array of resolved video objects
+
+/**
+ * @brief Cache for embed data keyed by waza ID.
+ *
+ * @type {Map<number, Array>}
+ */
 export const embedCache = new Map();
 
 // Per-session oEmbed metadata cache: url → { title, author } | 'pending' | 'failed'
+
+/**
+ * @brief Cache for oEmbed metadata keyed by URL.
+ *
+ * @type {Map<string, Object|string>}
+ */
 export const oembedCache = new Map();
 
 // oEmbed endpoint resolvers — returns a fetch URL or null if unsupported
+
+/**
+ * @brief Returns oEmbed endpoint URL for a given video URL.
+ *
+ * @param {string} url - Video URL.
+ * @return {string|null} oEmbed API endpoint or null.
+ */
 export function oembedEndpoint(url) {
   if (!url) return null;
   // YouTube
@@ -171,6 +239,13 @@ export function oembedEndpoint(url) {
 }
 
 // Fetch oEmbed for a single URL and update all matching DOM spans in the detail panel
+
+/**
+ * @brief Fetches oEmbed metadata for a URL and updates DOM.
+ *
+ * @param {string} url - Video URL.
+ * @return {Promise<void>}
+ */
 export async function fetchOembed(url) {
   if (oembedCache.has(url)) return;
   oembedCache.set(url, 'pending');
@@ -193,6 +268,13 @@ export async function fetchOembed(url) {
 }
 
 // Update the DOM spans for a specific URL after metadata arrives
+
+/**
+ * @brief Applies cached oEmbed metadata to DOM elements.
+ *
+ * @param {string} url - Video URL.
+ * @return {void}
+ */
 export function applyOembedToDOM(url) {
   const meta = oembedCache.get(url);
   if (!meta || meta === 'pending') return;
@@ -210,6 +292,13 @@ export function applyOembedToDOM(url) {
 }
 
 // Kick off oEmbed fetches for all videos of a waza (called after renderDetail)
+
+/**
+ * @brief Prefetches oEmbed metadata for all videos of a waza.
+ *
+ * @param {Array<Object>} vids - Array of video objects with 'url' property.
+ * @return {void}
+ */
 export function prefetchOembeds(vids) {
   vids.forEach((v) => {
     const cached = oembedCache.get(v.url);
@@ -221,6 +310,13 @@ export function prefetchOembeds(vids) {
     }
   });
 }
+
+/**
+ * @brief Generates video button HTML for a waza.
+ *
+ * @param {Object} w - Waza object containing video0..video9 fields.
+ * @return {string} HTML string of video buttons.
+ */
 export function videoButtons(w) {
   const vids = [
     w.video0,
@@ -259,6 +355,14 @@ export function videoButtons(w) {
 }
 
 // Mini like/dislike pill for list/card views
+
+/**
+ * @brief Generates like/dislike pill HTML for list/card views.
+ *
+ * @param {Object} w - Waza object with like_count and dislike_count.
+ * @param {Object} p - Progress object with like property.
+ * @return {string} HTML string of like/dislike pill.
+ */
 export function cardLikePill(w, p) {
   const lc = w.like_count || 0,
     dc = w.dislike_count || 0;
@@ -280,5 +384,3 @@ export function cardLikePill(w, p) {
     '</div>'
   );
 }
-
-// ── Render browse list ────────────────────────────────────────

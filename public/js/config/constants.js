@@ -1,6 +1,21 @@
-/* constants.js — shared constants for field names, label templates, shape symbols, and mappings. */
+/**
+ * @file constants.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Shared constants for marking labels, shape symbols, platform mappings, like/dislike values, Excel colors, and import text parsing utilities.
+ */
 
 // Template for Marking Labels
+
+/**
+ * @brief Default template for the six marking labels.
+ *
+ * Index order: 0=Want to Learn, 1=Learning, 2=Complete, 3=Favourite, 4=Oriwaza, 5=Forgotten.
+ *
+ * @type {string[]}
+ */
 export const MARKING_LABELS_TEMPLATE = [
   'Want to Learn',
   'Learning',
@@ -11,11 +26,31 @@ export const MARKING_LABELS_TEMPLATE = [
 ];
 
 // Shapes for markings 1-6 (index 0-5)
+
+/**
+ * @brief Unicode shape symbols for each marking index.
+ *
+ * @type {string[]}
+ */
 export const SHAPES = ['●', '▲', '■', '♥', '★', '◆'];
 // export const SHAPES_HUES = [200, 45, 123, 280, 80, 330];
+
+/**
+ * @brief Hue angles (in degrees) for each shape symbol.
+ *
+ * Used for generating marking blend colors.
+ *
+ * @type {number[]}
+ */
 export const SHAPES_HUES = [4, 28, 54, 118, 212, 272];
 
 // Platform labels and colors for video links
+
+/**
+ * @brief Display labels for video platforms.
+ *
+ * @type {Object.<string, string>}
+ */
 export const platLabel = {
   yt: 'YouTube',
   bili: 'Bilibili',
@@ -24,6 +59,12 @@ export const platLabel = {
   fb: 'Facebook',
   other: 'Video',
 };
+
+/**
+ * @brief Brand colors for video platforms.
+ *
+ * @type {Object.<string, string>}
+ */
 export const platColor = {
   yt: '#ff0000',
   bili: '#00a1d6',
@@ -34,11 +75,35 @@ export const platColor = {
 };
 
 // Like/dislike values (stored as integers in database)
+
+/**
+ * @brief Neutral like state (no preference).
+ *
+ * @type {null}
+ */
 export const LIKE_NONE = null; // No preference (neutral)
+
+/**
+ * @brief Like/thumbs up value.
+ *
+ * @type {number}
+ */
 export const LIKE_UP = 1; // Like/thumbs up
+
+/**
+ * @brief Dislike/thumbs down value.
+ *
+ * @type {number}
+ */
 export const LIKE_DOWN = -1; // Dislike/thumbs down
 
 // Cell Fill color mapping for Excel export (indexed by marking index)
+
+/**
+ * @brief Hexadecimal fill colors for Excel export, indexed by marking index (0-5).
+ *
+ * @type {string[]}
+ */
 export const EXPORT_MARK_COLORS = [
   'FF4F8FF7',
   'FF4CAF82',
@@ -49,6 +114,14 @@ export const EXPORT_MARK_COLORS = [
 ];
 
 // Common status labels mapping to Wazalist markings
+
+/**
+ * @brief Maps common status keywords to marking indices.
+ *
+ * Used during text import to auto-assign markings based on descriptive text.
+ *
+ * @type {Object.<string, number>}
+ */
 export const STATUS_TO_SHAPE_MAP = {
   // Completed/Learnt → Marking 3 (Complete)
   learnt: 2,
@@ -86,6 +159,12 @@ export const STATUS_TO_SHAPE_MAP = {
 };
 
 // Common header keywords to skip
+
+/**
+ * @brief Keywords that indicate header rows to skip during text import.
+ *
+ * @type {string[]}
+ */
 export const HEADER_KEYWORDS = [
   'basic waza',
   'learn first',
@@ -111,6 +190,12 @@ export const HEADER_KEYWORDS = [
 ];
 
 // Decorative markers to strip
+
+/**
+ * @brief Regular expression patterns for stripping decorative markers from text during import.
+ *
+ * @type {RegExp[]}
+ */
 export const DECORATIVE_PATTERNS = [
   /˗ˏˋ ★ ˎˊ˗/g, // Star decorations
   /\s*\(optional\)\s*/gi, // (Optional) tags

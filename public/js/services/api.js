@@ -1,15 +1,22 @@
-/* api.js */
+/**
+ * @file api.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Authenticated API request wrapper for backend communication. Handles token injection, JSON parsing, and session expiry.
+ */
 
 import { state } from '../state/state.js';
 
 /**
  * @brief Performs an authenticated API request to the backend.
  *
- * @param path The endpoint path (e.g., "/api/user").
- * @param method HTTP method (GET, POST, PUT, DELETE, etc.). Defaults to "GET".
- * @param body Optional request body payload (object). Will be JSON-stringified.
+ * @param {string} path The endpoint path (e.g., "/api/user").
+ * @param {string} method HTTP method (GET, POST, PUT, DELETE, etc.). Defaults to "GET".
+ * @param {Object|null} body Optional request body payload (object). Will be JSON-stringified.
  *
- * @return Promise<object> Parsed JSON response from the server.
+ * @return {Promise<Object>} Parsed JSON response from the server.
  *
  * @throws Will silently return empty object if response body is not valid JSON.
  * @throws Session expiry triggers global handleSessionExpired() on 401 with "Authentication required".

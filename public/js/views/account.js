@@ -1,4 +1,11 @@
-/* account.js */
+/**
+ * @file account.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Account management view. Handles import/export UI, username/password changes, progress reset, and account deletion with accordion sections.
+ */
 
 import { state } from '../state/state.js';
 import { LS_KEY, LS_LABELS, LS_SORT, LS_VIEW } from '../state/localStorage.js';
@@ -11,6 +18,13 @@ import { renderImport } from '../features/import/import-ui.js';
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
 // Safe to call before or after renderAccount has run: it updates the state
 // object always, and the DOM only if the section elements are present.
+
+/**
+ * @brief Opens a specific accordion section and closes all others.
+ *
+ * @param {string} key - Section key ('import', 'export', or 'manage').
+ * @return {void}
+ */
 export function openAccountSection(key) {
   Object.keys(accOpen).forEach((k) => {
     accOpen[k] = k === key;
@@ -27,6 +41,15 @@ export function openAccountSection(key) {
 const accOpen = { import: false, export: false, manage: true };
 
 // Collapsible accordion section, reusing the .dsec-toggle / .dsec-body mechanism.
+
+/**
+ * @brief Generates HTML for a collapsible accordion section.
+ *
+ * @param {string} key - Section identifier.
+ * @param {string} label - Section title.
+ * @param {string} innerHTML - Inner HTML content.
+ * @return {string} Accordion section HTML.
+ */
 function accSection(key, label, innerHTML) {
   const open = accOpen[key];
   return (
@@ -49,6 +72,15 @@ function accSection(key, label, innerHTML) {
 }
 
 // ── Account ───────────────────────────────────────────────────
+
+/**
+ * @brief Renders the full account management view.
+ *
+ * Displays accordion sections for Import, Export, and Manage Account.
+ * Handles all event bindings for username/password changes, progress reset, and account deletion.
+ *
+ * @return {Promise<void>}
+ */
 export async function renderAccount() {
   const container = document.getElementById('accountContent');
   const loggedIn = !state.isGuest && !!state.token;

@@ -1,5 +1,19 @@
+/**
+ * @file suggest-edit.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Suggest edit modal for waza data. Allows users to propose changes to existing waza entries, which are submitted to the contributions API for admin review.
+ */
+
 import { api } from '../services/api.js';
 
+/**
+ * @brief List of editable field names for waza suggestions.
+ *
+ * @type {string[]}
+ */
 const SE_FIELDS = [
   'name_jp',
   'name_en',
@@ -27,6 +41,12 @@ const SE_FIELDS = [
   'video9',
 ];
 
+/**
+ * @brief Opens the suggest edit modal pre-filled with current waza values as placeholders.
+ *
+ * @param {Object} w - Waza object to suggest edits for.
+ * @return {void}
+ */
 export function openSuggestEdit(w) {
   // Pre-fill with current values as placeholders
   SE_FIELDS.forEach((f) => {
@@ -43,6 +63,13 @@ export function openSuggestEdit(w) {
   document.getElementById('suggestBg').dataset.wazaId = w.id;
 }
 
+/**
+ * @brief Initializes event listeners for the suggest edit modal.
+ *
+ * Sets up close buttons, background click dismissal, and form submission handler.
+ *
+ * @return {void}
+ */
 export function initSuggestEdit() {
   document.getElementById('suggestClose').addEventListener('click', () => {
     document.getElementById('suggestBg').style.display = 'none';

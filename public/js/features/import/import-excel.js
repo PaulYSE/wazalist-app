@@ -1,8 +1,25 @@
-/* import-excel.js: Logic for parsing Excel files and extracting text with color information */
+/**
+ * @file import-excel.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Excel file parsing module. Extracts text and cell background colors for color-based marking auto-mapping during import.
+ */
 
 import { tiState } from '../../state/state.js';
 import { parseTextImport } from '../../lib/parser.js';
 
+/**
+ * @brief Parses an Excel file and extracts text content with cell color information.
+ *
+ * Reads the first sheet of the uploaded Excel file, captures cell text and background colors,
+ * groups text by color for potential marking auto-mapping, then passes the combined text
+ * to the text parser for waza matching.
+ *
+ * @param {File} file - The uploaded Excel file (.xlsx, .xls).
+ * @return {Promise<void>}
+ */
 export async function parseExcelFile(file) {
   const data = await file.arrayBuffer();
   const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
@@ -18,6 +35,7 @@ export async function parseExcelFile(file) {
       const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
       const cell = firstSheet[cellAddr];
 
+      // Skip empty cells
       if (!cell || !cell.v) continue;
 
       const text = String(cell.v).trim();

@@ -1,4 +1,11 @@
-/* waza-detail.js — renders the detail panel for a selected Waza, and handles all related interactions. */
+/**
+ * @file waza-detail.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Renders the detail panel for a selected waza, handles like/dislike, marking toggles, video embedding with oEmbed metadata, collapsible sections, and navigation to similar waza.
+ */
 
 import {
   platform,
@@ -16,6 +23,15 @@ import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit } from '../modals/suggest-edit.js';
 import { renderList } from './browse-list.js';
 
+/**
+ * @brief Selects a waza by ID and updates the UI.
+ *
+ * Stops playing embeds, updates selection highlight, renders detail panel,
+ * pushes history state, and scrolls detail panel to top.
+ *
+ * @param {number} id - Waza ID to select.
+ * @return {void}
+ */
 export function selectWaza(id) {
   // Stop any currently playing embeds before switching
   document.querySelectorAll('.embed-wrap.open iframe').forEach((f) => {
@@ -54,6 +70,11 @@ export function selectWaza(id) {
   }
 }
 
+/**
+ * @brief Initializes the mobile back button event listener.
+ *
+ * @return {void}
+ */
 export function initWazaDetail() {
   document.getElementById('mobileBack').addEventListener('click', () => {
     closeDetailPanel();
@@ -64,6 +85,14 @@ export function initWazaDetail() {
 // Track collapsed state per section key
 const collapsed = { names: false, classif: false, parents: false, creator: false };
 
+/**
+ * @brief Renders the detail panel for the currently selected waza.
+ *
+ * Displays waza names, like/dislike pill, marking buttons, video references with oEmbed metadata,
+ * collapsible info sections, similar waza chips, and suggest edit button for logged-in users.
+ *
+ * @return {void}
+ */
 export function renderDetail() {
   const panel = document.getElementById('detailContent');
   if (state.selectedId === null) {
@@ -462,6 +491,15 @@ export function renderDetail() {
 }
 
 // ── History popstate handler to support back button closing detail view ──
+
+/**
+ * @brief Closes the detail panel and clears the selected waza.
+ *
+ * Stops playing embeds, removes selection highlight, renders empty detail,
+ * and updates URL to remove ?waza parameter.
+ *
+ * @return {void}
+ */
 export function closeDetailPanel() {
   document.querySelectorAll('.embed-wrap.open iframe').forEach((f) => {
     f.src = '';

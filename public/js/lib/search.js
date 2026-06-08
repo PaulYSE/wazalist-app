@@ -1,5 +1,11 @@
-/* search.js — search-string normalization, fuzzy (Levenshtein) matching,
-   and filterWaza() which produces the currently-visible list. */
+/**
+ * @file search.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Search string normalization, fuzzy (Levenshtein) matching, scoped search prefixes, and filterWaza() for producing the currently-visible list.
+ */
 
 import { state } from '../state/state.js';
 import { getP } from '../services/progress.js';
@@ -33,6 +39,13 @@ const SEARCH_SCOPES = {
 };
 
 // ── Normalize user search entry ───────────────────────────────
+
+/**
+ * @brief Normalizes a string for case-insensitive and diacritic-insensitive search.
+ *
+ * @param {string} text - Input text.
+ * @return {string} Normalized lowercase string without diacritics.
+ */
 export function normalizeForSearch(text) {
   return text
     .toLowerCase()
@@ -43,12 +56,28 @@ export function normalizeForSearch(text) {
 }
 
 // String Matching
+
+/**
+ * @brief Checks if text exactly matches the query after normalization.
+ *
+ * @param {string} text - Text to match.
+ * @param {string} query - Query string.
+ * @return {boolean} True if exact match.
+ */
 function matchesExactField(text, query) {
   if (!text || !query) return false;
   return normalizeForSearch(text) === normalizeForSearch(query);
 }
 
 // ── Substring Matching ───────────────────────────────────────
+
+/**
+ * @brief Checks if query is a substring of text or all query words appear.
+ *
+ * @param {string} text - Text to search.
+ * @param {string} query - Query string.
+ * @return {boolean} True if substring or all words present.
+ */
 function matchesQuery(text, query) {
   if (!text || !query) return false;
 
@@ -66,6 +95,14 @@ function matchesQuery(text, query) {
 }
 
 // ── Levenshtein distance implementation ───────────────────────────────────────
+
+/**
+ * @brief Calculates Levenshtein edit distance between two strings.
+ *
+ * @param {string} a - First string.
+ * @param {string} b - Second string.
+ * @return {number} Edit distance.
+ */
 function levenshteinDistance(a, b) {
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
@@ -91,6 +128,15 @@ function levenshteinDistance(a, b) {
 }
 
 // ── Fuzzy String Matching ───
+
+/**
+ * @brief Determines if text fuzzy matches query within a distance threshold.
+ *
+ * @param {string} text - Text to match.
+ * @param {string} query - Query string.
+ * @param {number} maxDistance - Maximum allowed edit distance (default: 2).
+ * @return {boolean} True if fuzzy match within threshold.
+ */
 export function isFuzzyMatch(text, query, maxDistance = 2) {
   if (!text || !query) return false;
 
@@ -133,11 +179,25 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
 }
 
 // ── Filter logic ─────────────────────────────────────────────
+
+/**
+ * @brief Returns the best available English name for a waza.
+ *
+ * @param {Object} w - Waza object.
+ * @return {string} Display name.
+ */
 export const dispName = (w) =>
   w.name_en || w.name_en_literal || w.name_en_gtranslate || '(unnamed)';
 
 // Parse a scoped search like AUTHOR:"PERIKAN" or PARENT:OUKA.
 // Returns { fields, query, exact } or null if no recognized PREFIX: is present.
+
+/**
+ * @brief Parses a scoped search prefix like 'author:perikan' or 'parent:"ouka"'.
+ *
+ * @param {string} search - Search string.
+ * @return {Object|null} Object with fields, query, and exact flag, or null.
+ */
 function parseScopedSearch(search) {
   const m = search.match(/^([a-z]+)\s*:\s*(.*)$/i);
   if (!m) return null;
@@ -154,6 +214,16 @@ function parseScopedSearch(search) {
 }
 
 // Returns true if the waza matches the search string in any of the specified fields
+
+/**
+ * @brief Determines if a waza matches the search string.
+ *
+ * Supports scoped search (author:, parent:, name:, tag:) and global fuzzy search.
+ *
+ * @param {Object} w - Waza object.
+ * @param {string} search - Search query.
+ * @return {boolean} True if waza matches.
+ */
 export function wazaMatchesSearch(w, search) {
   if (!search) return true;
 
@@ -172,6 +242,13 @@ export function wazaMatchesSearch(w, search) {
   return SEARCH_FIELDS.some((f) => w[f] && matchFn(w[f], query));
 }
 
+/**
+ * @brief Filters and sorts the waza list based on current state filters.
+ *
+ * Applies search, marking filters, browseFilterAny mode, and sort preferences.
+ *
+ * @return {Array} Filtered and sorted array of waza objects.
+ */
 export function filterWaza() {
   const { search, markings } = state.filters;
   const anyMarkingActive = markings.some(Boolean);

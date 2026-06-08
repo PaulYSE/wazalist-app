@@ -1,11 +1,24 @@
-/* import-from-text.js — the text-import engine: column/status/label detection,
-   tab-separated parsing, findWazaForLine(), and parseTextImport(). No DOM here. */
+/**
+ * @file parser.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Text import engine for parsing waza lists with status detection, label extraction, tab-separated column detection, and fuzzy matching. No DOM manipulation.
+ */
 
 import { state, tiState } from '../state/state.js';
 import { normalizeForSearch, isFuzzyMatch } from '../lib/search.js';
 import { STATUS_TO_SHAPE_MAP, HEADER_KEYWORDS, DECORATIVE_PATTERNS } from '../config/constants.js';
 
 // Fuzzy status matching - find closest known status label
+
+/**
+ * @brief Fuzzy matches a status text to a marking index.
+ *
+ * @param {string} text - Status text to match.
+ * @return {number|null} Marking index (0-5) or null if no match.
+ */
 function fuzzyMatchStatus(text) {
   if (!text) return null;
   const normalized = text.toLowerCase().trim();
@@ -34,6 +47,13 @@ function fuzzyMatchStatus(text) {
 }
 
 // Enhanced multi-column detection with better heuristics
+
+/**
+ * @brief Detects column layout for tab-separated lines.
+ *
+ * @param {string[]} lines - Array of text lines.
+ * @return {string|null} Layout type: 'WAZA_STATUS', 'STATUS_WAZA', or null.
+ */
 function detectColumnLayout(lines) {
   const tabLines = lines.filter((l) => l.includes('\t'));
   if (tabLines.length === 0) return null;
@@ -85,8 +105,14 @@ function detectColumnLayout(lines) {
 }
 
 // Category detection and preservation
+
+/**
+ * @brief Detects if a line is a category header.
+ *
+ * @param {string} line - Text line.
+ * @return {string|null} Category name or null.
+ */
 function detectCategory(line) {
-  // Check if line is a category header
   const lower = line.toLowerCase();
 
   // Common category patterns
@@ -108,12 +134,26 @@ function detectCategory(line) {
 }
 
 // Check if line is a header/instruction row (should be skipped)
+
+/**
+ * @brief Determines if a line is a header/instruction row to skip.
+ *
+ * @param {string} line - Text line.
+ * @return {boolean} True if line is a header.
+ */
 function isHeaderLine(line) {
   const lower = line.toLowerCase();
   return HEADER_KEYWORDS.some((keyword) => lower.includes(keyword));
 }
 
 // Strip decorative markers and return cleaned text + detected favorite flag
+
+/**
+ * @brief Strips decorative markers from text and detects if it's a favorite.
+ *
+ * @param {string} text - Input text.
+ * @return {Object} Object with cleaned text and isFavorite flag.
+ */
 function stripDecorations(text) {
   let cleaned = text;
   let isFavorite = false;
@@ -132,6 +172,13 @@ function stripDecorations(text) {
 }
 
 // Extract waza name from Excel hyperlink formula
+
+/**
+ * @brief Extracts waza name from Excel HYPERLINK formula.
+ *
+ * @param {string} text - Text possibly containing hyperlink formula.
+ * @return {string|null} Extracted name or null.
+ */
 function extractFromHyperlink(text) {
   // Pattern: =HYPERLINK("URL", "Waza Name")
   const match = text.match(/=HYPERLINK\s*\(\s*"[^"]*"\s*,\s*"([^"]+)"\s*\)/i);
@@ -139,6 +186,13 @@ function extractFromHyperlink(text) {
 }
 
 // Parse "English (Japanese)" format and extract both parts
+
+/**
+ * @brief Parses "English (Japanese)" format into separate components.
+ *
+ * @param {string} text - Input text.
+ * @return {Object} Object with english, japanese, and original fields.
+ */
 function parseWazaName(text) {
   // Try to extract from "English (Japanese)" format
   const match = text.match(/^(.+?)\s*\(([^()]*)\)\s*$/);
@@ -151,6 +205,14 @@ function parseWazaName(text) {
 }
 
 // Detect tab-separated format and parse status + waza (Phase 2: enhanced)
+
+/**
+ * @brief Parses a tab-separated line into waza name and status.
+ *
+ * @param {string} line - Tab-separated line.
+ * @param {string|null} columnLayout - Detected layout ('WAZA_STATUS' or 'STATUS_WAZA').
+ * @return {Object|null} Object with waza and status fields, or null.
+ */
 function parseTabSeparated(line, columnLayout = null) {
   if (!line.includes('\t')) return null;
 
@@ -192,6 +254,13 @@ function parseTabSeparated(line, columnLayout = null) {
 }
 
 // Map status text to marking index (0-5) - Phase 2: with fuzzy matching
+
+/**
+ * @brief Maps status text to marking index using fuzzy matching.
+ *
+ * @param {string} statusText - Status text.
+ * @return {number|null} Marking index (0-5) or null.
+ */
 function mapStatusToMarking(statusText) {
   if (!statusText) return null;
   return fuzzyMatchStatus(statusText); // Use Phase 2 fuzzy matcher
@@ -200,6 +269,13 @@ function mapStatusToMarking(statusText) {
 // Matches any [...], {...} encapsulation on a line
 // Returns array of matched state.token strings (with brackets), e.g. ["[Learning]", "{WIP}"]
 // Note: () are reserved for "English(Japanese)" naming convention
+
+/**
+ * @brief Extracts bracket-encapsulated labels from a line.
+ *
+ * @param {string} line - Text line.
+ * @return {string[]} Array of matched label strings including brackets.
+ */
 function extractEncapsulations(line) {
   const matches = [];
   const re = /\[([^[\]]+)\]|\{([^{}]+)\}/g;
@@ -210,6 +286,13 @@ function extractEncapsulations(line) {
 
 // Strip ALL encapsulated state.tokens from a line to get the bare waza name
 // Note: () are NOT stripped - they're part of the "English(Japanese)" format
+
+/**
+ * @brief Removes all bracket-encapsulated labels from a line.
+ *
+ * @param {string} line - Text line.
+ * @return {string} Cleaned line without labels.
+ */
 function stripAllLabels(line) {
   return line
     .replace(/\[([^[\]]+)\]|\{([^{}]+)\}/g, '')
@@ -218,6 +301,13 @@ function stripAllLabels(line) {
 }
 
 // Detect which known label(s) appear on this line; returns first match or null
+
+/**
+ * @brief Detects the first known label on a line.
+ *
+ * @param {string} line - Text line.
+ * @return {string|null} Matched label (with brackets) or null.
+ */
 function detectLabelOnLine(line) {
   const tokens = extractEncapsulations(line);
   for (const tok of tokens) {
@@ -227,6 +317,13 @@ function detectLabelOnLine(line) {
 }
 
 // Collect all unique labels across the entire text
+
+/**
+ * @brief Collects all unique bracket-encapsulated labels from raw text.
+ *
+ * @param {string} rawText - Raw import text.
+ * @return {string[]} Ordered array of unique labels.
+ */
 function collectLabels(rawText) {
   const seen = new Set();
   const ordered = [];
@@ -242,6 +339,15 @@ function collectLabels(rawText) {
   return ordered;
 }
 
+/**
+ * @brief Finds a waza object matching a line of text.
+ *
+ * Uses hyperlink extraction, Japanese/English name parsing, exact matches,
+ * and fuzzy matching with distance threshold of 2.
+ *
+ * @param {string} line - Text line to match.
+ * @return {Object|null} Matching waza object or null.
+ */
 function findWazaForLine(line) {
   // Phase 1: Try hyperlink extraction first
   const hyperlinkMatch = extractFromHyperlink(line);
@@ -315,6 +421,15 @@ function findWazaForLine(line) {
   return hit || null;
 }
 
+/**
+ * @brief Main entry point for parsing imported text into matched waza.
+ *
+ * Collects labels, builds auto-mapping, detects column layout, processes lines,
+ * and populates tiState with matched and unmatched items.
+ *
+ * @param {string} rawText - Raw import text.
+ * @return {void}
+ */
 export function parseTextImport(rawText) {
   // 1. Collect all unique labels in document order
   tiState.foundLabels = collectLabels(rawText);

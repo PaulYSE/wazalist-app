@@ -1,14 +1,38 @@
-/* export-to-excel.js — the Export to Excel feature: exportToExcel() collects the
-    user's marked waza, generates an .xlsx file with hyperlinks and cell colors, and triggers the download. */
+/**
+ * @file export-to-excel.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Excel export feature. Collects user's marked waza, generates an .xlsx file with hyperlinks and cell colors, and triggers download.
+ */
+
 import { state } from '../state/state.js';
 import { showToast } from '../components/show-toast.js';
 import { SHAPES, EXPORT_MARK_COLORS } from '../config/constants.js';
 
+/**
+ * @brief Selects the best video URL for Excel hyperlink.
+ *
+ * Prioritizes video1, then falls back to video0 or any available video.
+ *
+ * @param {Object} w - Waza object with video0..video9 fields.
+ * @return {string} Video URL or empty string if none exists.
+ */
 function pickVideoUrl(w) {
   // User asked for video1; fall back to the first available video so links aren't broken.
   return w.video1 || w.video0 || w.video2 || w.video3 || w.video4 || w.video5 || '';
 }
 
+/**
+ * @brief Exports the user's marked waza to an Excel file.
+ *
+ * Collects all waza with at least one active marking, generates an Excel workbook
+ * with hyperlinked waza names, cell colors based on the first active marking,
+ * and a color legend. Triggers browser download.
+ *
+ * @return {Promise<void>}
+ */
 export async function exportToExcel() {
   const btn = document.getElementById('exportXlsxBtn');
   const status = document.getElementById('exportXlsxStatus');
@@ -19,6 +43,7 @@ export async function exportToExcel() {
     }
   };
 
+  // Check if ExcelJS library is available
   if (typeof ExcelJS === 'undefined') {
     setStatus('Excel library not loaded — please refresh and try again.', 'var(--red)');
     return;
@@ -134,5 +159,3 @@ export async function exportToExcel() {
     }
   }
 }
-
-// ── Dashboard ─────────────────────────────────────────────────

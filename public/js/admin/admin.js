@@ -1,6 +1,22 @@
-/* admin.js */
+/**
+ * @file admin.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Admin dashboard controller. Loads contribution queues (pending/approved/rejected), displays diffs for edit suggestions, allows admin to approve/reject with optional notes and payload modifications.
+ */
 
 const token = localStorage.getItem('wl_token') || '';
+
+/**
+ * @brief Authenticated API request for admin operations.
+ *
+ * @param {string} path - API endpoint path.
+ * @param {string} method - HTTP method (default 'GET').
+ * @param {Object|null} body - Request body.
+ * @return {Promise<Object>} JSON response.
+ */
 const api = async (path, method = 'GET', body = null) => {
   const opts = {
     method,
@@ -15,6 +31,12 @@ const api = async (path, method = 'GET', body = null) => {
 };
 
 // Readable field labels
+
+/**
+ * @brief Human-readable labels for contribution fields.
+ *
+ * @type {Object.<string, string>}
+ */
 const FIELD_LABELS = {
   name_jp: 'Name (JP)',
   name_en: 'Name (EN)',
@@ -41,6 +63,12 @@ const FIELD_LABELS = {
   video8: 'Video 9',
   video9: 'Video 10',
 };
+
+/**
+ * @brief Array of all editable field names.
+ *
+ * @type {string[]}
+ */
 const ALL_FIELDS = Object.keys(FIELD_LABELS);
 
 let queue = [],
@@ -48,6 +76,13 @@ let queue = [],
   currentStatus = 'pending';
 
 // ── Load queue ────────────────────────────────────────────────
+
+/**
+ * @brief Loads contributions for a given status from the admin API.
+ *
+ * @param {string} status - One of 'pending', 'approved', or 'rejected'.
+ * @return {Promise<void>}
+ */
 async function loadQueue(status = 'pending') {
   currentStatus = status;
   const res = await api('/api/admin/contributions?status=' + status);
@@ -72,6 +107,11 @@ async function loadQueue(status = 'pending') {
   }
 }
 
+/**
+ * @brief Renders the queue list in the sidebar.
+ *
+ * @return {void}
+ */
 function renderQueue() {
   const el = document.getElementById('queueList');
   if (!queue.length) {
@@ -107,6 +147,13 @@ function renderQueue() {
 }
 
 // ── Select item ───────────────────────────────────────────────
+
+/**
+ * @brief Loads and displays a selected contribution's details for review.
+ *
+ * @param {number} id - Contribution ID.
+ * @return {Promise<void>}
+ */
 async function selectItem(id) {
   selectedId = id;
   renderQueue();
@@ -228,6 +275,17 @@ async function selectItem(id) {
 }
 
 // ── Approve / Reject ─────────────────────────────────────────
+
+/**
+ * @brief Sends approve/reject action for a contribution.
+ *
+ * Collects edited payload and admin note, then posts to admin API.
+ * Reloads the queue on success.
+ *
+ * @param {Object} c - Contribution object.
+ * @param {string} action - 'approve' or 'reject'.
+ * @return {Promise<void>}
+ */
 async function doAction(c, action) {
   const panel = document.getElementById('detailPanel');
   const note = panel.querySelector('#adminNote')?.value.trim() || null;
@@ -268,6 +326,13 @@ async function doAction(c, action) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────
+
+/**
+ * @brief Escapes HTML special characters.
+ *
+ * @param {string} s - Input string.
+ * @return {string} Escaped string.
+ */
 function escapeHtml(s) {
   return String(s || '')
     .replace(/&/g, '&amp;')
@@ -275,6 +340,13 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+/**
+ * @brief Formats ISO timestamp to relative time string.
+ *
+ * @param {string} iso - ISO timestamp.
+ * @return {string} Relative time (e.g., '2d ago').
+ */
 function timeAgo(iso) {
   if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
@@ -288,6 +360,10 @@ function timeAgo(iso) {
 }
 
 // ── Tab switching ─────────────────────────────────────────────
+
+/**
+ * @brief Initializes tab click handlers for status filtering.
+ */
 document.querySelectorAll('.stab').forEach((tab) => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.stab').forEach((t) => t.classList.remove('active'));
@@ -297,6 +373,8 @@ document.querySelectorAll('.stab').forEach((tab) => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────
+
+// Check authentication token before booting admin panel
 if (!token) {
   document.body.innerHTML =
     '<div style="padding:40px;text-align:center;color:#e05555">Not authenticated — please sign in to the main app first.</div>';

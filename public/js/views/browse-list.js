@@ -1,4 +1,11 @@
-/* browse-list.js */
+/**
+ * @file browse-list.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Browse list view rendering and controls. Handles list/card/compact view modes, sorting, filtering, and selection.
+ */
 
 import {
   markingStyle,
@@ -18,6 +25,15 @@ import { updateMarkingFilterUI } from '../app/shell.js';
 // omitted values keep their current state. Persists, syncs all four selects
 // (+ the order-disabled state), and re-renders once. Adding a new sort field
 // later means only adding an <option> in the HTML — this stays untouched.
+
+/**
+ * @brief Changes the browse sort field and/or order.
+ *
+ * @param {Object} options - Sort options.
+ * @param {string} [options.field] - Sort field ('default' or 'likes').
+ * @param {string} [options.order] - Sort order ('asc' or 'desc').
+ * @return {void}
+ */
 export function setBrowseSort({ field, order } = {}) {
   if (field !== undefined) state.browseSortField = field;
   if (order !== undefined) state.browseSortOrder = order;
@@ -33,6 +49,12 @@ export function setBrowseSort({ field, order } = {}) {
 // Reflect current sort state into the desktop + mobile selects and the
 // order-disabled state, without persisting or rendering. Used at boot and by
 // setBrowseSort.
+
+/**
+ * @brief Syncs all sort control dropdowns with current state.
+ *
+ * @return {void}
+ */
 export function syncBrowseSortControls() {
   const isDefault = state.browseSortField === 'default';
   ['browseSortField', 'browseSortFieldMob'].forEach((id) => {
@@ -53,6 +75,13 @@ export function syncBrowseSortControls() {
 // compact). Every input — desktop dropdown, mobile dropdown, filter sheet —
 // routes here, so state, persistence, all three <select>s, and the rendered
 // list can never drift apart.
+
+/**
+ * @brief Changes the browse view mode (expanded/list/compact).
+ *
+ * @param {string} view - View mode: 'expanded', 'list', or 'compact'.
+ * @return {void}
+ */
 export function setBrowseView(view) {
   state.browseListView = view;
   localStorage.setItem(LS_VIEW, view);
@@ -62,6 +91,12 @@ export function setBrowseView(view) {
 
 // Reflect current state into the three view-style selects without re-rendering
 // or persisting. Used at boot, and by setBrowseView to keep the controls synced.
+
+/**
+ * @brief Syncs all view mode dropdowns with current state.
+ *
+ * @return {void}
+ */
 export function syncBrowseViewControls() {
   ['browseViewSelect', 'browseViewSelectMob', 'viewStyleSelectMobile'].forEach((id) => {
     const el = document.getElementById(id);
@@ -71,6 +106,12 @@ export function syncBrowseViewControls() {
 
 // Wire the controls that apply immediately (desktop + standalone mobile
 // dropdown). The filter-sheet's staged select is applied on Confirm in shell.js.
+
+/**
+ * @brief Initializes browse list event listeners.
+ *
+ * @return {void}
+ */
 export function initBrowseList() {
   document.getElementById('browseViewSelect').addEventListener('change', (e) => {
     setBrowseView(e.target.value);
@@ -91,6 +132,11 @@ export function initBrowseList() {
   });
 }
 
+/**
+ * @brief Renders the browse list based on current filter, sort, and view mode.
+ *
+ * @return {void}
+ */
 export function renderList() {
   const filtered = filterWaza();
   document.getElementById('countBar').textContent =

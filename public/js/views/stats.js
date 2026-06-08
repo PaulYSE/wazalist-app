@@ -1,4 +1,12 @@
-/* stats.js — the Stats dashboard (counts, recently-updated, coverage). */
+/**
+ * @file stats.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Stats dashboard displaying user progress, recently updated waza, top authors/families with toggles, family completion coverage, and community comparison.
+ */
+
 import { state } from '../state/state.js';
 import { getP } from '../services/progress.js';
 import { dispName } from '../lib/search.js';
@@ -11,6 +19,12 @@ import { escapeHtml } from '../lib/escape.js';
 let rankByFamily = false; // false = rank by author, true = rank by family
 let compareCommunity = false; // false = your stats only, true = side-by-side with community
 
+/**
+ * @brief Formats an ISO timestamp into a relative time string (e.g., "2h ago").
+ *
+ * @param {string} iso - ISO timestamp string.
+ * @return {string} Human-readable relative time.
+ */
 function timeAgo(iso) {
   if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
@@ -23,6 +37,11 @@ function timeAgo(iso) {
   return 'just now';
 }
 
+/**
+ * @brief Renders the stats dashboard with overview counts, rankings, coverage, and recent activity.
+ *
+ * @return {void}
+ */
 export function renderDashStats() {
   // ── Overview counts: marked / liked / disliked / total ──────
   let markingd = 0,
@@ -62,6 +81,15 @@ export function renderDashStats() {
   //   marks  = count of MY marked waza crediting that entity (personal)
   //   likes  = sum of like_count across that entity's waza (global community)
   // Keyed by EN name (fallback JP). Returns top `limit` for the chosen metric.
+
+  /**
+   * @brief Aggregates top entities by personal marks or community likes.
+   *
+   * @param {Array<Array<string>>} fieldPairs - Array of [enField, jpField] pairs.
+   * @param {string} metric - Metric to sort by ('marks' or 'likes').
+   * @param {number} limit - Maximum number of results.
+   * @return {Array<Object>} Sorted array of entity objects.
+   */
   function topBy(fieldPairs, metric, limit = 5) {
     const acc = {}; // key → { name, marks, likes }
     state.wazaData.forEach((w) => {

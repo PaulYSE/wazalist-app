@@ -1,4 +1,11 @@
-/* auth.js */
+/**
+ * @file auth.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Authentication module handling guest mode, login, registration, and logout. Manages UI event binding and session state transitions.
+ */
 
 import { state } from '../state/state.js';
 import { loadLocal } from '../state/localStorage.js';
@@ -15,6 +22,7 @@ import { showOnboarding } from '../features/onboarding.js';
  *
  * @see loadLocal
  * @see initApp
+ * @return {void}
  */
 function startGuest() {
   state.isGuest = true;
@@ -27,6 +35,8 @@ function startGuest() {
 
 /**
  * @brief Logs the user out by clearing authentication state and local storage, then reloads the page.
+ *
+ * @return {void}
  */
 export const doLogout = () => {
   state.token = '';
@@ -45,6 +55,7 @@ export const doLogout = () => {
  *
  * @see api
  * @see initApp
+ * @return {Promise<void>}
  */
 async function doLogin() {
   const username = document.getElementById('li-username').value.trim(),
@@ -77,6 +88,7 @@ async function doLogin() {
  * @see api
  * @see initApp
  * @see showOnboarding
+ * @return {Promise<void>}
  */
 async function doRegister() {
   const username = document.getElementById('rg-username').value.trim(),
@@ -123,6 +135,7 @@ async function doRegister() {
  * @see doLogin
  * @see doRegister
  * @see doLogout
+ * @return {void}
  */
 export function initAuth() {
   document.getElementById('toReg').onclick = () => {

@@ -1,5 +1,12 @@
-/* compare.js — list serialization + SHA-256 hashing, the share/import modals,
-   and the Compare tab (renderDashCompare). */
+/**
+ * @file compare.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Compare tab view. Displays imported share lists side by side with user's markings, allows label editing, marking toggles, and navigation to waza details.
+ */
+
 import { state } from '../state/state.js';
 import { SHAPES } from '../config/constants.js';
 import { saveLabels, getP, saveP } from '../services/progress.js';
@@ -17,8 +24,14 @@ import {
 } from '../features/share-list.js';
 
 // ── Compare tab ───────────────────────────────────────────────
+
 let compareSelectedKey = null;
 
+/**
+ * @brief Renders the compare tab with imported list selection, label comparison, and marking rows.
+ *
+ * @return {void}
+ */
 export function renderDashCompare() {
   const container = document.getElementById('dashCompare');
   const keys = Object.keys(importedLists);

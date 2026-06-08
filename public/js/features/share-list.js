@@ -1,9 +1,24 @@
+/**
+ * @file share-list.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Share and import waza marking lists via URL keys. Handles serialization, upload to server, and import with merge preview.
+ */
+
 import { state } from '../state/state.js';
 import { LS_IMPORTED } from '../state/localStorage.js';
 import { showToast } from '../components/show-toast.js';
 import { renderDashCompare } from '../views/compare.js';
 
 // Check URL for ?import= key on load
+
+/**
+ * @brief Checks URL for ?import= parameter on page load and triggers import modal.
+ *
+ * @return {void}
+ */
 export function checkAutoImport() {
   const importKey = new URL(location.href).searchParams.get('import');
   if (!importKey) return;
@@ -18,13 +33,32 @@ const loadImported = () => {
     return {};
   }
 };
+
+/**
+ * @brief Saves imported lists to localStorage.
+ *
+ * @param {Object} d - Imported lists data.
+ * @return {void}
+ */
 export const saveImported = (d) => localStorage.setItem(LS_IMPORTED, JSON.stringify(d));
+
+/**
+ * @brief Cache of imported lists keyed by share key.
+ *
+ * @type {Object.<string, Object>}
+ */
 export let importedLists = loadImported(); // { [key]: { key, name, importedAt, labels, marks } }
 
 // Pending import data — held between fetch modal and name modal
 let _pendingImport = null;
 
 // ── List serialization ────────────────────────────────────────
+
+/**
+ * @brief Serializes current user's marks and labels into a JSON string.
+ *
+ * @return {string} Serialized list data.
+ */
 function serializeList() {
   const marks = {};
   Object.entries(state.prog).forEach(([id, p]) => {
@@ -35,6 +69,12 @@ function serializeList() {
   return JSON.stringify({ v: 1, labels: state.markingLabels, marks });
 }
 
+/**
+ * @brief Generates SHA-256 hash of serialized list for use as share key.
+ *
+ * @param {string} serialized - Serialized list JSON string.
+ * @return {Promise<string>} Hex hash string.
+ */
 async function hashList(serialized) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(serialized));
   return Array.from(new Uint8Array(buf))
@@ -43,6 +83,12 @@ async function hashList(serialized) {
 }
 
 // ── Export flow ───────────────────────────────────────────────
+
+/**
+ * @brief Opens the export modal and uploads user's list to server.
+ *
+ * @return {Promise<void>}
+ */
 export async function openExportModal() {
   const marks = Object.entries(state.prog).filter(
     ([, p]) => (p.markings && p.markings.some(Boolean)) || p.like,
@@ -85,6 +131,13 @@ export async function openExportModal() {
 }
 
 // ── Import flow ───────────────────────────────────────────────
+
+/**
+ * @brief Opens the import modal, optionally prefilled with a share key.
+ *
+ * @param {string} prefillKey - Optional share key to prefill.
+ * @return {void}
+ */
 export function openImportModal(prefillKey = '') {
   document.getElementById('importKeyInput').value = prefillKey;
   document.getElementById('importErr').textContent = '';
@@ -92,6 +145,11 @@ export function openImportModal(prefillKey = '') {
   if (prefillKey) document.getElementById('importFetchBtn').click();
 }
 
+/**
+ * @brief Initializes all share/import modal event listeners.
+ *
+ * @return {void}
+ */
 export function initShare() {
   document.getElementById('exportClose').addEventListener('click', () => {
     document.getElementById('exportBg').style.display = 'none';

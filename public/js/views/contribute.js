@@ -1,4 +1,11 @@
-/* contribute.js */
+/**
+ * @file contribute.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Contribution view. Allows logged-in users to submit new waza suggestions and view their contribution history with status tracking.
+ */
 
 import { state } from '../state/state.js';
 import { api } from '../services/api.js';
@@ -6,6 +13,11 @@ import { doLogout } from '../services/auth.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 
+/**
+ * @brief Renders the contribute view with sign-in prompt, action buttons, and contribution history.
+ *
+ * @return {Promise<void>}
+ */
 export async function renderContribute() {
   const container = document.getElementById('contributeContent');
   const loggedIn = !state.isGuest && !!state.token;

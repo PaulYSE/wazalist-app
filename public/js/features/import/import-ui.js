@@ -1,4 +1,11 @@
-/* import-ui.js: UI rendering and event handling for the import feature */
+/**
+ * @file import-ui.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief UI rendering and event handling for the import feature (text and Excel).
+ */
 
 import { state, tiState } from '../../state/state.js';
 import { parseTextImport } from '../../lib/parser.js';
@@ -9,9 +16,18 @@ import { dispName } from '../../lib/search.js';
 import { saveP, saveLabels } from '../../services/progress.js';
 import { showToast } from '../../components/show-toast.js';
 
+/**
+ * @brief Renders the import UI based on current parsing state.
+ *
+ * Handles three states: input form (no parsed data), Excel color mapping mode,
+ * and matched results with auto-mapping/preview capabilities.
+ *
+ * @return {void}
+ */
 export function renderImport() {
   const container = document.getElementById('dashImport');
 
+  // ── Input form mode ─────────────────────────────────────────
   if (!tiState.parsed) {
     container.innerHTML = renderTiInput();
     bindTiInputEvents(container);
@@ -498,6 +514,11 @@ export function renderImport() {
   });
 }
 
+/**
+ * @brief Renders the initial text/Excel import input form.
+ *
+ * @return {string} HTML string for the import input form.
+ */
 function renderTiInput() {
   return (
     '<div style="display:flex;flex-direction:column;height:100%">' +
@@ -526,6 +547,12 @@ function renderTiInput() {
   );
 }
 
+/**
+ * @brief Binds event listeners for the import input form.
+ *
+ * @param {HTMLElement} container - The container element holding the input form.
+ * @return {void}
+ */
 function bindTiInputEvents(container) {
   // Text paste handler
   container.querySelector('#tiParseBtn')?.addEventListener('click', () => {
@@ -567,6 +594,12 @@ function bindTiInputEvents(container) {
   });
 }
 
+/**
+ * @brief Converts a hex color string to RGB components.
+ *
+ * @param {string} hex - Hex color string (e.g., 'FF4F8FF7' or '#FF4F8F').
+ * @return {Object} Object with r, g, b properties (0-255 range).
+ */
 function hexToRgb(hex) {
   // Remove # if present and handle 6-digit hex
   hex = hex.replace('#', '');

@@ -1,6 +1,24 @@
-/* Toast.js — showToast(msg, color): a simple helper to show a temporary toast message in the bottom-right. */
+/**
+ * @file show-toast.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief Simple toast notification helper. Displays a temporary message in the bottom-right corner of the viewport.
+ */
 
 // ── Toast helper ─────────────────────────────────────────────
+
+/**
+ * @brief Displays a temporary toast notification.
+ *
+ * Creates a floating div at bottom-right of the screen that auto-removes after 3 seconds.
+ * Supports green (success), amber (warning), and red (error) color schemes.
+ *
+ * @param {string} msg - The message text to display.
+ * @param {string} [color='green'] - Color theme: 'green', 'amber', or 'red'.
+ * @return {void}
+ */
 export function showToast(msg, color = 'green') {
   const colors = {
     green: ['#002a10', '#4caf82', '#4caf82'],

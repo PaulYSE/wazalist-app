@@ -1,6 +1,21 @@
+/**
+ * @file new-waza.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-08
+ * @brief New waza submission modal. Handles form display, validation, and submission to the contributions API.
+ */
+
 import { api } from '../services/api.js';
 
 // ── New Waza modal ────────────────────────────────────────────
+
+/**
+ * @brief List of field names for the new waza submission form.
+ *
+ * @type {string[]}
+ */
 const NW_FIELDS = [
   'name_jp',
   'name_en',
@@ -20,6 +35,11 @@ const NW_FIELDS = [
   'reference',
 ];
 
+/**
+ * @brief Opens the new waza submission modal and clears previous values.
+ *
+ * @return {void}
+ */
 export function openNewWazaModal() {
   NW_FIELDS.forEach((f) => {
     const el = document.getElementById('nw-' + f);
@@ -29,6 +49,13 @@ export function openNewWazaModal() {
   document.getElementById('newWazaBg').style.display = 'flex';
 }
 
+/**
+ * @brief Initializes event listeners for the new waza modal.
+ *
+ * Sets up open/close buttons, background click dismissal, and form submission handler.
+ *
+ * @return {void}
+ */
 export function initNewWaza() {
   document.getElementById('newWazaBtn').addEventListener('click', openNewWazaModal);
   document.getElementById('newWazaClose').addEventListener('click', () => {
