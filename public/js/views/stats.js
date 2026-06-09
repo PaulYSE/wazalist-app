@@ -12,7 +12,7 @@ import { getP } from '../services/progress.js';
 import { dispName } from '../lib/search.js';
 import { markingStyle, markingPips } from '../components/render-helpers.js';
 import { selectWaza } from './waza-detail.js';
-import { navigateToBrowse } from '../app/shell.js';
+import { navigateToBrowse, setSearchInput } from '../app/shell.js';
 import { escapeHtml } from '../lib/escape.js';
 
 // ── Persisted UI state (module scope: survives the re-render each toggle fires) ──
@@ -382,8 +382,7 @@ export function renderDashStats() {
   // ── Wiring ──────────────────────────────────────────────────
   const searchAndExit = (term, scope) => {
     const query = scope ? `${scope.toUpperCase()}:"${term}"` : term;
-    state.filters.search = query;
-    document.getElementById('searchInput').value = query;
+    setSearchInput(query);
     navigateToBrowse();
   };
 

@@ -22,6 +22,7 @@ import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit } from '../modals/suggest-edit.js';
 import { renderList } from './browse-list.js';
+import { setSearchInput } from '../app/shell.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -471,14 +472,13 @@ export function renderDetail() {
   // Search-and-exit: set the search term, then drop back to the list panel.
   const searchAndExit = (term, scope = null) => {
     const query = scope ? `${scope.toUpperCase()}:"${term}"` : term;
-    state.filters.search = query; // scoped query, so the filter actually scopes
-    document.getElementById('searchInput').value = query;
+    setSearchInput(query);
     state.selectedId = null;
     document.querySelector('.main').classList.remove('waza-selected');
     const url = new URL(location.href);
     url.searchParams.delete('waza');
     history.replaceState(null, '', url);
-    renderList(); // content changed (new filter) — re-render is correct here
+    renderList();
     renderDetail();
   };
   panel

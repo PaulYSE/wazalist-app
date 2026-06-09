@@ -193,20 +193,16 @@ export function initUi() {
   // ── Filter events ───────────────────────────────────────────
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
-  const searchWrap = searchInput.closest('.search-wrap');
 
   // Show/hide clear button based on input value
   searchInput.addEventListener('input', (e) => {
-    state.filters.search = e.target.value;
-    searchWrap.classList.toggle('has-value', !!e.target.value);
+    setSearchInput(e.target.value);
     renderList();
   });
 
   // Clear button resets input and search state
   searchClear.addEventListener('click', () => {
-    searchInput.value = '';
-    state.filters.search = '';
-    searchWrap.classList.remove('has-value');
+    setSearchInput('');
     searchInput.focus();
     renderList();
   });
@@ -376,4 +372,22 @@ export function navigateToBrowse() {
   document.getElementById('compareView').style.display = 'none';
   document.getElementById('accountView').style.display = 'none';
   document.getElementById('contributeView').style.display = 'none';
+}
+
+/**
+ * @brief Sets the global search filter and synchronizes the search input field.
+ *
+ * Updates the state.filters.search value, sets the input field's value,
+ * and toggles the clear button visibility based on whether the query is non-empty.
+ *
+ * @param {string} query - The search query string to set.
+ * @return {void}
+ */
+export function setSearchInput(query) {
+  state.filters.search = query;
+  const input = document.getElementById('searchInput');
+  if (!input) return;
+  input.value = query;
+  // Toggle the 'has-value' class on the search wrapper to show/hide the clear button
+  input.closest('.search-wrap')?.classList.toggle('has-value', !!query);
 }
