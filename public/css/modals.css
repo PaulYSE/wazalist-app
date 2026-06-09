@@ -75,6 +75,33 @@
   gap: 10px;
 }
 
+.cfield input,
+.cfield textarea,
+.cfield select {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.cfield input:focus,
+.cfield textarea:focus,
+.cfield select:focus {
+  border-color: var(--accent);
+}
+
+.cfield .hint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 3px;
+}
+
 .cmodal-footer {
   padding: 14px 20px;
   border-top: 1px solid var(--border);
