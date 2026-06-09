@@ -529,19 +529,10 @@
 }
 
 .acc-body > .acc-body-inner {
-  overflow: hidden;
-  min-height: 0; /* lets the grid row shrink below content height */
-}
-
-.acc-body {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.25s ease;
-}
-.acc-body.open {
-  grid-template-rows: 1fr;
-}
-.acc-body > .acc-body-inner {
-  overflow: hidden;
-  min-height: 0;
+  padding: 12px;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: var(--r);
+  border-bottom-right-radius: var(--r);
 }

@@ -286,23 +286,67 @@
 }
 
 /* collapsible section */
+/* collapsible section — styled as a clearly tappable bar */
 .dsec-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: 4px 0;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+
+.dsec-toggle:hover {
+  background: var(--bg3);
+  border-color: var(--accent);
+}
+
+/* When open, tie the header visually to the body below it: square off the
+   bottom corners so the bar + content read as one connected panel. */
+.dsec-toggle:not(.collapsed) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .dsec-toggle h3 {
   margin-bottom: 0;
+  color: var(--text2); /* brighter than the old text3 — reads as active */
 }
 
+.dsec-toggle:hover h3 {
+  color: var(--text1);
+}
+
+/* The arrow becomes a visible affordance: a circular chip, accent-tinted,
+   that clearly looks like a control rather than a stray glyph. */
 .dsec-toggle .toggle-arrow {
-  font-size: 11px;
-  color: var(--text3);
-  transition: transform 0.2s;
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  transition:
+    transform 0.2s,
+    background 0.12s,
+    border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.dsec-toggle:hover .toggle-arrow {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .dsec-toggle.collapsed .toggle-arrow {
@@ -310,7 +354,7 @@
 }
 
 .dsec-body {
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .dgrid {
