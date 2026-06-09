@@ -67,10 +67,10 @@ function accSection(key, label, controlsHTML, bodyHTML) {
     '</h3><span class="toggle-arrow">▾</span></div>' +
     '<div class="acc-body' +
     (open ? ' open' : '') +
-    '"><div class="acc-body-inner">' +
+    '"><div class="acc-body-inner"><div class="acc-body-box">' +
     controlsHTML +
     bodyHTML +
-    '</div></div></div>'
+    '</div></div></div></div>'
   );
 }
 
