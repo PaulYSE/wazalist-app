@@ -228,9 +228,9 @@ export function renderDetail() {
       '</h3><span class="toggle-arrow">▾</span></div>' +
       '<div class="acc-body' +
       (isCollapsed ? '' : ' open') +
-      '"><div class="acc-body-inner">' +
+      '"><div class="acc-body-inner"><div class="acc-body-box">' +
       inner +
-      '</div></div></div>'
+      '</div></div></div></div>'
     );
   };
 
