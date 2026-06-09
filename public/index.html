@@ -483,6 +483,46 @@
       </div>
     </div>
 
+    <!-- FIELD-TARGETED SUGGEST EDIT MODAL -->
+    <div id="fieldEditBg" class="cmodal-bg" style="display: none">
+      <div class="cmodal" style="max-width: 460px">
+        <div class="cmodal-header">
+          <h2 id="fieldEditTitle">✏️ Suggest a change</h2>
+          <button class="cmodal-close" id="fieldEditClose">✕</button>
+        </div>
+        <div class="cmodal-body">
+          <p
+            id="fieldEditDesc"
+            style="font-size: 13px; color: var(--text2); margin-bottom: 14px"
+          ></p>
+          <div id="fieldEditCurrentWrap" class="cfield" style="display: none">
+            <label>Current value</label>
+            <div
+              id="fieldEditCurrent"
+              style="
+                font-size: 13px;
+                color: var(--text3);
+                padding: 8px 10px;
+                background: var(--bg0);
+                border: 1px solid var(--border);
+                border-radius: var(--r);
+                word-break: break-all;
+              "
+            ></div>
+          </div>
+          <div class="cfield">
+            <label id="fieldEditLabel">New value</label>
+            <input id="fieldEditInput" type="text" placeholder="" autocomplete="off" />
+          </div>
+          <div class="cmodal-err" id="fieldEditErr"></div>
+        </div>
+        <div class="cmodal-footer">
+          <button class="cbtn cbtn-primary" id="fieldEditSubmit">Submit suggestion</button>
+          <button class="cbtn cbtn-ghost" id="fieldEditCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- NEW WAZA MODAL -->
     <div id="newWazaBg" class="cmodal-bg" style="display: none">
       <div class="cmodal">

@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-10
  * @brief Shared rendering utilities for marking styles/pips, video platform detection, oEmbed handling, and UI components like video buttons and like pills.
  */
 
@@ -383,4 +383,59 @@ export function cardLikePill(w, p) {
     '</span>' +
     '</div>'
   );
+}
+
+/**
+ * @brief Canonical identity key for a video URL — platform + id, ignoring
+ *        timestamps, query params, and short/long URL form. Two URLs pointing
+ *        at the same video (e.g. youtu.be/X and youtube.com/watch?v=X&t=90)
+ *        produce the same key. Falls back to a normalized raw URL for
+ *        platforms without an extractable id.
+ *
+ * @param {string} url - Video URL.
+ * @return {string|null} Identity key like "yt:dRJkbHvHli4", or null for empty input.
+ */
+export function videoKey(url) {
+  if (!url || !url.trim()) return null;
+  const u = url.trim();
+
+  let m = u.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/,
+  );
+  if (m) return 'yt:' + m[1];
+
+  m = u.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
+  if (m) return 'bili:' + m[1].toLowerCase();
+
+  m = u.match(/bilibili\.com\/video\/av(\d+)/i);
+  if (m) return 'bili:av' + m[1];
+
+  m = u.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)((?:sm|nm|so)\d+)/);
+  if (m) return 'nico:' + m[1];
+
+  m = u.match(/(?:twitter\.com|x\.com)\/[^/]+\/status\/(\d+)/i);
+  if (m) return 'tw:' + m[1];
+
+  // Fallback: strip protocol, www, trailing slash, and query/hash, lowercase.
+  return (
+    'raw:' +
+    u
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/[?#].*$/, '')
+      .replace(/\/+$/, '')
+      .toLowerCase()
+  );
+}
+
+/**
+ * @brief Whether two video URLs refer to the same video (timestamp-insensitive).
+ *
+ * @param {string} a - First URL.
+ * @param {string} b - Second URL.
+ * @return {boolean} True if both resolve to the same video identity.
+ */
+export function sameVideo(a, b) {
+  const ka = videoKey(a);
+  return ka !== null && ka === videoKey(b);
 }

@@ -19,7 +19,7 @@ import {
 import { initUi, closeMobMenu } from './app/shell.js';
 import { initShare } from './features/share-list.js';
 import { initNewWaza } from './modals/new-waza.js';
-import { initSuggestEdit } from './modals/suggest-edit.js';
+import { initSuggestEdit, initFieldEdit } from './modals/suggest-edit.js';
 import { initOnboarding, showOnboarding } from './features/onboarding.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
@@ -89,6 +89,7 @@ initUi();
 initShare();
 initNewWaza();
 initSuggestEdit();
+initFieldEdit();
 initOnboarding();
 initAuth();
 

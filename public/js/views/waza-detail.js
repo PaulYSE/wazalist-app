@@ -20,7 +20,7 @@ import { SHAPES, platLabel, platColor } from '../config/constants.js';
 import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
-import { openSuggestEdit } from '../modals/suggest-edit.js';
+import { openSuggestEdit, openVideoSuggest } from '../modals/suggest-edit.js';
 import { renderList } from './browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 
@@ -306,7 +306,11 @@ export function renderDetail() {
     // Videos — not collapsible
     '<div class="dsec"><h3>Video references</h3><div class="vlinks">' +
     videoHTML +
-    '</div></div>' +
+    '</div>' +
+    (!state.isGuest && state.token
+      ? '<div class="suggest-video-bar" id="suggestVideoBar">🎥 Suggest a video!</div>'
+      : '') +
+    '</div>' +
     // Collapsible sections
     sec(
       'names',
@@ -497,6 +501,7 @@ export function renderDetail() {
     .querySelectorAll('.chip[data-id]')
     .forEach((chip) => chip.addEventListener('click', () => selectWaza(+chip.dataset.id)));
   panel.querySelector('#suggestEditBtn')?.addEventListener('click', () => openSuggestEdit(w));
+  panel.querySelector('#suggestVideoBar')?.addEventListener('click', () => openVideoSuggest(w));
 }
 
 // ── History popstate handler to support back button closing detail view ──
