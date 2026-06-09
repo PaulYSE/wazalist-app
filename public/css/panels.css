@@ -384,6 +384,16 @@
   font-weight: 600;
 }
 
+/* Stats: indent the expanded marked-waza list under a ranking row */
+.rank-sublist {
+  margin: 0 0 8px 24px;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+}
+.rank-sublist .waza-compact:last-child {
+  border-bottom: none;
+}
+
 /* ── Contributions ── */
 .contrib-item {
   padding: 10px 14px;
@@ -521,4 +531,17 @@
 .acc-body > .acc-body-inner {
   overflow: hidden;
   min-height: 0; /* lets the grid row shrink below content height */
+}
+
+.acc-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+.acc-body.open {
+  grid-template-rows: 1fr;
+}
+.acc-body > .acc-body-inner {
+  overflow: hidden;
+  min-height: 0;
 }

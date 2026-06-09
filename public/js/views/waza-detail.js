@@ -213,7 +213,7 @@ export function renderDetail() {
         .join('')
     : '<span style="color:var(--text3);font-size:13px">None found</span>';
 
-  // Collapsible section helper
+  // Collapsible section helper (animated open/close, independent per section).
   const sec = (key, label, inner) => {
     const isCollapsed = collapsed[key];
     return (
@@ -226,11 +226,11 @@ export function renderDetail() {
       '<h3>' +
       label +
       '</h3><span class="toggle-arrow">▾</span></div>' +
-      '<div class="dsec-body" style="' +
-      (isCollapsed ? 'display:none' : '') +
-      '">' +
+      '<div class="acc-body' +
+      (isCollapsed ? '' : ' open') +
+      '"><div class="acc-body-inner">' +
       inner +
-      '</div></div>'
+      '</div></div></div>'
     );
   };
 
@@ -457,13 +457,13 @@ export function renderDetail() {
   });
   // Kick off oEmbed prefetch for all videos (progressive — updates DOM as results arrive)
   prefetchOembeds(resolvedVids);
-  // Collapsible toggles
+  // Collapsible toggles (animated; each section independent)
   panel.querySelectorAll('.dsec-toggle').forEach((el) =>
     el.addEventListener('click', () => {
       const key = el.dataset.key;
       collapsed[key] = !collapsed[key];
       el.classList.toggle('collapsed', collapsed[key]);
-      el.nextElementSibling.style.display = collapsed[key] ? 'none' : '';
+      el.nextElementSibling.classList.toggle('open', !collapsed[key]);
     }),
   );
   // Search-and-exit: set the search term, then drop back to the list panel.
