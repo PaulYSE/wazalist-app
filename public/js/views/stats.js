@@ -1,8 +1,10 @@
 /**
  * @file stats.js
  * @author Paul Yong Shao En
- * @brief Stats dashboard: always-open Your Progress, plus collapsible
- *        Top Waza / Top Family / Recent Activity sections with their controls.
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-09
+ * @brief Stats dashboard: always-open Your Progress, plus collapsible Top Waza / Top Family / Recent Activity sections with their controls.
  */
 
 import { state } from '../state/state.js';
@@ -23,6 +25,12 @@ let recentLimit = 10; // 10 | 15 | 20
 // Independent open/closed state for the three collapsible sections.
 const accOpen = { rank: true, family: false, recent: false };
 
+/**
+ * @brief Formats an ISO timestamp into a relative time string.
+ *
+ * @param {string} iso - ISO timestamp string.
+ * @return {string} Human-readable relative time (e.g., "2h ago").
+ */
 function timeAgo(iso) {
   if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
@@ -36,6 +44,16 @@ function timeAgo(iso) {
 }
 
 // Animated collapsible section (grid 0fr→1fr), independent open/close.
+
+/**
+ * @brief Generates an animated collapsible section with header and body.
+ *
+ * @param {string} key - Section identifier for state tracking.
+ * @param {string} label - Section title.
+ * @param {string} controlsHTML - HTML for control buttons inside the header area.
+ * @param {string} bodyHTML - HTML for the collapsible body content.
+ * @return {string} Accordion section HTML.
+ */
 function accSection(key, label, controlsHTML, bodyHTML) {
   const open = accOpen[key];
   return (
@@ -56,6 +74,11 @@ function accSection(key, label, controlsHTML, bodyHTML) {
   );
 }
 
+/**
+ * @brief Renders the full stats dashboard with overview, rankings, family completion, and recent activity.
+ *
+ * @return {void}
+ */
 export function renderDashStats() {
   // ── Overview (always open, outside the accordion) ───────────
   let markingd = 0,
@@ -85,9 +108,6 @@ export function renderDashStats() {
     '</div><div class="l">Total Waza</div></div>' +
     '</div></div>';
 
-  const now = Date.now();
-  const DAY = 24 * 60 * 60 * 1000;
-
   const AUTHOR_FIELDS = [
     ['author_en0', 'author_jp0'],
     ['author_en1', 'author_jp1'],
@@ -98,6 +118,15 @@ export function renderDashStats() {
   ];
 
   // Aggregate per entity, also tracking the marked waza ids (for "show waza").
+
+  /**
+   * @brief Aggregates top entities (authors/families) by personal marks or community likes.
+   *
+   * @param {Array<Array<string>>} fieldPairs - Array of [enField, jpField] pairs.
+   * @param {string} metric - Metric to sort by ('marks' or 'likes').
+   * @param {number} limit - Maximum number of results.
+   * @return {Array<Object>} Sorted array of entity objects with name, marks, likes, and wazaIds.
+   */
   function topBy(fieldPairs, metric, limit = 5) {
     const acc = {}; // key → { name, marks, likes, wazaIds: [] }
     state.wazaData.forEach((w) => {
@@ -278,7 +307,12 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families to show.</div>';
 
-  const famSection = accSection('family', 'Top family completion (3+ members)', famControls, covBody);
+  const famSection = accSection(
+    'family',
+    'Top family completion (3+ members)',
+    famControls,
+    covBody,
+  );
 
   // ── Recent Activity (selectable count) ──────────────────────
   const recent = state.wazaData
