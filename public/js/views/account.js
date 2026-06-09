@@ -38,7 +38,7 @@ export function openAccountSection(key) {
 
 // Accordion open/closed state — module-level so it persists across re-renders
 // Accordion state — only ONE section open at a time. Manage is the default.
-const accOpen = { import: false, export: false, manage: true };
+const accOpen = { import: false, export: false, manage: false };
 
 // Collapsible accordion section, reusing the .dsec-toggle / .dsec-body mechanism.
 

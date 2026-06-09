@@ -22,8 +22,9 @@ let showWaza = false; // expand each ranking row into its marked-waza list
 let famSort = 'completion'; // 'completion' | 'total'
 let famShowZero = false; // show families with 0 marked
 let recentLimit = 10; // 10 | 15 | 20
+
 // Independent open/closed state for the three collapsible sections.
-const accOpen = { rank: true, family: false, recent: false };
+const accOpen = { rank: false, family: false, recent: false };
 
 /**
  * @brief Formats an ISO timestamp into a relative time string.
@@ -386,13 +387,25 @@ export function renderDashStats() {
     navigateToBrowse();
   };
 
-  // Accordion toggles (independent open/close).
+  // Accordion toggles (mutually exclusive: opening one closes the others;
+  // clicking the open section closes it, so all-closed is a valid state).
   container.querySelectorAll('.stat-acc-toggle').forEach((el) => {
     el.addEventListener('click', () => {
       const key = el.dataset.acc;
-      accOpen[key] = !accOpen[key];
-      el.classList.toggle('collapsed', !accOpen[key]);
-      el.nextElementSibling.classList.toggle('open', accOpen[key]);
+      const wasOpen = accOpen[key];
+      // Close everything first.
+      Object.keys(accOpen).forEach((k) => {
+        accOpen[k] = false;
+      });
+      // Then open the clicked one — unless it was already open (toggle-to-close).
+      if (!wasOpen) accOpen[key] = true;
+      // Reflect the new state into every section's DOM, not just the clicked one,
+      // since opening one may have closed another.
+      container.querySelectorAll('.stat-acc-toggle').forEach((t) => {
+        const open = accOpen[t.dataset.acc];
+        t.classList.toggle('collapsed', !open);
+        t.nextElementSibling.classList.toggle('open', open);
+      });
     });
   });
 

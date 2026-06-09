@@ -89,7 +89,7 @@ export function initWazaDetail() {
 
 // ── Render detail ─────────────────────────────────────────────
 // Track collapsed state per section key
-const collapsed = { names: false, classif: false, parents: false, creator: false, similar: false };
+const collapsed = { names: true, classif: true, parents: true, creator: true, similar: true };
 
 /**
  * @brief Renders the detail panel for the currently selected waza.
@@ -407,11 +407,13 @@ export function renderDetail() {
             '</div>',
         )
       : '') +
-    sec(
-      'similar',
-      'Similar Waza',
-      '<div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div>',
-    ) +
+    (siblings.length
+      ? sec(
+          'similar',
+          'Similar Waza',
+          '<div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div>',
+        )
+      : '') +
     (!state.isGuest && state.token
       ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>'
       : '');
