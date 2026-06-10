@@ -260,8 +260,12 @@ function mkNextBtn() {
 
 // ── Browse demo (slide 1) ─────────────────────────────────────
 
+// Module-scope demo items so the marking filter can re-render the list.
+let browseDemoItems = [];
+let browseDemoFilter = 'all'; // 'all' | '0'..'5'
+
 /**
- * @brief Builds the browse list demo with real waza data.
+ * @brief Builds the browse list demo with real waza data + marking filter.
  *
  * @return {void}
  */
@@ -269,7 +273,6 @@ function buildBrowseDemo() {
   const container = document.getElementById('obBrowseList');
   if (!container) return;
 
-  // Get real waza data
   const realWaza = getRealWaza(5);
   if (realWaza.length === 0) {
     container.innerHTML =
@@ -277,8 +280,7 @@ function buildBrowseDemo() {
     return;
   }
 
-  // Use first 3 real waza with demo markings
-  const demoItems = [
+  browseDemoItems = [
     {
       waza: realWaza[0],
       markings: [true, false, false, true, true, false],
@@ -306,8 +308,26 @@ function buildBrowseDemo() {
     },
   ];
 
-  // Build real waza-list components (same structure as main app's list view)
-container.innerHTML = demoItems
+  renderBrowseDemoList();
+  wireBrowseDemoFilter();
+}
+
+// Render the demo list, applying the current marking filter.
+function renderBrowseDemoList() {
+  const container = document.getElementById('obBrowseList');
+  if (!container) return;
+  const shown =
+    browseDemoFilter === 'all'
+      ? browseDemoItems
+      : browseDemoItems.filter((item) => item.markings[+browseDemoFilter]);
+
+  if (!shown.length) {
+    container.innerHTML =
+      '<div style="color:var(--text3);padding:16px;text-align:center;font-size:13px">No waza with this marking</div>';
+    return;
+  }
+
+  container.innerHTML = shown
     .map((item) => {
       const w = item.waza;
       const markings = item.markings;
@@ -317,7 +337,6 @@ container.innerHTML = demoItems
         '</span><span>👎 ' +
         item.dislikes +
         '</span></div>';
-
       const bottomRow =
         '<div class="card-bottom-row">' +
         '<div class="markings-row wce-markings">' +
@@ -325,7 +344,6 @@ container.innerHTML = demoItems
         '</div>' +
         pill +
         '</div>';
-
       const _ms = markingStyle(markings);
       return (
         '<div class="waza-list ' +
@@ -334,16 +352,30 @@ container.innerHTML = demoItems
         _ms.style +
         '">' +
         '<div class="njp">' +
-        w.name_jp +
+        escapeHtml(w.name_jp || '—') +
         '</div>' +
         '<div class="nen">' +
-        w.name_en +
+        escapeHtml(w.name_en || '') +
         '</div>' +
         bottomRow +
         '</div>'
       );
     })
     .join('');
+}
+
+// Wire the demo marking-filter buttons (single-select, like a quick filter).
+function wireBrowseDemoFilter() {
+  const bar = document.getElementById('obFilterBar');
+  if (!bar) return;
+  bar.querySelectorAll('.ob-filter-btn').forEach((btn) => {
+    btn.onclick = () => {
+      browseDemoFilter = btn.dataset.obf;
+      bar.querySelectorAll('.ob-filter-btn').forEach((b) => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderBrowseDemoList();
+    };
+  });
 }
 
 // ── Fuzzy search demo (slide 2) ───────────────────────────────
