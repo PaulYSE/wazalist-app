@@ -935,83 +935,76 @@
               </div>
             </div>
 
-            <!-- SLIDE 6: Stats -->
-            <div class="ob-slide">
-              <div class="ob-slide-icon">📊</div>
-              <div class="ob-slide-title">Track your <span>Progress</span></div>
-              <div class="ob-slide-sub">
-                The <b>Stats</b> tab shows your marking history and recent activity. See which Waza
-                you've marked, when you last updated them, and your coverage by technique family.
-              </div>
-              <div class="ob-demo" style="padding: 14px">
-                <div
-                  style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 12px;
-                    margin-bottom: 12px;
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 11px;
-                      text-transform: uppercase;
-                      letter-spacing: 0.5px;
-                      color: var(--text3);
-                      margin-bottom: 8px;
-                    "
-                  >
-                    Overview
-                  </div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
-                    <div
-                      style="
-                        text-align: center;
-                        padding: 12px;
-                        background: var(--bg1);
-                        border-radius: 6px;
-                      "
-                    >
-                      <div style="font-size: 24px; font-weight: 700; color: var(--accent)">23</div>
-                      <div style="font-size: 12px; color: var(--text3)">Marked</div>
-                    </div>
-                    <div
-                      style="
-                        text-align: center;
-                        padding: 12px;
-                        background: var(--bg1);
-                        border-radius: 6px;
-                      "
-                    >
-                      <div style="font-size: 24px; font-weight: 700">150</div>
-                      <div style="font-size: 12px; color: var(--text3)">Total Waza</div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style="
-                    background: var(--bg0);
-                    border: 1px solid var(--border);
-                    border-radius: var(--r);
-                    padding: 12px;
-                  "
-                >
-                  <div
-                    style="
-                      font-size: 11px;
-                      text-transform: uppercase;
-                      letter-spacing: 0.5px;
-                      color: var(--text3);
-                      margin-bottom: 8px;
-                    "
-                  >
-                    Recent Activity
-                  </div>
-                  <div id="obStatsRecent"></div>
-                </div>
-              </div>
-            </div>
+<!-- SLIDE 6: Stats -->
+<div class="ob-slide">
+  <div class="ob-slide-icon">📊</div>
+  <div class="ob-slide-title">Track your <span>Progress</span></div>
+  <div class="ob-slide-sub">
+    The <b>Stats</b> tab breaks down your collection. See your overall counts, which authors and
+    families you've marked most (<b>Waza Trends</b>), how complete each family is, and your most
+    recent activity.
+  </div>
+  <div class="ob-demo" style="padding: 14px">
+    <!-- Overview (always visible) -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Your Progress</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="text-align:center;padding:10px 6px;background:var(--bg1);border-radius:6px">
+          <div style="font-size:20px;font-weight:700;color:var(--accent)">23</div>
+          <div style="font-size:11px;color:var(--text3)">Marked</div>
+        </div>
+        <div style="text-align:center;padding:10px 6px;background:var(--bg1);border-radius:6px">
+          <div style="font-size:20px;font-weight:700;color:var(--green)">8</div>
+          <div style="font-size:11px;color:var(--text3)">Liked</div>
+        </div>
+        <div style="text-align:center;padding:10px 6px;background:var(--bg1);border-radius:6px">
+          <div style="font-size:20px;font-weight:700;color:var(--red)">1</div>
+          <div style="font-size:11px;color:var(--text3)">Disliked</div>
+        </div>
+        <div style="text-align:center;padding:10px 6px;background:var(--bg1);border-radius:6px">
+          <div style="font-size:20px;font-weight:700">150</div>
+          <div style="font-size:11px;color:var(--text3)">Total</div>
+        </div>
+      </div>
+    </div>
+    <!-- Waza Trends (collapsible section, depicted open) -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">Waza Trends</span>
+        <span style="font-size:11px;color:var(--text3)">▾</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--accent2);color:#fff">Author</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text2)">Family</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text2);margin-left:auto">Show Waza</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text2)">1&nbsp;&nbsp;Over Action Dolphin</span><span style="color:var(--accent);font-weight:600">6</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0">
+        <span style="color:var(--text2)">2&nbsp;&nbsp;Rosario</span><span style="color:var(--accent);font-weight:600">4</span>
+      </div>
+    </div>
+    <!-- Top waza family (collapsible, depicted with a completion bar) -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)">Top Waza Family</span>
+        <span style="font-size:11px;color:var(--text3)">▾</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>OAD Kansai</span><span style="color:var(--text3)">5 / 8</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:20px;height:6px;overflow:hidden">
+        <div style="height:100%;width:62%;background:var(--accent2);border-radius:20px"></div>
+      </div>
+    </div>
+    <!-- Recent Activity (real demo via #obStatsRecent, unchanged) -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Recent Activity</div>
+      <div id="obStatsRecent"></div>
+    </div>
+  </div>
+</div>
 
             <!-- SLIDE 7: Compare -->
             <div class="ob-slide">
@@ -1035,25 +1028,34 @@
   <div class="ob-slide-icon">✏️</div>
   <div class="ob-slide-title">Help grow the <span>Database</span></div>
   <div class="ob-slide-sub">
-    Spot a typo, a dead link, or a missing video? Any <b>logged-in user</b> can suggest a
-    fix to a single field — no need to refill the whole entry. All suggestions are reviewed
-    by admins before going live.
+    Any <b>logged-in user</b> can improve the database. Submit a whole new waza, fix a single
+    field, or add a missing video — whatever fits. Everything is reviewed by an admin before
+    it goes live.
   </div>
   <div class="ob-demo" style="padding: 14px">
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px">Fix a field</div>
-        <div style="font-size:13px;color:var(--text2)">Suggest a correction to a name, author, or any single field.</div>
-      </div>
-      <div style="background:var(--bg0);border:1px dashed var(--border);border-radius:var(--r);padding:10px 12px;text-align:center;color:var(--accent);font-size:13px">
-        🎥 Suggest a video!
-      </div>
-      <div style="font-size:12px;color:var(--text3)">
-        Paste a link below any waza's videos — duplicates are caught automatically, even if the timestamp differs.
+    <!-- Full-form submission (still the way to add a brand-new waza) -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Submit a new waza</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="ob-field-preview"><label>Name (JP) *</label><div class="ob-fake-input">技名</div></div>
+        <div class="ob-field-preview"><label>Name (EN)</label><div class="ob-fake-input">Waza name</div></div>
+        <div class="ob-field-preview" style="grid-column:1/-1"><label>Video 1 *</label><div class="ob-fake-input">https://youtube.com/…</div></div>
       </div>
     </div>
+    <!-- Single-field fix -->
+    <div style="background:var(--bg0);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:6px">Fix a single field</div>
+      <div style="font-size:13px;color:var(--text2)">Spot a typo or dead link? Suggest a correction to just that field — no need to refill the rest.</div>
+    </div>
+    <!-- Suggest a video -->
+    <div style="background:var(--bg0);border:1px dashed var(--border);border-radius:var(--r);padding:10px 12px;text-align:center;color:var(--accent);font-size:13px;margin-bottom:8px">
+      🎥 Suggest a video!
+    </div>
+    <div style="font-size:12px;color:var(--text3)">
+      Paste a link below any waza's videos — duplicates are caught automatically, even if the timestamp differs.
+    </div>
     <div style="margin-top:12px;background:rgba(76,175,130,0.1);border:1px solid var(--green);border-radius:var(--r);padding:8px 10px">
-      <div style="font-size:12px;color:var(--green)">✓ Every suggestion is reviewed by an admin before it goes live</div>
+      <div style="font-size:12px;color:var(--green)">✓ Every contribution is reviewed by an admin before it goes live</div>
     </div>
   </div>
 </div>
