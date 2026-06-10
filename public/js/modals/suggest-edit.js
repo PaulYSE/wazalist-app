@@ -3,8 +3,8 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-10
- * @brief Suggest edit modal for waza data. Allows users to propose changes to existing waza entries, which are submitted to the contributions API for admin review.
+ * @date 2026-06-11
+ * @brief Suggest edit modal for waza data. Allows users to propose changes to existing waza entries, which are submitted to the contributions API for admin review. Also provides field-targeted suggestions and video appends.
  */
 
 import { api } from '../services/api.js';
@@ -222,6 +222,13 @@ export function openVideoSuggest(w) {
 }
 
 // Find the first empty video slot, skipping video0 (never append there).
+
+/**
+ * @brief Finds the next empty video slot for a waza, skipping video0.
+ *
+ * @param {Object} w - Waza object.
+ * @return {string|null} Field name (e.g., 'video2') or null if no slots available.
+ */
 function nextVideoSlot(w) {
   for (let i = 1; i < VIDEO_FIELDS.length; i++) {
     const v = w[VIDEO_FIELDS[i]];

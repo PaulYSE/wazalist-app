@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-11
  * @brief Account management view. Handles import/export UI, username/password changes, progress reset, and account deletion with accordion sections.
  */
 

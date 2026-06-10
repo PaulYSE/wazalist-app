@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-09
+ * @date 2026-06-11
  * @brief Stats dashboard: always-open Your Progress, plus collapsible Waza Trends / Top Waza Family / Recent Activity sections.
  */
 
@@ -46,6 +46,13 @@ function timeAgo(iso) {
 // Sort key for ordering marked waza by their left-most active marking, then the
 // next, etc. Two waza with the same first mark fall back to the second, and so
 // on — so the list reads left-to-right by marking column.
+
+/**
+ * @brief Generates sort key array for marking order (leftmost active first).
+ *
+ * @param {Array<boolean>} markings - Markings array.
+ * @return {Array<number>} Array of active marking indices, with 99 for unmarked.
+ */
 function markingOrder(markings) {
   // Index of each active marking, ascending; unmarked sorts last.
   const active = (markings || []).map((on, i) => (on ? i : 99)).filter((i) => i < 99);
@@ -53,6 +60,14 @@ function markingOrder(markings) {
 }
 
 // Compare two marking-order arrays lexicographically.
+
+/**
+ * @brief Compares two marking-order arrays lexicographically.
+ *
+ * @param {Array<boolean>} a - First markings array.
+ * @param {Array<boolean>} b - Second markings array.
+ * @return {number} Comparison result (-1, 0, 1).
+ */
 function compareMarkingOrder(a, b) {
   const oa = markingOrder(a),
     ob = markingOrder(b);
