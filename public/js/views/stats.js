@@ -4,7 +4,7 @@
  * @email paulyse99@gmail.com
  * @project Wazalist App
  * @date 2026-06-09
- * @brief Stats dashboard: always-open Your Progress, plus collapsible Top Waza / Top Family / Recent Activity sections with their controls.
+ * @brief Stats dashboard: always-open Your Progress, plus collapsible Waza Trends / Top Waza Family / Recent Activity sections.
  */
 
 import { state } from '../state/state.js';
@@ -17,9 +17,8 @@ import { escapeHtml } from '../lib/escape.js';
 
 // ── Persisted UI state (module scope: survives the re-render each toggle fires) ──
 let rankByFamily = false; // false = author, true = family
-let compareCommunity = false; // side-by-side community likes
 let showWaza = false; // expand each ranking row into its marked-waza list
-let famSort = 'completion'; // 'completion' | 'total'
+let famSort = 'completion'; // 'completed' | 'total' | 'completion'
 let famShowZero = false; // show families with 0 marked
 let recentLimit = 10; // 10 | 15 | 20
 
@@ -44,7 +43,29 @@ function timeAgo(iso) {
   return 'just now';
 }
 
-// Animated collapsible section (grid 0fr→1fr), independent open/close.
+// Sort key for ordering marked waza by their left-most active marking, then the
+// next, etc. Two waza with the same first mark fall back to the second, and so
+// on — so the list reads left-to-right by marking column.
+function markingOrder(markings) {
+  // Index of each active marking, ascending; unmarked sorts last.
+  const active = (markings || []).map((on, i) => (on ? i : 99)).filter((i) => i < 99);
+  return active.length ? active : [99];
+}
+
+// Compare two marking-order arrays lexicographically.
+function compareMarkingOrder(a, b) {
+  const oa = markingOrder(a),
+    ob = markingOrder(b);
+  const len = Math.max(oa.length, ob.length);
+  for (let i = 0; i < len; i++) {
+    const va = oa[i] ?? 99,
+      vb = ob[i] ?? 99;
+    if (va !== vb) return va - vb;
+  }
+  return 0;
+}
+
+// Animated collapsible section (grid 0fr→1fr), mutually-exclusive open/close.
 
 /**
  * @brief Generates an animated collapsible section with header and body.
@@ -76,7 +97,7 @@ function accSection(key, label, controlsHTML, bodyHTML) {
 }
 
 /**
- * @brief Renders the full stats dashboard with overview, rankings, family completion, and recent activity.
+ * @brief Renders the full stats dashboard with overview, Waza Trends, family completion, and recent activity.
  *
  * @return {void}
  */
@@ -118,30 +139,26 @@ export function renderDashStats() {
     ['parent_en1', 'parent_jp1'],
   ];
 
-  // Aggregate per entity, also tracking the marked waza ids (for "show waza").
-
   /**
-   * @brief Aggregates top entities (authors/families) by personal marks or community likes.
+   * @brief Aggregates top entities (authors/families) by personal marks.
    *
    * @param {Array<Array<string>>} fieldPairs - Array of [enField, jpField] pairs.
-   * @param {string} metric - Metric to sort by ('marks' or 'likes').
+   * @param {string} metric - Metric to sort by ('marks').
    * @param {number} limit - Maximum number of results.
-   * @return {Array<Object>} Sorted array of entity objects with name, marks, likes, and wazaIds.
+   * @return {Array<Object>} Sorted array of entity objects with name, marks, wazaIds.
    */
-  function topBy(fieldPairs, metric, limit = 5) {
-    const acc = {}; // key → { name, marks, likes, wazaIds: [] }
+  function topBy(fieldPairs, metric, limit = 10) {
+    const acc = {}; // key → { name, marks, wazaIds: [] }
     state.wazaData.forEach((w) => {
       const p = getP(w.id);
       const isMarked = p.markings && p.markings.some(Boolean);
-      const likeCount = w.like_count || 0;
       const names = new Set();
       fieldPairs.forEach(([en, jp]) => {
         const name = (w[en] || w[jp] || '').trim();
         if (name) names.add(name);
       });
       names.forEach((name) => {
-        if (!acc[name]) acc[name] = { name, marks: 0, likes: 0, wazaIds: [] };
-        acc[name].likes += likeCount;
+        if (!acc[name]) acc[name] = { name, marks: 0, wazaIds: [] };
         if (isMarked) {
           acc[name].marks++;
           acc[name].wazaIds.push(w.id);
@@ -150,46 +167,43 @@ export function renderDashStats() {
     });
     return Object.values(acc)
       .filter((e) => e[metric] > 0)
-      .sort((a, b) => b[metric] - a[metric] || b.marks - a.marks)
+      .sort((a, b) => b[metric] - a[metric] || a.name.localeCompare(b.name))
       .slice(0, limit);
   }
 
-  // ── Top Waza (authors | family) ─────────────────────────────
+  // ── Waza Trends (Author | Family) ───────────────────────────
   const rankFields = rankByFamily ? PARENT_FIELDS : AUTHOR_FIELDS;
   const rankScope = rankByFamily ? 'parent' : 'author';
-  const rankRows = topBy(rankFields, 'marks');
+  const rankRows = topBy(rankFields, 'marks', 10);
 
   const rankControls =
     '<div class="rank-toggles">' +
-    '<button class="rank-toggle' +
+    // Author/Family — single pill, mutually exclusive.
+    '<div class="seg-pill">' +
+    '<button class="seg-item' +
     (rankByFamily ? '' : ' on') +
-    '" id="rankByAuthorBtn">By author</button>' +
-    '<button class="rank-toggle' +
+    '" id="rankByAuthorBtn">Author</button>' +
+    '<button class="seg-item' +
     (rankByFamily ? ' on' : '') +
-    '" id="rankByFamilyBtn">By family</button>' +
-    '<button class="rank-toggle rank-toggle-compare' +
-    (compareCommunity ? ' on' : '') +
-    '" id="rankCompareBtn">' +
-    (compareCommunity ? '✓ ' : '') +
-    'Compare to community</button>' +
+    '" id="rankByFamilyBtn">Family</button>' +
+    '</div>' +
     '<button class="rank-toggle' +
     (showWaza ? ' on' : '') +
     '" id="rankShowWazaBtn">' +
     (showWaza ? '✓ ' : '') +
-    'Show waza</button>' +
+    'Show Waza</button>' +
     '</div>';
 
-  const rankHead = compareCommunity
-    ? '<div class="rank-head rank-head-compare"><span>#</span><span></span>' +
-      '<span title="Your marks">You</span><span title="Community likes">Likes</span></div>'
-    : '<div class="rank-head"><span>#</span><span></span><span title="Your marks">You</span></div>';
+  const rankHead =
+    '<div class="rank-head"><span>#</span><span></span><span title="Your marks">You</span></div>';
 
-  // Build the expandable marked-waza sublist for one entity (only when showWaza).
+  // Marked-waza sublist for one entity, sorted by marking order (left→right).
   const wazaSublist = (ids) =>
     '<div class="rank-sublist">' +
     ids
       .map((id) => state.wazaData.find((w) => w.id === id))
       .filter(Boolean)
+      .sort((a, b) => compareMarkingOrder(getP(a.id).markings, getP(b.id).markings))
       .map((w) => {
         const p = getP(w.id);
         const markings = p.markings || Array(6).fill(false);
@@ -219,17 +233,8 @@ export function renderDashStats() {
   const rankBody = rankRows.length
     ? rankRows
         .map((e, i) => {
-          const cells = compareCommunity
-            ? '<span class="rank-mine">' +
-              e.marks +
-              '</span><span class="rank-comm">' +
-              e.likes +
-              '</span>'
-            : '<span class="rank-mine">' + e.marks + '</span>';
           const row =
-            '<div class="rank-row' +
-            (compareCommunity ? ' rank-row-compare' : '') +
-            '" data-term="' +
+            '<div class="rank-row" data-term="' +
             escapeHtml(e.name) +
             '" data-scope="' +
             rankScope +
@@ -237,22 +242,17 @@ export function renderDashStats() {
             (i + 1) +
             '</span><span class="rank-name">' +
             escapeHtml(e.name) +
-            '</span>' +
-            cells +
-            '</div>';
+            '</span><span class="rank-mine">' +
+            e.marks +
+            '</span></div>';
           return showWaza ? row + wazaSublist(e.wazaIds) : row;
         })
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>';
 
-  const rankSection = accSection(
-    'rank',
-    rankByFamily ? 'Top waza family' : 'Top waza authors',
-    rankControls,
-    rankHead + rankBody,
-  );
+  const rankSection = accSection('rank', 'Waza Trends', rankControls, rankHead + rankBody);
 
-  // ── Top Family completion ───────────────────────────────────
+  // ── Top Waza Family ─────────────────────────────────────────
   const families = {};
   state.wazaData.forEach((w) => {
     [w.parent_en0, w.parent_en1].filter(Boolean).forEach((fam) => {
@@ -266,7 +266,9 @@ export function renderDashStats() {
   let famEntries = Object.entries(families).filter(([, { total }]) => total > 2);
   if (!famShowZero) famEntries = famEntries.filter(([, { touched }]) => touched > 0);
   famEntries.sort((a, b) => {
-    if (famSort === 'total') return b[1].total - a[1].total;
+    if (famSort === 'total') return b[1].total - a[1].total || b[1].touched - a[1].touched;
+    if (famSort === 'completed') return b[1].touched - a[1].touched || b[1].total - a[1].total;
+    // 'completion' — by completion rate, then by total as tiebreak.
     const pctA = a[1].total ? a[1].touched / a[1].total : 0;
     const pctB = b[1].total ? b[1].touched / b[1].total : 0;
     return pctB - pctA || b[1].total - a[1].total;
@@ -274,17 +276,23 @@ export function renderDashStats() {
 
   const famControls =
     '<div class="rank-toggles">' +
-    '<button class="rank-toggle' +
-    (famSort === 'completion' ? ' on' : '') +
-    '" id="famSortCompletionBtn">Sort by completion</button>' +
-    '<button class="rank-toggle' +
+    '<div class="seg-pill">' +
+    '<span class="seg-label">Sort by</span>' +
+    '<button class="seg-item' +
+    (famSort === 'completed' ? ' on' : '') +
+    '" data-famsort="completed">Completed</button>' +
+    '<button class="seg-item' +
     (famSort === 'total' ? ' on' : '') +
-    '" id="famSortTotalBtn">Sort by family total</button>' +
-    '<button class="rank-toggle rank-toggle-compare' +
+    '" data-famsort="total">Total</button>' +
+    '<button class="seg-item' +
+    (famSort === 'completion' ? ' on' : '') +
+    '" data-famsort="completion">Completion Rate</button>' +
+    '</div>' +
+    '<button class="rank-toggle' +
     (famShowZero ? ' on' : '') +
     '" id="famShowZeroBtn">' +
     (famShowZero ? '✓ ' : '') +
-    'Show empty families</button>' +
+    'Show Empty</button>' +
     '</div>';
 
   const covBody = famEntries.length
@@ -308,12 +316,7 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families to show.</div>';
 
-  const famSection = accSection(
-    'family',
-    'Top family completion (3+ members)',
-    famControls,
-    covBody,
-  );
+  const famSection = accSection('family', 'Top waza family', famControls, covBody);
 
   // ── Recent Activity (selectable count) ──────────────────────
   const recent = state.wazaData
@@ -340,7 +343,6 @@ export function renderDashStats() {
       .join('') +
     '</div>';
 
-  // The "that's all" sentinel row, styled as a waza-compact, when under the limit.
   const sentinelRow =
     '<div class="waza-compact" style="cursor:default;opacity:0.7">' +
     '<span class="drn">That\'s all!</span>' +
@@ -387,20 +389,15 @@ export function renderDashStats() {
     navigateToBrowse();
   };
 
-  // Accordion toggles (mutually exclusive: opening one closes the others;
-  // clicking the open section closes it, so all-closed is a valid state).
+  // Accordion toggles (mutually exclusive).
   container.querySelectorAll('.stat-acc-toggle').forEach((el) => {
     el.addEventListener('click', () => {
       const key = el.dataset.acc;
       const wasOpen = accOpen[key];
-      // Close everything first.
       Object.keys(accOpen).forEach((k) => {
         accOpen[k] = false;
       });
-      // Then open the clicked one — unless it was already open (toggle-to-close).
       if (!wasOpen) accOpen[key] = true;
-      // Reflect the new state into every section's DOM, not just the clicked one,
-      // since opening one may have closed another.
       container.querySelectorAll('.stat-acc-toggle').forEach((t) => {
         const open = accOpen[t.dataset.acc];
         t.classList.toggle('collapsed', !open);
@@ -417,8 +414,7 @@ export function renderDashStats() {
     });
   });
 
-  // Ranking rows jump to a scoped search — but only the row itself, not its
-  // sublist (the sublist rows have their own data-id click above).
+  // Ranking rows jump to a scoped search.
   container.querySelectorAll('.rank-row[data-term]').forEach((el) => {
     el.addEventListener('click', () => searchAndExit(el.dataset.term, el.dataset.scope));
   });
@@ -431,21 +427,15 @@ export function renderDashStats() {
     rankByFamily = true;
     renderDashStats();
   });
-  container.querySelector('#rankCompareBtn')?.addEventListener('click', () => {
-    compareCommunity = !compareCommunity;
-    renderDashStats();
-  });
   container.querySelector('#rankShowWazaBtn')?.addEventListener('click', () => {
     showWaza = !showWaza;
     renderDashStats();
   });
-  container.querySelector('#famSortCompletionBtn')?.addEventListener('click', () => {
-    famSort = 'completion';
-    renderDashStats();
-  });
-  container.querySelector('#famSortTotalBtn')?.addEventListener('click', () => {
-    famSort = 'total';
-    renderDashStats();
+  container.querySelectorAll('[data-famsort]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      famSort = btn.dataset.famsort;
+      renderDashStats();
+    });
   });
   container.querySelector('#famShowZeroBtn')?.addEventListener('click', () => {
     famShowZero = !famShowZero;

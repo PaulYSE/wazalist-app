@@ -327,9 +327,6 @@
   border-color: var(--accent);
   color: var(--accent);
 }
-.rank-toggle-compare {
-  margin-left: auto; /* push compare toggle to the right */
-}
 
 /* Single-value layout (your stats only) */
 .rank-head,
@@ -341,11 +338,7 @@
   padding: 6px 8px;
   font-size: 13px;
 }
-/* Two-value layout (compare mode) */
-.rank-head-compare,
-.rank-row-compare {
-  grid-template-columns: 24px 1fr 48px 56px;
-}
+
 .rank-head {
   font-size: 11px;
   color: var(--text3);
@@ -354,8 +347,7 @@
   border-bottom: 1px solid var(--border);
 }
 .rank-head span:nth-child(n + 3),
-.rank-mine,
-.rank-comm {
+.rank-mine {
   text-align: right;
 }
 .rank-row {
@@ -374,13 +366,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.rank-mine {
   color: var(--accent);
-  font-weight: 600;
-}
-.rank-comm {
-  color: var(--green);
   font-weight: 600;
 }
 
@@ -392,6 +378,49 @@
 }
 .rank-sublist .waza-compact:last-child {
   border-bottom: none;
+}
+
+/* Segmented pill (mutually-exclusive options in one rounded container) */
+.seg-pill {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg2);
+}
+.seg-label {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text3);
+  background: var(--bg0);
+  border-right: 1px solid var(--border);
+  cursor: default;
+  white-space: nowrap;
+}
+.seg-item {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.seg-item:last-child {
+  border-right: none;
+}
+.seg-item:hover {
+  color: var(--text1);
+}
+.seg-item.on {
+  background: var(--accent2);
+  color: #fff;
 }
 
 /* ── Contributions ── */
