@@ -17,7 +17,6 @@ import { setBrowseView } from '../views/browse-list.js';
 import {
   markingStyle, // used in renderList() for all 3 view modes
   markingPips, // used in renderList() and renderDetail()
-  cardLikePill, // used in renderList()
 } from '../components/render-helpers.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openAccountSection } from '../views/account.js';
@@ -308,11 +307,16 @@ function buildBrowseDemo() {
   ];
 
   // Build real waza-list components (same structure as main app's list view)
-  container.innerHTML = demoItems
+container.innerHTML = demoItems
     .map((item) => {
       const w = item.waza;
       const markings = item.markings;
-      const pill = cardLikePill(item.likes, item.dislikes);
+      const pill =
+        '<div class="card-like-pill"><span>👍 ' +
+        item.likes +
+        '</span><span>👎 ' +
+        item.dislikes +
+        '</span></div>';
 
       const bottomRow =
         '<div class="card-bottom-row">' +
@@ -451,8 +455,8 @@ function runSearchDemo(query) {
 
     // Use actual wazalist list row structure
     row.innerHTML = `
-        <span class="dnjp">${w.name_jp}</span>
-        <span class="dnen">${w.name_en}</span>
+        <span class="drn">${w.name_jp}</span>
+        <span class="drs">${w.name_en}</span>
       `;
 
     resultsEl.appendChild(row);
