@@ -15,6 +15,10 @@
  * @return {Promise<string>} HTML content of index.html.
  */
 export async function renderHtml(env: Env, request: Request) {
-	const response = await env.ASSETS.fetch(new URL("/index.html", request.url));
+	// Always serve the SPA shell (/index.html), regardless of the requested path
+	// (/browse, /stats, …). Build an absolute asset URL from the request origin
+	// and fetch it as a proper Request so the assets binding resolves it.
+	const assetUrl = new URL("/index.html", new URL(request.url).origin);
+	const response = await env.ASSETS.fetch(new Request(assetUrl.toString()));
 	return response.text();
 }

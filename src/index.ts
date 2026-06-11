@@ -532,7 +532,7 @@ export default {
 		}
 
 		// ── Fallback — serve app ──────────────────────────────────
-		const html = await renderHtml(env);
+		const html = await renderHtml(env, request);
 		return new Response(html, { headers: { "content-type": "text/html" } });
 	},
 } satisfies ExportedHandler<Env>;
