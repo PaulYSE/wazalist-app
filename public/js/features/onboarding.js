@@ -687,10 +687,10 @@ function buildMarkingDemo() {
 
     // Structure: drn (JP name) + drs (EN name) + cmp-markings-mine (buttons)
     const markingsHTML =
-      '<div class="cmp-markings-mine" style="flex-shrink:0">' +
+      '<div class="cmp-mark-pill" style="flex-shrink:0">' +
       SHAPES.map(
         (sh, si) =>
-          '<button class="cmp-marking-btn' +
+          '<button class="cmp-mark-seg' +
           (markings[si] ? ' on' : '') +
           '" ' +
           'data-wid="' +
@@ -699,7 +699,7 @@ function buildMarkingDemo() {
           si +
           '" ' +
           'title="' +
-          (state.markingLabels[si] || 'Marking ' + (si + 1)) +
+          escapeHtml(state.markingLabels[si] || 'Marking ' + (si + 1)) +
           '">' +
           sh +
           '</button>',
@@ -718,7 +718,7 @@ function buildMarkingDemo() {
     container.appendChild(row);
 
     // Attach click handlers to marking buttons
-    row.querySelectorAll('.cmp-marking-btn').forEach((btn) => {
+    row.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
       btn.addEventListener('click', () => {
         const wid = +btn.dataset.wid;
         const si = +btn.dataset.si;
@@ -900,7 +900,8 @@ function buildCompareDemo() {
     .map(
       ({ waza: w, theirs, mine }) =>
         '<div class="cmp-row">' +
-        '<div><div class="cmp-name-jp">' +
+        '<div class="cmp-names">' +
+        '<div class="cmp-name-jp">' +
         escapeHtml(w.name_jp || '—') +
         '</div>' +
         '<div class="cmp-name-en">' +
@@ -909,10 +910,10 @@ function buildCompareDemo() {
         '<div class="cmp-markings-imported">' +
         markingPips(theirs) +
         '</div>' +
-        '<div class="cmp-markings-mine">' +
+        '<div class="cmp-mark-pill">' +
         SHAPES.map(
           (s, i) =>
-            '<button class="cmp-marking-btn' +
+            '<button class="cmp-mark-seg' +
             (mine[i] ? ' on' : '') +
             '" disabled>' +
             s +
