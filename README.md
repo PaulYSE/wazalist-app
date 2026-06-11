@@ -2,6 +2,10 @@
 
 A web application for tracking and managing wotagei (Japanese idol fan-dance) techniques. Browse waza (techniques), mark your progress, and sync your learning across devices.
 
+## Technical Description
+
+Wazalist is a full-stack web application for browsing, tracking, and collaborating on a database of Wotagei techniques (Waza). It is built entirely on Cloudflare's serverless platform with no external backend infrastructure.
+
 ## Features
 
 ### Browse & Search
