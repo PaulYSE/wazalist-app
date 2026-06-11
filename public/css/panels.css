@@ -169,99 +169,12 @@
   align-items: center;
 }
 
-.labels-combined {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.labels-stacked {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.labels-imported {
-  padding: 5px 8px 3px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  border-top-left-radius: var(--r);
-  border-top-right-radius: var(--r);
-  color: var(--text2);
-  font-size: 12px;
-  min-height: 26px;
-  display: flex;
-  align-items: center;
-}
-
-.labels-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 0 8px;
-}
-
-.labels-input-bottom {
-  padding: 3px 8px 5px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-top: none;
-  border-bottom-left-radius: var(--r);
-  border-bottom-right-radius: var(--r);
-  color: var(--text1);
-  font-size: 13px;
-  outline: none;
-  min-height: 26px;
-}
-
-.labels-input-bottom:focus {
-  border-color: var(--accent);
-}
-
 .labels-count {
   font-size: 12px;
   color: var(--text3);
   flex-shrink: 0;
   width: 52px;
   text-align: right;
-}
-
-.labels-count-stacked {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  flex-shrink: 0;
-  width: 52px;
-  align-items: flex-end;
-}
-
-.labels-count-top {
-  font-size: 11px;
-  color: var(--text3);
-  padding: 2px 4px;
-  text-align: right;
-  min-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.labels-count-divider {
-  width: 100%;
-  height: 1px;
-  background: var(--border);
-  margin: 1px 0;
-}
-
-.labels-count-bottom {
-  font-size: 11px;
-  color: var(--text2);
-  padding: 2px 4px;
-  text-align: right;
-  min-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
 }
 
 .recent-time {

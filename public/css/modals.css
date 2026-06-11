@@ -196,8 +196,6 @@
 
 .cmp-col-headers {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.8fr;
-  gap: 8px;
   padding: 4px 0 8px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--border);
@@ -209,12 +207,16 @@
 
 .cmp-row {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.8fr;
-  gap: 8px;
   align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+}
+
+.cmp-col-headers,
+.cmp-row {
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
 }
 
 .cmp-row:hover .cmp-name-jp {
@@ -238,32 +240,135 @@
   align-items: center;
 }
 
-.cmp-markings-mine {
+/* ── Compare: top controls bar ── */
+.cmp-controls {
   display: flex;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+}
+.cmp-ctrl-remove {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+/* ── Compare: labels table (aligned columns) ── */
+.cmp-labels-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cmp-labels-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 1fr;
+  gap: 8px;
   align-items: center;
 }
-
-.cmp-marking-btn {
-  padding: 3px 7px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
+.cmp-labels-row-solo {
+  grid-template-columns: 32px 1fr;
+}
+.cmp-labels-marking {
+  font-size: 16px;
+  text-align: center;
+}
+.cmp-labels-their,
+.cmp-labels-mine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.cmp-labels-their {
+  font-size: 13px;
   color: var(--text2);
+  padding: 7px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+.cmp-labels-their > :first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cmp-labels-unset {
+  color: var(--text3);
+  font-style: italic;
+}
+.cmp-labels-input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+.cmp-labels-input:focus {
+  border-color: var(--accent);
+}
+.cmp-labels-count {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text3);
+  min-width: 24px;
+  text-align: right;
+}
+.cmp-labels-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* ── Compare: your-marks segmented pill ── */
+.cmp-mark-pill {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cmp-mark-seg {
+  padding: 5px 8px;
   font-size: 14px;
-  cursor: pointer;
   line-height: 1;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text3);
+  cursor: pointer;
   transition: all 0.12s;
 }
-
-.cmp-marking-btn:hover {
+.cmp-mark-seg:last-child {
+  border-right: none;
+}
+.cmp-mark-seg:hover {
   background: var(--bg3);
+  color: var(--text1);
+}
+.cmp-mark-seg.on {
+  background: var(--bg3);
+  color: var(--text1);
+  border-color: var(--accent);
 }
 
-.cmp-marking-btn.on {
-  background: var(--bg3);
-  border-color: var(--accent);
-  color: var(--text1);
+/* ── Compare: empty state ── */
+.cmp-empty {
+  color: var(--text3);
+  font-size: 13px;
+  padding: 20px 0;
+  text-align: center;
 }
 
 .ti-textarea {
