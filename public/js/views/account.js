@@ -108,27 +108,25 @@ export async function renderAccount() {
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
     'Name each marking to match how you use it. These labels appear as tooltips on the markings and in your exported lists.' +
     '</p>' +
-    '<div class="cmp-labels-table">' +
+    '<div class="acc-labels-table">' +
     SHAPE_CHARS.map(
       (s, i) =>
-        '<div class="cmp-labels-row cmp-labels-row-solo">' +
-        '<span class="cmp-labels-marking">' +
+        '<div class="acc-labels-row">' +
+        '<span class="acc-labels-marking">' +
         s +
         '</span>' +
-        '<div class="cmp-labels-mine">' +
         '<input class="acc-labels-input" data-si="' +
         i +
         '" type="text" maxlength="32" placeholder="Label this marking…" value="' +
         (state.markingLabels[i] || '').replace(/"/g, '&quot;') +
         '">' +
-        '<span class="cmp-labels-count">' +
+        '<span class="acc-labels-count">' +
         labelMarkingCounts[i] +
         ' waza</span>' +
-        '</div>' +
         '</div>',
     ).join('') +
     '</div>' +
-    '<div class="cmp-labels-actions">' +
+    '<div class="acc-labels-actions">' +
     '<button class="cbtn cbtn-primary" id="accSaveLabelsBtn">Save Labels</button>' +
     '<span id="accLabelsMsg" class="acc-form-msg" style="margin-left:10px"></span>' +
     '</div>';
