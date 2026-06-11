@@ -541,6 +541,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
+  aspect-ratio: 1 / 1;        /* square */
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
@@ -600,8 +601,46 @@
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border);
-  height: 22px;
+  flex: 1;                    /* fill the rest of the square */
+  min-height: 0;
 }
 .theme-swatch {
   flex: 1;
+}
+
+.theme-system-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.12s;
+}
+.theme-system-row:hover {
+  border-color: var(--accent);
+}
+.theme-system-row.on {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.theme-system-row.on .theme-option-label {
+  color: var(--accent);
+}
+
+.theme-option-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text1);
+}
+.theme-option-desc {
+  font-size: 11px;
+  color: var(--text3);
 }
