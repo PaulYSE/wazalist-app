@@ -10,7 +10,7 @@
 import { state } from './state/state.js';
 import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
-import { initBrowseList } from './views/browse-list.js';
+import { initBrowseList, renderList } from './views/browse-list.js';
 import {
   initWazaDetail,
   selectWazaFromHistory,
@@ -22,6 +22,9 @@ import { initNewWaza } from './modals/new-waza.js';
 import { initSuggestEdit, initFieldEdit } from './modals/suggest-edit.js';
 import { initOnboarding, showOnboarding } from './features/onboarding.js';
 import { parseRoute } from './app/router.js';
+import { initTheme } from './services/theme.js';
+import { renderDashStats } from './views/stats.js';
+import { renderDashCompare } from './views/compare.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
@@ -65,6 +68,22 @@ window.addEventListener('popstate', () => {
 });
 
 /**
+ * @brief Handles theme change events by re-rendering views with theme-dependent marking tints.
+ *
+ * Marking tints are baked into inline styles at render time and depend on the
+ * current theme's color scheme (e.g., hue blend backgrounds for marking combinations).
+ * When the theme changes, this listener regenerates the affected views to apply
+ * the correct theme-based styling.
+ */
+window.addEventListener('themechange', () => {
+  // Marking tints are baked into inline styles at render time and are
+  // theme-dependent; regenerate the views that show them.
+  renderList();
+  renderDashStats();
+  renderDashCompare();
+});
+
+/**
  * @brief Resolves a waza URL parameter to a valid waza ID.
  *
  * Supports both numeric IDs and Japanese name slugs for backward compatibility.
@@ -99,6 +118,7 @@ function resolveWaza(param) {
  * 7. Onboarding tour
  * 8. Authentication UI
  * 9. If token exists, initialize main app
+ * 9. Theme change event handler
  */
 initBrowseList();
 initWazaDetail();
@@ -109,6 +129,7 @@ initSuggestEdit();
 initFieldEdit();
 initOnboarding();
 initAuth();
+initTheme();
 
 // If token exists (logged-in user), start the app immediately
 if (state.token) initApp();

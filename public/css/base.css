@@ -68,6 +68,117 @@ body {
   --filter-h: 2rem;
 }
 
+/* ── Slate (explicit selection — same as the :root default) ── */
+[data-theme='slate'] {
+  --bg0: #0f0f14;
+  --bg1: #17171f;
+  --bg2: #1e1e28;
+  --bg3: #262633;
+  --border: #2e2c3e;
+  --text1: #e8e6f0;
+  --text2: #a09dba;
+  --text3: #6a6880;
+  --accent: #7c6ff7;
+  --accent2: #5a54c4;
+  --accent-rgb: 124, 111, 247;
+  --accent-bg: #211f3a;
+  --accent-bg-border: #36325c;
+  --on-accent: #ffffff;
+  --green: #56c08a;
+  --amber: #e0a23a;
+  --red: #e86060;
+  --gold: #f5c518;
+  --like: #6db4f0;
+  --dislike: #e87fa4;
+  --green-bg: #0d2a1b;
+  --green-bg-border: #1e6b46;
+  --amber-bg: #2a2010;
+  --amber-bg-border: #6b4f1e;
+  --red-bg: #2a1216;
+  --red-bg-border: #6b2e34;
+  --like-bg: #0f2233;
+  --like-bg-border: #2e5d80;
+  --dislike-bg: #2a1320;
+  --dislike-bg-border: #6b3450;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --overlay-soft: rgba(0, 0, 0, 0.15);
+  --embed-bg: #000000;
+}
+
+/* ── Dark (AMOLED true-black) ── */
+[data-theme='dark'] {
+  --bg0: #000000; /* true black — OLED pixels off */
+  --bg1: #0a0a0a;
+  --bg2: #141414;
+  --bg3: #1f1f1f;
+  --border: #2a2a2a; /* neutral gray, no slate tint */
+  --text1: #ededed;
+  --text2: #9a9a9a;
+  --text3: #6a6a6a;
+  --accent: #7c6ff7; /* brand accent preserved */
+  --accent2: #5a54c4;
+  --accent-rgb: 124, 111, 247;
+  --accent-bg: #1a1830;
+  --accent-bg-border: #2e2a52;
+  --on-accent: #ffffff;
+  --green: #56c08a;
+  --amber: #e0a23a;
+  --red: #e86060;
+  --gold: #f5c518;
+  --like: #6db4f0;
+  --dislike: #e87fa4;
+  --green-bg: #0a1f14;
+  --green-bg-border: #1a5c3c;
+  --amber-bg: #221a0c;
+  --amber-bg-border: #5c4419;
+  --red-bg: #220e11;
+  --red-bg-border: #5c272c;
+  --like-bg: #0a1a28;
+  --like-bg-border: #28506e;
+  --dislike-bg: #220f1a;
+  --dislike-bg-border: #5c2c45;
+  --scrim: rgba(0, 0, 0, 0.8); /* heavier — true-black base wants darker scrim */
+  --overlay-soft: rgba(0, 0, 0, 0.25);
+  --embed-bg: #000000;
+}
+
+/* ── Light (thorough — retuned semantics for a light base) ── */
+[data-theme='light'] {
+  --bg0: #ffffff;
+  --bg1: #f7f7fa;
+  --bg2: #eef0f4;
+  --bg3: #e2e5ec;
+  --border: #d4d7e0;
+  --text1: #1a1a24;
+  --text2: #50506a;
+  --text3: #8a8a9e;
+  --accent: #5a4fd0; /* slightly darker accent for contrast on white */
+  --accent2: #6f63e0;
+  --accent-rgb: 90, 79, 208;
+  --accent-bg: #ecebfb; /* pale accent tint */
+  --accent-bg-border: #cfcbf2;
+  --on-accent: #ffffff;
+  --green: #2e9e63; /* darkened for contrast on light */
+  --amber: #b87413;
+  --red: #d23b3b;
+  --gold: #c79a00;
+  --like: #2479c4;
+  --dislike: #c44e7a;
+  --green-bg: #e3f5ec; /* pale fills */
+  --green-bg-border: #a9dcc1;
+  --amber-bg: #fbf0dc;
+  --amber-bg-border: #ecd3a0;
+  --red-bg: #fbe5e5;
+  --red-bg-border: #f0bcbc;
+  --like-bg: #e2effb;
+  --like-bg-border: #aed1ee;
+  --dislike-bg: #fbe6ef;
+  --dislike-bg-border: #f0bdd4;
+  --scrim: rgba(20, 20, 30, 0.45); /* lighter scrim on light base */
+  --overlay-soft: rgba(0, 0, 0, 0.06);
+  --embed-bg: #000000; /* video letterbox stays black always */
+}
+
 input,
 select,
 button {

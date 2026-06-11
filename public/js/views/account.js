@@ -14,6 +14,7 @@ import { escapeHtml } from '../lib/escape.js';
 import { exportToExcel } from '../features/export-to-excel.js';
 import { renderImport } from '../features/import/import-ui.js';
 import { saveLabels } from '../services/progress.js';
+import { getTheme, setTheme } from '../services/theme.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -39,7 +40,13 @@ export function openAccountSection(key) {
 
 // Accordion open/closed state — module-level so it persists across re-renders
 // Accordion state — only ONE section open at a time. Manage is the default.
-const accOpen = { labels: false, import: false, export: false, manage: false };
+const accOpen = {
+  appearance: false,
+  labels: false,
+  import: false,
+  export: false,
+  manage: false,
+};
 
 // Collapsible accordion section, reusing the .dsec-toggle / .dsec-body mechanism.
 
@@ -84,6 +91,38 @@ function accSection(key, label, innerHTML) {
 export async function renderAccount() {
   const container = document.getElementById('accountContent');
   const loggedIn = !state.isGuest && !!state.token;
+
+  
+  // ── Appearance ────────────────────────────────────────────────
+  const currentTheme = getTheme(); // 'system' | 'light' | 'dark' | 'slate'
+  const THEME_OPTIONS = [
+    { key: 'system', label: 'System', desc: 'Match your device' },
+    { key: 'light', label: 'Light', desc: 'Bright' },
+    { key: 'dark', label: 'Dark', desc: 'AMOLED black' },
+    { key: 'slate', label: 'Slate', desc: 'Default' },
+  ];
+  const appearanceBody =
+    '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
+    'Choose how Wazalist looks. <b>System</b> follows your device\'s light or dark setting. ' +
+    'This preference is saved on this device.' +
+    '</p>' +
+    '<div class="theme-picker">' +
+    THEME_OPTIONS.map(
+      (o) =>
+        '<button class="theme-option' +
+        (o.key === currentTheme ? ' on' : '') +
+        '" data-theme-choice="' +
+        o.key +
+        '">' +
+        '<span class="theme-option-label">' +
+        o.label +
+        '</span>' +
+        '<span class="theme-option-desc">' +
+        o.desc +
+        '</span>' +
+        '</button>',
+    ).join('') +
+    '</div>';
 
   // Progress counts (used in the simplified Your Progress line + confirm dialogs)
   const progEntries = Object.values(state.prog);
@@ -226,6 +265,7 @@ export async function renderAccount() {
 
   // ── Assemble accordions ───────────────────────────────────────
   container.innerHTML =
+    accSection('appearance', 'Appearance', appearanceBody) +
     accSection('labels', 'Marking Labels', labelsBody) +
     accSection('import', 'Import Wazalist', importBody) +
     accSection('export', 'Export Wazalist', exportBody) +
@@ -245,6 +285,18 @@ export async function renderAccount() {
       } else {
         openAccountSection(key);
       }
+    });
+  });
+
+  // ── Appearance apply wiring ────────────────────────────────────────────────
+  container.querySelectorAll('.theme-option').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const choice = btn.dataset.themeChoice;
+      setTheme(choice); // persists + applies + dispatches 'themechange'
+      // Reflect selection immediately (the dispatched event re-renders marking
+      // views, but this accordion isn't one of them — update its highlight here).
+      container.querySelectorAll('.theme-option').forEach((b) => b.classList.remove('on'));
+      btn.classList.add('on');
     });
   });
 

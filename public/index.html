@@ -23,6 +23,28 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 
+    <!-- Apply saved theme before paint to avoid a flash of the wrong theme.
+         Kept inline (not a module) because modules run after first paint. -->
+    <script>
+      (function () {
+        try {
+          var THEMES = ['system', 'light', 'dark', 'slate'];
+          var stored = localStorage.getItem('wl_theme');
+          var choice = THEMES.indexOf(stored) >= 0 ? stored : 'system';
+          var resolved = choice;
+          if (choice === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          }
+          document.documentElement.dataset.theme = resolved;
+        } catch (e) {
+          /* localStorage blocked or unavailable — fall through to :root default (slate) */
+        }
+      })();
+    </script>
+
     <!-- App styles. Order matters: later files override earlier ones. -->
     <link rel="stylesheet" href="/css/base.css" />
     <link rel="stylesheet" href="/css/waza.css" />
