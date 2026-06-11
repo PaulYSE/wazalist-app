@@ -92,7 +92,6 @@ export async function renderAccount() {
   const container = document.getElementById('accountContent');
   const loggedIn = !state.isGuest && !!state.token;
 
-  
   // ── Appearance ────────────────────────────────────────────────
   const currentTheme = getTheme(); // 'system' | 'light' | 'dark' | 'slate'
   const THEME_OPTIONS = [
@@ -103,7 +102,7 @@ export async function renderAccount() {
   ];
   const appearanceBody =
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
-    'Choose how Wazalist looks. <b>System</b> follows your device\'s light or dark setting. ' +
+    "Choose how Wazalist looks. <b>System</b> follows your device's light or dark setting. " +
     'This preference is saved on this device.' +
     '</p>' +
     '<div class="theme-picker">' +
