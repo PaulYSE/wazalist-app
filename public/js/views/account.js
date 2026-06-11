@@ -13,6 +13,7 @@ import { api } from '../services/api.js';
 import { escapeHtml } from '../lib/escape.js';
 import { exportToExcel } from '../features/export-to-excel.js';
 import { renderImport } from '../features/import/import-ui.js';
+import { saveLabels } from '../services/progress.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -38,7 +39,7 @@ export function openAccountSection(key) {
 
 // Accordion open/closed state — module-level so it persists across re-renders
 // Accordion state — only ONE section open at a time. Manage is the default.
-const accOpen = { import: false, export: false, manage: false };
+const accOpen = { labels: false, import: false, export: false, manage: false };
 
 // Collapsible accordion section, reusing the .dsec-toggle / .dsec-body mechanism.
 
@@ -89,6 +90,48 @@ export async function renderAccount() {
   const totalMarked = progEntries.filter((p) => p.markings && p.markings.some((m) => m)).length;
   const totalLiked = progEntries.filter((p) => p.like === 1).length;
   const totalDisliked = progEntries.filter((p) => p.like === -1).length;
+
+  // ── Marking Labels ────────────────────────────────────────────
+  // Per-marking label editor (the same editor offered in Compare, given a
+  // proper home here). Counts show how many waza currently carry each marking.
+  const labelMarkingCounts = Array(6).fill(0);
+  state.wazaData.forEach((w) => {
+    const p = state.prog[w.id];
+    if (p && p.markings)
+      p.markings.forEach((on, i) => {
+        if (on) labelMarkingCounts[i]++;
+      });
+  });
+
+  const SHAPE_CHARS = ['●', '▲', '■', '♥', '★', '◆'];
+  const labelsBody =
+    '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
+    'Name each marking to match how you use it. These labels appear as tooltips on the markings and in your exported lists.' +
+    '</p>' +
+    '<div class="cmp-labels-table">' +
+    SHAPE_CHARS.map(
+      (s, i) =>
+        '<div class="cmp-labels-row cmp-labels-row-solo">' +
+        '<span class="cmp-labels-marking">' +
+        s +
+        '</span>' +
+        '<div class="cmp-labels-mine">' +
+        '<input class="acc-labels-input" data-si="' +
+        i +
+        '" type="text" maxlength="32" placeholder="Label this marking…" value="' +
+        (state.markingLabels[i] || '').replace(/"/g, '&quot;') +
+        '">' +
+        '<span class="cmp-labels-count">' +
+        labelMarkingCounts[i] +
+        ' waza</span>' +
+        '</div>' +
+        '</div>',
+    ).join('') +
+    '</div>' +
+    '<div class="cmp-labels-actions">' +
+    '<button class="cbtn cbtn-primary" id="accSaveLabelsBtn">Save Labels</button>' +
+    '<span id="accLabelsMsg" class="acc-form-msg" style="margin-left:10px"></span>' +
+    '</div>';
 
   // ── Import Wazalist ───────────────────────────────────────────
   // renderImport() populates #dashImport with both the Excel and Text panels.
@@ -148,9 +191,9 @@ export async function renderAccount() {
       </div>`
     : '';
 
-  // Your Progress (simplified) + Reset All Progress
+  // Your Progress (simplified) + Reset All Progress — bordered card, matching
   const resetBlock = `
-    <div style="margin-bottom:18px;border-top:1px solid var(--border);padding-top:16px">
+    <div style="border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:18px">
       <h4 style="font-size:13px;font-weight:600;margin:0 0 8px">Your Progress</h4>
       <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
         Marked: <b style="color:var(--accent)">${totalMarked}</b> &nbsp;·&nbsp;
@@ -185,6 +228,7 @@ export async function renderAccount() {
 
   // ── Assemble accordions ───────────────────────────────────────
   container.innerHTML =
+    accSection('labels', 'Marking Labels', labelsBody) +
     accSection('import', 'Import Wazalist', importBody) +
     accSection('export', 'Export Wazalist', exportBody) +
     accSection('manage', 'Manage Account', manageBody);
@@ -206,7 +250,7 @@ export async function renderAccount() {
     });
   });
 
-  // ── Export ────────────────────────────────────────────────────
+  // ── Export button wiring ────────────────────────────────────────────────────
   container.querySelector('#exportXlsxBtn')?.addEventListener('click', () => exportToExcel());
 
   container.querySelector('#changeUsernameBtn')?.addEventListener('click', async () => {
@@ -260,6 +304,25 @@ export async function renderAccount() {
       localStorage.removeItem('wl_username');
       location.reload();
     }, 1200);
+  });
+
+  // ── Marking Labels save ───────────────────────────────────────
+  container.querySelector('#accSaveLabelsBtn')?.addEventListener('click', async () => {
+    container.querySelectorAll('.acc-labels-input').forEach((inp) => {
+      state.markingLabels[+inp.dataset.si] = inp.value;
+    });
+    const msg = container.querySelector('#accLabelsMsg');
+    msg.className = 'acc-form-msg';
+    msg.style.color = 'var(--text3)';
+    msg.textContent = 'Saving…';
+    try {
+      await saveLabels();
+      msg.className = 'acc-form-msg ok';
+      msg.textContent = 'Labels saved.';
+    } catch {
+      msg.className = 'acc-form-msg err';
+      msg.textContent = 'Failed to save labels.';
+    }
   });
 
   // ── Reset All Progress ────────────────────────────────────────

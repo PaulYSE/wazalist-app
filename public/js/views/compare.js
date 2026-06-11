@@ -117,9 +117,7 @@ export function renderDashCompare() {
           s +
           '</span>' +
           '<div class="cmp-labels-their">' +
-          (impLabel
-            ? escapeHtml(impLabel)
-            : '<span class="cmp-labels-unset">Unlabeled</span>') +
+          (impLabel ? escapeHtml(impLabel) : '<span class="cmp-labels-unset">Unlabeled</span>') +
           '<span class="cmp-labels-count">' +
           impMarkingCounts[i] +
           '</span>' +
@@ -168,7 +166,7 @@ export function renderDashCompare() {
   }
 
   // ── Comparison rows ──────────────────────────────────────────
-  let rowsSection = '';
+  let rowsSection;
   if (!keys.length) {
     rowsSection =
       '<div class="cmp-empty">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
@@ -216,9 +214,7 @@ export function renderDashCompare() {
         );
       })
       .join('');
-    const empty = !rows.length
-      ? '<div class="cmp-empty">This list has no marks.</div>'
-      : '';
+    const empty = !rows.length ? '<div class="cmp-empty">This list has no marks.</div>' : '';
     rowsSection = (rows.length ? colHeaders : '') + rowsHtml + empty;
   }
 
