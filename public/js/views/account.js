@@ -14,7 +14,14 @@ import { escapeHtml } from '../lib/escape.js';
 import { exportToExcel } from '../features/export-to-excel.js';
 import { renderImport } from '../features/import/import-ui.js';
 import { saveLabels } from '../services/progress.js';
-import { getTheme, setTheme } from '../services/theme.js';
+import {
+  getThemeMode,
+  getThemeLightChoice,
+  getThemeDarkChoice,
+  getActiveTheme,
+  setTheme,
+  setThemeSystemMode,
+} from '../services/theme.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -93,34 +100,57 @@ export async function renderAccount() {
   const loggedIn = !state.isGuest && !!state.token;
 
   // ── Appearance ────────────────────────────────────────────────
-  const currentTheme = getTheme(); // 'system' | 'light' | 'dark' | 'slate'
-  const THEME_OPTIONS = [
-    { key: 'system', label: 'System', desc: 'Match your device' },
-    { key: 'light', label: 'Light', desc: 'Bright' },
-    { key: 'dark', label: 'Dark', desc: 'AMOLED black' },
-    { key: 'slate', label: 'Slate', desc: 'Default' },
+  const themeMode = getThemeMode();
+  const lightChoice = getThemeLightChoice();
+  const darkChoice = getThemeDarkChoice();
+  const activeExplicit = themeMode === 'explicit' ? getActiveTheme() : null;
+
+  const LIGHT_OPTS = [
+    { key: 'light', label: 'Light' },
+    { key: 'solarized', label: 'Solarized' },
   ];
+  const DARK_OPTS = [
+    { key: 'dark', label: 'Dark' },
+    { key: 'amoled', label: 'AMOLED' },
+    { key: 'dracula', label: 'Dracula' },
+    { key: 'steel', label: 'Steel' },
+  ];
+
+  const themeTile = (o, isActive, isSystemTarget) =>
+    '<button class="theme-option' +
+    (isActive ? ' on' : '') +
+    '" data-theme-choice="' +
+    o.key +
+    '">' +
+    '<span class="theme-option-label">' +
+    o.label +
+    '</span>' +
+    (isSystemTarget
+      ? '<span class="theme-system-marker" title="Used for System">⚙ System</span>'
+      : '') +
+    '</button>';
+
   const appearanceBody =
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
-    "Choose how Wazalist looks. <b>System</b> follows your device's light or dark setting. " +
-    'This preference is saved on this device.' +
+    'Choose how Wazalist looks. <b>System</b> follows your device and uses your chosen ' +
+    'light and dark themes (marked ⚙). Saved on this device.' +
     '</p>' +
+    // System row
+    '<button class="theme-system-row' +
+    (themeMode === 'system' ? ' on' : '') +
+    '" data-theme-system="1">' +
+    '<span class="theme-option-label">System</span>' +
+    '<span class="theme-option-desc">Follow device, using ⚙-marked themes</span>' +
+    '</button>' +
+    // Light group
+    '<div class="theme-group-label">Light themes</div>' +
     '<div class="theme-picker">' +
-    THEME_OPTIONS.map(
-      (o) =>
-        '<button class="theme-option' +
-        (o.key === currentTheme ? ' on' : '') +
-        '" data-theme-choice="' +
-        o.key +
-        '">' +
-        '<span class="theme-option-label">' +
-        o.label +
-        '</span>' +
-        '<span class="theme-option-desc">' +
-        o.desc +
-        '</span>' +
-        '</button>',
-    ).join('') +
+    LIGHT_OPTS.map((o) => themeTile(o, o.key === activeExplicit, o.key === lightChoice)).join('') +
+    '</div>' +
+    // Dark group
+    '<div class="theme-group-label">Dark themes</div>' +
+    '<div class="theme-picker">' +
+    DARK_OPTS.map((o) => themeTile(o, o.key === activeExplicit, o.key === darkChoice)).join('') +
     '</div>';
 
   // Progress counts (used in the simplified Your Progress line + confirm dialogs)
@@ -288,14 +318,14 @@ export async function renderAccount() {
   });
 
   // ── Appearance apply wiring ────────────────────────────────────────────────
-  container.querySelectorAll('.theme-option').forEach((btn) => {
+  container.querySelector('[data-theme-system]')?.addEventListener('click', () => {
+    setThemeSystemMode();
+    renderAccount(); // refresh highlights/markers
+  });
+  container.querySelectorAll('.theme-option[data-theme-choice]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const choice = btn.dataset.themeChoice;
-      setTheme(choice); // persists + applies + dispatches 'themechange'
-      // Reflect selection immediately (the dispatched event re-renders marking
-      // views, but this accordion isn't one of them — update its highlight here).
-      container.querySelectorAll('.theme-option').forEach((b) => b.classList.remove('on'));
-      btn.classList.add('on');
+      setTheme(btn.dataset.themeChoice);
+      renderAccount(); // refresh highlights/markers
     });
   });
 

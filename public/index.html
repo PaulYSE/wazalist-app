@@ -28,25 +28,34 @@
     <script>
       (function () {
         try {
-          var THEMES = ['system', 'light', 'dark', 'slate'];
-          var stored = localStorage.getItem('wl_theme');
-          var choice = THEMES.indexOf(stored) >= 0 ? stored : 'system';
-          var resolved = choice;
-          if (choice === 'system') {
-            resolved =
-              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-                ? 'dark'
-                : 'light';
+          var LIGHT = ['light', 'solarized'];
+          var DARK = ['amoled', 'dark', 'dracula', 'steel'];
+          var mode = localStorage.getItem('wl_theme_mode');
+          var active;
+          if (mode === 'explicit') {
+            active = localStorage.getItem('wl_theme_active');
+            if (LIGHT.indexOf(active) < 0 && DARK.indexOf(active) < 0) active = 'dark';
+          } else {
+            var prefersDark =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+              active = localStorage.getItem('wl_theme_dark');
+              if (DARK.indexOf(active) < 0) active = 'dark';
+            } else {
+              active = localStorage.getItem('wl_theme_light');
+              if (LIGHT.indexOf(active) < 0) active = 'light';
+            }
           }
-          document.documentElement.dataset.theme = resolved;
+          document.documentElement.dataset.theme = active;
         } catch (e) {
-          /* localStorage blocked or unavailable — fall through to :root default (slate) */
+          /* fall through to :root fallback */
         }
       })();
     </script>
 
     <!-- App styles. Order matters: later files override earlier ones. -->
     <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/themes.css" />
     <link rel="stylesheet" href="/css/waza.css" />
     <link rel="stylesheet" href="/css/panels.css" />
     <link rel="stylesheet" href="/css/modals.css" />

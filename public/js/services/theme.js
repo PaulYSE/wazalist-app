@@ -4,85 +4,100 @@
  * @email paulyse99@gmail.com
  * @project Wazalist App
  * @date 2026-06-12
- * @brief Theme management. Resolves and applies the active theme (system/light/dark/slate),
- *        persists the choice to localStorage, and tracks OS preference changes when on 'system'.
+ * @brief Theme management. Mode is 'system' or 'explicit'. In system mode the
+ *        active theme is the user's chosen light/dark theme, picked by OS
+ *        prefers-color-scheme. Picking a specific theme sets explicit mode and
+ *        updates the matching light/dark slot. Persisted to localStorage.
  */
 
-const LS_THEME = 'wl_theme';
+const LS_MODE = 'wl_theme_mode'; // 'system' | 'explicit'
+const LS_LIGHT = 'wl_theme_light'; // chosen light theme
+const LS_DARK = 'wl_theme_dark'; // chosen dark theme
 
-// The user-selectable choices. 'system' is a meta-choice that resolves to
-// 'light' or 'dark' based on the OS preference.
-export const THEMES = ['system', 'light', 'dark', 'slate'];
+export const LIGHT_THEMES = ['light', 'solarized'];
+export const DARK_THEMES = ['amoled', 'dark', 'dracula', 'steel'];
+const ALL = [...LIGHT_THEMES, ...DARK_THEMES];
 
-// 'system' resolves to one of these via prefers-color-scheme.
-const SYSTEM_DARK = 'dark'; // OS dark  → AMOLED dark
-const SYSTEM_LIGHT = 'light'; // OS light → light
+const DEFAULT_LIGHT = 'light';
+const DEFAULT_DARK = 'dark';
 
-/**
- * @brief Returns the stored theme choice, or 'system' if none/invalid.
- *
- * @return {string} One of THEMES.
- */
-export function getTheme() {
-  const v = localStorage.getItem(LS_THEME);
-  return THEMES.includes(v) ? v : 'system';
+/** @return {boolean} */
+function osPrefersDark() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+/** @return {string} 'system' | 'explicit' */
+export function getThemeMode() {
+  return localStorage.getItem(LS_MODE) === 'explicit' ? 'explicit' : 'system';
+}
+
+/** @return {string} the chosen light theme */
+export function getThemeLightChoice() {
+  const v = localStorage.getItem(LS_LIGHT);
+  return LIGHT_THEMES.includes(v) ? v : DEFAULT_LIGHT;
+}
+
+/** @return {string} the chosen dark theme */
+export function getThemeDarkChoice() {
+  const v = localStorage.getItem(LS_DARK);
+  return DARK_THEMES.includes(v) ? v : DEFAULT_DARK;
 }
 
 /**
- * @brief Resolves a choice to a concrete theme name (collapses 'system').
- *
- * @param {string} choice - A value from THEMES.
- * @return {string} A concrete theme: 'light' | 'dark' | 'slate'.
+ * @brief Resolve the active concrete theme from current mode + slots + OS.
+ * @return {string} a concrete theme name.
  */
-function resolve(choice) {
-  if (choice === 'system') {
-    const prefersDark =
-      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? SYSTEM_DARK : SYSTEM_LIGHT;
+export function getActiveTheme() {
+  if (getThemeMode() === 'explicit') {
+    const v = localStorage.getItem('wl_theme_active');
+    return ALL.includes(v) ? v : getThemeDarkChoice();
   }
-  return choice;
+  // system: pick the slot matching the OS preference
+  return osPrefersDark() ? getThemeDarkChoice() : getThemeLightChoice();
 }
 
-/**
- * @brief Applies the given choice to the document (sets data-theme).
- *        Does NOT persist — use setTheme for that.
- *
- * @param {string} choice - A value from THEMES.
- * @return {void}
- */
-export function applyTheme(choice) {
-  document.documentElement.dataset.theme = resolve(choice);
+/** @brief Apply the resolved theme to the document + notify. */
+export function applyTheme() {
+  document.documentElement.dataset.theme = getActiveTheme();
   window.dispatchEvent(new Event('themechange'));
 }
 
 /**
- * @brief Sets, persists, and applies the theme choice.
- *
- * @param {string} choice - A value from THEMES.
+ * @brief Switch to System mode (active theme follows OS + chosen slots).
  * @return {void}
  */
-export function setTheme(choice) {
-  if (!THEMES.includes(choice)) choice = 'system';
-  localStorage.setItem(LS_THEME, choice);
-  applyTheme(choice);
+export function setThemeSystemMode() {
+  localStorage.setItem(LS_MODE, 'system');
+  applyTheme();
 }
 
 /**
- * @brief Initializes theming: applies the stored choice and, while on 'system',
- *        re-applies live when the OS light/dark preference changes.
- *
+ * @brief Pick a specific theme: set explicit mode, store it as active, and
+ *        update the matching light/dark slot (so it becomes the System target
+ *        for its category too).
+ * @param {string} theme - a concrete theme name.
+ * @return {void}
+ */
+export function setTheme(theme) {
+  if (!ALL.includes(theme)) return;
+  localStorage.setItem(LS_MODE, 'explicit');
+  localStorage.setItem('wl_theme_active', theme);
+  if (LIGHT_THEMES.includes(theme)) localStorage.setItem(LS_LIGHT, theme);
+  else localStorage.setItem(LS_DARK, theme);
+  applyTheme();
+}
+
+/**
+ * @brief Init: apply current state and track OS changes while in system mode.
  * @return {void}
  */
 export function initTheme() {
-  applyTheme(getTheme());
-
-  // Track OS preference changes — only matters while the choice is 'system'.
+  applyTheme();
   if (window.matchMedia) {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = () => {
-      if (getTheme() === 'system') applyTheme('system');
+      if (getThemeMode() === 'system') applyTheme();
     };
-    // addEventListener is the modern API; older Safari used addListener.
     if (mq.addEventListener) mq.addEventListener('change', onChange);
     else if (mq.addListener) mq.addListener(onChange);
   }
