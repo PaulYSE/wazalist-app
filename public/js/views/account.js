@@ -105,6 +105,18 @@ export async function renderAccount() {
   const darkChoice = getThemeDarkChoice();
   const activeExplicit = themeMode === 'explicit' ? getActiveTheme() : null;
 
+  // Representative swatches per theme (bg0, bg2, accent, a semantic pop).
+  // Hardcoded because a card previews a theme that isn't the active one, so it
+  // can't read that theme's live CSS variables.
+  const THEME_SWATCHES = {
+    light: ['#ffffff', '#eef0f4', '#5a4fd0', '#2e9e63'],
+    solarized: ['#fdf6e3', '#eee8d5', '#268bd2', '#859900'],
+    dark: ['#0f0f14', '#1e1e28', '#7c6ff7', '#56c08a'],
+    amoled: ['#000000', '#141414', '#7c6ff7', '#56c08a'],
+    dracula: ['#282a36', '#44475a', '#bd93f9', '#50fa7b'],
+    steel: ['#14181d', '#232a32', '#5fa8d3', '#5bbf99'],
+  };
+
   const LIGHT_OPTS = [
     { key: 'light', label: 'Light' },
     { key: 'solarized', label: 'Solarized' },
@@ -116,41 +128,49 @@ export async function renderAccount() {
     { key: 'steel', label: 'Steel' },
   ];
 
-  const themeTile = (o, isActive, isSystemTarget) =>
-    '<button class="theme-option' +
+  const swatchStrip = (key) =>
+    '<div class="theme-swatches">' +
+    (THEME_SWATCHES[key] || [])
+      .map((c) => '<span class="theme-swatch" style="background:' + c + '"></span>')
+      .join('') +
+    '</div>';
+
+  // isActive → currently rendering (explicit mode). isTarget → System uses it.
+  const themeCard = (o, isActive, isTarget) =>
+    '<button class="theme-card' +
     (isActive ? ' on' : '') +
+    (isTarget ? ' target' : '') +
     '" data-theme-choice="' +
     o.key +
     '">' +
-    '<span class="theme-option-label">' +
+    (isTarget ? '<span class="theme-check" title="Used for System">✓</span>' : '') +
+    '<span class="theme-card-name">' +
     o.label +
     '</span>' +
-    (isSystemTarget
-      ? '<span class="theme-system-marker" title="Used for System">⚙ System</span>'
-      : '') +
+    swatchStrip(o.key) +
     '</button>';
 
   const appearanceBody =
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
-    'Choose how Wazalist looks. <b>System</b> follows your device and uses your chosen ' +
-    'light and dark themes (marked ⚙). Saved on this device.' +
+    'Choose how Wazalist looks. <b>System</b> follows your device, using the light and ' +
+    'dark themes you select (marked ✓). Saved on this device.' +
     '</p>' +
     // System row
     '<button class="theme-system-row' +
     (themeMode === 'system' ? ' on' : '') +
     '" data-theme-system="1">' +
     '<span class="theme-option-label">System</span>' +
-    '<span class="theme-option-desc">Follow device, using ⚙-marked themes</span>' +
+    '<span class="theme-option-desc">Follow device, using ✓-marked themes</span>' +
     '</button>' +
     // Light group
     '<div class="theme-group-label">Light themes</div>' +
-    '<div class="theme-picker">' +
-    LIGHT_OPTS.map((o) => themeTile(o, o.key === activeExplicit, o.key === lightChoice)).join('') +
+    '<div class="theme-grid">' +
+    LIGHT_OPTS.map((o) => themeCard(o, o.key === activeExplicit, o.key === lightChoice)).join('') +
     '</div>' +
     // Dark group
     '<div class="theme-group-label">Dark themes</div>' +
-    '<div class="theme-picker">' +
-    DARK_OPTS.map((o) => themeTile(o, o.key === activeExplicit, o.key === darkChoice)).join('') +
+    '<div class="theme-grid">' +
+    DARK_OPTS.map((o) => themeCard(o, o.key === activeExplicit, o.key === darkChoice)).join('') +
     '</div>';
 
   // Progress counts (used in the simplified Your Progress line + confirm dialogs)
@@ -320,12 +340,12 @@ export async function renderAccount() {
   // ── Appearance apply wiring ────────────────────────────────────────────────
   container.querySelector('[data-theme-system]')?.addEventListener('click', () => {
     setThemeSystemMode();
-    renderAccount(); // refresh highlights/markers
+    renderAccount();
   });
-  container.querySelectorAll('.theme-option[data-theme-choice]').forEach((btn) => {
+  container.querySelectorAll('.theme-card[data-theme-choice]').forEach((btn) => {
     btn.addEventListener('click', () => {
       setTheme(btn.dataset.themeChoice);
-      renderAccount(); // refresh highlights/markers
+      renderAccount();
     });
   });
 

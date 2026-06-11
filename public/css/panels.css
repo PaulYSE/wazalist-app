@@ -527,52 +527,20 @@
   margin-top: 12px;
 }
 
-/* ── Account: appearance theme picker ── */
-.theme-system-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  cursor: pointer;
-  font-family: inherit;
-  text-align: left;
-  transition: all 0.12s;
-}
-.theme-system-row:hover {
-  border-color: var(--accent);
-}
-.theme-system-row.on {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-}
-.theme-system-row.on .theme-option-label {
-  color: var(--accent);
-}
-.theme-group-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text3);
-  margin: 4px 0 6px;
-}
-.theme-picker {
+/* ── Account: appearance theme cards ── */
+.theme-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 12px;
 }
-.theme-option {
+
+.theme-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 12px;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
@@ -581,30 +549,59 @@
   text-align: left;
   transition: all 0.12s;
 }
-.theme-option:hover {
+.theme-card:hover {
   border-color: var(--accent);
 }
-.theme-option.on {
+
+/* Active (currently rendering) — filled highlight. */
+.theme-card.on {
   border-color: var(--accent);
   background: var(--accent-bg);
 }
-.theme-option-label {
+.theme-card.on .theme-card-name {
+  color: var(--accent);
+}
+
+/* System target — outlined with a thicker accent ring (distinct from .on fill;
+   a card can be both, in which case it's filled AND ringed). */
+.theme-card.target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.theme-card-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--text1);
 }
-.theme-option.on .theme-option-label {
-  color: var(--accent);
-}
-.theme-option-desc {
+
+/* Checkmark, top-right corner, on System-target cards. */
+.theme-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 11px;
-  color: var(--text3);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
-.theme-system-marker {
-  font-size: 10px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-bg-border);
-  border-radius: 10px;
-  padding: 1px 6px;
+
+/* Mini palette preview. */
+.theme-swatches {
+  display: flex;
+  gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  height: 22px;
+}
+.theme-swatch {
+  flex: 1;
 }
