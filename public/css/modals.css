@@ -4,7 +4,7 @@
 .cmodal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,7 +121,7 @@
 
 .cbtn-primary {
   background: var(--accent2);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .cbtn-primary:hover {
@@ -428,15 +428,15 @@
 }
 
 .ti-badge-ok {
-  background: #002a10;
+  background: var(--green-bg);
   color: var(--green);
-  border: 1px solid var(--green);
+  border: 1px solid var(--green-bg-border);
 }
 
 .ti-badge-miss {
-  background: #2a1800;
+  background: var(--amber-bg);
   color: var(--amber);
-  border: 1px solid var(--amber);
+  border: 1px solid var(--amber-bg-border);
 }
 
 .ti-unmatched-row {
@@ -488,9 +488,9 @@
 }
 
 .ti-cat-dynamic {
-  background: #1a1a2e;
+  background: var(--accent-bg);
   color: var(--accent);
-  border: 1px solid var(--accent2);
+  border: 1px solid var(--accent-bg-border);
 }
 
 .ti-manual-markings {

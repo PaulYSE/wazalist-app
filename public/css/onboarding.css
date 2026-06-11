@@ -3,7 +3,7 @@
 #wlOnboarding {
   position: fixed;
   inset: 0;
-  background: rgba(6, 5, 12, 0.92);
+  background: var(--scrim);
   backdrop-filter: blur(6px);
   z-index: 9999;
   display: flex;
@@ -29,7 +29,7 @@
   flex-direction: column;
   box-shadow:
     0 32px 80px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(124, 111, 247, 0.15);
+    0 0 0 1px rgba(var(--accent-rgb), 0.15);
   position: relative;
 }
 
@@ -230,7 +230,7 @@
 }
 .ob-style-pill.selected {
   border-color: var(--accent);
-  background: rgba(124, 111, 247, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 .ob-style-pill .sp-label {
   font-size: 12px;
@@ -432,7 +432,7 @@
 .ob-btn-primary {
   background: var(--accent2);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   margin-left: auto;
 }
 .ob-btn-primary:hover {
@@ -441,18 +441,18 @@
 .ob-btn-secondary {
   background: var(--accent2);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .ob-btn-secondary:hover {
   background: var(--accent);
 }
 .ob-btn-green {
-  background: #002a10;
+  background: var(--green-bg);
   border-color: var(--green);
   color: var(--green);
 }
 .ob-btn-green:hover {
-  background: #003d18;
+  background: var(--green-bg-border);
 }
 
 .ob-filter-bar {
@@ -480,7 +480,7 @@
 .ob-filter-btn.on {
   background: var(--accent2);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .ob-peek-grid {
   display: grid;

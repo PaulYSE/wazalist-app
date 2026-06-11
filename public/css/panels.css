@@ -333,7 +333,7 @@
 }
 .seg-item.on {
   background: var(--accent2);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* ── Contributions ── */
@@ -362,15 +362,15 @@
 }
 
 .ct-edit {
-  background: #001a2a;
-  color: #60b8f0;
-  border: 1px solid #004a7a;
+  background: var(--like-bg);
+  color: var(--like);
+  border: 1px solid var(--like-bg-border);
 }
 
 .ct-new {
-  background: #2a1a00;
-  color: #e8a030;
-  border: 1px solid #7a4a00;
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid var(--amber-bg-border);
 }
 
 .contrib-status {
@@ -382,21 +382,21 @@
 }
 
 .cs-pending {
-  background: #2a2000;
+  background: var(--amber-bg);
   color: var(--amber);
-  border: 1px solid var(--amber);
+  border: 1px solid var(--amber-bg-border);
 }
 
 .cs-approved {
-  background: #002a10;
+  background: var(--green-bg);
   color: var(--green);
-  border: 1px solid var(--green);
+  border: 1px solid var(--green-bg-border);
 }
 
 .cs-rejected {
-  background: #2a0000;
+  background: var(--red-bg);
   color: var(--red);
-  border: 1px solid var(--red);
+  border: 1px solid var(--red-bg-border);
 }
 
 .contrib-item .ci-name {
