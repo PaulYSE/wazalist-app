@@ -483,3 +483,46 @@
   border-bottom-left-radius: var(--r);
   border-bottom-right-radius: var(--r);
 }
+
+/* ── Account: marking-labels editor ── */
+.acc-labels-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.acc-labels-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.acc-labels-marking {
+  font-size: 16px;
+  text-align: center;
+}
+.acc-labels-input {
+  min-width: 0;
+  padding: 7px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text1);
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+.acc-labels-input:focus {
+  border-color: var(--accent);
+}
+.acc-labels-count {
+  font-size: 12px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+.acc-labels-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
