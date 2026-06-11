@@ -15,6 +15,8 @@ import { renderContribute } from '../views/contribute.js';
 import { renderList, setBrowseView, setBrowseSort } from '../views/browse-list.js';
 import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
+import { pushRoute } from './router.js';
+import { closeDetailNoHistory } from '../views/waza-detail.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -336,21 +338,10 @@ export function initUi() {
   // ── Nav tabs ────────────────────────────────────────────────
   document.querySelectorAll('.ntab').forEach((tab) =>
     tab.addEventListener('click', () => {
-      document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
       const t = tab.dataset.tab;
-      document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
-      document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
-      document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
-      document.getElementById('contributeView').style.display =
-        t === 'contribute' ? 'block' : 'none';
-      document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
-      if (t === 'stats') renderDashStats();
-      if (t === 'compare') renderDashCompare();
-      if (t === 'contribute') renderContribute();
-      if (t === 'account') renderAccount();
-      // Update mobile menu active state
-      updateMobMenuActiveState();
+      // Switching tabs closes any open waza (waza is Browse-only); do it before
+      // the history push so the pushed entry reflects the final view.
+      switchTab(t);
     }),
   );
 }
@@ -365,13 +356,50 @@ export function initUi() {
  * @return {void}
  */
 export function navigateToBrowse() {
-  document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
-  document.querySelector('[data-tab="browse"]').classList.add('active');
-  document.getElementById('browseView').style.display = 'flex';
-  document.getElementById('statsView').style.display = 'none';
-  document.getElementById('compareView').style.display = 'none';
-  document.getElementById('accountView').style.display = 'none';
-  document.getElementById('contributeView').style.display = 'none';
+  activateTab('browse');
+}
+
+/**
+ * @brief Pure visual tab switch — no history writes.
+ *
+ * Updates the active tab UI, toggles view visibility, and renders the appropriate view content.
+ * Does not modify browser history or close detail panels.
+ *
+ * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'contribute', 'account').
+ * @return {void}
+ */
+export function activateTab(t) {
+  document.querySelectorAll('.ntab').forEach((x) => x.classList.remove('active'));
+  document.querySelector(`.ntab[data-tab="${t}"]`)?.classList.add('active');
+  document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
+  document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
+  document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
+  document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
+  document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
+  if (t === 'stats') renderDashStats();
+  if (t === 'compare') renderDashCompare();
+  if (t === 'contribute') renderContribute();
+  if (t === 'account') renderAccount();
+  updateMobMenuActiveState();
+}
+
+/**
+ * @brief User-initiated tab switch: closes any open waza, switches view, and pushes history state.
+ *
+ * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'contribute', 'account').
+ * @return {void}
+ */
+export function switchTab(t) {
+  const current = document.querySelector('.ntab.active')?.dataset.tab;
+  // Leaving browse with a waza open: close it (no separate history write — the
+  // single pushRoute below records the destination view).
+  if (state.selectedId !== null) {
+    closeDetailNoHistory();
+  }
+  activateTab(t);
+  if (t !== current || state.selectedId !== null) {
+    pushRoute(t, null);
+  }
 }
 
 /**

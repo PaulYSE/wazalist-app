@@ -15,10 +15,11 @@ import {
   syncBrowseViewControls,
   syncBrowseSortControls,
 } from '../views/browse-list.js';
-import { selectWaza } from '../views/waza-detail.js';
+import { selectWazaFromHistory } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
-import { startWazaPlaceholderRotation } from './shell.js';
+import { activateTab, startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
+import { parseRoute, replaceRoute } from './router.js';
 
 // ── Initialization entry point ─────────────────────────────────────
 
@@ -114,22 +115,31 @@ export async function initApp() {
   // Sync view style dropdowns with loaded preference
   syncBrowseViewControls();
 
-  // Check for ?waza= in URL (from shared links or back navigation)
-  const wazaParam = new URL(location.href).searchParams.get('waza');
-  if (wazaParam) {
-    // Parse as numeric ID (primary format)
-    const id = parseInt(wazaParam);
-    if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) {
-      selectWaza(id);
-    } else {
-      // Backward compatibility: try matching by Japanese name slug
-      const decodedSlug = decodeURIComponent(wazaParam);
-      const match = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === decodedSlug);
-      if (match) {
-        selectWaza(match.id);
-      }
-    }
+  // Boot into whatever view the URL describes (tab + optional waza).
+  const { tab, wazaParam } = parseRoute();
+  if (tab !== 'browse') {
+    activateTab(tab); // visual switch into the deep-linked tab
   }
+  // Normalize the initial entry so it carries state + a clean slug URL
+  // (e.g. "/" becomes "/browse"). replaceRoute — don't add a history entry.
+  if (wazaParam && tab === 'browse') {
+    const target = (() => {
+      const id = parseInt(wazaParam);
+      if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) return id;
+      const decoded = decodeURIComponent(wazaParam);
+      const m = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === decoded);
+      return m ? m.id : null;
+    })();
+    if (target != null) {
+      selectWazaFromHistory(target); // open without pushing
+      replaceRoute('browse', target); // normalize URL to numeric id
+    } else {
+      replaceRoute('browse', null);
+    }
+  } else {
+    replaceRoute(tab, null);
+  }
+
   startWazaPlaceholderRotation();
   checkAutoImport();
 }

@@ -16,11 +16,12 @@ import {
   selectWazaFromHistory,
   closeDetailPanelFromHistory,
 } from './views/waza-detail.js';
-import { initUi, closeMobMenu } from './app/shell.js';
+import { initUi, closeMobMenu, activateTab } from './app/shell.js';
 import { initShare } from './features/share-list.js';
 import { initNewWaza } from './modals/new-waza.js';
 import { initSuggestEdit, initFieldEdit } from './modals/suggest-edit.js';
 import { initOnboarding, showOnboarding } from './features/onboarding.js';
+import { parseRoute } from './app/router.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
@@ -42,26 +43,42 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 // ── Popstate — back button closes the detail panel ────────────
 
 /**
- * @brief Handles browser back/forward navigation to sync detail panel with URL.
+ * @brief Handles browser back/forward navigation to restore tab and waza detail state from URL.
  *
- * Reads the ?waza= URL parameter and opens/closes the detail panel accordingly.
- * This ensures the back/forward buttons maintain correct state without full page reloads.
+ * Parses the current URL for tab and waza parameters, reconciles the active tab
+ * (without writing history), and opens/closes the detail panel as needed.
  */
 window.addEventListener('popstate', () => {
-  // Reconcile the detail panel to whatever the URL now says, rather than only
-  // handling the close case. The URL is authoritative (e.state is null for
-  // entries we didn't create, e.g. the initial load).
-  const wazaParam = new URL(location.href).searchParams.get('waza');
-  const targetId = wazaParam ? parseInt(wazaParam) : null;
+  const { tab, wazaParam } = parseRoute();
 
-  if (targetId && !isNaN(targetId) && state.wazaData.some((w) => w.id === targetId)) {
-    // URL points at a waza — open it if it isn't already the one shown.
+  // 1. Reconcile the tab (visual switch only — no history write).
+  const currentTab = document.querySelector('.ntab.active')?.dataset.tab;
+  if (tab !== currentTab) activateTab(tab);
+
+  // 2. Reconcile the waza (only meaningful on browse).
+  const targetId = wazaParam ? resolveWaza(wazaParam) : null;
+  if (targetId != null) {
     if (state.selectedId !== targetId) selectWazaFromHistory(targetId);
   } else if (state.selectedId !== null) {
-    // URL has no waza — close the panel if one is open.
     closeDetailPanelFromHistory();
   }
 });
+
+/**
+ * @brief Resolves a waza URL parameter to a valid waza ID.
+ *
+ * Supports both numeric IDs and Japanese name slugs for backward compatibility.
+ *
+ * @param {string} param - URL parameter value (numeric ID or JP name slug).
+ * @return {number|null} Waza ID if found, null otherwise.
+ */
+function resolveWaza(param) {
+  const id = parseInt(param);
+  if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) return id;
+  const decoded = decodeURIComponent(param);
+  const match = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === decoded);
+  return match ? match.id : null;
+}
 
 // ── Boot ──────────────────────────────────────────────────────
 // All modules above have finished evaluating, so it is now safe to wire DOM

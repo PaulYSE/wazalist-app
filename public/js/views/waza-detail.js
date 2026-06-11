@@ -23,6 +23,7 @@ import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit, openVideoSuggest } from '../modals/suggest-edit.js';
 import { renderList } from './browse-list.js';
 import { setSearchInput } from '../app/shell.js';
+import { pushRoute, replaceRoute } from '../app/router.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -70,9 +71,7 @@ export function selectWaza(id) {
 
   // Push history state so back button closes detail instead of exiting app
   if (id !== null && !isPopping) {
-    const url = new URL(location.href);
-    url.searchParams.set('waza', id);
-    history.pushState({ wazaOpen: true, wazaId: id }, '', url);
+    pushRoute('browse', id);
   }
 }
 
@@ -481,9 +480,7 @@ export function renderDetail() {
     setSearchInput(query);
     state.selectedId = null;
     document.querySelector('.main').classList.remove('waza-selected');
-    const url = new URL(location.href);
-    url.searchParams.delete('waza');
-    history.replaceState(null, '', url);
+    replaceRoute('browse', null);
     renderList();
     renderDetail();
   };
@@ -530,9 +527,25 @@ export function closeDetailPanel() {
   document.querySelector('.main').classList.remove('waza-selected');
 
   if (!isPopping) {
-    const url = new URL(location.href);
-    url.searchParams.delete('waza');
-    history.replaceState(null, '', url);
+    replaceRoute('browse', null);
+  }
+}
+
+/**
+ * @brief Closes the detail panel without writing a history entry.
+ *
+ * Uses the `isPopping` flag to prevent `closeDetailPanel()` from pushing a
+ * `replaceState` call. This is used when a tab switch is about to push its
+ * own history entry, avoiding a separate waza-close entry in the navigation stack.
+ *
+ * @return {void}
+ */
+export function closeDetailNoHistory() {
+  isPopping = true;
+  try {
+    closeDetailPanel();
+  } finally {
+    isPopping = false;
   }
 }
 
