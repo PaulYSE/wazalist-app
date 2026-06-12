@@ -945,7 +945,22 @@
                     >
                       Clear All
                     </button>
-                    <button id="obUseTemplate" class="ob-btn-green">✓ Use template</button>
+                    <button
+                      id="obUseTemplate"
+                      style="
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                        border: 1px solid var(--green);
+                        background: var(--green-bg);
+                        color: var(--green);
+                        font-size: 11px;
+                        cursor: pointer;
+                        font-family: inherit;
+                        transition: background 0.15s;
+                      "
+                      onmouseover="this.style.background = 'var(--green-bg-border)'"
+                      onmouseout="this.style.background = 'var(--green-bg)'"
+                    >✓ Use template</button>
                   </div>
                 </div>
                 <div class="ob-labels" id="obLabelsPreview">
