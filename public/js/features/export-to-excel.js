@@ -77,26 +77,42 @@ export async function exportToExcel() {
     wb.creator = 'Wazalist';
     wb.created = new Date();
     const ws = wb.addWorksheet('Wazalist');
-    ws.getColumn(1).width = 52;
+    ws.getColumn(1).width = 22; // A: legend labels
+    ws.getColumn(2).width = 52; // B: waza hyperlinks
 
-    // Header = username (or Guest)
-    const head = ws.getCell('A1');
-    head.value = headerName;
-    head.font = { bold: true, size: 14 };
+    // ── Column A: fixed legend block ──
+    // A1 blank, A2 = "Legend" header, A3–A8 = the six marking labels (index
+    // order), each filled with its marking's color so the legend is a key.
+    ws.getCell('A2').value = 'Legend';
+    ws.getCell('A2').font = { bold: true, color: { argb: 'FF777777' } };
+    for (let i = 0; i < 6; i++) {
+      const label = (state.markingLabels[i] || '').trim() || 'Marking ' + (i + 1);
+      const cell = ws.getCell('A' + (i + 3)); // A3..A8
+      cell.value = `${SHAPES[i]}  ${label}`;
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: EXPORT_MARK_COLORS[i] },
+      };
+      cell.font = { color: { argb: 'FF1A1A1A' } };
+    }
 
-    // Track which markings actually appear, for the legend
-    const usedMarks = new Set();
+    // ── Column B: username header + every marked waza ──
+    // B1 = username (uncolored). B2 onward = one waza per row, colored by its
+    // first active marking, as a HYPERLINK to its video.
+    const headCell = ws.getCell('B1');
+    headCell.value = headerName;
+    headCell.font = { bold: true, size: 14 };
 
     let r = 2;
     rows.forEach(({ waza: w, firstMark }) => {
       const en = (w.name_en || w.name_en_literal || w.name_en_gtranslate || '').trim();
       const jp = (w.name_jp || '').trim();
-      let disp = en && jp ? `${en}(${jp})` : en || jp || 'Waza #' + w.id;
+      const disp = en && jp ? `${en}(${jp})` : en || jp || 'Waza #' + w.id;
       const url = pickVideoUrl(w);
 
-      const cell = ws.getCell('A' + r);
+      const cell = ws.getCell('B' + r);
       if (url) {
-        // =HYPERLINK("url","name_en(name_jp)") — escape any double quotes for the formula
         const fUrl = url.replace(/"/g, '""');
         const fDisp = disp.replace(/"/g, '""');
         cell.value = { formula: `HYPERLINK("${fUrl}","${fDisp}")` };
@@ -106,32 +122,11 @@ export async function exportToExcel() {
         cell.font = { color: { argb: 'FF1A1A1A' } };
       }
 
-      // Cell colour based on the active marking
+      // Fill by first active marking.
       const argb = EXPORT_MARK_COLORS[firstMark] || 'FFFFFFFF';
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } };
-      usedMarks.add(firstMark);
       r++;
     });
-
-    // Legend (a couple of rows below the list) so the colours have meaning
-    r += 1;
-    ws.getCell('A' + r).value = 'Legend';
-    ws.getCell('A' + r).font = { bold: true, color: { argb: 'FF777777' } };
-    r++;
-    [...usedMarks]
-      .sort((a, b) => a - b)
-      .forEach((mi) => {
-        const label = (state.markingLabels[mi] || '').trim() || 'Marking ' + (mi + 1);
-        const cell = ws.getCell('A' + r);
-        cell.value = `${SHAPES[mi]}  ${label}`;
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: EXPORT_MARK_COLORS[mi] },
-        };
-        cell.font = { color: { argb: 'FF1A1A1A' } };
-        r++;
-      });
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {

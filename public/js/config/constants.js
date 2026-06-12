@@ -105,12 +105,12 @@ export const LIKE_DOWN = -1; // Dislike/thumbs down
  * @type {string[]}
  */
 export const EXPORT_MARK_COLORS = [
-  'FF4F8FF7',
-  'FF4CAF82',
-  'FFE8A030',
-  'FFE0557F',
-  'FFF5C518',
-  'FF7C6FF7',
+  'FFFF0000', // 0 ● red    #ff0000
+  'FFFF9900', // 1 ▲ orange #ff9900
+  'FFFFFF00', // 2 ■ yellow #ffff00
+  'FF00FF00', // 3 ♥ green  #00ff00
+  'FF00FFFF', // 4 ★ cyan   #00ffff
+  'FFFF00FF', // 5 ◆ pink   #ff00ff
 ];
 
 // Common status labels mapping to Wazalist markings
