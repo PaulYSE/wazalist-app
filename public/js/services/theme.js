@@ -14,9 +14,7 @@ const LS_MODE = 'wl_theme_mode'; // 'system' | 'explicit'
 const LS_LIGHT = 'wl_theme_light'; // chosen light theme
 const LS_DARK = 'wl_theme_dark'; // chosen dark theme
 
-export const LIGHT_THEMES = ['light', 'solarized'];
-export const DARK_THEMES = ['amoled', 'dark', 'dracula', 'steel'];
-const ALL = [...LIGHT_THEMES, ...DARK_THEMES];
+import { LIGHT_THEMES, DARK_THEMES, ALL_THEMES } from '../config/theme-registry.js';
 
 const DEFAULT_LIGHT = 'light';
 const DEFAULT_DARK = 'dark';
@@ -50,9 +48,8 @@ export function getThemeDarkChoice() {
 export function getActiveTheme() {
   if (getThemeMode() === 'explicit') {
     const v = localStorage.getItem('wl_theme_active');
-    return ALL.includes(v) ? v : getThemeDarkChoice();
+    return ALL_THEMES.includes(v) ? v : getThemeDarkChoice();
   }
-  // system: pick the slot matching the OS preference
   return osPrefersDark() ? getThemeDarkChoice() : getThemeLightChoice();
 }
 
@@ -79,7 +76,7 @@ export function setThemeSystemMode() {
  * @return {void}
  */
 export function setTheme(theme) {
-  if (!ALL.includes(theme)) return;
+  if (!ALL_THEMES.includes(theme)) return;
   localStorage.setItem(LS_MODE, 'explicit');
   localStorage.setItem('wl_theme_active', theme);
   if (LIGHT_THEMES.includes(theme)) localStorage.setItem(LS_LIGHT, theme);

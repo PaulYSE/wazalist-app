@@ -16,6 +16,7 @@ import {
   LIKE_DOWN,
 } from '../config/constants.js';
 import { state } from '../state/state.js';
+import { LIGHT_THEMES } from '../config/theme-registry.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -78,7 +79,7 @@ function _computeMarkingStyle(markings, theme) {
   const count = active.length;
   const t = Math.pow((count - 1) / 5, 0.65);
 
-  if (theme === 'light') {
+  if (LIGHT_THEMES.includes(theme)) {
     // Light canvas: pale fill, darker saturated border. More markings → a touch
     // more saturated and slightly less pale, so density still reads.
     const sat = Math.round(45 + t * 35); // 45→80%

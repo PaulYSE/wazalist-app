@@ -22,6 +22,7 @@ import {
   setTheme,
   setThemeSystemMode,
 } from '../services/theme.js';
+import { THEME_REGISTRY } from '../config/theme-registry.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -105,49 +106,29 @@ export async function renderAccount() {
   const darkChoice = getThemeDarkChoice();
   const activeExplicit = themeMode === 'explicit' ? getActiveTheme() : null;
 
-  // Representative swatches per theme (bg0, bg2, accent, a semantic pop).
-  // Hardcoded because a card previews a theme that isn't the active one, so it
-  // can't read that theme's live CSS variables.
-  const THEME_SWATCHES = {
-    light: ['#ffffff', '#eef0f4', '#5a4fd0', '#2e9e63'],
-    solarized: ['#fdf6e3', '#eee8d5', '#268bd2', '#859900'],
-    dark: ['#0f0f14', '#1e1e28', '#7c6ff7', '#56c08a'],
-    amoled: ['#000000', '#141414', '#7c6ff7', '#56c08a'],
-    dracula: ['#282a36', '#44475a', '#bd93f9', '#50fa7b'],
-    steel: ['#14181d', '#232a32', '#5fa8d3', '#5bbf99'],
-  };
+  const lightThemes = THEME_REGISTRY.filter((t) => t.group === 'light');
+  const darkThemes = THEME_REGISTRY.filter((t) => t.group === 'dark');
 
-  const LIGHT_OPTS = [
-    { key: 'light', label: 'Light' },
-    { key: 'solarized', label: 'Solarized' },
-  ];
-  const DARK_OPTS = [
-    { key: 'dark', label: 'Dark' },
-    { key: 'amoled', label: 'AMOLED' },
-    { key: 'dracula', label: 'Dracula' },
-    { key: 'steel', label: 'Steel' },
-  ];
-
-  const swatchStrip = (key) =>
+  const swatchStrip = (swatches) =>
     '<div class="theme-swatches">' +
-    (THEME_SWATCHES[key] || [])
+    (swatches || [])
       .map((c) => '<span class="theme-swatch" style="background:' + c + '"></span>')
       .join('') +
     '</div>';
 
   // isActive → currently rendering (explicit mode). isTarget → System uses it.
-  const themeCard = (o, isActive, isTarget) =>
+  const themeCard = (t, isActive, isTarget) =>
     '<button class="theme-card' +
     (isActive ? ' on' : '') +
     (isTarget ? ' target' : '') +
     '" data-theme-choice="' +
-    o.key +
+    t.key +
     '">' +
     (isTarget ? '<span class="theme-check" title="Used for System">✓</span>' : '') +
     '<span class="theme-card-name">' +
-    o.label +
+    escapeHtml(t.label) +
     '</span>' +
-    swatchStrip(o.key) +
+    swatchStrip(t.swatches) +
     '</button>';
 
   const appearanceBody =
@@ -155,22 +136,19 @@ export async function renderAccount() {
     'Choose how Wazalist looks. <b>System</b> follows your device, using the light and ' +
     'dark themes you select (marked ✓). Saved on this device.' +
     '</p>' +
-    // System row
     '<button class="theme-system-row' +
     (themeMode === 'system' ? ' on' : '') +
     '" data-theme-system="1">' +
     '<span class="theme-option-label">System</span>' +
     '<span class="theme-option-desc">Follow device, using ✓-marked themes</span>' +
     '</button>' +
-    // Light group
     '<div class="theme-group-label">Light themes</div>' +
     '<div class="theme-grid">' +
-    LIGHT_OPTS.map((o) => themeCard(o, o.key === activeExplicit, o.key === lightChoice)).join('') +
+    lightThemes.map((t) => themeCard(t, t.key === activeExplicit, t.key === lightChoice)).join('') +
     '</div>' +
-    // Dark group
     '<div class="theme-group-label">Dark themes</div>' +
     '<div class="theme-grid">' +
-    DARK_OPTS.map((o) => themeCard(o, o.key === activeExplicit, o.key === darkChoice)).join('') +
+    darkThemes.map((t) => themeCard(t, t.key === activeExplicit, t.key === darkChoice)).join('') +
     '</div>';
 
   // Progress counts (used in the simplified Your Progress line + confirm dialogs)

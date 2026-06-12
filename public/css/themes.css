@@ -153,6 +153,339 @@
   --embed-bg: #000000;
 }
 
+/* ── Nord Dark (Polar Night base, Frost/Aurora accents) ── */
+[data-theme='nord-dark'] {
+  --bg0: #2e3440; /* polar night 0 */
+  --bg1: #333b49;
+  --bg2: #3b4252; /* polar night 1 */
+  --bg3: #434c5e; /* polar night 2 */
+  --border: #4c566a; /* polar night 3 */
+  --text1: #eceff4; /* snow storm 2 */
+  --text2: #d8dee9; /* snow storm 0 */
+  --text3: #7b8694;
+  --accent: #88c0d0; /* frost 1 (cyan) */
+  --accent2: #81a1c1; /* frost 2 */
+  --accent-rgb: 136, 192, 208;
+  --accent-bg: #2c3b44;
+  --accent-bg-border: #4a6a78;
+  --on-accent: #2e3440;
+  --green: #a3be8c; /* aurora green */
+  --amber: #ebcb8b; /* aurora yellow */
+  --red: #bf616a; /* aurora red */
+  --gold: #ebcb8b;
+  --like: #88c0d0; /* frost cyan */
+  --dislike: #b48ead; /* aurora purple */
+  --green-bg: #2e3a2c;
+  --green-bg-border: #5c7a4e;
+  --amber-bg: #3a352370;
+  --amber-bg-border: #7a6e3e;
+  --red-bg: #3a2a2c;
+  --red-bg-border: #7a4850;
+  --like-bg: #243842;
+  --like-bg-border: #486a78;
+  --dislike-bg: #352c38;
+  --dislike-bg-border: #6e5470;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.18);
+  --embed-bg: #000000;
+}
+
+/* ── Gruvbox Dark (authentic: dark base, orange accent) ── */
+[data-theme='gruvbox-dark'] {
+  --bg0: #282828; /* gruvbox dark bg */
+  --bg1: #32302f; /* bg0_s */
+  --bg2: #3c3836; /* bg1 */
+  --bg3: #504945; /* bg2 */
+  --border: #504945;
+  --text1: #ebdbb2; /* fg1 */
+  --text2: #d5c4a1; /* fg2 */
+  --text3: #a89984; /* fg4 */
+  --accent: #fe8019; /* gruvbox bright orange */
+  --accent2: #d65d0e;
+  --accent-rgb: 254, 128, 25;
+  --accent-bg: #3a2e1c;
+  --accent-bg-border: #7a5a2c;
+  --on-accent: #282828;
+  --green: #b8bb26; /* bright green */
+  --amber: #fabd2f; /* bright yellow */
+  --red: #fb4934; /* bright red */
+  --gold: #fabd2f;
+  --like: #83a598; /* bright blue */
+  --dislike: #d3869b; /* bright purple */
+  --green-bg: #2e3318;
+  --green-bg-border: #6b7a2c;
+  --amber-bg: #332c14;
+  --amber-bg-border: #7a6420;
+  --red-bg: #331e1a;
+  --red-bg-border: #7a3a30;
+  --like-bg: #243030;
+  --like-bg-border: #4e6660;
+  --dislike-bg: #331e28;
+  --dislike-bg-border: #7a4a5c;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --overlay-soft: rgba(0, 0, 0, 0.2);
+  --embed-bg: #000000;
+}
+
+/* ── GitHub Dark ── */
+[data-theme='github-dark'] {
+  --bg0: #0d1117; /* canvas default */
+  --bg1: #161b22; /* canvas subtle */
+  --bg2: #21262d;
+  --bg3: #30363d;
+  --border: #30363d;
+  --text1: #e6edf3; /* fg default */
+  --text2: #9198a1; /* fg muted */
+  --text3: #6e7681;
+  --accent: #58a6ff; /* github dark blue */
+  --accent2: #1f6feb;
+  --accent-rgb: 88, 166, 255;
+  --accent-bg: #11253f;
+  --accent-bg-border: #1f5092;
+  --on-accent: #ffffff;
+  --green: #3fb950; /* success */
+  --amber: #d29922; /* attention */
+  --red: #f85149; /* danger */
+  --gold: #d29922;
+  --like: #58a6ff;
+  --dislike: #db61a2; /* done/sponsors pink */
+  --green-bg: #0f2a17;
+  --green-bg-border: #238636;
+  --amber-bg: #2a2110;
+  --amber-bg-border: #9e6a03;
+  --red-bg: #2a1517;
+  --red-bg-border: #da3633;
+  --like-bg: #11253f;
+  --like-bg-border: #1f5092;
+  --dislike-bg: #2a1626;
+  --dislike-bg-border: #ae4c8e;
+  --scrim: rgba(1, 4, 9, 0.7);
+  --overlay-soft: rgba(0, 0, 0, 0.2);
+  --embed-bg: #000000;
+}
+
+/* ── One Dark Pro ── */
+[data-theme='one-dark'] {
+  --bg0: #282c34; /* one dark bg */
+  --bg1: #2f343d;
+  --bg2: #3a3f4b;
+  --bg3: #454b56;
+  --border: #4b5263;
+  --text1: #abb2bf; /* fg */
+  --text2: #9099a8;
+  --text3: #6b7280;
+  --accent: #61afef; /* one dark blue */
+  --accent2: #528bcc;
+  --accent-rgb: 97, 175, 239;
+  --accent-bg: #233244;
+  --accent-bg-border: #3d5a78;
+  --on-accent: #282c34;
+  --green: #98c379; /* one dark green */
+  --amber: #e5c07b; /* one dark yellow */
+  --red: #e06c75; /* one dark red */
+  --gold: #e5c07b;
+  --like: #61afef; /* blue */
+  --dislike: #c678dd; /* purple */
+  --green-bg: #283319;
+  --green-bg-border: #5c7a3e;
+  --amber-bg: #332c18;
+  --amber-bg-border: #7a6838;
+  --red-bg: #331e21;
+  --red-bg-border: #7a3e44;
+  --like-bg: #233244;
+  --like-bg-border: #3d5a78;
+  --dislike-bg: #2e2433;
+  --dislike-bg-border: #62487a;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.18);
+  --embed-bg: #000000;
+}
+
+/* ── Catppuccin Frappé ── */
+[data-theme='frappe'] {
+  --bg0: #303446; /* base */
+  --bg1: #292c3c; /* mantle */
+  --bg2: #414559; /* surface0 */
+  --bg3: #51576d; /* surface1 */
+  --border: #51576d;
+  --text1: #c6d0f5; /* text */
+  --text2: #b5bfe2; /* subtext1 */
+  --text3: #838ba7; /* overlay1 */
+  --accent: #ca9ee6; /* mauve */
+  --accent2: #babbf1; /* lavender */
+  --accent-rgb: 202, 158, 230;
+  --accent-bg: #3a3550;
+  --accent-bg-border: #5a4f78;
+  --on-accent: #303446;
+  --green: #a6d189; /* green */
+  --amber: #e5c890; /* yellow */
+  --red: #e78284; /* red */
+  --gold: #e5c890;
+  --like: #8caaee; /* blue */
+  --dislike: #f4b8e4; /* pink */
+  --green-bg: #2e3a26;
+  --green-bg-border: #5c7a48;
+  --amber-bg: #3a3322;
+  --amber-bg-border: #7a6c44;
+  --red-bg: #3a262a;
+  --red-bg-border: #7a4448;
+  --like-bg: #2a3346;
+  --like-bg-border: #4e6488;
+  --dislike-bg: #382c38;
+  --dislike-bg-border: #785470;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --overlay-soft: rgba(0, 0, 0, 0.18);
+  --embed-bg: #000000;
+}
+
+/* ── Catppuccin Macchiato ── */
+[data-theme='macchiato'] {
+  --bg0: #24273a; /* base */
+  --bg1: #1e2030; /* mantle */
+  --bg2: #363a4f; /* surface0 */
+  --bg3: #494d64; /* surface1 */
+  --border: #494d64;
+  --text1: #cad3f5; /* text */
+  --text2: #b8c0e0; /* subtext1 */
+  --text3: #8087a2; /* overlay1 */
+  --accent: #c6a0f6; /* mauve */
+  --accent2: #b7bdf8; /* lavender */
+  --accent-rgb: 198, 160, 246;
+  --accent-bg: #312e48;
+  --accent-bg-border: #54497a;
+  --on-accent: #24273a;
+  --green: #a6da95; /* green */
+  --amber: #eed49f; /* yellow */
+  --red: #ed8796; /* red */
+  --gold: #eed49f;
+  --like: #8aadf4; /* blue */
+  --dislike: #f5bde6; /* pink */
+  --green-bg: #28341f;
+  --green-bg-border: #547a44;
+  --amber-bg: #342f1e;
+  --amber-bg-border: #7a6c40;
+  --red-bg: #34222a;
+  --red-bg-border: #7a4250;
+  --like-bg: #232f46;
+  --like-bg-border: #466088;
+  --dislike-bg: #342438;
+  --dislike-bg-border: #7a4e74;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --overlay-soft: rgba(0, 0, 0, 0.18);
+  --embed-bg: #000000;
+}
+
+/* ── Catppuccin Mocha ── */
+[data-theme='mocha'] {
+  --bg0: #1e1e2e; /* base */
+  --bg1: #181825; /* mantle */
+  --bg2: #313244; /* surface0 */
+  --bg3: #45475a; /* surface1 */
+  --border: #45475a;
+  --text1: #cdd6f4; /* text */
+  --text2: #bac2de; /* subtext1 */
+  --text3: #7f849c; /* overlay1 */
+  --accent: #cba6f7; /* mauve */
+  --accent2: #b4befe; /* lavender */
+  --accent-rgb: 203, 166, 247;
+  --accent-bg: #2c2940;
+  --accent-bg-border: #534878;
+  --on-accent: #1e1e2e;
+  --green: #a6e3a1; /* green */
+  --amber: #f9e2af; /* yellow */
+  --red: #f38ba8; /* red */
+  --gold: #f9e2af;
+  --like: #89b4fa; /* blue */
+  --dislike: #f5c2e7; /* pink */
+  --green-bg: #25351f;
+  --green-bg-border: #4e7a44;
+  --amber-bg: #353020;
+  --amber-bg-border: #7a6e44;
+  --red-bg: #352028;
+  --red-bg-border: #7a404e;
+  --like-bg: #222f44;
+  --like-bg-border: #466088;
+  --dislike-bg: #352438;
+  --dislike-bg-border: #7a4e72;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --overlay-soft: rgba(0, 0, 0, 0.18);
+  --embed-bg: #000000;
+}
+
+/* ── SynthWave '84 (colors only, no glow) ── */
+[data-theme='synthwave'] {
+  --bg0: #262335; /* synthwave bg */
+  --bg1: #2a2139;
+  --bg2: #34294f;
+  --bg3: #463465;
+  --border: #495495;
+  --text1: #f0eff1;
+  --text2: #b6b1d8;
+  --text3: #848bbd;
+  --accent: #ff7edb; /* neon pink */
+  --accent2: #e066c0;
+  --accent-rgb: 255, 126, 219;
+  --accent-bg: #3a2347;
+  --accent-bg-border: #7a4a8e;
+  --on-accent: #262335;
+  --green: #72f1b8; /* neon mint */
+  --amber: #fede5d; /* neon yellow */
+  --red: #fe4450; /* neon red */
+  --gold: #fede5d;
+  --like: #36f9f6; /* neon cyan */
+  --dislike: #ff7edb; /* neon pink */
+  --green-bg: #1a3a30;
+  --green-bg-border: #2c7a64;
+  --amber-bg: #3a3318;
+  --amber-bg-border: #7a6c2c;
+  --red-bg: #3a1a20;
+  --red-bg-border: #7a323c;
+  --like-bg: #133638;
+  --like-bg-border: #2c6e72;
+  --dislike-bg: #3a2340;
+  --dislike-bg-border: #7a4a7e;
+  --scrim: rgba(20, 16, 35, 0.72);
+  --overlay-soft: rgba(0, 0, 0, 0.22);
+  --embed-bg: #000000;
+}
+
+/* ── Night Owl ── */
+[data-theme='night-owl'] {
+  --bg0: #011627; /* night owl bg (deep navy) */
+  --bg1: #0b2942;
+  --bg2: #0e293f;
+  --bg3: #1d3b53;
+  --border: #1d3b53;
+  --text1: #d6deeb; /* fg */
+  --text2: #a9b8d0;
+  --text3: #637777; /* muted */
+  --accent: #82aaff; /* night owl blue */
+  --accent2: #5f8ae0;
+  --accent-rgb: 130, 170, 255;
+  --accent-bg: #16304f;
+  --accent-bg-border: #3a5a82;
+  --on-accent: #011627;
+  --green: #addb67; /* night owl green */
+  --amber: #ecc48d; /* night owl orange/tan */
+  --red: #ef5350; /* night owl red */
+  --gold: #ffeb95; /* night owl yellow */
+  --like: #82aaff; /* blue */
+  --dislike: #c792ea; /* purple */
+  --green-bg: #233318;
+  --green-bg-border: #5c7a38;
+  --amber-bg: #33291a;
+  --amber-bg-border: #7a603a;
+  --red-bg: #331c1c;
+  --red-bg-border: #7a3a38;
+  --like-bg: #16304f;
+  --like-bg-border: #3a5a82;
+  --dislike-bg: #2b2440;
+  --dislike-bg-border: #604e7a;
+  --scrim: rgba(1, 22, 39, 0.72);
+  --overlay-soft: rgba(0, 0, 0, 0.22);
+  --embed-bg: #000000;
+}
+
 /* ── Light (the retuned light theme) ── */
 [data-theme='light'] {
   --bg0: #ffffff;
@@ -224,5 +557,190 @@
   --dislike-bg-border: #e8b3cf;
   --scrim: rgba(88, 80, 60, 0.4);
   --overlay-soft: rgba(101, 76, 0, 0.06);
+  --embed-bg: #000000;
+}
+
+/* ── Nord Light (Snow Storm base, Frost accent) ── */
+[data-theme='nord-light'] {
+  --bg0: #eceff4; /* snow storm 2 */
+  --bg1: #e5e9f0; /* snow storm 1 */
+  --bg2: #dce0e8;
+  --bg3: #d8dee9; /* snow storm 0 */
+  --border: #c2c9d6;
+  --text1: #2e3440; /* polar night 0 */
+  --text2: #4c566a; /* polar night 3 */
+  --text3: #7b8694;
+  --accent: #5e81ac; /* frost 3 (deep blue) */
+  --accent2: #81a1c1; /* frost 2 */
+  --accent-rgb: 94, 129, 172;
+  --accent-bg: #dbe3ee;
+  --accent-bg-border: #aec3da;
+  --on-accent: #eceff4;
+  --green: #5b8a52; /* aurora green, darkened for light */
+  --amber: #b88a30; /* aurora yellow, darkened */
+  --red: #bf616a; /* aurora red */
+  --gold: #b88a30;
+  --like: #5e81ac; /* frost blue */
+  --dislike: #b56b8e; /* aurora purple/magenta lean */
+  --green-bg: #e3edde;
+  --green-bg-border: #b8d0ac;
+  --amber-bg: #f1e8d4;
+  --amber-bg-border: #ddc89a;
+  --red-bg: #f3dee0;
+  --red-bg-border: #e0b3b8;
+  --like-bg: #dbe3ee;
+  --like-bg-border: #aec3da;
+  --dislike-bg: #f0dee7;
+  --dislike-bg-border: #d9b3c7;
+  --scrim: rgba(46, 52, 64, 0.4);
+  --overlay-soft: rgba(46, 52, 64, 0.06);
+  --embed-bg: #000000;
+}
+
+/* ── Gruvbox Light (authentic: cream base, orange accent) ── */
+[data-theme='gruvbox-light'] {
+  --bg0: #fbf1c7; /* gruvbox light bg */
+  --bg1: #f4e8be;
+  --bg2: #ebdbb2; /* bg1 */
+  --bg3: #d5c4a1; /* bg2 */
+  --border: #d5c4a1;
+  --text1: #3c3836; /* fg1 */
+  --text2: #504945; /* fg2 */
+  --text3: #7c6f64; /* fg4 */
+  --accent: #d65d0e; /* gruvbox orange */
+  --accent2: #af3a03; /* dark orange */
+  --accent-rgb: 214, 93, 14;
+  --accent-bg: #f6e3c0;
+  --accent-bg-border: #e6c699;
+  --on-accent: #fbf1c7;
+  --green: #79740e; /* gruvbox green (dark) */
+  --amber: #b57614; /* gruvbox yellow (dark) */
+  --red: #cc241d; /* gruvbox red */
+  --gold: #b57614;
+  --like: #076678; /* gruvbox blue (dark) */
+  --dislike: #b16286; /* gruvbox purple (dark) */
+  --green-bg: #eaecc6;
+  --green-bg-border: #c7cc8e;
+  --amber-bg: #f3e6c0;
+  --amber-bg-border: #ddc78e;
+  --red-bg: #f6dcd2;
+  --red-bg-border: #e8b3a0;
+  --like-bg: #d9e6e6;
+  --like-bg-border: #a3c4c4;
+  --dislike-bg: #f1dde6;
+  --dislike-bg-border: #d9b0c4;
+  --scrim: rgba(60, 56, 54, 0.4);
+  --overlay-soft: rgba(60, 56, 54, 0.06);
+  --embed-bg: #000000;
+}
+
+/* ── GitHub Light ── */
+[data-theme='github-light'] {
+  --bg0: #ffffff;
+  --bg1: #f6f8fa; /* canvas subtle */
+  --bg2: #eaeef2;
+  --bg3: #d0d7de;
+  --border: #d0d7de;
+  --text1: #1f2328; /* fg default */
+  --text2: #57606a; /* fg muted */
+  --text3: #8c959f;
+  --accent: #0969da; /* github blue */
+  --accent2: #0550ae;
+  --accent-rgb: 9, 105, 218;
+  --accent-bg: #ddf4ff;
+  --accent-bg-border: #b6e3ff;
+  --on-accent: #ffffff;
+  --green: #1a7f37; /* success */
+  --amber: #9a6700; /* attention */
+  --red: #cf222e; /* danger */
+  --gold: #9a6700;
+  --like: #0969da;
+  --dislike: #bf3989; /* github "done"/sponsors pink */
+  --green-bg: #dafbe1;
+  --green-bg-border: #aceebb;
+  --amber-bg: #fff8c5;
+  --amber-bg-border: #eac54f;
+  --red-bg: #ffebe9;
+  --red-bg-border: #ff8182;
+  --like-bg: #ddf4ff;
+  --like-bg-border: #b6e3ff;
+  --dislike-bg: #ffeff7;
+  --dislike-bg-border: #ffbedd;
+  --scrim: rgba(31, 35, 40, 0.4);
+  --overlay-soft: rgba(31, 35, 40, 0.05);
+  --embed-bg: #000000;
+}
+
+/* ── Catppuccin Latte (light flavor) ── */
+[data-theme='latte'] {
+  --bg0: #eff1f5; /* base */
+  --bg1: #e6e9ef; /* mantle */
+  --bg2: #dce0e8; /* crust */
+  --bg3: #ccd0da; /* surface0 */
+  --border: #bcc0cc; /* surface1 */
+  --text1: #4c4f69; /* text */
+  --text2: #5c5f77; /* subtext1 */
+  --text3: #8c8fa1; /* subtext0 */
+  --accent: #8839ef; /* mauve */
+  --accent2: #7287fd; /* lavender */
+  --accent-rgb: 136, 57, 239;
+  --accent-bg: #e9e1f8;
+  --accent-bg-border: #cbb8ee;
+  --on-accent: #eff1f5;
+  --green: #40a02b; /* green */
+  --amber: #df8e1d; /* yellow */
+  --red: #d20f39; /* red */
+  --gold: #df8e1d;
+  --like: #1e66f5; /* blue */
+  --dislike: #ea76cb; /* pink */
+  --green-bg: #e1f0db;
+  --green-bg-border: #b3dca6;
+  --amber-bg: #f7ecd5;
+  --amber-bg-border: #e6cf9b;
+  --red-bg: #f7d8dd;
+  --red-bg-border: #eaaab4;
+  --like-bg: #dde6fb;
+  --like-bg-border: #adc2f4;
+  --dislike-bg: #f7dff0;
+  --dislike-bg-border: #eeb4dd;
+  --scrim: rgba(76, 79, 105, 0.4);
+  --overlay-soft: rgba(76, 79, 105, 0.06);
+  --embed-bg: #000000;
+}
+
+/* ── Light Owl (Night Owl's light counterpart) ── */
+[data-theme='light-owl'] {
+  --bg0: #fbfbfb;
+  --bg1: #f4f4f4;
+  --bg2: #ebebeb;
+  --bg3: #dcdcdc;
+  --border: #d3d3d3;
+  --text1: #403f53; /* light owl fg */
+  --text2: #5c5f77;
+  --text3: #90a7b2; /* muted blue-gray */
+  --accent: #2aa298; /* light owl teal */
+  --accent2: #08916a;
+  --accent-rgb: 42, 162, 152;
+  --accent-bg: #d9efec;
+  --accent-bg-border: #a6d8d1;
+  --on-accent: #ffffff;
+  --green: #08916a;
+  --amber: #daaa01;
+  --red: #de3d3b;
+  --gold: #daaa01;
+  --like: #288ed7; /* light owl blue */
+  --dislike: #994cc3; /* light owl purple */
+  --green-bg: #d8efe5;
+  --green-bg-border: #a3d8c4;
+  --amber-bg: #f6eecb;
+  --amber-bg-border: #e3d28c;
+  --red-bg: #f7dcdb;
+  --red-bg-border: #eaaba9;
+  --like-bg: #dceaf7;
+  --like-bg-border: #aacae8;
+  --dislike-bg: #eee0f5;
+  --dislike-bg-border: #cdb0e3;
+  --scrim: rgba(64, 63, 83, 0.4);
+  --overlay-soft: rgba(64, 63, 83, 0.05);
   --embed-bg: #000000;
 }

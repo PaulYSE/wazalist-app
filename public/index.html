@@ -28,28 +28,19 @@
     <script>
       (function () {
         try {
-          var LIGHT = ['light', 'solarized'];
-          var DARK = ['amoled', 'dark', 'dracula', 'steel'];
           var mode = localStorage.getItem('wl_theme_mode');
           var active;
           if (mode === 'explicit') {
-            active = localStorage.getItem('wl_theme_active');
-            if (LIGHT.indexOf(active) < 0 && DARK.indexOf(active) < 0) active = 'dark';
+            active = localStorage.getItem('wl_theme_active') || 'dark';
           } else {
-            var prefersDark =
+            var dark =
               window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-              active = localStorage.getItem('wl_theme_dark');
-              if (DARK.indexOf(active) < 0) active = 'dark';
-            } else {
-              active = localStorage.getItem('wl_theme_light');
-              if (LIGHT.indexOf(active) < 0) active = 'light';
-            }
+            active =
+              localStorage.getItem(dark ? 'wl_theme_dark' : 'wl_theme_light') ||
+              (dark ? 'dark' : 'light');
           }
           document.documentElement.dataset.theme = active;
-        } catch (e) {
-          /* fall through to :root fallback */
-        }
+        } catch (e) {}
       })();
     </script>
 
