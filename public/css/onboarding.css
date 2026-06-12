@@ -450,6 +450,7 @@
   background: var(--green-bg);
   border-color: var(--green);
   color: var(--green);
+  border-radius: 999px;     /* ADD — pill shape */
 }
 .ob-btn-green:hover {
   background: var(--green-bg-border);
