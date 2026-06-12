@@ -16,7 +16,7 @@ import {
   LIKE_DOWN,
 } from '../config/constants.js';
 import { state } from '../state/state.js';
-import { THEME_REGISTRY, LIGHT_THEMES } from '../config/theme-registry.js';
+import { THEME_REGISTRY } from '../config/theme-registry.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -67,11 +67,11 @@ export function markingStyle(markings) {
 //   bgL:  [min%, max%]  — fill lightness (dark themes: above base; light: below)
 //   bdL:  [min%, max%]  — border-left lightness (the accent edge)
 const MARKING_TIERS = {
-  black: { sat: [60, 95], bgL: [14, 26], bdL: [50, 78] },
-  deep: { sat: [55, 92], bgL: [16, 30], bdL: [52, 80] },
-  mid: { sat: [50, 88], bgL: [24, 40], bdL: [55, 82] },
-  light: { sat: [55, 88], bgL: [88, 76], bdL: [48, 32] },
-  'warm-light': { sat: [62, 92], bgL: [86, 74], bdL: [46, 30] },
+  black: { sat: [52, 88], bgL: [11, 22], bdL: [48, 74] },
+  deep: { sat: [48, 85], bgL: [12, 25], bdL: [50, 76] },
+  mid: { sat: [44, 80], bgL: [20, 35], bdL: [52, 78] },
+  light: { sat: [48, 80], bgL: [91, 80], bdL: [50, 35] },
+  'warm-light': { sat: [54, 84], bgL: [89, 78], bdL: [48, 33] },
 };
 const DEFAULT_TIER = 'deep';
 

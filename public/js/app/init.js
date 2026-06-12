@@ -15,7 +15,7 @@ import {
   syncBrowseViewControls,
   syncBrowseSortControls,
 } from '../views/browse-list.js';
-import { selectWazaFromHistory } from '../views/waza-detail.js';
+import { selectWazaFromHistory, renderDetail } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
 import { activateTab, startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
@@ -101,6 +101,7 @@ export async function initApp() {
     }
   }
   renderList();
+  renderDetail();
   renderDashStats();
 
   // Show admin-only chrome now that isAdmin is known from the session.
