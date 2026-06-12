@@ -16,7 +16,7 @@ import {
   LIKE_DOWN,
 } from '../config/constants.js';
 import { state } from '../state/state.js';
-import { LIGHT_THEMES } from '../config/theme-registry.js';
+import { THEME_REGISTRY, LIGHT_THEMES } from '../config/theme-registry.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -32,8 +32,13 @@ const _msCache = new Map();
  * @return {string} Resolved theme name.
  */
 function activeTheme() {
-  return document.documentElement.dataset.theme || 'slate';
+  return document.documentElement.dataset.theme || 'dark';
 }
+
+// theme key → tier, derived from the registry's `tier` field (fallback by group).
+const _tierByTheme = Object.fromEntries(
+  THEME_REGISTRY.map((t) => [t.key, t.tier || (t.group === 'light' ? 'light' : 'deep')]),
+);
 
 /**
  * @brief Computes marking style with memoization (theme-aware).
@@ -46,28 +51,45 @@ function activeTheme() {
  */
 export function markingStyle(markings) {
   const theme = activeTheme();
-  const key = theme + ':' + (markings || []).map((b) => (b ? '1' : '0')).join('');
+  const tier = _tierByTheme[theme] || 'deep';
+  const key = tier + ':' + (markings || []).map((b) => (b ? '1' : '0')).join('');
   const hit = _msCache.get(key);
   if (hit) return hit;
-  const v = _computeMarkingStyle(markings, theme);
+  const v = _computeMarkingStyle(markings, tier);
   _msCache.set(key, v);
   return v;
 }
 
+// Per-tier marking-tint tuning. Each maps the 1→6 marking-count curve (t: 0→1)
+// onto saturation + fill-lightness + border-lightness ranges. Higher saturation
+// and more lightness-separation from the base = more prominent tints.
+//   sat:  [min%, max%]  — color intensity (more markings → more saturated)
+//   bgL:  [min%, max%]  — fill lightness (dark themes: above base; light: below)
+//   bdL:  [min%, max%]  — border-left lightness (the accent edge)
+const MARKING_TIERS = {
+  black: { sat: [60, 95], bgL: [14, 26], bdL: [50, 78] },
+  deep: { sat: [55, 92], bgL: [16, 30], bdL: [52, 80] },
+  mid: { sat: [50, 88], bgL: [24, 40], bdL: [55, 82] },
+  light: { sat: [55, 88], bgL: [88, 76], bdL: [48, 32] },
+  'warm-light': { sat: [62, 92], bgL: [86, 74], bdL: [46, 30] },
+};
+const DEFAULT_TIER = 'deep';
+
 /**
- * @brief Computes marking style without memoization (theme-aware).
+ * @brief Computes marking style without memoization (theme-tier aware).
  *
- * Dark themes (slate/dark): a dark tinted fill with a brighter hue border.
- * Light theme: a pale tinted fill with a darker, saturated hue border, so the
- * tint reads as a gentle wash on a white canvas instead of a dark blob.
+ * Hues are fixed (SHAPES_HUES, circular-mean blend). Saturation, fill lightness,
+ * and border lightness are driven by the active theme's tier, so tints stay
+ * prominent against each theme's particular background.
  *
  * @param {Array<boolean>} markings - Array of 6 boolean marking states.
- * @param {string} theme - Resolved theme name ('light' | 'dark' | 'slate').
- * @return {Object} Object containing CSS class and inline style string.
+ * @param {string} tier - The active theme's marking tier.
+ * @return {Object} { cls, style }.
  */
-function _computeMarkingStyle(markings, theme) {
+function _computeMarkingStyle(markings, tier) {
   const active = (markings || []).map((on, i) => (on ? i : -1)).filter((i) => i >= 0);
   if (!active.length) return { cls: '', style: '' };
+
   let sinSum = 0,
     cosSum = 0;
   active.forEach((i) => {
@@ -76,36 +98,16 @@ function _computeMarkingStyle(markings, theme) {
     cosSum += Math.cos(rad);
   });
   const hue = Math.round(((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360);
+
   const count = active.length;
-  const t = Math.pow((count - 1) / 5, 0.65);
+  const t = Math.pow((count - 1) / 5, 0.65); // 0 at 1 marking → 1 at 6
 
-  if (LIGHT_THEMES.includes(theme)) {
-    // Light canvas: pale fill, darker saturated border. More markings → a touch
-    // more saturated and slightly less pale, so density still reads.
-    const sat = Math.round(45 + t * 35); // 45→80%
-    const bgL = Math.round(94 - t * 9); // 94→85% (pale wash)
-    const bdL = Math.round(55 - t * 18); // 55→37% (darker definition)
-    return {
-      cls: 'sh-active',
-      style:
-        'background:hsl(' +
-        hue +
-        ',' +
-        sat +
-        '%,' +
-        bgL +
-        '%);border-left-color:hsl(' +
-        hue +
-        ',65%,' +
-        bdL +
-        '%)',
-    };
-  }
+  const p = MARKING_TIERS[tier] || MARKING_TIERS[DEFAULT_TIER];
+  const lerp = (a, b) => Math.round(a + (b - a) * t);
+  const sat = lerp(p.sat[0], p.sat[1]);
+  const bgL = lerp(p.bgL[0], p.bgL[1]);
+  const bdL = lerp(p.bdL[0], p.bdL[1]);
 
-  // Dark themes (slate, AMOLED dark): original treatment — dark fill, bright border.
-  const sat = Math.round(38 + t * 57);
-  const bgL = Math.round(7.5 + t * 9);
-  const bdL = Math.round(42 + t * 44);
   return {
     cls: 'sh-active',
     style:
@@ -117,7 +119,9 @@ function _computeMarkingStyle(markings, theme) {
       bgL +
       '%);border-left-color:hsl(' +
       hue +
-      ',70%,' +
+      ',' +
+      Math.min(sat + 10, 100) +
+      '%,' +
       bdL +
       '%)',
   };
