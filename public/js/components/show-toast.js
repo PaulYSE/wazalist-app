@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-13
  * @brief Simple toast notification helper. Displays a temporary message in the bottom-right corner of the viewport.
  */
 
@@ -13,19 +13,20 @@
  * @brief Displays a temporary toast notification.
  *
  * Creates a floating div at bottom-right of the screen that auto-removes after 3 seconds.
- * Supports green (success), amber (warning), and red (error) color schemes.
+ * Colors are theme-driven via CSS variables, so the toast adapts to the active theme.
  *
  * @param {string} msg - The message text to display.
  * @param {string} [color='green'] - Color theme: 'green', 'amber', or 'red'.
  * @return {void}
  */
 export function showToast(msg, color = 'green') {
+  // Each entry maps to [background var, foreground/border var].
   const colors = {
-    green: ['#002a10', '#4caf82', '#4caf82'],
-    amber: ['#2a1800', '#e8a030', '#e8a030'],
-    red: ['#2a0000', '#e05555', '#e05555'],
+    green: ['var(--green-bg)', 'var(--green)'],
+    amber: ['var(--amber-bg)', 'var(--amber)'],
+    red: ['var(--red-bg)', 'var(--red)'],
   };
-  const [bg, fg, border] = colors[color] || colors.green;
+  const [bg, fg] = colors[color] || colors.green;
   const fb = document.createElement('div');
   fb.style.cssText =
     'position:fixed;bottom:20px;right:20px;background:' +
@@ -33,7 +34,7 @@ export function showToast(msg, color = 'green') {
     ';color:' +
     fg +
     ';border:1px solid ' +
-    border +
+    fg +
     ';border-radius:8px;padding:10px 16px;font-size:13px;z-index:300;max-width:320px';
   fb.textContent = msg;
   document.body.appendChild(fb);

@@ -64,8 +64,10 @@ export async function saveLabels() {
  * or sends an API request for authenticated users. Also updates like/dislike counts on the
  * corresponding waza data and shows a transient "Saved" indicator.
  *
- * @param {number} id The waza identifier.
- * @param {Object} patch Partial progress object to merge into existing progress.
+ * @param {number} id - The waza identifier.
+ * @param {Object} patch - Partial progress object to merge into existing progress.
+ * @param {Object} [opts={}] - Options object.
+ * @param {boolean} [opts.skipListRender=false] - If true, skips re-rendering the browse list after save.
  * @see getP
  * @see loadLocal
  * @see saveLocal
@@ -73,17 +75,18 @@ export async function saveLabels() {
  * @see renderDetail
  * @return {Promise<void>}
  */
-export async function saveP(id, patch) {
+export async function saveP(id, patch, opts = {}) {
+  const skipListRender = !!opts.skipListRender;
   state.prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
   if (state.isGuest) {
     const l = loadLocal();
     l[id] = state.prog[id];
     saveLocal(l);
-    renderList();
+    if (!skipListRender) renderList();
     renderDetail();
   } else {
     state.savingIds.add(id);
-    renderDetail(); // show spinning state immediately
+    renderDetail();
     try {
       const res = await api('/api/progress', 'POST', {
         waza_id: id,
@@ -93,7 +96,6 @@ export async function saveP(id, patch) {
       if (res.error) {
         console.warn('Progress save failed:', res.error);
       } else if (res.like_count != null) {
-        // Apply fresh aggregate counts back to wazaData so cards update immediately
         const w = state.wazaData.find((x) => x.id === id);
         if (w) {
           w.like_count = res.like_count;
@@ -104,9 +106,8 @@ export async function saveP(id, patch) {
       console.warn('Progress save error:', err);
     }
     state.savingIds.delete(id);
-    renderList();
+    if (!skipListRender) renderList();
     renderDetail();
-    // Flash "Saved ✓" indicator
     const indicator = document.getElementById('saveIndicator');
     if (indicator) {
       indicator.style.opacity = '1';

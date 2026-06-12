@@ -8,6 +8,7 @@
  */
 
 import { api } from '../services/api.js';
+import { showToast } from '../components/show-toast.js';
 
 // ── New Waza modal ────────────────────────────────────────────
 
@@ -99,12 +100,7 @@ export function initNewWaza() {
       document.getElementById('newWazaBg').style.display = 'none';
       btn.disabled = false;
       btn.textContent = 'Submit Waza';
-      const fb = document.createElement('div');
-      fb.style.cssText =
-        'position:fixed;bottom:20px;right:20px;background:#002a10;color:#4caf82;border:1px solid #4caf82;border-radius:8px;padding:10px 16px;font-size:13px;z-index:300';
-      fb.textContent = 'Waza submitted for review — thank you!';
-      document.body.appendChild(fb);
-      setTimeout(() => fb.remove(), 3000);
+      showToast('Waza submitted for review — thank you!', 'green');
     } catch (e) {
       console.error('Waza submit failed:', e);
       errEl.textContent = 'Network error. Please try again.';

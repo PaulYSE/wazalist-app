@@ -21,7 +21,7 @@ import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit, openVideoSuggest } from '../modals/suggest-edit.js';
-import { renderList } from './browse-list.js';
+import { renderList, updateListRowMarkings } from './browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
 
@@ -431,7 +431,18 @@ export function renderDetail() {
     btn.addEventListener('click', () => {
       const ns = [...markings];
       ns[+btn.dataset.si] = !ns[+btn.dataset.si];
-      saveP(w.id, { markings: ns });
+
+      // Immediate visual feedback on the button itself.
+      btn.classList.toggle('on', ns[+btn.dataset.si]);
+
+      // If a marking-filter is active, toggling a marking can change whether
+      // this waza belongs in the filtered list, so a full re-render is needed.
+      // Otherwise, patch just this one row instead of rebuilding all rows.
+      const markingFilterActive = state.filters.markings.some(Boolean);
+
+      saveP(w.id, { markings: ns }, { skipListRender: !markingFilterActive }).then(() => {
+        if (!markingFilterActive) updateListRowMarkings(w.id);
+      });
     }),
   );
 

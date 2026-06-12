@@ -8,6 +8,7 @@
  */
 
 import { api } from '../services/api.js';
+import { showToast } from '../components/show-toast.js';
 import { videoKey } from '../components/render-helpers.js';
 
 /**
@@ -299,12 +300,7 @@ export function initFieldEdit() {
       bg.style.display = 'none';
       btn.disabled = false;
       btn.textContent = 'Submit suggestion';
-      const fb = document.createElement('div');
-      fb.style.cssText =
-        'position:fixed;bottom:20px;right:20px;background:#002a10;color:#4caf82;border:1px solid #4caf82;border-radius:8px;padding:10px 16px;font-size:13px;z-index:300';
-      fb.textContent = 'Suggestion submitted — thank you!';
-      document.body.appendChild(fb);
-      setTimeout(() => fb.remove(), 3000);
+      showToast('Suggestion submitted — thank you!', 'green');
     } catch (e) {
       console.error('Field-edit submit failed:', e);
       errEl.textContent = 'Network error. Please try again.';

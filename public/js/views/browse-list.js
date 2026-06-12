@@ -19,6 +19,7 @@ import { getP } from '../services/progress.js';
 import { selectWaza } from './waza-detail.js';
 import { LS_VIEW, LS_SORT } from '../state/localStorage.js';
 import { updateMarkingFilterUI } from '../app/shell.js';
+import { openNewWazaModal } from '../modals/new-waza.js';
 
 // ── Browse sort ───────────────────────────────────────────────
 // Single entry point for changing sort. Pass either field, order, or both;
@@ -133,6 +134,36 @@ export function initBrowseList() {
 }
 
 /**
+ * @brief Updates a single browse-list row's marking tint + pips in place,
+ *        without rebuilding the whole list. Used after a marking toggle when no
+ *        marking-filter is active, so a 1312-row re-render isn't triggered for a
+ *        one-row visual change.
+ *
+ * @param {number} id - Waza ID whose row should refresh.
+ * @return {void}
+ */
+export function updateListRowMarkings(id) {
+  const listEl = document.getElementById('wazaList');
+  if (!listEl) return;
+  const row = listEl.querySelector(`[data-id="${id}"]`);
+  if (!row) return; // not currently in the list (filtered out / different state) — nothing to patch
+
+  const w = state.wazaData.find((x) => x.id === id);
+  if (!w) return;
+  const p = getP(id);
+  const markings = p.markings || Array(6).fill(false);
+
+  // Re-tint: markingStyle() returns { cls, style } exactly as renderList builds each row.
+  const ms = markingStyle(markings);
+  row.classList.toggle('sh-active', ms.cls === 'sh-active');
+  row.setAttribute('style', ms.style); // background + border-left-color, or '' when no markings
+
+  // Refresh the pips. All three views contain a .markings-row with the pips.
+  const pipsHost = row.querySelector('.markings-row');
+  if (pipsHost) pipsHost.innerHTML = markingPips(markings);
+}
+
+/**
  * @brief Renders the browse list based on current filter, sort, and view mode.
  *
  * @return {void}
@@ -143,8 +174,19 @@ export function renderList() {
     filtered.length + ' of ' + state.wazaData.length + ' Waza';
   const list = document.getElementById('wazaList');
   if (!filtered.length) {
+    const canAdd = !state.isGuest && !!state.token;
     list.innerHTML =
-      '<div style="padding:20px;text-align:center;color:#6a6880;font-size:14px">No Waza found</div>';
+      '<div style="padding:24px 20px;text-align:center;color:var(--text3)">' +
+      '<div style="font-size:14px;color:var(--text2)">No Waza found</div>' +
+      '<div style="margin-top:10px;font-size:13px">Can\'t find the Waza you\'re looking for?</div>' +
+      (canAdd
+        ? '<button class="btn" id="noResultAddBtn" style="margin-top:12px">+ Help us add it to the database!</button>'
+        : '<div style="margin-top:6px;font-size:12px">Sign in to help add it to the database.</div>') +
+      '</div>';
+    if (canAdd) {
+      const addBtn = document.getElementById('noResultAddBtn');
+      if (addBtn) addBtn.addEventListener('click', () => openNewWazaModal());
+    }
     return;
   }
 
