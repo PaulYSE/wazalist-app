@@ -18,7 +18,7 @@ import { filterWaza, dispName } from '../lib/search.js';
 import { getP } from '../services/progress.js';
 import { selectWaza } from './waza-detail.js';
 import { LS_VIEW, LS_SORT } from '../state/localStorage.js';
-import { updateMarkingFilterUI } from '../app/shell.js';
+import { updateMarkingFilterUI, setSearchInput } from '../app/shell.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 
 // ── Browse sort ───────────────────────────────────────────────
@@ -161,6 +161,28 @@ export function updateListRowMarkings(id) {
   // Refresh the pips. All three views contain a .markings-row with the pips.
   const pipsHost = row.querySelector('.markings-row');
   if (pipsHost) pipsHost.innerHTML = markingPips(markings);
+}
+
+/**
+ * @brief Picks a random waza, drops its English name into the search box (which
+ *        filters the list to it), and opens its detail panel.
+ *
+ * Picks from the actual loaded waza array rather than a random id in
+ * [1, max(id)], because ids are non-contiguous — a random id could hit a gap.
+ *
+ * @return {void}
+ */
+export function surpriseMe() {
+  if (!state.wazaData.length) return;
+  const w = state.wazaData[Math.floor(Math.random() * state.wazaData.length)];
+
+  // Put its English name in the search bar (filters the list to this waza).
+  const name = (w.name_en || w.name_en_literal || w.name_jp || '').trim();
+  setSearchInput(name); // single chokepoint: updates box + state + re-renders list
+  renderList(); // apply the filter so the list narrows to this waza
+
+  // Open its detail.
+  selectWaza(w.id);
 }
 
 /**

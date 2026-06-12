@@ -21,7 +21,7 @@ import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit, openVideoSuggest } from '../modals/suggest-edit.js';
-import { renderList, updateListRowMarkings } from './browse-list.js';
+import { renderList, updateListRowMarkings, surpriseMe } from './browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
 
@@ -102,7 +102,12 @@ export function renderDetail() {
   const panel = document.getElementById('detailContent');
   if (state.selectedId === null) {
     panel.innerHTML =
-      '<div class="d-empty"><div style="font-size:32px">⛩</div><div>Select a Waza to view details</div></div>';
+      '<div class="d-empty">' +
+      '<div style="font-size:32px">⛩</div>' +
+      '<div>Select a Waza to view details</div>' +
+      '<button class="btn" id="surpriseMeBtn" style="margin-top:14px">🎲 Surprise me!</button>' +
+      '</div>';
+    panel.querySelector('#surpriseMeBtn')?.addEventListener('click', surpriseMe);
     return;
   }
   const w = state.wazaData.find((x) => x.id === state.selectedId);

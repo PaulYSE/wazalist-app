@@ -12,7 +12,7 @@ import { renderDashStats } from '../views/stats.js';
 import { renderDashCompare } from '../views/compare.js';
 import { renderAccount } from '../views/account.js';
 import { renderContribute } from '../views/contribute.js';
-import { renderList, setBrowseView, setBrowseSort } from '../views/browse-list.js';
+import { renderList, setBrowseView, setBrowseSort, surpriseMe } from '../views/browse-list.js';
 import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 import { pushRoute } from './router.js';
@@ -333,6 +333,10 @@ export function initUi() {
     filterSheetBg.classList.remove('open');
     setBrowseSort({ field: newSortField, order: newSortOrder });
     setBrowseView(newView); // applies state + persists + syncs all selects + renders once
+  });
+  document.getElementById('surpriseMeMobBtn')?.addEventListener('click', () => {
+    filterSheetBg.classList.remove('open'); // close the sheet
+    surpriseMe();
   });
 
   // ── Nav tabs ────────────────────────────────────────────────
