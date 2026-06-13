@@ -870,7 +870,7 @@ function timeAgoDemo(label) {
 function buildCompareDemo() {
   const container = document.getElementById('obCompareDemo');
   if (!container) return;
-  const realWaza = getRealWaza(3);
+  const realWaza = getRealWaza(6);
   if (realWaza.length === 0) {
     container.innerHTML =
       '<div style="color:var(--text3);padding:12px;text-align:center">Loading Waza…</div>';
