@@ -457,15 +457,22 @@
 
 .ob-filter-bar {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
 }
+
+.ob-filter-bar .btn:first-child {
+  border-radius: var(--r) 0 0 var(--r);
+}
+
+.ob-filter-bar .btn:last-child {
+  border-radius: 0 var(--r) var(--r) 0;
+  border-right-width: 1px;
+}
+
 .ob-filter-btn {
   padding: 4px 9px;
   font-size: 13px;
   border: 1px solid var(--border);
-  border-radius: var(--r);
+  border-radius: 0;
   background: var(--bg2);
   color: var(--text2);
   cursor: pointer;
@@ -519,7 +526,8 @@
 /* Small variant — standalone (not built on .ob-btn) so the compact padding,
    font-size, and radius are explicit and not overridden by .ob-btn's larger
    defaults. The padding + radius are intentional for these two buttons. */
-.ob-btn-sm {
+.ob-btn-sm,
+.ob-btn-sm-green {
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid var(--border);
