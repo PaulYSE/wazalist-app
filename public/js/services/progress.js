@@ -14,7 +14,6 @@ import { renderList } from '../views/browse-list.js';
 import { renderDetail } from '../views/waza-detail.js';
 import { showToast } from '../components/show-toast.js';
 
-
 // ── Progress helpers ─────────────────────────────────────────
 
 /**

@@ -23,6 +23,7 @@ import {
   setThemeSystemMode,
 } from '../services/theme.js';
 import { THEME_REGISTRY } from '../config/theme-registry.js';
+import { showToast } from '../components/show-toast.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -193,7 +194,6 @@ export async function renderAccount() {
     '</div>' +
     '<div class="acc-labels-actions">' +
     '<button class="cbtn cbtn-primary" id="accSaveLabelsBtn">Save Marking Labels</button>' +
-    '<span id="accLabelsMsg" class="acc-form-msg" style="margin-left:10px"></span>' +
     '</div>';
 
   // ── Import Wazalist ───────────────────────────────────────────
@@ -386,17 +386,12 @@ Permanently delete your account and everything tied to it — your login, all ma
     container.querySelectorAll('.acc-labels-input').forEach((inp) => {
       state.markingLabels[+inp.dataset.si] = inp.value;
     });
-    const msg = container.querySelector('#accLabelsMsg');
-    msg.className = 'acc-form-msg';
-    msg.style.color = 'var(--text3)';
-    msg.textContent = 'Saving…';
+    showToast('Saving…', 'amber');
     try {
       await saveLabels();
-      msg.className = 'acc-form-msg ok';
-      msg.textContent = 'Marking Labels saved.';
+      showToast('Marking Labels saved', 'green');
     } catch {
-      msg.className = 'acc-form-msg err';
-      msg.textContent = "Couldn't save your Marking Labels.";
+      showToast("Couldn't save your Marking Labels", 'green');
     }
   });
 
