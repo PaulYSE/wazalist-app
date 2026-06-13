@@ -337,22 +337,6 @@ export function renderDetail() {
         '</div></div>' +
         '</div>',
     ) +
-    (w.tag || w.reference
-      ? sec(
-          'classif',
-          'Classification',
-          (w.tag
-            ? '<div style="margin-bottom:10px"><span class="chip tag-pill">' +
-              escapeHtml(w.tag) +
-              '</span></div>'
-            : '') +
-            (w.reference
-              ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
-                w.reference +
-                '</div></div></div>'
-              : ''),
-        )
-      : '') +
     (w.parent_jp0 || w.parent_en0 || w.parent_jp1 || w.parent_en1
       ? sec(
           'parents',
@@ -420,6 +404,22 @@ export function renderDetail() {
           'similar',
           'Similar Waza',
           '<div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div>',
+        )
+      : '') +
+    (w.tag || w.reference
+      ? sec(
+          'classif',
+          'Extra Information',
+          (w.tag
+            ? '<div style="margin-bottom:10px"><span class="chip tag-pill">' +
+              escapeHtml(w.tag) +
+              '</span></div>'
+            : '') +
+            (w.reference
+              ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
+                w.reference +
+                '</div></div></div>'
+              : ''),
         )
       : '') +
     (!state.isGuest && state.token

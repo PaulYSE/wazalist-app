@@ -12,6 +12,8 @@ import { LS_LABELS, loadLocal, saveLocal } from '../state/localStorage.js';
 import { api } from './api.js';
 import { renderList } from '../views/browse-list.js';
 import { renderDetail } from '../views/waza-detail.js';
+import { showToast } from '../components/show-toast.js';
+
 
 // ── Progress helpers ─────────────────────────────────────────
 
@@ -108,13 +110,6 @@ export async function saveP(id, patch, opts = {}) {
     state.savingIds.delete(id);
     if (!skipListRender) renderList();
     renderDetail();
-    const indicator = document.getElementById('saveIndicator');
-    if (indicator) {
-      indicator.style.opacity = '1';
-      clearTimeout(indicator._t);
-      indicator._t = setTimeout(() => {
-        indicator.style.opacity = '0';
-      }, 1400);
-    }
+    showToast('Saved ✓', 'green');
   }
 }

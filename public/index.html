@@ -132,17 +132,6 @@
           <span class="tagline">Wotagei Skills Database</span>
         </div>
         <div class="topbar-right">
-          <span
-            id="saveIndicator"
-            style="
-              font-size: 12px;
-              color: var(--green);
-              opacity: 0;
-              transition: opacity 0.3s;
-              white-space: nowrap;
-            "
-            >Saved ✓</span
-          >
           <span class="guest-badge" id="guestBadge" style="display: none">Guest</span>
           <span
             id="usernameBadge"
@@ -424,10 +413,11 @@
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Literal translation</label><input id="se-name_en_literal" type="text" />
+              <label>Romaji</label><input id="se-name_en_literal" type="text" />
             </div>
             <div class="cfield">
-              <label>Google Translate</label><input id="se-name_en_gtranslate" type="text" />
+              <label>Google Translate (English)</label
+              ><input id="se-name_en_gtranslate" type="text" />
             </div>
           </div>
           <div class="cfield-row">
@@ -435,39 +425,39 @@
               <label>Tag</label><input id="se-tag" type="text" placeholder="e.g. Kihon Waza" />
             </div>
             <div class="cfield">
-              <label>Reference / lore</label><input id="se-reference" type="text" />
+              <label>Reference / Lore</label><input id="se-reference" type="text" />
             </div>
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Parent JP 0</label><input id="se-parent_jp0" type="text" />
+              <label>First parent Waza (Japanese)</label><input id="se-parent_jp0" type="text" />
             </div>
             <div class="cfield">
-              <label>Parent EN 0</label><input id="se-parent_en0" type="text" />
-            </div>
-          </div>
-          <div class="cfield-row">
-            <div class="cfield">
-              <label>Parent JP 1</label><input id="se-parent_jp1" type="text" />
-            </div>
-            <div class="cfield">
-              <label>Parent EN 1</label><input id="se-parent_en1" type="text" />
+              <label>First parent Waza (English)</label><input id="se-parent_en0" type="text" />
             </div>
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Author (JP) 0</label><input id="se-author_jp0" type="text" />
+              <label>Second parent Waza (Japanese)</label><input id="se-parent_jp1" type="text" />
             </div>
             <div class="cfield">
-              <label>Author (EN) 0</label><input id="se-author_en0" type="text" />
+              <label>Second parent Waza (English)</label><input id="se-parent_en1" type="text" />
             </div>
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Author (JP) 1</label><input id="se-author_jp1" type="text" />
+              <label>First author (Japanese)</label><input id="se-author_jp0" type="text" />
             </div>
             <div class="cfield">
-              <label>Author (EN) 1</label><input id="se-author_en1" type="text" />
+              <label>First author (English)</label><input id="se-author_en0" type="text" />
+            </div>
+          </div>
+          <div class="cfield-row">
+            <div class="cfield">
+              <label>Second author (Japanese)</label><input id="se-author_jp1" type="text" />
+            </div>
+            <div class="cfield">
+              <label>Second author (English)</label><input id="se-author_en1" type="text" />
             </div>
           </div>
           <div class="cfield">
@@ -571,7 +561,7 @@
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Literal translation</label><input id="nw-name_en_literal" type="text" />
+              <label>Romaji</label><input id="nw-name_en_literal" type="text" />
             </div>
             <div class="cfield">
               <label>Tag</label><input id="nw-tag" type="text" placeholder="e.g. Kihon Waza" />
@@ -579,26 +569,26 @@
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Parent JP 0</label><input id="nw-parent_jp0" type="text" />
+              <label>Parent Waza (Japanese)</label><input id="nw-parent_jp0" type="text" />
             </div>
             <div class="cfield">
-              <label>Parent EN 0</label><input id="nw-parent_en0" type="text" />
-            </div>
-          </div>
-          <div class="cfield-row">
-            <div class="cfield">
-              <label>Author (JP) 0</label><input id="nw-author_jp0" type="text" />
-            </div>
-            <div class="cfield">
-              <label>Author (EN) 0</label><input id="nw-author_en0" type="text" />
+              <label>Parent Waza (English)</label><input id="nw-parent_en0" type="text" />
             </div>
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Author (JP) 1</label><input id="nw-author_jp1" type="text" />
+              <label>First author (Japanese)</label><input id="nw-author_jp0" type="text" />
             </div>
             <div class="cfield">
-              <label>Author (EN) 1</label><input id="nw-author_en1" type="text" />
+              <label>First author (English)</label><input id="nw-author_en0" type="text" />
+            </div>
+          </div>
+          <div class="cfield-row">
+            <div class="cfield">
+              <label>Second author (Japanese)</label><input id="nw-author_jp1" type="text" />
+            </div>
+            <div class="cfield">
+              <label>Second author (English)</label><input id="nw-author_en1" type="text" />
             </div>
           </div>
           <div class="cfield">

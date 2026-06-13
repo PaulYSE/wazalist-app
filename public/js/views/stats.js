@@ -263,7 +263,7 @@ export function renderDashStats() {
           return showWaza ? row + wazaSublist(e.wazaIds) : row;
         })
         .join('')
-    : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No data yet.</div>';
+    : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No Families to show.</div>';
 
   const rankSection = accSection('rank', 'Waza Trends', rankControls, rankHead + rankBody);
 
@@ -331,7 +331,7 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families to show.</div>';
 
-  const famSection = accSection('family', 'Top waza family', famControls, covBody);
+  const famSection = accSection('family', 'Top Waza Family', famControls, covBody);
 
   // ── Recent Activity (selectable count) ──────────────────────
   const recent = state.wazaData
@@ -361,7 +361,7 @@ export function renderDashStats() {
   const sentinelRow =
     '<div class="waza-compact" style="cursor:default;opacity:0.7">' +
     '<span class="drn">That\'s all!</span>' +
-    '<span class="drs">Add more Wazas to your list!</span></div>';
+    '<span class="drs">Mark more Waza to fill this out.</span></div>';
 
   const recentBody =
     (recent.length
@@ -391,7 +391,7 @@ export function renderDashStats() {
           .join('')
       : '') + (recent.length < recentLimit ? sentinelRow : '');
 
-  const recentSection = accSection('recent', 'Recent activity', recentControls, recentBody);
+  const recentSection = accSection('recent', 'Recent Activity', recentControls, recentBody);
 
   // ── Assemble ────────────────────────────────────────────────
   const container = document.getElementById('dashStats');

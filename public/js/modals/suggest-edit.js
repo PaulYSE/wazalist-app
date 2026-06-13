@@ -116,12 +116,7 @@ export function initSuggestEdit() {
       btn.disabled = false;
       btn.textContent = 'Submit suggestion';
       // Flash feedback in detail panel
-      const fb = document.createElement('div');
-      fb.style.cssText =
-        'position:fixed;bottom:20px;right:20px;background:#002a10;color:#4caf82;border:1px solid #4caf82;border-radius:8px;padding:10px 16px;font-size:13px;z-index:300';
-      fb.textContent = 'Suggestion submitted — thank you!';
-      document.body.appendChild(fb);
-      setTimeout(() => fb.remove(), 3000);
+      showToast('Suggestion submitted — thank you!', 'green');
     } catch (e) {
       console.error('Suggestion submit failed:', e);
       errEl.textContent = 'Network error. Please try again.';
@@ -138,14 +133,14 @@ const FIELD_META = {
   name_jp: { label: 'Name (Japanese)', type: 'text' },
   name_en: { label: 'Name (English)', type: 'text' },
   name_en_literal: { label: 'Romaji', type: 'text' },
-  name_en_gtranslate: { label: 'Google Translate (EN)', type: 'text' },
-  name_cn_gtranslate: { label: 'Google Translate (CN)', type: 'text' },
-  tag: { label: 'Classification', type: 'text' },
-  reference: { label: 'Reference / lore', type: 'text' },
-  parent_en0: { label: 'Parent Waza (EN)', type: 'text' },
-  parent_jp0: { label: 'Parent Waza (JP)', type: 'text' },
-  author_en0: { label: 'Author (EN)', type: 'text' },
-  author_jp0: { label: 'Author (JP)', type: 'text' },
+  name_en_gtranslate: { label: 'Google Translate (English)', type: 'text' },
+  name_cn_gtranslate: { label: 'Google Translate (Chinese)', type: 'text' },
+  tag: { label: 'Tag', type: 'text' },
+  reference: { label: 'Reference / Lore', type: 'text' },
+  parent_en0: { label: 'Parent Waza (English)', type: 'text' },
+  parent_jp0: { label: 'Parent Waza (Japanese)', type: 'text' },
+  author_en0: { label: 'Author (English)', type: 'text' },
+  author_jp0: { label: 'Author (Japanese)', type: 'text' },
 };
 
 const VIDEO_FIELDS = [

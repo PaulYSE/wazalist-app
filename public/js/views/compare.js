@@ -100,13 +100,13 @@ export function renderDashCompare() {
   // ── Labels comparison block ──────────────────────────────────
   const saveBtnRow =
     '<div class="cmp-labels-actions">' +
-    '<button class="btn" id="cmpSaveLabelsBtn">Save Labels</button>' +
+    '<button class="btn" id="cmpSaveLabelsBtn">Save Marking Labels</button>' +
     '</div>';
 
   let labelsHtml;
   if (imp) {
     labelsHtml =
-      '<div class="dsec2"><h3>Labels comparison</h3>' +
+      '<div class="dsec2"><h3>Marking Labels comparison</h3>' +
       '<div class="cmp-labels-table">' +
       SHAPES.map((s, i) => {
         const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
@@ -117,7 +117,7 @@ export function renderDashCompare() {
           s +
           '</span>' +
           '<div class="cmp-labels-their">' +
-          (impLabel ? escapeHtml(impLabel) : '<span class="cmp-labels-unset">Unlabeled</span>') +
+          (impLabel ? escapeHtml(impLabel) : '<span class="cmp-labels-unset">Unlabelled</span>') +
           '<span class="cmp-labels-count">' +
           impMarkingCounts[i] +
           '</span>' +
@@ -125,7 +125,7 @@ export function renderDashCompare() {
           '<div class="cmp-labels-mine">' +
           '<input class="cmp-labels-input" data-si="' +
           i +
-          '" type="text" maxlength="32" placeholder="Your label…" value="' +
+          '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
           myLabel.replace(/"/g, '&quot;') +
           '">' +
           '<span class="cmp-labels-count">' +
@@ -140,7 +140,7 @@ export function renderDashCompare() {
       '</div>';
   } else {
     labelsHtml =
-      '<div class="dsec2"><h3>My labels</h3>' +
+      '<div class="dsec2"><h3>My Marking Labels</h3>' +
       '<div class="cmp-labels-table">' +
       SHAPES.map(
         (s, i) =>
@@ -151,7 +151,7 @@ export function renderDashCompare() {
           '<div class="cmp-labels-mine">' +
           '<input class="cmp-labels-input" data-si="' +
           i +
-          '" type="text" maxlength="32" placeholder="Label this marking…" value="' +
+          '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
           state.markingLabels[i].replace(/"/g, '&quot;') +
           '">' +
           '<span class="cmp-labels-count">' +
@@ -229,7 +229,7 @@ export function renderDashCompare() {
       state.markingLabels[+inp.dataset.si] = inp.value;
     });
     saveLabels();
-    showToast('Labels saved', 'green');
+    showToast('Marking Labels saved', 'green');
   });
 
   container.querySelector('#cmpSelect')?.addEventListener('change', (e) => {

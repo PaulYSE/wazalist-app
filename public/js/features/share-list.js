@@ -189,7 +189,7 @@ export function initShare() {
     const errEl = document.getElementById('importErr');
     errEl.textContent = '';
     if (!/^[0-9a-f]{64}$/.test(key)) {
-      errEl.textContent = 'Key must be 64 hex characters.';
+      errEl.textContent = "That key doesn't look right — check you copied all of it.";
       return;
     }
     const btn = document.getElementById('importFetchBtn');
@@ -211,11 +211,11 @@ export function initShare() {
       try {
         parsed = JSON.parse(json.data);
       } catch {
-        errEl.textContent = 'Invalid list data.';
+        errEl.textContent = "That list couldn't be read. (Invalid list data)";
         return;
       }
       if (!parsed.v || !parsed.marks) {
-        errEl.textContent = 'Unrecognised list format.';
+        errEl.textContent = "That list couldn't be read. (Unrecognised list format)";
         return;
       }
       _pendingImport = { key, ...parsed };

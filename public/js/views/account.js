@@ -133,8 +133,7 @@ export async function renderAccount() {
 
   const appearanceBody =
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
-    'Choose how Wazalist looks. <b>System</b> follows your device, using the light and ' +
-    'dark themes you select (marked ✓). Saved on this device.' +
+    'Choose how Wazalist looks. <b>System</b> follows your device, switching between the light and dark themes you pick (marked ✓). Saved on this device.' +
     '</p>' +
     '<button class="theme-system-row' +
     (themeMode === 'system' ? ' on' : '') +
@@ -172,7 +171,7 @@ export async function renderAccount() {
   const SHAPE_CHARS = ['●', '▲', '■', '♥', '★', '◆'];
   const labelsBody =
     '<p style="font-size:13px;color:var(--text2);margin:0 0 12px">' +
-    'Name each marking to match how you use it. These labels appear as tooltips on the markings and in your exported lists.' +
+    'Name each Marking to match how you use it. Your Marking Labels show as tooltips on the markings and travel with your exported lists.' +
     '</p>' +
     '<div class="acc-labels-table">' +
     SHAPE_CHARS.map(
@@ -183,7 +182,7 @@ export async function renderAccount() {
         '</span>' +
         '<input class="acc-labels-input" data-si="' +
         i +
-        '" type="text" maxlength="32" placeholder="Label this marking…" value="' +
+        '" type="text" maxlength="32" placeholder="Name this Marking…" value="' +
         (state.markingLabels[i] || '').replace(/"/g, '&quot;') +
         '">' +
         '<span class="acc-labels-count">' +
@@ -193,7 +192,7 @@ export async function renderAccount() {
     ).join('') +
     '</div>' +
     '<div class="acc-labels-actions">' +
-    '<button class="cbtn cbtn-primary" id="accSaveLabelsBtn">Save Labels</button>' +
+    '<button class="cbtn cbtn-primary" id="accSaveLabelsBtn">Save Marking Labels</button>' +
     '<span id="accLabelsMsg" class="acc-form-msg" style="margin-left:10px"></span>' +
     '</div>';
 
@@ -205,8 +204,8 @@ export async function renderAccount() {
   const exportBody = `
     <h4 style="font-size:13px;font-weight:600;margin:4px 0 8px">Export to Excel</h4>
     <p style="font-size:13px;color:var(--text2);margin:0 0 12px">
-      Download an <b>.xlsx</b> of every waza you've marked. Each entry is a clickable link to its video,
-      shown as <code>name_en(name_jp)</code>, with the cell coloured by its marking.
+      Download an <b>.xlsx</b> of every Waza you've marked. Each row links straight to the video,
+      and the cell is coloured by its Marking.
     </p>
     <button class="cbtn cbtn-primary" id="exportXlsxBtn">⬇️ Export to Excel</button>
     <span id="exportXlsxStatus" style="font-size:13px;color:var(--text3);margin-left:10px"></span>`;
@@ -230,7 +229,7 @@ export async function renderAccount() {
     : `<div style="text-align:center;padding:16px 0;margin-bottom:18px">
         <div style="font-size:28px;margin-bottom:8px">👤</div>
         <div style="font-weight:600;margin-bottom:6px">Guest Mode</div>
-        <div style="font-size:13px;color:var(--text3)">You're using guest mode. Your data is stored locally in your browser.</div>
+        <div style="font-size:13px;color:var(--text3)">You're browsing as a guest. Your marks are saved on this device only — sign in to keep them across devices.</div>
       </div>`;
 
   // Change Username (logged-in only) — form is built now; backend route is pending,
@@ -265,7 +264,7 @@ export async function renderAccount() {
         Disliked: <b style="color:var(--red)">${totalDisliked}</b>
       </div>
       <p style="font-size:12px;color:var(--text3);margin:0 0 10px">
-        Permanently deletes all your markings, likes, and custom labels.
+        Permanently deletes all your markings, likes, and Marking Labels.
         ${loggedIn ? 'This cannot be undone.' : 'Your local browser data will be cleared.'}
       </p>
       <button class="btn" id="resetAccountBtn" style="background:var(--bg3);border:1px solid var(--red);color:var(--red)">
@@ -278,9 +277,8 @@ export async function renderAccount() {
     ? `<div style="border:1px solid var(--red);border-radius:var(--rl);padding:16px">
         <h4 style="color:var(--red);font-size:13px;font-weight:600;margin:0 0 8px">Delete Account</h4>
         <p style="font-size:12px;color:var(--text2);margin:0 0 12px">
-          Permanently delete your account and everything tied to it — your login, all marked waza,
-          likes and dislikes, custom labels, contribution history, and active sessions. This cannot be undone.
-        </p>
+Permanently delete your account and everything tied to it — your login, all marked Waza,
+          likes and dislikes, Marking Labels, contribution history, and active sessions. This cannot be undone.        </p>
         <button class="btn" id="deleteAccountBtn" style="background:var(--red);border:1px solid var(--red);color:white">
           Delete My Account
         </button>
@@ -395,10 +393,10 @@ export async function renderAccount() {
     try {
       await saveLabels();
       msg.className = 'acc-form-msg ok';
-      msg.textContent = 'Labels saved.';
+      msg.textContent = 'Marking Labels saved.';
     } catch {
       msg.className = 'acc-form-msg err';
-      msg.textContent = 'Failed to save labels.';
+      msg.textContent = "Couldn't save your Marking Labels.";
     }
   });
 
@@ -409,7 +407,7 @@ export async function renderAccount() {
       `⚠️ WARNING: This will ${loggedIn ? 'permanently delete' : 'clear'} ALL your progress data:\n\n` +
       `• ${totalMarked} marked Waza\n` +
       `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
-      `• All custom marking labels\n\n` +
+      `• All your Marking Labels\n\n` +
       `This action CANNOT be undone.\n\n` +
       `Type "RESET" to confirm:`;
 
@@ -422,7 +420,7 @@ export async function renderAccount() {
     }
 
     resetBtn.disabled = true;
-    resetBtn.textContent = '⏳ Resetting...';
+    resetBtn.textContent = '⏳ Resetting…';
 
     try {
       if (loggedIn) {
@@ -453,7 +451,7 @@ export async function renderAccount() {
         '• Your login\n' +
         `• ${totalMarked} marked Waza\n` +
         `• ${totalLiked} likes and ${totalDisliked} dislikes\n` +
-        '• Custom labels and contribution history\n\n' +
+        '• Marking Labels and contribution history\n\n' +
         'This CANNOT be undone. Continue?',
     );
     if (!sure) return;
