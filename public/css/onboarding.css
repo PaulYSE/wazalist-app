@@ -514,3 +514,34 @@
   color: var(--text2);
   text-align: center;
 }
+
+/* ── Slide-5 compact label buttons (Clear All / Use template) ── */
+/* Small variant — standalone (not built on .ob-btn) so the compact padding,
+   font-size, and radius are explicit and not overridden by .ob-btn's larger
+   defaults. The padding + radius are intentional for these two buttons. */
+.ob-btn-sm {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.ob-btn-sm:hover {
+  background: var(--bg3);
+  color: var(--text1);
+}
+
+/* Green variant of the small button (Use template). */
+.ob-btn-sm-green {
+  border-color: var(--green);
+  background: var(--green-bg);
+  color: var(--green);
+}
+.ob-btn-sm-green:hover {
+  background: var(--green-bg-border);
+  color: var(--green);
+}

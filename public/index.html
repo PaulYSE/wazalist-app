@@ -87,7 +87,7 @@
       </div>
       <div class="abox" id="regBox" style="display: none">
         <h2>⛩ Wazalist</h2>
-        <div class="sub">Create an account to sync progress across devices</div>
+        <div class="sub">Create an account to keep your Wazalist across devices</div>
         <div class="field">
           <label>Username</label
           ><input
@@ -432,8 +432,7 @@
           </div>
           <div class="cfield-row">
             <div class="cfield">
-              <label>Skill level</label
-              ><input id="se-tag" type="text" placeholder="e.g. Beginner" />
+              <label>Tag</label><input id="se-tag" type="text" placeholder="e.g. Kihon Waza" />
             </div>
             <div class="cfield">
               <label>Reference / lore</label><input id="se-reference" type="text" />
@@ -575,8 +574,7 @@
               <label>Literal translation</label><input id="nw-name_en_literal" type="text" />
             </div>
             <div class="cfield">
-              <label>Skill level</label
-              ><input id="nw-tag" type="text" placeholder="e.g. Beginner" />
+              <label>Tag</label><input id="nw-tag" type="text" placeholder="e.g. Kihon Waza" />
             </div>
           </div>
           <div class="cfield-row">
@@ -644,7 +642,7 @@
         </div>
         <div class="cmodal-body">
           <p style="font-size: 13px; color: var(--text2); margin-bottom: 14px">
-            Share your marks and labels with others. Keys expire after 90 days.
+            Share your Markings and Marking Labels with others. Keys expire after 90 days.
           </p>
           <div id="exportStatus" style="font-size: 13px; color: var(--text3); margin-bottom: 10px">
             Generating…
@@ -674,7 +672,7 @@
         </div>
         <div class="cmodal-body">
           <div class="cfield">
-            <label>Share key (64 hex characters)</label>
+            <label>Share key</label>
             <input
               id="importKeyInput"
               type="text"
@@ -749,8 +747,8 @@
               <div class="ob-slide-icon">⛩</div>
               <div class="ob-slide-title">Welcome to <span>Wazalist</span></div>
               <div class="ob-slide-sub">
-                Your personal database for Wotagei techniques. Here's everything you can do — we'll
-                walk through each in a moment.
+                Your personal database of Waza — the techniques and routines of Wotagei. Here's
+                everything you can do; we'll walk through each in a moment.
               </div>
               <div class="ob-peek-grid">
                 <div class="ob-peek">
@@ -791,8 +789,8 @@
               <div class="ob-slide-icon">🔍</div>
               <div class="ob-slide-title">Explore all <span>Waza</span></div>
               <div class="ob-slide-sub">
-                Use the <b>Explore</b> tab to search the full database. Every Waza has its Japanese
-                name, English translation, skill level, parent techniques, and reference videos.
+                The <b>Explore</b> tab is the full Waza database. Each one carries its Japanese and
+                English names, Tag, parent Waza, and reference videos.
               </div>
               <div class="ob-demo" id="obBrowseDemo">
                 <div
@@ -829,13 +827,13 @@
               <div class="ob-slide-icon">💬</div>
               <div class="ob-slide-title">Can't write in <span>Japanese?</span></div>
               <div class="ob-slide-sub">
-                No problem — search in English or Romaji. Minor spelling mistakes are handled
-                automatically.
+                No problem — search in English or Romaji, and don't worry about exact spelling.
+                Close enough will find it.
               </div>
-              <div class="ob-slide-note">(And minor spelling mistakes too!)</div>
               <div class="ob-demo ob-search-demo">
                 <div class="ob-slide-note" style="margin-top: 10px; color: var(--text2)">
-                  <b>Tip:</b> narrow your search to one field with a scope prefix — e.g.
+                  <b>Tip:</b> tap any author or parent inside a Waza to <b>instantly filter</b> by
+                  it. Power users can also type
                   <code
                     style="
                       background: var(--bg3);
@@ -844,15 +842,25 @@
                       padding: 1px 5px;
                       font-size: 12px;
                     "
-                    >AUTHOR:"Shun"</code
+                    >AUTHOR:"SETSUNA"</code
                   >
-                  shows only that author's waza. Or just tap an author or parent inside any waza to
-                  do it for you.
+                  or
+                  <code
+                    style="
+                      background: var(--bg3);
+                      border: 1px solid var(--border);
+                      border-radius: 3px;
+                      padding: 1px 5px;
+                      font-size: 12px;
+                    "
+                    >PARENT:"THUNDERSNAKE"</code
+                  >
+                  to search one field directly.
                 </div>
                 <input
                   type="text"
                   id="obSearchInput"
-                  placeholder="Try searching for a waza..."
+                  placeholder="Try searching for a Waza..."
                   autocomplete="off"
                   spellcheck="false"
                 />
@@ -862,7 +870,7 @@
                     id="obSearchHint"
                     style="color: var(--text3); font-size: 13px"
                   >
-                    Start typing above to see fuzzy matching in action…
+                    Start typing above to see it in action…
                   </div>
                 </div>
               </div>
@@ -873,7 +881,8 @@
               <div class="ob-slide-icon">🃏</div>
               <div class="ob-slide-title">Choose a <span>card style</span></div>
               <div class="ob-slide-sub">
-                Click a style to select it. You can change this anytime in the filter bar.
+                Pick how your Waza appear — <b>Cards, List, or Compact</b>. Change it anytime from
+                the filter bar.
               </div>
               <div class="ob-style-demo" id="obStyleDemo">
                 <!-- Demo styles built by JS using real app components -->
@@ -885,8 +894,8 @@
               <div class="ob-slide-icon">🏷️</div>
               <div class="ob-slide-title">Build your <span>Wazalist</span></div>
               <div class="ob-slide-sub">
-                Use the 6 marking markings (● ▲ ■ ♥ ★ ◆) to tag any Waza. Toggle them on and off —
-                try it below!
+                Six Markings (● ▲ ■ ♥ ★ ◆) you can switch on and off for any Waza — like having
+                <b>six different bookmarks</b>. Try it below!
               </div>
               <div class="ob-demo ob-marking-demo" id="obMarkingDemo">
                 <!-- rows built by JS -->
@@ -898,8 +907,8 @@
               <div class="ob-slide-icon">✍️</div>
               <div class="ob-slide-title">You decide what each <span>Marking means</span></div>
               <div class="ob-slide-sub">
-                Label each marking however suits your learning style — or use the suggested template
-                below. You can rename them anytime.
+                Give each Marking your own name — your <b>Marking Labels</b>. Use the template below
+                or make your own. Rename them whenever you like.
               </div>
               <div class="ob-demo">
                 <div
@@ -921,48 +930,8 @@
                     >Your labels</span
                   >
                   <div style="display: flex; gap: 6px">
-                    <button
-                      id="obClearAll"
-                      style="
-                        padding: 4px 10px;
-                        border-radius: 6px;
-                        border: 1px solid var(--border);
-                        background: var(--bg2);
-                        color: var(--text2);
-                        font-size: 11px;
-                        cursor: pointer;
-                        font-family: inherit;
-                        transition: all 0.15s;
-                      "
-                      onmouseover="
-                        this.style.background = 'var(--bg3)';
-                        this.style.color = 'var(--text1)';
-                      "
-                      onmouseout="
-                        this.style.background = 'var(--bg2)';
-                        this.style.color = 'var(--text2)';
-                      "
-                    >
-                      Clear All
-                    </button>
-                    <button
-                      id="obUseTemplate"
-                      style="
-                        padding: 4px 10px;
-                        border-radius: 6px;
-                        border: 1px solid var(--green);
-                        background: var(--green-bg);
-                        color: var(--green);
-                        font-size: 11px;
-                        cursor: pointer;
-                        font-family: inherit;
-                        transition: background 0.15s;
-                      "
-                      onmouseover="this.style.background = 'var(--green-bg-border)'"
-                      onmouseout="this.style.background = 'var(--green-bg)'"
-                    >
-                      ✓ Use template
-                    </button>
+                    <button id="obClearAll" class="ob-btn-sm">Clear All</button>
+                    <button id="obUseTemplate" class="ob-btn-sm-green">✓ Use template</button>
                   </div>
                 </div>
                 <div class="ob-labels" id="obLabelsPreview">
@@ -1023,9 +992,9 @@
               <div class="ob-slide-icon">📊</div>
               <div class="ob-slide-title">Track your <span>Progress</span></div>
               <div class="ob-slide-sub">
-                The <b>Stats</b> tab breaks down your collection. See your overall counts, which
-                authors and families you've marked most (<b>Waza Trends</b>), how complete each
-                family is, and your most recent activity.
+                The <b>Stats</b> tab breaks down your collection — overall counts, the authors and
+                Families you've marked most (<b>Waza Trends</b>), how complete each Family is, and
+                your latest activity.
               </div>
               <div class="ob-demo" style="padding: 14px">
                 <!-- Overview (always visible) -->
@@ -1269,9 +1238,9 @@
               <div class="ob-slide-icon">🔄</div>
               <div class="ob-slide-title">Share & <span>Compare</span> lists</div>
               <div class="ob-slide-sub">
-                <b>Any user</b> can export their list with custom labels to get a shareable key.
-                <b>Anyone (including guests)</b> can import these lists in the <b>Compare</b> tab to
-                do side-by-side comparisons.
+                <b>Export</b> your list — Markings and Marking Labels included — as a
+                <b>shareable key</b>. <b>Anyone</b>, guests too, can import it in the
+                <b>Compare</b> tab to see both lists side by side.
               </div>
               <div class="ob-demo" style="padding: 14px">
                 <div class="cmp-col-headers">
@@ -1286,9 +1255,9 @@
               <div class="ob-slide-icon">✏️</div>
               <div class="ob-slide-title">Help grow the <span>Database</span></div>
               <div class="ob-slide-sub">
-                Any <b>logged-in user</b> can improve the database. Submit a whole new waza, fix a
-                single field, or add a missing video — whatever fits. Everything is reviewed by an
-                admin before it goes live.
+                Signed-in members can grow the database: <b>add</b> a new Waza, <b>fix</b> a single
+                detail, or drop in a missing video. An <b>admin</b> reviews everything before it
+                goes live.
               </div>
               <div class="ob-demo" style="padding: 14px">
                 <!-- Full-form submission (still the way to add a brand-new waza) -->
@@ -1310,7 +1279,7 @@
                       margin-bottom: 8px;
                     "
                   >
-                    Submit a new waza
+                    Submit a new Waza
                   </div>
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                     <div class="ob-field-preview">
@@ -1346,7 +1315,7 @@
                       margin-bottom: 6px;
                     "
                   >
-                    Fix a single field
+                    Fix a single detail
                   </div>
                   <div style="font-size: 13px; color: var(--text2)">
                     Spot a typo or dead link? Suggest a correction to just that field — no need to
@@ -1369,13 +1338,12 @@
                   🎥 Suggest a video!
                 </div>
                 <div style="font-size: 12px; color: var(--text3)">
-                  Paste a link below any waza's videos — duplicates are caught automatically, even
-                  if the timestamp differs.
+                  Paste a link below any Waza's videos — duplicates are caught automatically.
                 </div>
                 <div
                   style="
                     margin-top: 12px;
-                    background: rgba(76, 175, 130, 0.1);
+                    background: var(--green-bg);
                     border: 1px solid var(--green);
                     border-radius: var(--r);
                     padding: 8px 10px;
@@ -1393,11 +1361,8 @@
               <div class="ob-slide-icon">📥</div>
               <div class="ob-slide-title">Import an existing <span>Wazalist</span></div>
               <div class="ob-slide-sub">
-                Already have a list? Import it instantly. Excel files with coloured cells are
-                supported, as well as plain text paste.
-              </div>
-              <div class="ob-slide-note">
-                Excel and text import supported — colours are detected automatically.
+                <b>Already keep a list?</b> Bring it straight over. Coloured Excel cells become
+                Markings automatically — or just paste plain text.
               </div>
               <div class="ob-demo" style="padding: 14px">
                 <div style="font-size: 12px; color: var(--text3); margin-bottom: 8px">
@@ -1590,7 +1555,7 @@
                   </div>
                 </div>
                 <div style="font-size: 12px; color: var(--text3); margin-top: 8px">
-                  Each colour becomes a marking you assign on import.
+                  Each colour becomes a Marking you assign on import.
                 </div>
               </div>
             </div>

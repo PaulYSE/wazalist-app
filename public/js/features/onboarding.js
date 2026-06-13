@@ -182,7 +182,7 @@ function renderFooter() {
     // Save button — same pattern as share.js
     const saveBtn = document.createElement('button');
     saveBtn.className = 'ob-btn ob-btn-primary';
-    saveBtn.textContent = 'Save Labels';
+    saveBtn.textContent = 'Save Marking Labels';
 
     saveBtn.onclick = () => {
       labelsValues.forEach((value, i) => {
@@ -192,7 +192,7 @@ function renderFooter() {
       if (typeof renderDashStats === 'function') renderDashStats();
       saveBtn.textContent = 'Saved ✓';
       setTimeout(() => {
-        saveBtn.textContent = 'Save Labels';
+        saveBtn.textContent = 'Save Marking Labels';
       }, 1800);
     };
     footerRight.appendChild(saveBtn);
@@ -276,7 +276,7 @@ function buildBrowseDemo() {
   const realWaza = getRealWaza(5);
   if (realWaza.length === 0) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      '<div style="color:var(--text3);padding:20px;text-align:center">Loading Waza…</div>';
     return;
   }
 
@@ -323,7 +323,7 @@ function renderBrowseDemoList() {
 
   if (!shown.length) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:16px;text-align:center;font-size:13px">No waza with this marking</div>';
+      '<div style="color:var(--text3);padding:16px;text-align:center;font-size:13px">No Waza with this Marking</div>';
     return;
   }
 
@@ -395,8 +395,7 @@ function initSearchDemo() {
   input.value = '';
   if (hint) hint.style.display = '';
   resultsEl.innerHTML =
-    '<div class="ob-no-results" id="obSearchHint">Start typing above to see fuzzy matching in action…</div>';
-
+    '<div class="ob-no-results" id="obSearchHint">Start typing above to see it in action…</div>';
   input.oninput = () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => runSearchDemo(input.value), 120);
@@ -461,7 +460,7 @@ function runSearchDemo(query) {
   if (!resultsEl) return;
   if (!query.trim()) {
     resultsEl.innerHTML =
-      '<div class="ob-no-results" id="obSearchHint">Start typing above to see fuzzy matching in action…</div>';
+      '<div class="ob-no-results" id="obSearchHint">Start typing above to see it in action…</div>';
     return;
   }
 
@@ -475,8 +474,7 @@ function runSearchDemo(query) {
   const matches = realWaza.filter((w) => wazaMatchesSearch(w, query)).slice(0, 10);
 
   if (!matches.length) {
-    resultsEl.innerHTML =
-      '<div class="ob-no-results">No matches found — try a different spelling</div>';
+    resultsEl.innerHTML = '<div class="ob-no-results">No matches — try a different spelling.</div>';
     return;
   }
 
@@ -543,7 +541,7 @@ function buildStyleDemo() {
   const realWaza = getRealWaza(5);
   if (realWaza.length === 0) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      '<div style="color:var(--text3);padding:20px;text-align:center">Loading Waza…</div>';
     return;
   }
 
@@ -628,7 +626,7 @@ function buildStyleDemo() {
 
     const pillLabel = document.createElement('div');
     pillLabel.className = 'sp-label';
-    pillLabel.textContent = label + (chosenStyle === key ? ' ✓ (selected)' : '');
+    pillLabel.textContent = label + (chosenStyle === key ? ' ✓ selected' : '');
     pill.appendChild(pillLabel);
 
     const preview = document.createElement('div');
@@ -668,7 +666,7 @@ function buildMarkingDemo() {
   const realWaza = getRealWaza(10);
   if (realWaza.length === 0) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:20px;text-align:center">Loading waza...</div>';
+      '<div style="color:var(--text3);padding:20px;text-align:center">Loading Waza…</div>';
     return;
   }
 
@@ -814,7 +812,7 @@ function buildStatsDemo() {
   const realWaza = getRealWaza(3);
   if (realWaza.length === 0) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:12px;text-align:center">Loading waza…</div>';
+      '<div style="color:var(--text3);padding:12px;text-align:center">Loading Waza…</div>';
     return;
   }
   // Fabricated sample markings + relative times (onboarding has no real progress).
@@ -875,7 +873,7 @@ function buildCompareDemo() {
   const realWaza = getRealWaza(3);
   if (realWaza.length === 0) {
     container.innerHTML =
-      '<div style="color:var(--text3);padding:12px;text-align:center">Loading waza…</div>';
+      '<div style="color:var(--text3);padding:12px;text-align:center">Loading Waza…</div>';
     return;
   }
   // Sample: their marks (pips) vs your marks (buttons), like the real cmp-row.
