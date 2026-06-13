@@ -457,6 +457,7 @@
 
 .ob-filter-bar {
   display: flex;
+  margin-bottom: 8px;
 }
 
 .ob-filter-bar .btn:first-child {
