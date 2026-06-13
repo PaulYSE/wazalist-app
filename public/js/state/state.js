@@ -48,6 +48,9 @@ export const state = {
   browseSortOrder: savedSort.order,
   browseListView: localStorage.getItem(LS_VIEW) || 'expanded',
   markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
+  myGroups: [],         // [{ id, name, role }] — groups the user belongs to
+myGroupsLoaded: false,
+currentUserId: null,  // set on login/session restore for group member comparisons
 };
 
 // ── Import-from-text shared state ─────────────────────────────

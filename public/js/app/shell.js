@@ -17,6 +17,7 @@ import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/new-waza.js';
 import { pushRoute } from './router.js';
 import { closeDetailNoHistory } from '../views/waza-detail.js';
+import { renderGroups } from '../views/groups.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -378,10 +379,12 @@ export function activateTab(t) {
   document.getElementById('browseView').style.display = t === 'browse' ? 'flex' : 'none';
   document.getElementById('statsView').style.display = t === 'stats' ? 'block' : 'none';
   document.getElementById('compareView').style.display = t === 'compare' ? 'block' : 'none';
+  document.getElementById('groupsView').style.display = t === 'groups' ? 'flex' : 'none';
   document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
   document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
   if (t === 'stats') renderDashStats();
   if (t === 'compare') renderDashCompare();
+  if (t === 'groups') renderGroups();
   if (t === 'contribute') renderContribute();
   if (t === 'account') renderAccount();
   updateMobMenuActiveState();

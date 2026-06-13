@@ -186,6 +186,10 @@
             <span class="mob-menu-item-icon">⚖️</span>
             <span>Compare</span>
           </button>
+          <button class="mob-menu-item" data-menu-tab="groups">
+            <span class="mob-menu-item-icon">👥</span>
+            <span>Groups</span>
+          </button>
           <button class="mob-menu-item" data-menu-tab="contribute">
             <span class="mob-menu-item-icon">✏️</span>
             <span>Contribute</span>
@@ -230,6 +234,7 @@
         <button class="ntab active" data-tab="browse">Explore</button>
         <button class="ntab" data-tab="stats">Stats</button>
         <button class="ntab" data-tab="compare">Compare</button>
+        <button class="ntab" data-tab="groups">Groups</button>
         <button class="ntab" data-tab="contribute">Contribute</button>
         <button class="ntab" data-tab="account">Account</button>
       </div>
@@ -370,6 +375,25 @@
       <div id="compareView" style="display: none; flex: 1; overflow: hidden">
         <div class="dash">
           <div id="dashCompare"></div>
+        </div>
+      </div>
+      
+      <!-- GROUPS -->
+      <div id="groupsView" style="display: none; flex: 1; overflow: hidden">
+        <div class="main">
+          <div class="list-panel" id="groupListPanel">
+            <div class="count-bar" id="groupCountBar">Loading…</div>
+            <div id="groupList"></div>
+          </div>
+          <div class="detail-panel" id="groupDetailPanel">
+            <div class="mobile-back" id="groupMobileBack">← Back to groups</div>
+            <div id="groupDetailContent">
+              <div class="d-empty">
+                <div style="font-size:32px">👥</div>
+                <div>Select a Group to view details</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -622,6 +646,74 @@
         </div>
       </div>
     </div>
+
+    <!-- CREATE GROUP MODAL -->
+<div id="createGroupBg" class="cmodal-bg" style="display: none">
+  <div class="cmodal" style="max-width: 480px">
+    <div class="cmodal-header">
+      <h2>👥 Create a Group</h2>
+      <button class="cmodal-close" id="createGroupClose">✕</button>
+    </div>
+    <div class="cmodal-body">
+      <div class="cfield">
+        <label>Group name *</label>
+        <input id="cg-name" type="text" maxlength="64" placeholder="e.g. Wotagei SG Batch 2025" autocomplete="off" />
+      </div>
+      <div class="cfield">
+        <label>Who can join?</label>
+        <select id="cg-policy">
+          <option value="open">Open — anyone can join immediately</option>
+          <option value="approval">Approval — members need your OK</option>
+          <option value="invite">Invite only — share a private key</option>
+        </select>
+      </div>
+      <div class="cfield">
+        <label>Social links <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+        <div id="cg-social-list"></div>
+        <button class="btn" id="cg-add-social" style="margin-top:6px;font-size:12px">+ Add link</button>
+      </div>
+      <div class="cmodal-err" id="cg-err"></div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="cg-submit">Create Group</button>
+      <button class="cbtn cbtn-ghost" id="createGroupCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT GROUP MODAL -->
+<div id="editGroupBg" class="cmodal-bg" style="display: none">
+  <div class="cmodal" style="max-width: 480px">
+    <div class="cmodal-header">
+      <h2>✏️ Edit Group</h2>
+      <button class="cmodal-close" id="editGroupClose">✕</button>
+    </div>
+    <div class="cmodal-body">
+      <div class="cfield">
+        <label>Group name *</label>
+        <input id="eg-name" type="text" maxlength="64" autocomplete="off" />
+      </div>
+      <div class="cfield">
+        <label>Who can join?</label>
+        <select id="eg-policy">
+          <option value="open">Open — anyone can join immediately</option>
+          <option value="approval">Approval — members need your OK</option>
+          <option value="invite">Invite only — share a private key</option>
+        </select>
+      </div>
+      <div class="cfield">
+        <label>Social links <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+        <div id="eg-social-list"></div>
+        <button class="btn" id="eg-add-social" style="margin-top:6px;font-size:12px">+ Add link</button>
+      </div>
+      <div class="cmodal-err" id="eg-err"></div>
+    </div>
+    <div class="cmodal-footer">
+      <button class="cbtn cbtn-primary" id="eg-submit">Save changes</button>
+      <button class="cbtn cbtn-ghost" id="editGroupCancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
     <!-- EXPORT MODAL -->
     <div id="exportBg" class="cmodal-bg" style="display: none">

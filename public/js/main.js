@@ -25,6 +25,8 @@ import { parseRoute } from './app/router.js';
 import { initTheme } from './services/theme.js';
 import { renderDashStats } from './views/stats.js';
 import { renderDashCompare } from './views/compare.js';
+import { initGroups } from './views/groups.js';
+import { initCreateGroup, initEditGroup } from './modals/create-group.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
@@ -124,6 +126,9 @@ initBrowseList();
 initWazaDetail();
 initUi();
 initShare();
+initGroups();
+initCreateGroup();
+initEditGroup();
 initNewWaza();
 initSuggestEdit();
 initFieldEdit();

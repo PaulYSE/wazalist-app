@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS waza (
     video6            TEXT,
     video7            TEXT,
     video8            TEXT,
-    video9            TEXT
+    video9            TEXT,
+    UNIQUE(name_jp, name_en)
 );
 
 -- User accounts.
@@ -80,5 +81,45 @@ CREATE TABLE IF NOT EXISTS contributions (
     reviewed_at DATETIME
 );
 
+-- ── Groups ────────────────────────────────────────────────────
+
+-- Groups
+CREATE TABLE IF NOT EXISTS groups (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT    NOT NULL,
+  join_policy TEXT    NOT NULL DEFAULT 'open'
+                CHECK(join_policy IN ('open','approval','invite')),
+  invite_key  TEXT    UNIQUE,
+  social      TEXT,
+  created_by  INTEGER NOT NULL REFERENCES users(id),
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Group membership
+CREATE TABLE IF NOT EXISTS group_members (
+  group_id  INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id   INTEGER NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  role      TEXT    NOT NULL DEFAULT 'member'
+              CHECK(role IN ('admin','member')),
+  tag       TEXT,
+  joined_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (group_id, user_id)
+);
+
+-- Join applications (all three join policies route through here)
+CREATE TABLE IF NOT EXISTS group_applications (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  group_id   INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id    INTEGER NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  status     TEXT    NOT NULL DEFAULT 'pending'
+               CHECK(status IN ('pending','approved','rejected')),
+  applied_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(group_id, user_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_contributions_status ON contributions(status);
 CREATE INDEX IF NOT EXISTS idx_contributions_user   ON contributions(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_user   ON group_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_group  ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_applications_user  ON group_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_applications_group ON group_applications(group_id);

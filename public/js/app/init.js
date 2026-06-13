@@ -64,6 +64,7 @@ export async function initApp() {
       if (meRes && meRes.user) {
         state.isAdmin = !!meRes.user.is_admin;
         state.currentUsername = meRes.user.username;
+        state.currentUserId = meRes.user.id;
       }
     } catch (err) {
       console.warn('Session restore error:', err);
