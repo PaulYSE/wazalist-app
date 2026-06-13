@@ -304,10 +304,6 @@
     background: var(--bg1);
   }
 
-  .main.waza-selected .list-panel {
-    display: none;
-  }
-
   .main.waza-selected .detail-panel {
     display: flex;
   }

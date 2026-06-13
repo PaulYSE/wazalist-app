@@ -13,7 +13,7 @@ import { escapeHtml } from '../lib/escape.js';
 
 // Callbacks set when modals are opened
 let _onCreate = null;
-let _onEdit   = null;
+let _onEdit = null;
 let _editGroupId = null;
 
 // ── Social link builder (shared between create + edit) ────────
@@ -26,15 +26,26 @@ let _editGroupId = null;
  * @return {void}
  */
 function renderSocialList(container, links) {
-  container.innerHTML = links.map((s, i) =>
-    '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" data-si="' + i + '">' +
-    '<input class="cfield input sg-platform" type="text" placeholder="Platform (e.g. Instagram)" value="' + escapeHtml(s.platform) + '" style="flex:1;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">' +
-    '<input class="cfield input sg-url" type="url" placeholder="https://…" value="' + escapeHtml(s.url) + '" style="flex:2;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">' +
-    '<button class="btn sg-remove" data-si="' + i + '" style="padding:4px 8px;color:var(--red);border-color:var(--red);flex-shrink:0">✕</button>' +
-    '</div>'
-  ).join('');
+  container.innerHTML = links
+    .map(
+      (s, i) =>
+        '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" data-si="' +
+        i +
+        '">' +
+        '<input class="cfield input sg-platform" type="text" placeholder="Platform (e.g. Instagram)" value="' +
+        escapeHtml(s.platform) +
+        '" style="flex:1;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">' +
+        '<input class="cfield input sg-url" type="url" placeholder="https://…" value="' +
+        escapeHtml(s.url) +
+        '" style="flex:2;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text1);font-size:13px">' +
+        '<button class="btn sg-remove" data-si="' +
+        i +
+        '" style="padding:4px 8px;color:var(--red);border-color:var(--red);flex-shrink:0">✕</button>' +
+        '</div>',
+    )
+    .join('');
 
-  container.querySelectorAll('.sg-remove').forEach(btn => {
+  container.querySelectorAll('.sg-remove').forEach((btn) => {
     btn.addEventListener('click', () => {
       links.splice(+btn.dataset.si, 1);
       renderSocialList(container, links);
@@ -51,7 +62,7 @@ function renderSocialList(container, links) {
 function readSocialList(container) {
   const rows = container.querySelectorAll('[data-si]');
   const result = [];
-  rows.forEach(row => {
+  rows.forEach((row) => {
     const platform = row.querySelector('.sg-platform').value.trim();
     const url = row.querySelector('.sg-url').value.trim();
     if (platform && url) result.push({ platform, url });
@@ -99,7 +110,7 @@ export function initCreateGroup() {
   };
   document.getElementById('createGroupClose').addEventListener('click', closeFn);
   document.getElementById('createGroupCancel').addEventListener('click', closeFn);
-  document.getElementById('createGroupBg').addEventListener('click', e => {
+  document.getElementById('createGroupBg').addEventListener('click', (e) => {
     if (e.target === document.getElementById('createGroupBg')) closeFn();
   });
 
@@ -110,31 +121,41 @@ export function initCreateGroup() {
     const errEl = document.getElementById('cg-err');
 
     errEl.textContent = '';
-    if (!name) { errEl.textContent = 'Group name is required.'; return; }
+    if (!name) {
+      errEl.textContent = 'Group name is required.';
+      return;
+    }
 
     const btn = document.getElementById('cg-submit');
-    btn.disabled = true; btn.textContent = 'Creating…';
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
 
     try {
       const res = await api('/api/groups', 'POST', { name, join_policy, social });
       if (res.error) {
         errEl.textContent = res.error;
-        btn.disabled = false; btn.textContent = 'Create Group';
+        btn.disabled = false;
+        btn.textContent = 'Create Group';
         return;
       }
 
       // If invite-only, show the key before closing
       if (res.invite_key) {
-        alert('Your Group has been created!\n\nInvite key (share this with members):\n' + res.invite_key);
+        alert(
+          'Your Group has been created!\n\nInvite key (share this with members):\n' +
+            res.invite_key,
+        );
       }
 
       document.getElementById('createGroupBg').style.display = 'none';
-      btn.disabled = false; btn.textContent = 'Create Group';
+      btn.disabled = false;
+      btn.textContent = 'Create Group';
       if (_onCreate) await _onCreate();
     } catch (e) {
       console.error('Create group failed:', e);
       errEl.textContent = 'Network error. Please try again.';
-      btn.disabled = false; btn.textContent = 'Create Group';
+      btn.disabled = false;
+      btn.textContent = 'Create Group';
     }
   });
 }
@@ -153,9 +174,13 @@ export function openEditGroup(group, onSuccess) {
   _editGroupId = group.id;
 
   let social = [];
-  try { social = JSON.parse(group.social || '[]'); } catch { /* empty */ }
+  try {
+    social = JSON.parse(group.social || '[]');
+  } catch {
+    /* empty */
+  }
   // Clone so edits don't mutate the cached object
-  const socialLinks = social.map(s => ({ ...s }));
+  const socialLinks = social.map((s) => ({ ...s }));
 
   document.getElementById('eg-name').value = group.name || '';
   document.getElementById('eg-policy').value = group.join_policy || 'open';
@@ -228,7 +253,7 @@ export function initEditGroup() {
   };
   document.getElementById('editGroupClose').addEventListener('click', closeFn);
   document.getElementById('editGroupCancel').addEventListener('click', closeFn);
-  document.getElementById('editGroupBg').addEventListener('click', e => {
+  document.getElementById('editGroupBg').addEventListener('click', (e) => {
     if (e.target === document.getElementById('editGroupBg')) closeFn();
   });
 
@@ -239,25 +264,32 @@ export function initEditGroup() {
     const errEl = document.getElementById('eg-err');
 
     errEl.textContent = '';
-    if (!name) { errEl.textContent = 'Group name is required.'; return; }
+    if (!name) {
+      errEl.textContent = 'Group name is required.';
+      return;
+    }
 
     const btn = document.getElementById('eg-submit');
-    btn.disabled = true; btn.textContent = 'Saving…';
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
 
     try {
       const res = await api('/api/groups/' + _editGroupId, 'PUT', { name, join_policy, social });
       if (res.error) {
         errEl.textContent = res.error;
-        btn.disabled = false; btn.textContent = 'Save changes';
+        btn.disabled = false;
+        btn.textContent = 'Save changes';
         return;
       }
       closeFn();
-      btn.disabled = false; btn.textContent = 'Save changes';
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
       if (_onEdit) await _onEdit();
     } catch (e) {
       console.error('Edit group failed:', e);
       errEl.textContent = 'Network error. Please try again.';
-      btn.disabled = false; btn.textContent = 'Save changes';
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
     }
   });
 }
