@@ -893,6 +893,21 @@ function buildCompareDemo() {
       theirs: [false, false, true, false, false, false],
       mine: [false, false, false, false, false, false],
     },
+    {
+      waza: realWaza[3],
+      theirs: [true, false, false, true, false, true],
+      mine: [false, false, true, false, false, false],
+    },
+    {
+      waza: realWaza[4],
+      theirs: [false, true, false, false, true, false],
+      mine: [false, false, false, true, true, false],
+    },
+    {
+      waza: realWaza[5],
+      theirs: [false, true, true, false, false, false],
+      mine: [false, false, false, true, false, false],
+    },
   ];
   container.innerHTML = sample
     .map(
