@@ -50,14 +50,14 @@ function buildGroupBody(loggedIn) {
     '<div class="cmp-controls">' +
     // Group picker — populated from state.myGroups (already loaded)
     '<select id="cmpGroupSelect" class="cmp-select" style="min-width:160px">' +
-    '<option value="">— Select a Group —</option>' +
+    '<option value="">Select Group</option>' +
     state.myGroups
       .map((g) => '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>')
       .join('') +
     '</select>' +
     // Member picker — starts disabled; populated after group is chosen
     '<select id="cmpMemberSelect" class="cmp-select" style="min-width:160px" disabled>' +
-    '<option value="">— Select a member —</option>' +
+    '<option value="">Select Member</option>' +
     '</select>' +
     // Compare button — starts disabled until a member is chosen
     '<button class="btn" id="cmpGroupLoadBtn" disabled>Compare</button>' +

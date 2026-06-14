@@ -4,7 +4,7 @@
  * @email paulyse99@gmail.com
  * @project Wazalist App
  * @date 2026-06-11
- * @brief Stats dashboard: always-open Your Progress, plus collapsible Waza Trends / Top Waza Family / Recent Activity sections.
+ * @brief Stats dashboard: always-open Your Progress, plus collapsible Favourite Waza / Waza Family Statistics / Recent Activity sections.
  */
 
 import { state } from '../state/state.js';
@@ -112,7 +112,7 @@ function accSection(key, label, controlsHTML, bodyHTML) {
 }
 
 /**
- * @brief Renders the full stats dashboard with overview, Waza Trends, family completion, and recent activity.
+ * @brief Renders the full stats dashboard with overview, Favourite Waza, family completion, and recent activity.
  *
  * @return {void}
  */
@@ -186,7 +186,7 @@ export function renderDashStats() {
       .slice(0, limit);
   }
 
-  // ── Waza Trends (Author | Family) ───────────────────────────
+  // ── Favourite Waza (Author | Family) ───────────────────────────
   const rankFields = rankByFamily ? PARENT_FIELDS : AUTHOR_FIELDS;
   const rankScope = rankByFamily ? 'parent' : 'author';
   const rankRows = topBy(rankFields, 'marks', 10);
@@ -265,9 +265,9 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No Families to show.</div>';
 
-  const rankSection = accSection('rank', 'Waza Trends', rankControls, rankHead + rankBody);
+  const rankSection = accSection('rank', 'Favourite Waza', rankControls, rankHead + rankBody);
 
-  // ── Top Waza Family ─────────────────────────────────────────
+  // ── Waza Family Statistics ─────────────────────────────────────────
   const families = {};
   state.wazaData.forEach((w) => {
     [w.parent_en0, w.parent_en1].filter(Boolean).forEach((fam) => {
@@ -295,13 +295,13 @@ export function renderDashStats() {
     '<span class="seg-label">Sort by</span>' +
     '<button class="seg-item' +
     (famSort === 'completed' ? ' on' : '') +
-    '" data-famsort="completed">Completed</button>' +
+    '" data-famsort="completed">Marked</button>' +
     '<button class="seg-item' +
     (famSort === 'total' ? ' on' : '') +
-    '" data-famsort="total">Total</button>' +
+    '" data-famsort="total">All</button>' +
     '<button class="seg-item' +
     (famSort === 'completion' ? ' on' : '') +
-    '" data-famsort="completion">Completion Rate</button>' +
+    '" data-famsort="completion">Marked/All</button>' +
     '</div>' +
     '<button class="rank-toggle rank-right' +
     (famShowZero ? ' on' : '') +
@@ -331,7 +331,7 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families to show.</div>';
 
-  const famSection = accSection('family', 'Top Waza Family', famControls, covBody);
+  const famSection = accSection('family', 'Waza Family Statistics', famControls, covBody);
 
   // ── Recent Activity (selectable count) ──────────────────────
   const recent = state.wazaData

@@ -58,6 +58,7 @@
   font-size: 15px;
   padding: 5px 11px;
   line-height: 1;
+  width: 100%;
 }
 
 .view-toggle-group .btn:first-child {
