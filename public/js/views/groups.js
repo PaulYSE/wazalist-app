@@ -569,4 +569,5 @@ export function initGroups() {
     document.getElementById('groupDetailContent').innerHTML =
       '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
   });
+  refreshMyGroups();
 }
