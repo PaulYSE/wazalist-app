@@ -397,26 +397,26 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // Fuzzy match - try Japanese first, then English (maxDistance=2)
+  // Fuzzy match - try Japanese first, then English
   if (japanese) {
-    hit = state.wazaData.find((w) => isFuzzyMatch(w.name_jp, japanese, 2));
+    hit = state.wazaData.find((w) => isFuzzyMatch(w.name_jp, japanese, 1));
     if (hit) return hit;
   }
 
   hit = state.wazaData.find(
     (w) =>
-      isFuzzyMatch(w.name_en, english, 2) ||
-      isFuzzyMatch(w.name_en_literal, english, 2) ||
-      isFuzzyMatch(w.name_en_gtranslate, english, 2),
+      isFuzzyMatch(w.name_en, english, 1) ||
+      isFuzzyMatch(w.name_en_literal, english, 1) ||
+      isFuzzyMatch(w.name_en_gtranslate, english, 1),
   );
   if (hit) return hit;
 
-  // Final fallback: fuzzy on full text (maxDistance=2)
+  // Final fallback: fuzzy on full text
   hit = state.wazaData.find(
     (w) =>
-      isFuzzyMatch(w.name_jp, cleaned, 2) ||
-      isFuzzyMatch(w.name_en, cleaned, 2) ||
-      isFuzzyMatch(w.name_en_literal, cleaned, 2),
+      isFuzzyMatch(w.name_jp, cleaned, 1) ||
+      isFuzzyMatch(w.name_en, cleaned, 1) ||
+      isFuzzyMatch(w.name_en_literal, cleaned, 1),
   );
   return hit || null;
 }
