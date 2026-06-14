@@ -340,8 +340,8 @@
   flex-shrink: 0;
 }
 .cmp-mark-seg {
-  padding: 5px 8px;
-  font-size: 14px;
+  padding: 2px 4px;
+  font-size: 13px;
   line-height: 1;
   border: none;
   border-right: 1px solid var(--border);
@@ -349,6 +349,8 @@
   color: var(--text3);
   cursor: pointer;
   transition: all 0.12s;
+  min-width: 1.375rem;
+  min-height: 1.375rem;
 }
 .cmp-mark-seg:last-child {
   border-right: none;
@@ -373,7 +375,7 @@
 
 .ti-textarea {
   width: 100%;
-  min-height: 160px;
+  min-height: 20rem;
   flex: 1;
   padding: 10px 12px;
   background: var(--bg2);

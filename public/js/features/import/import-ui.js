@@ -522,8 +522,10 @@ export function renderImport() {
 function renderTiInput() {
   return (
     '<div style="display:flex;flex-direction:column;height:100%">' +
-    // ── Import from Excel ──────────────────────────────────────
-    '<div class="dsec2"><h3>📊 Import from Excel</h3></div>' +
+    // ── Import from Excel ────────────────────────────────────
+    '<div class="dsec2">' +
+    '<h3>📊 Import from Excel</h3>' +
+    '</div>' +
     '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px">' +
     '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Upload your Excel file with colored cells. Cell colors will be detected and mapped to your markings.</p>' +
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
@@ -531,16 +533,17 @@ function renderTiInput() {
     '<button class="cbtn cbtn-primary" id="tiFileBtn">📁 Choose File</button>' +
     '<span id="tiFileName" style="font-size:13px;color:var(--text3)">No file selected</span>' +
     '</div>' +
-    '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Preserves cell colors &nbsp; ✓ Automatic proficiency mapping</div>' +
+    '<div style="margin-top:8px;font-size:12px;color:var(--text3)">✓ Minor Spelling Mistakes &nbsp; ✓ Smart Color Detection</div>' +
     '</div>' +
-    // ── Import from Text ───────────────────────────────────────
-    '<div class="dsec2"><h3>📋 Import from Text</h3></div>' +
+    // ── Import from Text ─────────────────────────────────────
+    '<div class="dsec2">' +
+    '<h3>📋 Import from Text</h3>' +
+    '</div>' +
     '<div style="flex:1;display:flex;flex-direction:column;min-height:0">' +
-    '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza names (one per line). Labels in <b>[ ]</b>, <b>{ }</b>, or <b>( )</b> are detected as categories.</p>' +
-    '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Paste your waza list here…\n\nSupported label formats:\n[Learning]\nDouble Rainbow (ダブルレインボー)\nMix\n\n{Performance Ready}\nNami (波)\n\nHyper Mix (ハイパーミックス)"></textarea>' +
-    '<div class="ti-hint">Labels can be section headers on their own line, or placed inline next to a waza name. All bracket styles are supported: <code>[label]</code> <code>{label}</code> <code>(label)</code></div>' +
+    '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">Paste a list of waza (one per line). Use <code>[Square Brackets]</code> or <code>{Curly Brackets}</code> to indicate section headers.</p>' +
+    '<textarea class="ti-textarea" id="tiPasteArea" placeholder="Example…\n\n[Learning]\nOAD Kansai(OAD 関西)\nOAD Kanto\n\n{Want to Learn}\nIzanagi(イザナギ)\nIzanami(イザナミ)"></textarea>' +
     '<div style="margin-top:12px;display:flex;gap:8px">' +
-    '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse List \u2192</button>' +
+    '<button class="cbtn cbtn-primary" id="tiParseBtn">Analyse Text</button>' +
     '</div>' +
     '</div>' +
     '</div>'

@@ -204,8 +204,10 @@ export async function renderAccount() {
   const exportBody = `
     <h4 style="font-size:13px;font-weight:600;margin:4px 0 8px">Export to Excel</h4>
     <p style="font-size:13px;color:var(--text2);margin:0 0 12px">
-      Download an <b>.xlsx</b> of every Waza you've marked. Each row links straight to the video,
-      and the cell is coloured by its Marking.
+      Want to leave Wazalist? No problem!<br/>
+      Download an <b>.xlsx</b> of every Waza you've marked.<br/>
+      Generate a list of hyperlinked waza in the classic <code>NAME_EN(NAME_JP)</code> format,
+      and the cell fill color is based on your Markings!
     </p>
     <button class="cbtn cbtn-primary" id="exportXlsxBtn">⬇️ Export to Excel</button>
     <span id="exportXlsxStatus" style="font-size:13px;color:var(--text3);margin-left:10px"></span>`;
