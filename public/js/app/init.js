@@ -117,6 +117,9 @@ export async function initApp() {
   // Sync view style dropdowns with loaded preference
   syncBrowseViewControls();
 
+  startWazaPlaceholderRotation();
+  checkAutoImport();
+
   // Boot into whatever view the URL describes (tab + optional waza).
   const { tab, wazaParam } = parseRoute();
   if (tab !== 'browse') {
@@ -141,7 +144,4 @@ export async function initApp() {
   } else {
     replaceRoute(tab, null);
   }
-
-  startWazaPlaceholderRotation();
-  checkAutoImport();
 }

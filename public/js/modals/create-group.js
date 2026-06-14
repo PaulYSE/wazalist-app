@@ -210,9 +210,6 @@ export function openEditGroup(group, onSuccess) {
  * @return {Promise<void>}
  */
 async function _showInviteKeySection(groupId) {
-  // The key is returned on creation; to surface it again we need a dedicated
-  // GET — for now we don't expose GET for the key (security), so the admin
-  // regenerates via a button. We show the regenerate button in the edit modal.
   const existing = document.getElementById('eg-invite-key-section');
   if (existing) existing.remove();
 
@@ -222,21 +219,54 @@ async function _showInviteKeySection(groupId) {
   section.innerHTML =
     '<div class="cfield">' +
     '<label>Invite key</label>' +
-    '<div style="font-size:13px;color:var(--text3);margin-bottom:6px">The invite key is only shown once on creation. Regenerate it below — this invalidates the old key.</div>' +
-    '<button class="btn" id="eg-regen-key">🔑 Regenerate invite key</button>' +
-    '<div id="eg-new-key" style="margin-top:8px;font-family:monospace;font-size:12px;word-break:break-all;color:var(--text2)"></div>' +
+    '<div id="eg-current-key" style="font-family:monospace;font-size:12px;word-break:break-all;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);margin-bottom:8px;user-select:all">Loading…</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" id="eg-copy-key" style="font-size:12px">Copy key</button>' +
+    '<button class="btn" id="eg-regen-key" style="font-size:12px;color:var(--amber);border-color:var(--amber)">🔑 Regenerate</button>' +
+    '</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:6px">Regenerating invalidates the old key immediately.</div>' +
     '</div>';
 
   document.getElementById('eg-social-list').parentElement.appendChild(section);
 
-  document.getElementById('eg-regen-key')?.addEventListener('click', async () => {
+  const keyDisplay = section.querySelector('#eg-current-key');
+  const copyBtn = section.querySelector('#eg-copy-key');
+  const regenBtn = section.querySelector('#eg-regen-key');
+
+  // Fetch current key
+  try {
+    const res = await api('/api/groups/' + groupId + '/invite-key');
+    if (res.error) {
+      keyDisplay.textContent = 'Could not load key.';
+    } else {
+      keyDisplay.textContent = res.invite_key;
+    }
+  } catch {
+    keyDisplay.textContent = 'Could not load key.';
+  }
+
+  copyBtn.addEventListener('click', async () => {
+    const key = keyDisplay.textContent;
+    if (!key || key === 'Could not load key.' || key === 'Loading…') return;
+    await navigator.clipboard.writeText(key);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy key';
+    }, 1800);
+  });
+
+  regenBtn.addEventListener('click', async () => {
     if (!confirm('Regenerate the invite key? The old key will stop working immediately.')) return;
+    regenBtn.disabled = true;
+    regenBtn.textContent = 'Regenerating…';
     const res = await api('/api/groups/' + groupId + '/invite-key', 'POST');
     if (res.error) {
-      document.getElementById('eg-new-key').textContent = 'Error: ' + res.error;
-      return;
+      keyDisplay.textContent = 'Error: ' + res.error;
+    } else {
+      keyDisplay.textContent = res.invite_key;
     }
-    document.getElementById('eg-new-key').textContent = 'New key: ' + res.invite_key;
+    regenBtn.disabled = false;
+    regenBtn.textContent = '🔑 Regenerate';
   });
 }
 

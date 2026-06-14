@@ -7,6 +7,7 @@
  * @brief Compare tab view. Centralized top controls, label comparison editor, and side-by-side marks (their pips vs. your segmented mark-pill) with in-place toggling.
  */
 
+import { api } from '../services/api.js';
 import { state } from '../state/state.js';
 import { SHAPES } from '../config/constants.js';
 import { saveLabels, getP, saveP } from '../services/progress.js';
