@@ -311,6 +311,7 @@ async function renderGroupDetail(groupId) {
             .join('') +
           '</div></div>';
       } catch (e) {
+        console.error('Group member load failed:', e);
         membersHTML =
           '<div class="dsec"><h3>Members</h3><div style="color:var(--text3);font-size:13px">Couldn\'t load members.</div></div>';
       }

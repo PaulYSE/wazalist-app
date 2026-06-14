@@ -101,6 +101,7 @@ async function renderGroupCompareSection(container) {
           .join('');
       memberSel.disabled = false;
     } catch (e) {
+      console.error('Group members load failed:', e);
       memberSel.innerHTML = '<option value="">Couldn\'t load members</option>';
     }
   });
