@@ -47,25 +47,21 @@ function buildGroupBody(loggedIn) {
   }
 
   return (
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
-
+    '<div class="cmp-controls">' +
     // Group picker — populated from state.myGroups (already loaded)
     '<select id="cmpGroupSelect" class="cmp-select" style="min-width:160px">' +
     '<option value="">— Select a Group —</option>' +
-    state.myGroups.map(g =>
-      '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>'
-    ).join('') +
+    state.myGroups
+      .map((g) => '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>')
+      .join('') +
     '</select>' +
-
     // Member picker — starts disabled; populated after group is chosen
     '<select id="cmpMemberSelect" class="cmp-select" style="min-width:160px" disabled>' +
     '<option value="">— Select a member —</option>' +
     '</select>' +
-
     // Compare button — starts disabled until a member is chosen
     '<button class="btn" id="cmpGroupLoadBtn" disabled>Compare</button>' +
     '</div>' +
-
     // Result area — filled by wireGroupContent() after the API call
     '<div id="cmpGroupResult" style="margin-top:12px"></div>'
   );
@@ -81,9 +77,9 @@ function buildGroupBody(loggedIn) {
  * @return {void}
  */
 function wireGroupContent(container) {
-  const groupSel  = container.querySelector('#cmpGroupSelect');
+  const groupSel = container.querySelector('#cmpGroupSelect');
   const memberSel = container.querySelector('#cmpMemberSelect');
-  const loadBtn   = container.querySelector('#cmpGroupLoadBtn');
+  const loadBtn = container.querySelector('#cmpGroupLoadBtn');
 
   // None of these elements exist when the accordion is closed — safe to bail.
   if (!groupSel || !memberSel || !loadBtn) return;
@@ -92,8 +88,8 @@ function wireGroupContent(container) {
   groupSel.addEventListener('change', async () => {
     const gid = +groupSel.value;
     memberSel.innerHTML = '<option value="">Loading…</option>';
-    memberSel.disabled  = true;
-    loadBtn.disabled    = true;
+    memberSel.disabled = true;
+    loadBtn.disabled = true;
 
     if (!gid) {
       memberSel.innerHTML = '<option value="">— Select a member —</option>';
@@ -102,15 +98,20 @@ function wireGroupContent(container) {
 
     try {
       const members = await api('/api/groups/' + gid + '/members');
-      const others  = members.filter(m => m.user_id !== state.currentUserId);
+      const others = members.filter((m) => m.user_id !== state.currentUserId);
       memberSel.innerHTML =
         '<option value="">— Select a member —</option>' +
-        others.map(m =>
-          '<option value="' + m.user_id + '">' +
-          escapeHtml(m.username) +
-          (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
-          '</option>'
-        ).join('');
+        others
+          .map(
+            (m) =>
+              '<option value="' +
+              m.user_id +
+              '">' +
+              escapeHtml(m.username) +
+              (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
+              '</option>',
+          )
+          .join('');
       memberSel.disabled = false;
     } catch {
       memberSel.innerHTML = '<option value="">Couldn\'t load members</option>';
@@ -128,51 +129,51 @@ function wireGroupContent(container) {
     const uid = +memberSel.value;
     if (!gid || !uid) return;
 
-    loadBtn.disabled    = true;
+    loadBtn.disabled = true;
     loadBtn.textContent = 'Loading…';
-    const resultEl      = container.querySelector('#cmpGroupResult');
-    resultEl.innerHTML  =
-      '<div style="color:var(--text3);font-size:13px">Loading…</div>';
+    const resultEl = container.querySelector('#cmpGroupResult');
+    resultEl.innerHTML = '<div style="color:var(--text3);font-size:13px">Loading…</div>';
 
     try {
-      const data = await api(
-        '/api/groups/' + gid + '/members/' + uid + '/progress'
-      );
+      const data = await api('/api/groups/' + gid + '/members/' + uid + '/progress');
 
       if (data.error) {
         resultEl.innerHTML =
-          '<div style="color:var(--red);font-size:13px">' +
-          escapeHtml(data.error) + '</div>';
-        loadBtn.disabled    = false;
+          '<div style="color:var(--red);font-size:13px">' + escapeHtml(data.error) + '</div>';
+        loadBtn.disabled = false;
         loadBtn.textContent = 'Compare';
         return;
       }
 
-      const memberName  = memberSel.options[memberSel.selectedIndex].text;
+      const memberName = memberSel.options[memberSel.selectedIndex].text;
       const importedIds = new Set(Object.keys(data.markings).map(Number));
-      const rows        = state.wazaData.filter(w => importedIds.has(w.id));
+      const rows = state.wazaData.filter((w) => importedIds.has(w.id));
 
       if (!rows.length) {
         resultEl.innerHTML =
           '<div style="color:var(--text3);font-size:13px">' +
-          escapeHtml(memberName) + ' hasn\'t marked any Waza yet.</div>';
-        loadBtn.disabled    = false;
+          escapeHtml(memberName) +
+          " hasn't marked any Waza yet.</div>";
+        loadBtn.disabled = false;
         loadBtn.textContent = 'Compare';
         return;
       }
 
       // ── Labels side-by-side ──────────────────────────────────
-      const theirLabels   = data.labels || Array(6).fill('');
+      const theirLabels = data.labels || Array(6).fill('');
       const memberLabelsHtml =
         '<div class="dsec2"><h3>Marking Labels — ' +
-        escapeHtml(memberName) + '</h3>' +
+        escapeHtml(memberName) +
+        '</h3>' +
         '<div class="cmp-labels-table">' +
         SHAPES.map((s, i) => {
           const theirLabel = theirLabels[i] || '';
-          const myLabel    = state.markingLabels[i] || '';
+          const myLabel = state.markingLabels[i] || '';
           return (
             '<div class="cmp-labels-row">' +
-            '<span class="cmp-labels-marking">' + s + '</span>' +
+            '<span class="cmp-labels-marking">' +
+            s +
+            '</span>' +
             '<div class="cmp-labels-their">' +
             (theirLabel
               ? escapeHtml(theirLabel)
@@ -189,61 +190,80 @@ function wireGroupContent(container) {
       // ── Waza comparison rows ──────────────────────────────────
       const colHeaders =
         '<div class="cmp-col-headers"><span>Waza</span>' +
-        '<span>' + escapeHtml(memberName) + '</span>' +
+        '<span>' +
+        escapeHtml(memberName) +
+        '</span>' +
         '<span>Your marks</span></div>';
 
-      const rowsHtml = rows.map(w => {
-        const theirMark     = data.markings[w.id] || { markings: Array(6).fill(false) };
-        const myMarkings    = (getP(w.id).markings || Array(6).fill(false)).slice();
-        const theirMarkings = theirMark.markings || Array(6).fill(false);
-        return (
-          '<div class="cmp-row" data-id="' + w.id + '">' +
-          '<div class="cmp-names">' +
-          '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>' +
-          '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>' +
-          '</div>' +
-          '<div class="cmp-markings-imported">' + markingPips(theirMarkings) + '</div>' +
-          '<div class="cmp-mark-pill">' +
-          SHAPES.map((s, i) =>
-            '<button class="cmp-mark-seg' + (myMarkings[i] ? ' on' : '') +
-            '" data-wid="' + w.id + '" data-si="' + i +
-            '" title="' + escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
-            '">' + s + '</button>'
-          ).join('') +
-          '</div></div>'
-        );
-      }).join('');
+      const rowsHtml = rows
+        .map((w) => {
+          const theirMark = data.markings[w.id] || { markings: Array(6).fill(false) };
+          const myMarkings = (getP(w.id).markings || Array(6).fill(false)).slice();
+          const theirMarkings = theirMark.markings || Array(6).fill(false);
+          return (
+            '<div class="cmp-row" data-id="' +
+            w.id +
+            '">' +
+            '<div class="cmp-names">' +
+            '<div class="cmp-name-jp">' +
+            escapeHtml(w.name_jp || '—') +
+            '</div>' +
+            '<div class="cmp-name-en">' +
+            escapeHtml(dispName(w)) +
+            '</div>' +
+            '</div>' +
+            '<div class="cmp-markings-imported">' +
+            markingPips(theirMarkings) +
+            '</div>' +
+            '<div class="cmp-mark-pill">' +
+            SHAPES.map(
+              (s, i) =>
+                '<button class="cmp-mark-seg' +
+                (myMarkings[i] ? ' on' : '') +
+                '" data-wid="' +
+                w.id +
+                '" data-si="' +
+                i +
+                '" title="' +
+                escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
+                '">' +
+                s +
+                '</button>',
+            ).join('') +
+            '</div></div>'
+          );
+        })
+        .join('');
 
       resultEl.innerHTML = memberLabelsHtml + colHeaders + rowsHtml;
 
       // Wire mark toggles inside the result
-      resultEl.querySelectorAll('.cmp-mark-seg').forEach(btn => {
-        btn.addEventListener('click', e => {
+      resultEl.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const wid = +btn.dataset.wid, si = +btn.dataset.si;
-          const ns  = (getP(wid).markings || Array(6).fill(false)).slice();
-          ns[si]    = !ns[si];
+          const wid = +btn.dataset.wid,
+            si = +btn.dataset.si;
+          const ns = (getP(wid).markings || Array(6).fill(false)).slice();
+          ns[si] = !ns[si];
           btn.classList.toggle('on', ns[si]);
           saveP(wid, { markings: ns });
         });
       });
 
       // Clicking a row navigates to that waza in the Browse tab
-      resultEl.querySelectorAll('.cmp-row').forEach(el => {
-        el.addEventListener('click', e => {
+      resultEl.querySelectorAll('.cmp-row').forEach((el) => {
+        el.addEventListener('click', (e) => {
           if (e.target.closest('.cmp-mark-pill')) return;
           navigateToBrowse();
           selectWaza(+el.dataset.id);
         });
       });
-
     } catch {
       resultEl.innerHTML =
-        '<div style="color:var(--red);font-size:13px">' +
-        'Couldn\'t load this member\'s list.</div>';
+        '<div style="color:var(--red);font-size:13px">' + "Couldn't load this member's list.</div>";
     }
 
-    loadBtn.disabled    = false;
+    loadBtn.disabled = false;
     loadBtn.textContent = 'Compare';
   });
 }
@@ -257,7 +277,6 @@ let compareSelectedKey = null;
  * 'group' | 'imported' | null (both collapsed)
  */
 let activeAccordion = null;
-
 
 // ── Data helpers ──────────────────────────────────────────────
 
@@ -315,22 +334,27 @@ function toggleAccordion(key) {
 function accShell(key, label, visible, open, bodyHtml) {
   return (
     // Outer wrapper: hidden entirely when visible = false (e.g. no groups)
-    '<div class="dsec2"' + (visible ? '' : ' style="display:none"') + '>' +
-
+    '<div class="dsec2"' +
+    (visible ? '' : ' style="display:none"') +
+    '>' +
     // Header row — clicking this fires toggleAccordion(key)
-    '<div class="dsec-toggle cmp-acc-toggle' + (open ? '' : ' collapsed') +
-    '" data-acc="' + key + '">' +
+    '<div class="dsec-toggle cmp-acc-toggle' +
+    (open ? '' : ' collapsed') +
+    '" data-acc="' +
+    key +
+    '">' +
     '<h3 style="margin-bottom:0;border-bottom:none;padding-bottom:0">' +
-    label + '</h3>' +
-    '<span class="toggle-arrow">▾</span>' +  // rotates via CSS .collapsed rule
+    label +
+    '</h3>' +
+    '<span class="toggle-arrow">▾</span>' + // rotates via CSS .collapsed rule
     '</div>' +
-
     // Collapsible body — .open triggers the grid 0fr→1fr animation in panels.css
-    '<div class="acc-body' + (open ? ' open' : '') + '">' +
+    '<div class="acc-body' +
+    (open ? ' open' : '') +
+    '">' +
     '<div class="acc-body-inner"><div class="acc-body-box">' +
     bodyHtml +
     '</div></div></div>' +
-
     '</div>'
   );
 }
@@ -353,16 +377,24 @@ function buildImportedBody() {
   const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
 
   // ── Controls ──────────────────────────────────────────────────
-  const listOpts = keys.map(k =>
-    '<option value="' + escapeHtml(k) + '"' +
-    (k === compareSelectedKey ? ' selected' : '') + '>' +
-    escapeHtml(importedLists[k].name) + '</option>'
-  ).join('');
+  const listOpts = keys
+    .map(
+      (k) =>
+        '<option value="' +
+        escapeHtml(k) +
+        '"' +
+        (k === compareSelectedKey ? ' selected' : '') +
+        '>' +
+        escapeHtml(importedLists[k].name) +
+        '</option>',
+    )
+    .join('');
 
   const controlsHtml =
     '<div class="cmp-controls">' +
     '<select class="cmp-select" id="cmpSelect">' +
-    '<option value="">— select a list —</option>' + listOpts +
+    '<option value="">— select a list —</option>' +
+    listOpts +
     '</select>' +
     (compareSelectedKey
       ? '<button class="btn cmp-ctrl-remove" id="cmpRemoveBtn">Remove</button>'
@@ -373,23 +405,31 @@ function buildImportedBody() {
 
   // ── Marking counts (for label badges) ─────────────────────────
   const impMarkingCounts = Array(6).fill(0);
-  const myMarkingCounts  = Array(6).fill(0);
+  const myMarkingCounts = Array(6).fill(0);
 
   if (imp && imp.marks) {
-    Object.values(imp.marks).forEach(mark => {
+    Object.values(imp.marks).forEach((mark) => {
       if (mark.markings)
-        mark.markings.forEach((on, i) => { if (on) impMarkingCounts[i]++; });
+        mark.markings.forEach((on, i) => {
+          if (on) impMarkingCounts[i]++;
+        });
     });
     const importedIds = new Set(Object.keys(imp.marks).map(Number));
-    state.wazaData.forEach(w => {
+    state.wazaData.forEach((w) => {
       if (!importedIds.has(w.id)) return;
       const p = getP(w.id);
-      if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; });
+      if (p.markings)
+        p.markings.forEach((on, i) => {
+          if (on) myMarkingCounts[i]++;
+        });
     });
   } else {
-    state.wazaData.forEach(w => {
+    state.wazaData.forEach((w) => {
       const p = getP(w.id);
-      if (p.markings) p.markings.forEach((on, i) => { if (on) myMarkingCounts[i]++; });
+      if (p.markings)
+        p.markings.forEach((on, i) => {
+          if (on) myMarkingCounts[i]++;
+        });
     });
   }
 
@@ -407,41 +447,58 @@ function buildImportedBody() {
       '<div class="cmp-labels-table">' +
       SHAPES.map((s, i) => {
         const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
-        const myLabel  = state.markingLabels[i] || '';
+        const myLabel = state.markingLabels[i] || '';
         return (
           '<div class="cmp-labels-row">' +
-          '<span class="cmp-labels-marking">' + s + '</span>' +
+          '<span class="cmp-labels-marking">' +
+          s +
+          '</span>' +
           '<div class="cmp-labels-their">' +
-          (impLabel
-            ? escapeHtml(impLabel)
-            : '<span class="cmp-labels-unset">Unlabelled</span>') +
-          '<span class="cmp-labels-count">' + impMarkingCounts[i] + '</span>' +
+          (impLabel ? escapeHtml(impLabel) : '<span class="cmp-labels-unset">Unlabelled</span>') +
+          '<span class="cmp-labels-count">' +
+          impMarkingCounts[i] +
+          '</span>' +
           '</div>' +
           '<div class="cmp-labels-mine">' +
-          '<input class="cmp-labels-input" data-si="' + i +
+          '<input class="cmp-labels-input" data-si="' +
+          i +
           '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
-          myLabel.replace(/"/g, '&quot;') + '">' +
-          '<span class="cmp-labels-count">' + myMarkingCounts[i] + '</span>' +
+          myLabel.replace(/"/g, '&quot;') +
+          '">' +
+          '<span class="cmp-labels-count">' +
+          myMarkingCounts[i] +
+          '</span>' +
           '</div></div>'
         );
       }).join('') +
-      '</div>' + saveBtnRow + '</div>';
+      '</div>' +
+      saveBtnRow +
+      '</div>';
   } else {
     // Single-column: just your labels (no imported list selected)
     labelsHtml =
       '<div class="dsec2"><h3>My Marking Labels</h3>' +
       '<div class="cmp-labels-table">' +
-      SHAPES.map((s, i) =>
-        '<div class="cmp-labels-row cmp-labels-row-solo">' +
-        '<span class="cmp-labels-marking">' + s + '</span>' +
-        '<div class="cmp-labels-mine">' +
-        '<input class="cmp-labels-input" data-si="' + i +
-        '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
-        state.markingLabels[i].replace(/"/g, '&quot;') + '">' +
-        '<span class="cmp-labels-count">' + myMarkingCounts[i] + ' waza</span>' +
-        '</div></div>'
+      SHAPES.map(
+        (s, i) =>
+          '<div class="cmp-labels-row cmp-labels-row-solo">' +
+          '<span class="cmp-labels-marking">' +
+          s +
+          '</span>' +
+          '<div class="cmp-labels-mine">' +
+          '<input class="cmp-labels-input" data-si="' +
+          i +
+          '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
+          state.markingLabels[i].replace(/"/g, '&quot;') +
+          '">' +
+          '<span class="cmp-labels-count">' +
+          myMarkingCounts[i] +
+          ' waza</span>' +
+          '</div></div>',
       ).join('') +
-      '</div>' + saveBtnRow + '</div>';
+      '</div>' +
+      saveBtnRow +
+      '</div>';
   }
 
   // ── Comparison rows ───────────────────────────────────────────
@@ -451,43 +508,57 @@ function buildImportedBody() {
       '<div class="cmp-empty">No imported lists yet.<br>' +
       'Use <b>↓ Import List</b> to add one.</div>';
   } else {
-    const importedIds = imp
-      ? new Set(Object.keys(imp.marks).map(Number))
-      : new Set();
-    const rows = state.wazaData.filter(w => importedIds.has(w.id));
+    const importedIds = imp ? new Set(Object.keys(imp.marks).map(Number)) : new Set();
+    const rows = state.wazaData.filter((w) => importedIds.has(w.id));
 
     const colHeaders =
       '<div class="cmp-col-headers">' +
       '<span>Waza</span><span>Their marks</span><span>Your marks</span>' +
       '</div>';
 
-    const rowsHtml = rows.map(w => {
-      const importedMark =
-        imp ? imp.marks[w.id] || { markings: Array(6).fill(false) }
-            : { markings: Array(6).fill(false) };
-      const myMarkings   = (getP(w.id).markings || Array(6).fill(false)).slice();
-      const impMarkings  = importedMark.markings || Array(6).fill(false);
-      return (
-        '<div class="cmp-row" data-id="' + w.id + '">' +
-        '<div class="cmp-names">' +
-        '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>' +
-        '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>' +
-        '</div>' +
-        '<div class="cmp-markings-imported">' + markingPips(impMarkings) + '</div>' +
-        '<div class="cmp-mark-pill">' +
-        SHAPES.map((s, i) =>
-          '<button class="cmp-mark-seg' + (myMarkings[i] ? ' on' : '') +
-          '" data-wid="' + w.id + '" data-si="' + i +
-          '" title="' + escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
-          '">' + s + '</button>'
-        ).join('') +
-        '</div></div>'
-      );
-    }).join('');
+    const rowsHtml = rows
+      .map((w) => {
+        const importedMark = imp
+          ? imp.marks[w.id] || { markings: Array(6).fill(false) }
+          : { markings: Array(6).fill(false) };
+        const myMarkings = (getP(w.id).markings || Array(6).fill(false)).slice();
+        const impMarkings = importedMark.markings || Array(6).fill(false);
+        return (
+          '<div class="cmp-row" data-id="' +
+          w.id +
+          '">' +
+          '<div class="cmp-names">' +
+          '<div class="cmp-name-jp">' +
+          escapeHtml(w.name_jp || '—') +
+          '</div>' +
+          '<div class="cmp-name-en">' +
+          escapeHtml(dispName(w)) +
+          '</div>' +
+          '</div>' +
+          '<div class="cmp-markings-imported">' +
+          markingPips(impMarkings) +
+          '</div>' +
+          '<div class="cmp-mark-pill">' +
+          SHAPES.map(
+            (s, i) =>
+              '<button class="cmp-mark-seg' +
+              (myMarkings[i] ? ' on' : '') +
+              '" data-wid="' +
+              w.id +
+              '" data-si="' +
+              i +
+              '" title="' +
+              escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
+              '">' +
+              s +
+              '</button>',
+          ).join('') +
+          '</div></div>'
+        );
+      })
+      .join('');
 
-    const empty = !rows.length
-      ? '<div class="cmp-empty">This list has no marks.</div>'
-      : '';
+    const empty = !rows.length ? '<div class="cmp-empty">This list has no marks.</div>' : '';
     rowsSection = (rows.length ? colHeaders : '') + rowsHtml + empty;
   }
 
@@ -501,55 +572,51 @@ function buildImportedBody() {
  * @return {void}
  */
 function wireImportedContent(container) {
-  container.querySelector('#cmpExportBtn')
-    ?.addEventListener('click', openExportModal);
+  container.querySelector('#cmpExportBtn')?.addEventListener('click', openExportModal);
 
-  container.querySelector('#cmpImportBtn')
-    ?.addEventListener('click', () => openImportModal());
+  container.querySelector('#cmpImportBtn')?.addEventListener('click', () => openImportModal());
 
-  container.querySelector('#cmpSaveLabelsBtn')
-    ?.addEventListener('click', () => {
-      container.querySelectorAll('.cmp-labels-input').forEach(inp => {
-        state.markingLabels[+inp.dataset.si] = inp.value;
-      });
-      saveLabels();
-      showToast('Marking Labels saved', 'green');
+  container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
+    container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
+      state.markingLabels[+inp.dataset.si] = inp.value;
     });
+    saveLabels();
+    showToast('Marking Labels saved', 'green');
+  });
 
   // List picker — re-render the whole tab to reflect the new selection
-  container.querySelector('#cmpSelect')
-    ?.addEventListener('change', e => {
-      compareSelectedKey = e.target.value || null;
-      renderDashCompare();
-    });
+  container.querySelector('#cmpSelect')?.addEventListener('change', (e) => {
+    compareSelectedKey = e.target.value || null;
+    renderDashCompare();
+  });
 
   // Remove button — deletes from localStorage and re-renders
-  container.querySelector('#cmpRemoveBtn')
-    ?.addEventListener('click', () => {
-      if (!compareSelectedKey) return;
-      const name = importedLists[compareSelectedKey].name;
-      if (!confirm('Remove "' + name + '" from your imported lists?')) return;
-      delete importedLists[compareSelectedKey];
-      saveImported(importedLists);
-      compareSelectedKey = null;
-      renderDashCompare();
-    });
+  container.querySelector('#cmpRemoveBtn')?.addEventListener('click', () => {
+    if (!compareSelectedKey) return;
+    const name = importedLists[compareSelectedKey].name;
+    if (!confirm('Remove "' + name + '" from your imported lists?')) return;
+    delete importedLists[compareSelectedKey];
+    saveImported(importedLists);
+    compareSelectedKey = null;
+    renderDashCompare();
+  });
 
   // Marking toggle — in-place, no full re-render (preserves scroll + labels)
-  container.querySelectorAll('.cmp-mark-seg').forEach(btn => {
-    btn.addEventListener('click', e => {
+  container.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const wid = +btn.dataset.wid, si = +btn.dataset.si;
-      const ns  = (getP(wid).markings || Array(6).fill(false)).slice();
-      ns[si]    = !ns[si];
+      const wid = +btn.dataset.wid,
+        si = +btn.dataset.si;
+      const ns = (getP(wid).markings || Array(6).fill(false)).slice();
+      ns[si] = !ns[si];
       btn.classList.toggle('on', ns[si]);
       saveP(wid, { markings: ns });
     });
   });
 
   // Row click — navigate to that waza
-  container.querySelectorAll('.cmp-row').forEach(el => {
-    el.addEventListener('click', e => {
+  container.querySelectorAll('.cmp-row').forEach((el) => {
+    el.addEventListener('click', (e) => {
       if (e.target.closest('.cmp-mark-pill')) return;
       navigateToBrowse();
       selectWaza(+el.dataset.id);
@@ -568,7 +635,7 @@ function wireImportedContent(container) {
  */
 export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
-  const loggedIn  = !state.isGuest && !!state.token;
+  const loggedIn = !state.isGuest && !!state.token;
 
   // Re-check group membership every time the Compare tab is opened.
   // refreshMyGroups() is a no-op if already loaded; we reset the flag
@@ -586,25 +653,27 @@ export async function renderDashCompare() {
 
   // ── Build accordion bodies (only when open — avoids rendering heavy
   //    row lists that would never be visible while collapsed) ──────
-  const groupBody    = activeAccordion === 'group'
-    ? buildGroupBody(loggedIn)
-    : '';
+  const groupBody = activeAccordion === 'group' ? buildGroupBody(loggedIn) : '';
 
-  const importedBody = activeAccordion === 'imported'
-    ? buildImportedBody()
-    : '';
+  const importedBody = activeAccordion === 'imported' ? buildImportedBody() : '';
 
   // ── Render both accordion shells ──────────────────────────────
   container.innerHTML =
-    accShell('group',    'Compare with Group',        hasGroups, activeAccordion === 'group',    groupBody)    +
-    accShell('imported', 'Compare with Imported List', true,     activeAccordion === 'imported', importedBody);
+    accShell('group', 'Compare with Group', hasGroups, activeAccordion === 'group', groupBody) +
+    accShell(
+      'imported',
+      'Compare with Imported List',
+      true,
+      activeAccordion === 'imported',
+      importedBody,
+    );
 
   // ── Wire accordion toggle buttons ─────────────────────────────
-  container.querySelectorAll('.cmp-acc-toggle').forEach(el => {
+  container.querySelectorAll('.cmp-acc-toggle').forEach((el) => {
     el.addEventListener('click', () => toggleAccordion(el.dataset.acc));
   });
 
   // ── Wire content event listeners (only for the open section) ──
-  if (activeAccordion === 'group')    wireGroupContent(container);
+  if (activeAccordion === 'group') wireGroupContent(container);
   if (activeAccordion === 'imported') wireImportedContent(container);
 }
