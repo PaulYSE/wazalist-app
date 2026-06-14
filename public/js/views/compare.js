@@ -41,20 +41,23 @@ async function renderGroupCompareSection() {
   if (!state.myGroupsLoaded) await refreshMyGroups();
 
   if (!state.myGroups.length) {
-    return '<div class="dsec2">' +
+    return (
+      '<div class="dsec2">' +
       '<h3>Compare with a Group member</h3>' +
       '<div style="font-size:13px;color:var(--text3)">Join a Group to compare your Wazalist with its members.</div>' +
-      '</div>';
+      '</div>'
+    );
   }
 
-  return '<div class="dsec2" id="groupCompareSection">' +
+  return (
+    '<div class="dsec2" id="groupCompareSection">' +
     '<h3>Compare with a Group member</h3>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' +
     '<select id="cmpGroupSelect" class="cmp-select" style="min-width:160px">' +
     '<option value="">— Select a Group —</option>' +
-    state.myGroups.map(g =>
-      '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>'
-    ).join('') +
+    state.myGroups
+      .map((g) => '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>')
+      .join('') +
     '</select>' +
     '<select id="cmpMemberSelect" class="cmp-select" style="min-width:160px" disabled>' +
     '<option value="">— Select a member —</option>' +
@@ -62,7 +65,8 @@ async function renderGroupCompareSection() {
     '<button class="btn" id="cmpGroupLoadBtn" disabled>Compare</button>' +
     '</div>' +
     '<div id="cmpGroupResult" style="margin-top:12px"></div>' +
-    '</div>';
+    '</div>'
+  );
 }
 
 // ── Compare tab ───────────────────────────────────────────────
@@ -76,7 +80,7 @@ let compareSelectedKey = null;
  */
 export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
-  
+
   const groupSectionHtml = await renderGroupCompareSection();
 
   const keys = Object.keys(importedLists);
@@ -284,15 +288,20 @@ export async function renderDashCompare() {
 
       try {
         const members = await api('/api/groups/' + gid + '/members');
-        const others = members.filter(m => m.user_id !== state.currentUserId);
+        const others = members.filter((m) => m.user_id !== state.currentUserId);
         memberSel.innerHTML =
           '<option value="">— Select a member —</option>' +
-          others.map(m =>
-            '<option value="' + m.user_id + '">' +
-            escapeHtml(m.username) +
-            (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
-            '</option>'
-          ).join('');
+          others
+            .map(
+              (m) =>
+                '<option value="' +
+                m.user_id +
+                '">' +
+                escapeHtml(m.username) +
+                (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
+                '</option>',
+            )
+            .join('');
         memberSel.disabled = false;
       } catch (e) {
         console.error('Group members load failed:', e);
@@ -326,12 +335,13 @@ export async function renderDashCompare() {
 
         const memberName = memberSel.options[memberSel.selectedIndex].text;
         const importedIds = new Set(Object.keys(data.markings).map(Number));
-        const rows = state.wazaData.filter(w => importedIds.has(w.id));
+        const rows = state.wazaData.filter((w) => importedIds.has(w.id));
 
         if (!rows.length) {
           resultEl.innerHTML =
             '<div style="color:var(--text3);font-size:13px">' +
-            escapeHtml(memberName) + " hasn't marked any Waza yet.</div>";
+            escapeHtml(memberName) +
+            " hasn't marked any Waza yet.</div>";
           loadBtn.disabled = false;
           loadBtn.textContent = 'Compare';
           return;
@@ -339,16 +349,22 @@ export async function renderDashCompare() {
 
         const theirLabels = data.labels || Array(6).fill('');
         const memberLabelsHtml =
-          '<div class="dsec2"><h3>Marking Labels — ' + escapeHtml(memberName) + '</h3>' +
+          '<div class="dsec2"><h3>Marking Labels — ' +
+          escapeHtml(memberName) +
+          '</h3>' +
           '<div class="cmp-labels-table">' +
           SHAPES.map((s, i) => {
             const theirLabel = theirLabels[i] || '';
             const myLabel = state.markingLabels[i] || '';
             return (
               '<div class="cmp-labels-row">' +
-              '<span class="cmp-labels-marking">' + s + '</span>' +
+              '<span class="cmp-labels-marking">' +
+              s +
+              '</span>' +
               '<div class="cmp-labels-their">' +
-              (theirLabel ? escapeHtml(theirLabel) : '<span class="cmp-labels-unset">Unlabelled</span>') +
+              (theirLabel
+                ? escapeHtml(theirLabel)
+                : '<span class="cmp-labels-unset">Unlabelled</span>') +
               '</div>' +
               '<div class="cmp-labels-mine">' +
               '<span style="font-size:13px;color:var(--text2)">' +
@@ -360,32 +376,51 @@ export async function renderDashCompare() {
 
         const colHeaders =
           '<div class="cmp-col-headers"><span>Waza</span><span>' +
-          escapeHtml(memberName) + '</span><span>Your marks</span></div>';
+          escapeHtml(memberName) +
+          '</span><span>Your marks</span></div>';
 
-        const rowsHtml = rows.map(w => {
-          const theirMark = data.markings[w.id] || { markings: Array(6).fill(false) };
-          const myMarkings = (getP(w.id).markings || Array(6).fill(false)).slice();
-          const theirMarkings = theirMark.markings || Array(6).fill(false);
-          return (
-            '<div class="cmp-row" data-id="' + w.id + '">' +
-            '<div class="cmp-names"><div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>' +
-            '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div></div>' +
-            '<div class="cmp-markings-imported">' + markingPips(theirMarkings) + '</div>' +
-            '<div class="cmp-mark-pill">' +
-            SHAPES.map((s, i) =>
-              '<button class="cmp-mark-seg' + (myMarkings[i] ? ' on' : '') +
-              '" data-wid="' + w.id + '" data-si="' + i +
-              '" title="' + escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) + '">' +
-              s + '</button>'
-            ).join('') +
-            '</div></div>'
-          );
-        }).join('');
+        const rowsHtml = rows
+          .map((w) => {
+            const theirMark = data.markings[w.id] || { markings: Array(6).fill(false) };
+            const myMarkings = (getP(w.id).markings || Array(6).fill(false)).slice();
+            const theirMarkings = theirMark.markings || Array(6).fill(false);
+            return (
+              '<div class="cmp-row" data-id="' +
+              w.id +
+              '">' +
+              '<div class="cmp-names"><div class="cmp-name-jp">' +
+              escapeHtml(w.name_jp || '—') +
+              '</div>' +
+              '<div class="cmp-name-en">' +
+              escapeHtml(dispName(w)) +
+              '</div></div>' +
+              '<div class="cmp-markings-imported">' +
+              markingPips(theirMarkings) +
+              '</div>' +
+              '<div class="cmp-mark-pill">' +
+              SHAPES.map(
+                (s, i) =>
+                  '<button class="cmp-mark-seg' +
+                  (myMarkings[i] ? ' on' : '') +
+                  '" data-wid="' +
+                  w.id +
+                  '" data-si="' +
+                  i +
+                  '" title="' +
+                  escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
+                  '">' +
+                  s +
+                  '</button>',
+              ).join('') +
+              '</div></div>'
+            );
+          })
+          .join('');
 
         resultEl.innerHTML = memberLabelsHtml + colHeaders + rowsHtml;
 
-        resultEl.querySelectorAll('.cmp-mark-seg').forEach(btn => {
-          btn.addEventListener('click', e => {
+        resultEl.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const wid = +btn.dataset.wid;
             const si = +btn.dataset.si;
@@ -397,14 +432,13 @@ export async function renderDashCompare() {
           });
         });
 
-        resultEl.querySelectorAll('.cmp-row').forEach(el => {
-          el.addEventListener('click', e => {
+        resultEl.querySelectorAll('.cmp-row').forEach((el) => {
+          el.addEventListener('click', (e) => {
             if (e.target.closest('.cmp-mark-pill')) return;
             navigateToBrowse();
             selectWaza(+el.dataset.id);
           });
         });
-
       } catch (e) {
         console.error('Group compare load failed:', e);
         resultEl.innerHTML =
