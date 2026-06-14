@@ -240,6 +240,9 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+.rank-toggle.rank-right {
+  margin-left: auto;
+}
 
 /* Single-value layout (your stats only) */
 .rank-head,
@@ -493,7 +496,7 @@
 }
 .acc-labels-row {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: 28px 1fr 3.5rem;
   gap: 10px;
   align-items: center;
 }
@@ -519,6 +522,7 @@
   font-size: 12px;
   color: var(--text3);
   white-space: nowrap;
+  text-align: right;
 }
 .acc-labels-actions {
   display: flex;
@@ -530,7 +534,7 @@
 /* ── Account: appearance theme cards ── */
 .theme-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -541,7 +545,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  aspect-ratio: 1 / 1; /* square */
+  aspect-ratio: 2 / 1;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
@@ -571,7 +575,7 @@
 }
 
 .theme-card-name {
-  font-size: 14px;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text1);
 }

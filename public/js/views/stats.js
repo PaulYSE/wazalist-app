@@ -202,7 +202,7 @@ export function renderDashStats() {
     (rankByFamily ? ' on' : '') +
     '" id="rankByFamilyBtn">Family</button>' +
     '</div>' +
-    '<button class="rank-toggle' +
+    '<button class="rank-toggle rank-right' +
     (showWaza ? ' on' : '') +
     '" id="rankShowWazaBtn">' +
     (showWaza ? '✓ ' : '') +
@@ -303,7 +303,7 @@ export function renderDashStats() {
     (famSort === 'completion' ? ' on' : '') +
     '" data-famsort="completion">Completion Rate</button>' +
     '</div>' +
-    '<button class="rank-toggle' +
+    '<button class="rank-toggle rank-right' +
     (famShowZero ? ' on' : '') +
     '" id="famShowZeroBtn">' +
     (famShowZero ? '✓ ' : '') +
