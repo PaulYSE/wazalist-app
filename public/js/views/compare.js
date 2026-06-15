@@ -25,6 +25,119 @@ import {
 } from '../features/share-list.js';
 import { refreshMyGroups } from './groups.js';
 
+// ── Compare Table Builder ──────────────────────────────────
+
+/**
+ * @brief Builds the HTML for a marking labels comparison table.
+ *
+ * Renders a table comparing marking labels between two users (or just the current user).
+ * Displays shape symbols, label inputs, and waza counts. When a second user is provided,
+ * shows a two-column layout (their labels read-only, your labels editable).
+ *
+ * @param {string} title - Section title to display.
+ * @param {Object} userFirst - First user's data object containing { labels: string[], counts: number[] }.
+ * @param {Object} [userSecond] - Optional second user's data object for two-column comparison.
+ * @return {string} HTML string for the labels comparison section.
+ */
+function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond) {
+  // ── Build the 6 rows ──────────────────────────────────────
+  const rowsHtml = SHAPES.map((s, i) => {
+    const myLabels = userFirst.labels[i] || '';
+    const myCounts = userFirst.counts[i];
+
+    if (userSecond) {
+      const theirLabels = userSecond.labels[i] || '';
+      const theirCounts = userSecond.counts[i];
+
+      return (
+        '<div class="cmp-labels-row">' +
+        // Marking symbol
+        '<span class="cmp-labels-marking">' +
+        s +
+        '</span>' +
+        // Their label (read-only)
+        '<div class="cmp-labels-their">' +
+        (theirLabels
+          ? escapeHtml(theirLabels)
+          : '<span class="cmp-labels-unset">Unlabelled</span>') +
+        '<span class="cmp-labels-count">' +
+        theirCounts +
+        '</span>' +
+        '</div>' +
+        // Your label (editable input)
+        '<div class="cmp-labels-mine">' +
+        '<input class="cmp-labels-input" data-si="' +
+        i +
+        '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
+        myLabels.replace(/"/g, '&quot;') +
+        '">' +
+        '<span class="cmp-labels-count">' +
+        myCounts +
+        '</span>' +
+        '</div>' +
+        '</div>'
+      );
+    } else {
+      // Single-column: just your label (editable) with count
+      return (
+        '<div class="cmp-labels-row cmp-labels-row-solo">' +
+        '<span class="cmp-labels-marking">' +
+        s +
+        '</span>' +
+        '<div class="cmp-labels-mine">' +
+        '<input class="cmp-labels-input" data-si="' +
+        i +
+        '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
+        myLabels.replace(/"/g, '&quot;') +
+        '">' +
+        '<span class="cmp-labels-count">' +
+        myCounts +
+        ' waza</span>' +
+        '</div>' +
+        '</div>'
+      );
+    }
+  }).join('');
+
+  // ── Save Marking Labels Button ──────────────────────────────────────
+  const saveBtnRow =
+    '<div class="cmp-labels-actions">' +
+    '<button class="btn" id="cmpSaveLabelsBtn">Save Marking Labels</button>' +
+    '</div>';
+
+  // ── Assemble the full section ──────────────────────────────
+  return (
+    '<div class="dsec2">' +
+    '<h3>' +
+    escapeHtml(title) +
+    '</h3>' +
+    '<div class="cmp-labels-table">' +
+    rowsHtml +
+    '</div>' +
+    saveBtnRow +
+    '</div>'
+  );
+}
+
+/**
+ * @brief Wires the "Save Marking Labels" button inside a container.
+ *
+ * Reads all .cmp-labels-input values, writes them to state.markingLabels,
+ * persists via saveLabels(), and shows a toast.
+ *
+ * @param {HTMLElement} container - DOM element containing #cmpSaveLabelsBtn and .cmp-labels-input elements.
+ * @return {void}
+ */
+function wireSaveLabelsButton(container) {
+  container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
+    container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
+      state.markingLabels[+inp.dataset.si] = inp.value;
+    });
+    saveLabels();
+    showToast('Marking Labels saved', 'green');
+  });
+}
+
 // ── Group comparison section ──────────────────────────────────
 
 /**
@@ -434,71 +547,18 @@ function buildImportedBody() {
   }
 
   // ── Labels table ──────────────────────────────────────────────
-  const saveBtnRow =
-    '<div class="cmp-labels-actions">' +
-    '<button class="btn" id="cmpSaveLabelsBtn">Save Marking Labels</button>' +
-    '</div>';
-
   let labelsHtml;
   if (imp) {
-    // Two-column: their label vs your editable label
-    labelsHtml =
-      '<div class="dsec2"><h3>Marking Labels comparison</h3>' +
-      '<div class="cmp-labels-table">' +
-      SHAPES.map((s, i) => {
-        const impLabel = imp.labels && imp.labels[i] ? imp.labels[i] : '';
-        const myLabel = state.markingLabels[i] || '';
-        return (
-          '<div class="cmp-labels-row">' +
-          '<span class="cmp-labels-marking">' +
-          s +
-          '</span>' +
-          '<div class="cmp-labels-their">' +
-          (impLabel ? escapeHtml(impLabel) : '<span class="cmp-labels-unset">Unlabelled</span>') +
-          '<span class="cmp-labels-count">' +
-          impMarkingCounts[i] +
-          '</span>' +
-          '</div>' +
-          '<div class="cmp-labels-mine">' +
-          '<input class="cmp-labels-input" data-si="' +
-          i +
-          '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
-          myLabel.replace(/"/g, '&quot;') +
-          '">' +
-          '<span class="cmp-labels-count">' +
-          myMarkingCounts[i] +
-          '</span>' +
-          '</div></div>'
-        );
-      }).join('') +
-      '</div>' +
-      saveBtnRow +
-      '</div>';
+    labelsHtml = buildCompareMarkingLabelsTableHTML(
+      'Compare Marking Labels Table',
+      { labels: state.markingLabels, counts: myMarkingCounts },
+      { labels: imp.labels || Array(6).fill(''), counts: impMarkingCounts },
+    );
   } else {
-    // Single-column: just your labels (no imported list selected)
-    labelsHtml =
-      '<div class="dsec2"><h3>My Marking Labels</h3>' +
-      '<div class="cmp-labels-table">' +
-      SHAPES.map(
-        (s, i) =>
-          '<div class="cmp-labels-row cmp-labels-row-solo">' +
-          '<span class="cmp-labels-marking">' +
-          s +
-          '</span>' +
-          '<div class="cmp-labels-mine">' +
-          '<input class="cmp-labels-input" data-si="' +
-          i +
-          '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
-          state.markingLabels[i].replace(/"/g, '&quot;') +
-          '">' +
-          '<span class="cmp-labels-count">' +
-          myMarkingCounts[i] +
-          ' waza</span>' +
-          '</div></div>',
-      ).join('') +
-      '</div>' +
-      saveBtnRow +
-      '</div>';
+    labelsHtml = buildCompareMarkingLabelsTableHTML('Marking Labels Table', {
+      labels: state.markingLabels,
+      counts: myMarkingCounts,
+    });
   }
 
   // ── Comparison rows ───────────────────────────────────────────
@@ -576,13 +636,7 @@ function wireImportedContent(container) {
 
   container.querySelector('#cmpImportBtn')?.addEventListener('click', () => openImportModal());
 
-  container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
-    container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
-      state.markingLabels[+inp.dataset.si] = inp.value;
-    });
-    saveLabels();
-    showToast('Marking Labels saved', 'green');
-  });
+  wireSaveLabelsButton(container);
 
   // List picker — re-render the whole tab to reflect the new selection
   container.querySelector('#cmpSelect')?.addEventListener('change', (e) => {
