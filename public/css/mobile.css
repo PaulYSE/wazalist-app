@@ -371,4 +371,27 @@
     padding: 0 0.625rem;
     display: block;
   }
+
+  .cmp-labels-row {
+    grid-template-columns: 32px 1fr;
+    /* The first column (marking) spans the full row height,
+       the second column holds both labels stacked */
+  }
+
+  /* Make the marking symbol span both stacked rows */
+  .cmp-labels-marking {
+    grid-row: 1 / 3;
+  }
+
+  /* Their label goes on row 1 */
+  .cmp-labels-their {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* My label goes on row 2, directly below */
+  .cmp-labels-mine {
+    grid-column: 2;
+    grid-row: 2;
+  }
 }

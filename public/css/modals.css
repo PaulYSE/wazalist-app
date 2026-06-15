@@ -267,12 +267,12 @@
 }
 .cmp-labels-row {
   display: grid;
-  grid-template-columns: 32px 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: 4px;
   align-items: center;
 }
 .cmp-labels-row-solo {
-  grid-template-columns: 32px 1fr;
+  grid-template-columns: 40px 1fr;
 }
 .cmp-labels-marking {
   font-size: 16px;
@@ -285,24 +285,7 @@
   gap: 8px;
   min-width: 0;
 }
-.cmp-labels-their {
-  font-size: 13px;
-  color: var(--text2);
-  padding: 7px 10px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-}
-.cmp-labels-their > :first-child {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.cmp-labels-unset {
-  color: var(--text3);
-  font-style: italic;
-}
+.cmp-labels-their .label-names,
 .cmp-labels-input {
   flex: 1;
   min-width: 0;
@@ -310,20 +293,34 @@
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  color: var(--text1);
   font-size: 13px;
+}
+.cmp-labels-their .label-names {
+  color: var(--text2);
+}
+.cmp-labels-input {
+  color: var(--text1);
   outline: none;
   font-family: inherit;
 }
 .cmp-labels-input:focus {
   border-color: var(--accent);
 }
+.cmp-labels-their .label-unset {
+  color: var(--text3);
+  font-style: italic;
+}
+.cmp-labels-their .label-count,
+.cmp-labels-mine .label-count,
 .cmp-labels-count {
   flex-shrink: 0;
   font-size: 12px;
   color: var(--text3);
   min-width: 3.5rem;
   text-align: right;
+}
+.cmp-labels-their .label-count {
+  color: var(--text2);
 }
 .cmp-labels-actions {
   display: flex;

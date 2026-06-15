@@ -205,7 +205,6 @@ export function renderDashStats() {
     '<button class="rank-toggle rank-right' +
     (showWaza ? ' on' : '') +
     '" id="rankShowWazaBtn">' +
-    (showWaza ? '✓ ' : '') +
     'Show Waza</button>' +
     '</div>';
 
@@ -306,7 +305,6 @@ export function renderDashStats() {
     '<button class="rank-toggle rank-right' +
     (famShowZero ? ' on' : '') +
     '" id="famShowZeroBtn">' +
-    (famShowZero ? '✓ ' : '') +
     'Show Empty</button>' +
     '</div>';
 
