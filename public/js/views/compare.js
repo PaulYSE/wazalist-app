@@ -62,7 +62,7 @@ function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond) {
           : '<span class="cmp-labels-unset">Unlabelled</span>') +
         '<span class="cmp-labels-count">' +
         theirCounts +
-        '</span>' +
+        ' waza</span>' +
         '</div>' +
         // Your label (editable input)
         '<div class="cmp-labels-mine">' +
@@ -73,7 +73,7 @@ function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond) {
         '">' +
         '<span class="cmp-labels-count">' +
         myCounts +
-        '</span>' +
+        ' waza</span>' +
         '</div>' +
         '</div>'
       );
@@ -136,6 +136,65 @@ function wireSaveLabelsButton(container) {
     saveLabels();
     showToast('Marking Labels saved', 'green');
   });
+}
+
+/**
+ * @brief Builds an HTML string for the waza comparison rows table.
+ *
+ * Renders column headers ("Waza", theirLabel, "Your marks") and a row per waza.
+ * Each row shows the waza names, their marking pips (read-only), and your marking
+ * toggle buttons (interactive — wiring happens after render via wireCompareListeners).
+ *
+ * @param {Set<number>}              wazaIds       - Set of waza IDs to display.
+ * @param {Object<number, boolean[]>} theirMarkings - Map of wazaId → marking booleans.
+ * @param {string}                   theirName    - Text for the "their" column header.
+ * @param {string}                   emptyMessage  - Message shown when no waza have marks.
+ * @return {string} HTML string for the comparison table (col-headers + rows).
+ */
+function buildCompareMarkingTableRowsHTML(wazaIds, theirMarkings, theirName, emptyMessage) {
+  const rows = state.wazaData.filter((w) => wazaIds.has(w.id));
+
+  // ── Empty state ───────────────────────────────────────────
+  if (!rows.length) {
+    return '<div class="cmp-empty">' + emptyMessage + '</div>';
+  }
+
+  // ── Column headers ────────────────────────────────────────
+  const colHeaders =
+    '<div class="cmp-col-headers">' +
+    '<span>Waza</span>' +
+    '<span>' + escapeHtml(theirName) + '</span>' +
+    '<span>Your marks</span>' +
+    '</div>';
+
+  // ── Rows ──────────────────────────────────────────────────
+  const rowsHtml = rows
+    .map((w) => {
+      const theirs = theirMarkings[w.id] || Array(6).fill(false);
+      const mine = (getP(w.id).markings || Array(6).fill(false)).slice();
+
+      return (
+        '<div class="cmp-row" data-id="' + w.id + '">' +
+        '<div class="cmp-names">' +
+        '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>' +
+        '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>' +
+        '</div>' +
+        '<div class="cmp-markings-imported">' + markingPips(theirs) + '</div>' +
+        '<div class="cmp-mark-pill">' +
+        SHAPES.map((s, i) =>
+          '<button class="cmp-mark-seg' +
+          (mine[i] ? ' on' : '') +
+          '" data-wid="' + w.id +
+          '" data-si="' + i +
+          '" title="' + escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) + '">' +
+          s + '</button>'
+        ).join('') +
+        '</div></div>'
+      );
+    })
+    .join('');
+
+  return colHeaders + rowsHtml;
 }
 
 // ── Group comparison section ──────────────────────────────────
@@ -569,57 +628,20 @@ function buildImportedBody() {
       'Use <b>↓ Import List</b> to add one.</div>';
   } else {
     const importedIds = imp ? new Set(Object.keys(imp.marks).map(Number)) : new Set();
-    const rows = state.wazaData.filter((w) => importedIds.has(w.id));
 
-    const colHeaders =
-      '<div class="cmp-col-headers">' +
-      '<span>Waza</span><span>Their marks</span><span>Your marks</span>' +
-      '</div>';
+    const theirMarkingsLookup = {};
+    if (imp) {
+      for (const [wazaId, mark] of Object.entries(imp.marks)) {
+        theirMarkingsLookup[+wazaId] = mark.markings || Array(6).fill(false);
+      }
+    }
 
-    const rowsHtml = rows
-      .map((w) => {
-        const importedMark = imp
-          ? imp.marks[w.id] || { markings: Array(6).fill(false) }
-          : { markings: Array(6).fill(false) };
-        const myMarkings = (getP(w.id).markings || Array(6).fill(false)).slice();
-        const impMarkings = importedMark.markings || Array(6).fill(false);
-        return (
-          '<div class="cmp-row" data-id="' +
-          w.id +
-          '">' +
-          '<div class="cmp-names">' +
-          '<div class="cmp-name-jp">' +
-          escapeHtml(w.name_jp || '—') +
-          '</div>' +
-          '<div class="cmp-name-en">' +
-          escapeHtml(dispName(w)) +
-          '</div>' +
-          '</div>' +
-          '<div class="cmp-markings-imported">' +
-          markingPips(impMarkings) +
-          '</div>' +
-          '<div class="cmp-mark-pill">' +
-          SHAPES.map(
-            (s, i) =>
-              '<button class="cmp-mark-seg' +
-              (myMarkings[i] ? ' on' : '') +
-              '" data-wid="' +
-              w.id +
-              '" data-si="' +
-              i +
-              '" title="' +
-              escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
-              '">' +
-              s +
-              '</button>',
-          ).join('') +
-          '</div></div>'
-        );
-      })
-      .join('');
-
-    const empty = !rows.length ? '<div class="cmp-empty">This list has no marks.</div>' : '';
-    rowsSection = (rows.length ? colHeaders : '') + rowsHtml + empty;
+    rowsSection = buildCompareMarkingTableRowsHTML(
+      importedIds,
+      theirMarkingsLookup,
+      'Their marks',
+      'This list has no marks.'
+    );
   }
 
   return controlsHtml + labelsHtml + rowsSection;
