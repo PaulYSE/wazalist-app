@@ -163,7 +163,9 @@ function buildCompareMarkingTableRowsHTML(wazaIds, theirMarkings, theirName, emp
   const colHeaders =
     '<div class="cmp-col-headers">' +
     '<span>Waza</span>' +
-    '<span>' + escapeHtml(theirName) + '</span>' +
+    '<span>' +
+    escapeHtml(theirName) +
+    '</span>' +
     '<span>Your marks</span>' +
     '</div>';
 
@@ -174,20 +176,34 @@ function buildCompareMarkingTableRowsHTML(wazaIds, theirMarkings, theirName, emp
       const mine = (getP(w.id).markings || Array(6).fill(false)).slice();
 
       return (
-        '<div class="cmp-row" data-id="' + w.id + '">' +
+        '<div class="cmp-row" data-id="' +
+        w.id +
+        '">' +
         '<div class="cmp-names">' +
-        '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>' +
-        '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>' +
+        '<div class="cmp-name-jp">' +
+        escapeHtml(w.name_jp || '—') +
         '</div>' +
-        '<div class="cmp-markings-imported">' + markingPips(theirs) + '</div>' +
+        '<div class="cmp-name-en">' +
+        escapeHtml(dispName(w)) +
+        '</div>' +
+        '</div>' +
+        '<div class="cmp-markings-imported">' +
+        markingPips(theirs) +
+        '</div>' +
         '<div class="cmp-mark-pill">' +
-        SHAPES.map((s, i) =>
-          '<button class="cmp-mark-seg' +
-          (mine[i] ? ' on' : '') +
-          '" data-wid="' + w.id +
-          '" data-si="' + i +
-          '" title="' + escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) + '">' +
-          s + '</button>'
+        SHAPES.map(
+          (s, i) =>
+            '<button class="cmp-mark-seg' +
+            (mine[i] ? ' on' : '') +
+            '" data-wid="' +
+            w.id +
+            '" data-si="' +
+            i +
+            '" title="' +
+            escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
+            '">' +
+            s +
+            '</button>',
         ).join('') +
         '</div></div>'
       );
@@ -640,7 +656,7 @@ function buildImportedBody() {
       importedIds,
       theirMarkingsLookup,
       'Their marks',
-      'This list has no marks.'
+      'This list has no marks.',
     );
   }
 
