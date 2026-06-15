@@ -312,11 +312,14 @@ export default {
 			// Delete child rows first, then the user — in one atomic batch.
 			// FK cascade can't be relied on (enforcement is off by default, and
 			// progress/contributions have no ON DELETE rule anyway).
+			// src/index.ts — DELETE /api/account
 			await env.DB.batch([
-				env.DB.prepare("DELETE FROM sessions      WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM progress      WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM contributions WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM users         WHERE id      = ?").bind(user.id),
+				env.DB.prepare("DELETE FROM sessions             WHERE user_id = ?").bind(user.id),
+				env.DB.prepare("DELETE FROM progress             WHERE user_id = ?").bind(user.id),
+				env.DB.prepare("DELETE FROM contributions        WHERE user_id = ?").bind(user.id),
+				env.DB.prepare("DELETE FROM group_members        WHERE user_id = ?").bind(user.id),  // ← ADD
+				env.DB.prepare("DELETE FROM group_applications   WHERE user_id = ?").bind(user.id),  // ← ADD
+				env.DB.prepare("DELETE FROM users                WHERE id      = ?").bind(user.id),
 			]);
 
 			return json({ success: true });

@@ -76,6 +76,7 @@ async function doLogin() {
   state.currentUsername = res.user.username;
   localStorage.setItem('wl_username', state.currentUsername);
   state.isAdmin = !!res.user.is_admin;
+  state.currentUserId = res.user.id;
   initApp();
 }
 
@@ -118,6 +119,7 @@ async function doRegister() {
     localStorage.setItem('wl_token', state.token);
     state.currentUsername = li.user.username;
     localStorage.setItem('wl_username', state.currentUsername);
+    state.currentUserId = li.user.id;
     initApp();
     showOnboarding();
   }
