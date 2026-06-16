@@ -241,7 +241,7 @@ function renderGroupList() {
       selectedGroupId = +el.dataset.gid;
       renderGroupList();
       renderGroupDetail(selectedGroupId);
-      document.querySelector('.main').classList.add('waza-selected');
+      document.querySelector('#groupsView .main').classList.add('waza-selected');
     });
   });
 }
@@ -538,7 +538,7 @@ async function renderGroupDetail(groupId) {
       await refreshGroups();
       document.getElementById('groupDetailContent').innerHTML =
         '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
-      document.querySelector('.main').classList.remove('waza-selected');
+      document.querySelector('#groupsView .main').classList.remove('waza-selected');
     });
 
     // Approve / Reject applications
@@ -645,7 +645,7 @@ export function initGroups() {
   wireCreateGroupBtn();
   document.getElementById('groupMobileBack')?.addEventListener('click', () => {
     selectedGroupId = null;
-    document.querySelector('.main').classList.remove('waza-selected');
+    document.querySelector('#groupsView .main').classList.remove('waza-selected');
     renderGroupList();
     document.getElementById('groupDetailContent').innerHTML =
       '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
