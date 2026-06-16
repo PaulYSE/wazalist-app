@@ -28,6 +28,16 @@ import { refreshMyGroups } from './groups.js';
 /** @brief Cached data from the last successful group comparison API call. */
 let _lastGroupData = null;
 
+// ── Module-level state ────────────────────────────────────────
+/** @brief Key of the currently displayed imported list. */
+let compareSelectedKey = null;
+
+/**
+ * @brief Which accordion is currently open.
+ * 'group' | 'imported' | null (both collapsed)
+ */
+let activeAccordion = null;
+
 // ── Compare Table Builder ──────────────────────────────────
 
 /**
@@ -414,6 +424,7 @@ function wireGroupContent(container) {
       memberSel.disabled = false;
     } catch {
       memberSel.innerHTML = '<option value="">Couldn\'t load members</option>';
+      memberSel.disabled = false;
     }
   });
 
@@ -485,16 +496,6 @@ function wireGroupContent(container) {
     loadBtn.textContent = 'Compare';
   });
 }
-
-// ── Module-level state ────────────────────────────────────────
-/** @brief Key of the currently displayed imported list. */
-let compareSelectedKey = null;
-
-/**
- * @brief Which accordion is currently open.
- * 'group' | 'imported' | null (both collapsed)
- */
-let activeAccordion = null;
 
 // ── Data helpers ──────────────────────────────────────────────
 
