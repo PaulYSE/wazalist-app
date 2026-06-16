@@ -619,10 +619,8 @@ export default {
 
 		// Generate invite key if needed
 		let invite_key: string | null = null;
-		if (join_policy === "invite") {
-			const buf = crypto.getRandomValues(new Uint8Array(32));
-			invite_key = Array.from(buf).map(b => b.toString(16).padStart(2, "0")).join("");
-		}
+		const buf = crypto.getRandomValues(new Uint8Array(32));
+		invite_key = Array.from(buf).map(b => b.toString(16).padStart(2, "0")).join("");
 
 		const result = await env.DB.prepare(`
 			INSERT INTO groups (name, join_policy, invite_key, social, created_by)
@@ -1074,7 +1072,6 @@ export default {
 			"SELECT join_policy, invite_key FROM groups WHERE id = ?"
 		).bind(groupId).first();
 		if (!group) return err("Group not found", 404);
-		if ((group.join_policy as string) !== "invite") return err("This group does not use invite keys");
 
 		return json({ invite_key: group.invite_key });
 		}

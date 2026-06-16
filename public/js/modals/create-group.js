@@ -60,7 +60,7 @@ function renderSocialList(container, links) {
  * @return {Array<{platform:string,url:string}>}
  */
 function readSocialList(container) {
-  const rows = container.querySelectorAll('[data-si]');
+  const rows = container.querySelectorAll(':scope > [data-si]');
   const result = [];
   rows.forEach((row) => {
     const platform = row.querySelector('.sg-platform').value.trim();
@@ -197,10 +197,8 @@ export function openEditGroup(group, onSuccess) {
     renderSocialList(document.getElementById('eg-social-list'), socialLinks);
   });
 
-  // Show current invite key if policy is invite
-  if (group.join_policy === 'invite') {
-    _showInviteKeySection(_editGroupId);
-  }
+  // Show invite key
+  _showInviteKeySection(_editGroupId);
 }
 
 /**
@@ -219,7 +217,7 @@ async function _showInviteKeySection(groupId) {
   section.innerHTML =
     '<div class="cfield">' +
     '<label>Invite key</label>' +
-    '<div id="eg-current-key" style="font-family:monospace;font-size:12px;word-break:break-all;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);margin-bottom:8px;user-select:all">Loading…</div>' +
+    '<div id="eg-current-key" style="font-family:monospace;font-size:12px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);margin-bottom:8px;user-select:all;overflow:hidden;text-overflow:ellipsis;">Loading…</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn" id="eg-copy-key" style="font-size:12px">Copy key</button>' +
     '<button class="btn" id="eg-regen-key" style="font-size:12px;color:var(--amber);border-color:var(--amber)">🔑 Regenerate</button>' +

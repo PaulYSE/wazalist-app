@@ -14,11 +14,84 @@ import { escapeHtml } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
 import { openCreateGroup, openEditGroup } from '../modals/create-group.js';
 
+// ── TEMPORARY: BLOCK START ────────────────────────────────────
+// ── Admin-only access during development ──────────────────────
+// TODO: Remove this block when Groups feature is ready for all users.
+
+/**
+ * @brief Hides the Groups tab from non-admin users.
+ *
+ * Call this manually from the dev console after login:
+ *   enableGroupsForAdmins()
+ *
+ * @return {void}
+ */
+function enableGroupsForAdmins() {
+  const isAdmin = state.isAdmin;
+  document.querySelector('.ntab[data-tab="groups"]').style.display = isAdmin ? '' : 'none';
+  document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = isAdmin
+    ? ''
+    : 'none';
+  document.getElementById('groupsView').style.display = isAdmin ? '' : 'none';
+}
+enableGroupsForAdmins();
+
+// Expose globally for dev-console access
+window.enableGroupsForAdmins = enableGroupsForAdmins;
+
+// ── TEMPORARY: BLOCK END ──────────────────────────────────────
+
 // ── Module state ──────────────────────────────────────────────
 
 let selectedGroupId = null;
 let groupsCache = []; // all groups from /api/groups
 let groupsLoaded = false;
+let groupSearchQuery = '';
+
+// ── Search input ──────────────────────────────────────────────
+
+/**
+ * @brief Filters the groups cache by the current search query.
+ *
+ * Matches against group name only. Case-insensitive partial match.
+ *
+ * @return {Object[]} Filtered array of group objects.
+ */
+function filterGroups() {
+  if (!groupSearchQuery) return groupsCache;
+  const q = groupSearchQuery.toLowerCase();
+  return groupsCache.filter((g) => g.name.toLowerCase().includes(q));
+}
+
+/**
+ * @brief Wires the group search input and clear button.
+ *
+ * Listens for input to filter the group list, and clears the search
+ * when the clear button is clicked. Updates renderGroupList on change.
+ *
+ * @return {void}
+ */
+function wireGroupSearchInput() {
+  const searchInput = document.getElementById('groupSearchInput');
+  const searchClear = document.getElementById('groupSearchClear');
+
+  searchInput?.addEventListener('input', (e) => {
+    groupSearchQuery = e.target.value.trim();
+    renderGroupList();
+  });
+
+  searchClear?.addEventListener('click', () => {
+    searchInput.value = '';
+    groupSearchQuery = '';
+    searchInput.focus();
+    renderGroupList();
+  });
+
+  // Show/hide clear button based on input value
+  searchInput?.addEventListener('input', (e) => {
+    searchInput.closest('.search-wrap')?.classList.toggle('has-value', !!e.target.value);
+  });
+}
 
 // ── Entry point ───────────────────────────────────────────────
 
@@ -93,6 +166,20 @@ const POLICY_CLASS = {
   invite: 'ct-edit',
 };
 
+function makeCreateGroupBtn(id, style, text) {
+  if (state.isGuest || !state.token) return '';
+
+  return '<button class="btn" id="' + id + '" style="' + style + '">' + text + '</button>';
+}
+function wireCreateGroupBtn(id) {
+  document.getElementById(id)?.addEventListener('click', () => {
+    openCreateGroup(async () => {
+      groupsLoaded = false;
+      await refreshGroups();
+    });
+  });
+}
+
 /**
  * @brief Renders the left-panel group list.
  *
@@ -103,36 +190,26 @@ function renderGroupList() {
   const listEl = document.getElementById('groupList');
   if (!countBar || !listEl) return;
 
+  const filtered = filterGroups();
   const loggedIn = !state.isGuest && !!state.token;
-  const createBtn = loggedIn
-    ? '<button class="btn" id="createGroupBtn" style="margin-left:auto;font-size:12px">+ Create Group</button>'
-    : '';
 
   countBar.innerHTML =
-    '<span>' +
-    groupsCache.length +
-    ' Group' +
-    (groupsCache.length !== 1 ? 's' : '') +
-    '</span>' +
-    createBtn;
+    '<span>' + filtered.length + ' Group' + (filtered.length !== 1 ? 's' : '') + '</span>';
 
-  document.getElementById('createGroupBtn')?.addEventListener('click', () => {
-    openCreateGroup(async () => {
-      groupsLoaded = false;
-      await refreshGroups();
-    });
-  });
-
-  if (!groupsCache.length) {
+  if (!filtered.length) {
     listEl.innerHTML =
       '<div style="padding:24px 20px;text-align:center;color:var(--text3);font-size:13px">' +
-      'No Groups yet.' +
-      (loggedIn ? ' Be the first to <b>create one</b>!' : ' Sign in to create one.') +
+      '<div style="font-size:14px;color:var(--text2)">No Group found</div>' +
+      '<div style="margin-top:10px;font-size:13px">Can\'t find the Group you\'re looking for?</div>' +
+      (loggedIn
+        ? makeCreateGroupBtn('groupNoResultAddBtn', 'margin-top:12px', '+ Create a Group!')
+        : '<div style="margin-top:6px;font-size:12px">Sign in to help add it to the database.</div>') +
       '</div>';
+    wireCreateGroupBtn('groupNoResultAddBtn');
     return;
   }
 
-  listEl.innerHTML = groupsCache
+  listEl.innerHTML = filtered
     .map(
       (g) =>
         '<div class="waza-list' +
@@ -356,6 +433,8 @@ async function renderGroupDetail(groupId) {
           const keyRes = await api('/api/groups/' + groupId + '/my-status');
           // Key is only visible to admins — fetch it separately via edit endpoint
           // We'll reveal it via the Edit Group modal instead of inline
+
+          // TODO: display keyRes to admin
         }
       }
     }
@@ -562,6 +641,8 @@ async function renderGroupDetail(groupId) {
  * @return {void}
  */
 export function initGroups() {
+  wireGroupSearchInput();
+  wireCreateGroupBtn();
   document.getElementById('groupMobileBack')?.addEventListener('click', () => {
     selectedGroupId = null;
     document.querySelector('.main').classList.remove('waza-selected');

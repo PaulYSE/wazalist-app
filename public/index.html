@@ -186,11 +186,10 @@
             <span class="mob-menu-item-icon">⚖️</span>
             <span>Compare</span>
           </button>
-          <!-- WIP HIDDEN SEARCH VISIBILITY HERE
           <button class="mob-menu-item" data-menu-tab="groups">
             <span class="mob-menu-item-icon">👥</span>
             <span>Groups</span>
-          </button> -->
+          </button>
           <button class="mob-menu-item" data-menu-tab="contribute">
             <span class="mob-menu-item-icon">✏️</span>
             <span>Contribute</span>
@@ -235,8 +234,7 @@
         <button class="ntab active" data-tab="browse">Explore</button>
         <button class="ntab" data-tab="stats">Stats</button>
         <button class="ntab" data-tab="compare">Compare</button>
-        <!-- WIP HIDDEN SEARCH VISIBILITY HERE
-        <button class="ntab" data-tab="groups">Groups</button> -->
+        <button class="ntab" data-tab="groups">Groups</button>
         <button class="ntab" data-tab="contribute">Contribute</button>
         <button class="ntab" data-tab="account">Account</button>
       </div>
@@ -381,7 +379,18 @@
       </div>
 
       <!-- GROUPS -->
-      <div id="groupsView" style="display: none; flex: 1; overflow: hidden">
+      <div id="groupsView" style="display: none; flex-direction: column; flex: 1; overflow: hidden">
+        <div class="search-row">
+          <div class="search-wrap">
+            <input
+              id="groupSearchInput"
+              type="search"
+              placeholder="Search Groups by name…"
+              autocomplete="off"
+            />
+            <button class="search-clear" id="groupSearchClear" aria-label="Clear search">✕</button>
+          </div>
+        </div>
         <div class="main">
           <div class="list-panel" id="groupListPanel">
             <div class="count-bar" id="groupCountBar">Loading…</div>
