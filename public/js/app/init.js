@@ -14,7 +14,7 @@ import {
   renderList,
   syncBrowseViewControls,
   syncBrowseSortControls,
-} from '../views/browse-list.js';
+} from '../views/waza-browse-list.js';
 import { selectWazaFromHistory, renderDetail } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
 import { activateTab, startWazaPlaceholderRotation } from './shell.js';

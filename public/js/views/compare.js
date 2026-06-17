@@ -23,7 +23,7 @@ import {
   saveImported,
   openExportModal,
 } from '../features/share-list.js';
-import { refreshMyGroups } from './groups.js';
+import { refreshMyGroups } from './groups-browse-list.js';
 
 /** @brief Cached data from the last successful group comparison API call. */
 let _lastGroupData = null;

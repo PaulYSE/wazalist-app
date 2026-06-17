@@ -13,7 +13,7 @@ import { state } from '../state/state.js';
 import { LS_LABELS } from '../state/localStorage.js';
 import { SHAPES, MARKING_LABELS_TEMPLATE } from '../config/constants.js';
 import { wazaMatchesSearch, dispName } from '../lib/search.js';
-import { setBrowseView } from '../views/browse-list.js';
+import { setBrowseView } from '../views/waza-browse-list.js';
 import {
   markingStyle, // used in renderList() for all 3 view modes
   markingPips, // used in renderList() and renderDetail()

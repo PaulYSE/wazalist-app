@@ -10,7 +10,7 @@
 import { state } from './state/state.js';
 import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
-import { initBrowseList, renderList } from './views/browse-list.js';
+import { initBrowseList, renderList } from './views/waza-browse-list.js';
 import {
   initWazaDetail,
   selectWazaFromHistory,
@@ -25,7 +25,7 @@ import { parseRoute } from './app/router.js';
 import { initTheme } from './services/theme.js';
 import { renderDashStats } from './views/stats.js';
 import { renderDashCompare } from './views/compare.js';
-import { initGroups } from './views/groups.js';
+import { initGroups } from './views/groups-browse-list.js';
 import { initCreateGroup } from './modals/group-new.js';
 import { initEditGroup } from './modals/group-edit.js';
 

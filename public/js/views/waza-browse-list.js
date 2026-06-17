@@ -1,5 +1,5 @@
 /**
- * @file browse-list.js
+ * @file waza-browse-list.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
