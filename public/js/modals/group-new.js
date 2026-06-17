@@ -8,7 +8,7 @@
  */
 
 import { api } from '../services/api.js';
-import { renderSocialList, readSocialList } from "../components/render-group-helpers.js"
+import { renderSocialList, readSocialList } from '../components/render-groups-socials.js';
 
 // Callbacks set when modals are opened
 let _onCreate = null;

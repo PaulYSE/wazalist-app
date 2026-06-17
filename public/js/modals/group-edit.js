@@ -8,8 +8,105 @@
  */
 
 import { api } from '../services/api.js';
-import { renderSocialList, readSocialList } from '../components/render-group-helpers.js';
+import { renderSocialList, readSocialList } from '../components/render-groups-socials.js';
 import { getGroupInviteKey, createGroupInviteKey } from '../services/groups-api.js';
+
+// ── Invite key ───────────────────────────
+
+/**
+ * @brief Generates the HTML for the invite key section.
+ *
+ * @param {string} idPrefix - Prefix for DOM IDs (e.g., 'eg' for edit group).
+ * @return {string} HTML string for the invite key section.
+ */
+function renderGroupInviteKeyHTML(idPrefix) {
+  return (
+    '<div class="cfield">' +
+    '<label>Invite key</label>' +
+    '<div id="' +
+    idPrefix +
+    '-current-key" style="font-family:monospace;font-size:12px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);margin-bottom:8px;user-select:all;overflow:hidden;text-overflow:ellipsis;">Loading…</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn" id="' +
+    idPrefix +
+    '-copy-key" style="font-size:12px">Copy key</button>' +
+    '<button class="btn" id="' +
+    idPrefix +
+    '-regen-key" style="font-size:12px;color:var(--amber);border-color:var(--amber)">🔑 Regenerate</button>' +
+    '</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:6px">Regenerating invalidates the old key immediately.</div>' +
+    '</div>'
+  );
+}
+
+/**
+ * @brief Wires copy and regenerate event handlers for the invite key section.
+ *
+ * @param {HTMLElement} section - The section container element.
+ * @param {string} idPrefix - Prefix for DOM IDs used in the section.
+ * @param {number} groupId - The ID of the group.
+ * @return {void}
+ */
+function wireGroupInviteKeyEvents(section, idPrefix, groupId) {
+  const keyDisplay = section.querySelector('#' + idPrefix + '-current-key');
+  const copyBtn = section.querySelector('#' + idPrefix + '-copy-key');
+  const regenBtn = section.querySelector('#' + idPrefix + '-regen-key');
+
+  // Copy handler
+  copyBtn.addEventListener('click', async () => {
+    const key = keyDisplay.textContent;
+    if (!key || key === 'Could not load key.' || key === 'Loading…') return;
+    await navigator.clipboard.writeText(key);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy key';
+    }, 1800);
+  });
+
+  // Regenerate handler
+  regenBtn.addEventListener('click', async () => {
+    if (!confirm('Regenerate the invite key? The old key will stop working immediately.')) return;
+    regenBtn.disabled = true;
+    regenBtn.textContent = 'Regenerating…';
+    const newKey = await createGroupInviteKey(groupId);
+    keyDisplay.textContent = newKey || 'Error: Could not regenerate key.';
+    regenBtn.disabled = false;
+    regenBtn.textContent = '🔑 Regenerate';
+  });
+}
+
+/**
+ * @brief Fetches and displays the invite key section in the edit modal.
+ *
+ * Orchestrates: removing existing section, rendering HTML, appending to DOM,
+ * fetching the current key, and wiring event handlers.
+ *
+ * @param {number} groupId - The ID of the group.
+ * @param {string} idPrefix - Prefix for DOM IDs (defaults to 'eg').
+ * @return {Promise<void>}
+ */
+async function showGroupInviteKeySection(groupId, idPrefix = 'eg') {
+  // 1. Remove existing section
+  const existing = document.getElementById(idPrefix + '-invite-key-section');
+  if (existing) existing.remove();
+
+  // 2. Create and append section
+  const section = document.createElement('div');
+  section.id = idPrefix + '-invite-key-section';
+  section.style.cssText = 'margin-top:12px';
+  section.innerHTML = renderGroupInviteKeyHTML(idPrefix);
+
+  // Insert after the social list container
+  document.getElementById(idPrefix + '-social-list').parentElement.appendChild(section);
+
+  // 3. Fetch and display the current key
+  const keyDisplay = section.querySelector('#' + idPrefix + '-current-key');
+  const key = await getGroupInviteKey(groupId);
+  keyDisplay.textContent = key || 'Could not load key.';
+
+  // 4. Wire events
+  wireGroupInviteKeyEvents(section, idPrefix, groupId);
+}
 
 // ── Edit Group ────────────────────────────────────────────────
 
@@ -56,65 +153,7 @@ export function openEditGroup(group, onSuccess) {
   });
 
   // Show invite key
-  _showInviteKeySection(_editGroupId);
-}
-
-/**
- * @brief Fetches and displays the invite key for admins in the edit modal.
- *
- * Retrieves the current invite key using getGroupInviteKey and renders it
- * with Copy and Regenerate buttons. Regenerate calls createGroupInviteKey.
- *
- * @param {number} groupId - The ID of the group.
- * @return {Promise<void>}
- */
-async function _showInviteKeySection(groupId) {
-  const existing = document.getElementById('eg-invite-key-section');
-  if (existing) existing.remove();
-
-  const section = document.createElement('div');
-  section.id = 'eg-invite-key-section';
-  section.style.cssText = 'margin-top:12px';
-  section.innerHTML =
-    '<div class="cfield">' +
-    '<label>Invite key</label>' +
-    '<div id="eg-current-key" style="font-family:monospace;font-size:12px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);margin-bottom:8px;user-select:all;overflow:hidden;text-overflow:ellipsis;">Loading…</div>' +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn" id="eg-copy-key" style="font-size:12px">Copy key</button>' +
-    '<button class="btn" id="eg-regen-key" style="font-size:12px;color:var(--amber);border-color:var(--amber)">🔑 Regenerate</button>' +
-    '</div>' +
-    '<div style="font-size:12px;color:var(--text3);margin-top:6px">Regenerating invalidates the old key immediately.</div>' +
-    '</div>';
-
-  document.getElementById('eg-social-list').parentElement.appendChild(section);
-
-  const keyDisplay = section.querySelector('#eg-current-key');
-  const copyBtn = section.querySelector('#eg-copy-key');
-  const regenBtn = section.querySelector('#eg-regen-key');
-
-  // Fetch current key
-  const key = await getGroupInviteKey(groupId);
-  keyDisplay.textContent = key || 'Could not load key.';
-
-  copyBtn.addEventListener('click', async () => {
-    const key = keyDisplay.textContent;
-    if (!key || key === 'Could not load key.' || key === 'Loading…') return;
-    await navigator.clipboard.writeText(key);
-    copyBtn.textContent = 'Copied!';
-    setTimeout(() => {
-      copyBtn.textContent = 'Copy key';
-    }, 1800);
-  });
-
-  regenBtn.addEventListener('click', async () => {
-    if (!confirm('Regenerate the invite key? The old key will stop working immediately.')) return;
-    regenBtn.disabled = true;
-    regenBtn.textContent = 'Regenerating…';
-    const newKey = await createGroupInviteKey(groupId);
-    keyDisplay.textContent = newKey || 'Error: Could not regenerate key.';
-    regenBtn.disabled = false;
-    regenBtn.textContent = '🔑 Regenerate';
-  });
+  showGroupInviteKeySection(_editGroupId);
 }
 
 /**

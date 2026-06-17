@@ -1,5 +1,5 @@
 /**
- * @file groups-utils.js (partial — social link helpers)
+ * @file render-groups-helpers.js (partial — social link helpers)
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
