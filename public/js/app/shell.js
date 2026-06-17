@@ -14,7 +14,7 @@ import { renderAccount } from '../views/account.js';
 import { renderContribute } from '../views/contribute.js';
 import { renderList, setBrowseView, setBrowseSort, surpriseMe } from '../views/browse-list.js';
 import { doLogout } from '../services/auth.js';
-import { openNewWazaModal } from '../modals/new-waza.js';
+import { openNewWazaModal } from '../modals/waza-new.js';
 import { pushRoute } from './router.js';
 import { closeDetailNoHistory } from '../views/waza-detail.js';
 import { renderGroups } from '../views/groups.js';

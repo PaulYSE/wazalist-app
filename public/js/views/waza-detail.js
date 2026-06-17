@@ -20,7 +20,7 @@ import { SHAPES, platLabel, platColor } from '../config/constants.js';
 import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
-import { openSuggestEdit, openVideoSuggest } from '../modals/suggest-edit.js';
+import { openSuggestEdit, openVideoSuggest } from '../modals/waza-edit.js';
 import { renderList, updateListRowMarkings, surpriseMe } from './browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';

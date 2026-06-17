@@ -19,7 +19,7 @@ import { getP } from '../services/progress.js';
 import { selectWaza } from './waza-detail.js';
 import { LS_VIEW, LS_SORT } from '../state/localStorage.js';
 import { updateMarkingFilterUI, setSearchInput } from '../app/shell.js';
-import { openNewWazaModal } from '../modals/new-waza.js';
+import { openNewWazaModal } from '../modals/waza-new.js';
 
 // ── Browse sort ───────────────────────────────────────────────
 // Single entry point for changing sort. Pass either field, order, or both;

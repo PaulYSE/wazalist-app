@@ -1,5 +1,5 @@
 /**
- * @file new-waza.js
+ * @file waza-new.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App

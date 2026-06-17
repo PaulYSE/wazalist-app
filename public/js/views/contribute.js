@@ -11,7 +11,7 @@ import { state } from '../state/state.js';
 import { api } from '../services/api.js';
 import { doLogout } from '../services/auth.js';
 import { escapeHtml } from '../lib/escape.js';
-import { openNewWazaModal } from '../modals/new-waza.js';
+import { openNewWazaModal } from '../modals/waza-new.js';
 
 /**
  * @brief Renders the contribute view with sign-in prompt, action buttons, and contribution history.

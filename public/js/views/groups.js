@@ -12,7 +12,9 @@ import { api } from '../services/api.js';
 import { state } from '../state/state.js';
 import { escapeHtml } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
-import { openCreateGroup, openEditGroup } from '../modals/create-group.js';
+import { openCreateGroup } from '../modals/group-new.js';
+import { openEditGroup } from '../modals/group-edit.js';
+import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
 
 // ── TEMPORARY: BLOCK START ────────────────────────────────────
 // ── Admin-only access during development ──────────────────────
@@ -153,19 +155,6 @@ export async function refreshMyGroups() {
 }
 
 // ── Group list panel ──────────────────────────────────────────
-
-const POLICY_LABEL = {
-  open: 'Open',
-  approval: 'Approval',
-  invite: 'Invite only',
-};
-
-const POLICY_CLASS = {
-  open: 'cs-approved',
-  approval: 'cs-pending',
-  invite: 'ct-edit',
-};
-
 function makeCreateGroupBtn(id, style, text) {
   if (state.isGuest || !state.token) return '';
 
@@ -426,15 +415,6 @@ async function renderGroupDetail(groupId) {
           }
         } catch {
           /* non-fatal */
-        }
-
-        // Show invite key if policy is invite
-        if (g.join_policy === 'invite') {
-          const keyRes = await api('/api/groups/' + groupId + '/my-status');
-          // Key is only visible to admins — fetch it separately via edit endpoint
-          // We'll reveal it via the Edit Group modal instead of inline
-
-          // TODO: display keyRes to admin
         }
       }
     }

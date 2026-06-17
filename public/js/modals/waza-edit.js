@@ -1,5 +1,5 @@
 /**
- * @file suggest-edit.js
+ * @file waza-edit.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App

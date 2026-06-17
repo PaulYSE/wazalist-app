@@ -18,15 +18,16 @@ import {
 } from './views/waza-detail.js';
 import { initUi, closeMobMenu, activateTab } from './app/shell.js';
 import { initShare } from './features/share-list.js';
-import { initNewWaza } from './modals/new-waza.js';
-import { initSuggestEdit, initFieldEdit } from './modals/suggest-edit.js';
+import { initNewWaza } from './modals/waza-new.js';
+import { initSuggestEdit, initFieldEdit } from './modals/waza-edit.js';
 import { initOnboarding, showOnboarding } from './features/onboarding.js';
 import { parseRoute } from './app/router.js';
 import { initTheme } from './services/theme.js';
 import { renderDashStats } from './views/stats.js';
 import { renderDashCompare } from './views/compare.js';
 import { initGroups } from './views/groups.js';
-import { initCreateGroup, initEditGroup } from './modals/create-group.js';
+import { initCreateGroup } from './modals/group-new.js';
+import { initEditGroup } from './modals/group-edit.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
