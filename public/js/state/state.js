@@ -34,10 +34,6 @@ const savedSort = loadSortPrefs();
  * sort preferences, view mode, and custom marking labels.
  */
 export const state = {
-  token: localStorage.getItem('wl_token') || '',
-  isGuest: false,
-  currentUsername: localStorage.getItem('wl_username') || '',
-  isAdmin: false,
   wazaData: [],
   prog: {},
   selectedId: null,
@@ -48,9 +44,6 @@ export const state = {
   browseSortOrder: savedSort.order,
   browseListView: localStorage.getItem(LS_VIEW) || 'expanded',
   markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
-  myGroups: [], // [{ id, name, role }] — groups the user belongs to
-  myGroupsLoaded: false,
-  currentUserId: null, // set on login/session restore for group member comparisons
 };
 
 // ── Import-from-text shared state ─────────────────────────────

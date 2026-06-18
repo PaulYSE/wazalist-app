@@ -24,6 +24,12 @@ import {
   openExportModal,
 } from '../features/share-list.js';
 import { refreshMyGroups } from './groups-browse-list.js';
+import {
+  getCurrentUserId,
+  getMyGroups,
+  isLoggedIn,
+  resetMyGroupsLoaded,
+} from '../state/user-state.js';
 
 /** @brief Cached data from the last successful group comparison API call. */
 let _lastGroupData = null;
@@ -345,10 +351,11 @@ function renderCompareResult() {
  * The actual member list is fetched lazily when the user picks a group,
  * so this stays synchronous and fast.
  *
- * @param {boolean} loggedIn - Whether the current user is authenticated.
  * @return {string} HTML string.
  */
-function buildGroupBody(loggedIn) {
+function buildGroupBody() {
+  const loggedIn = isLoggedIn();
+
   if (!loggedIn) {
     return (
       '<div style="font-size:13px;color:var(--text3)">' +
@@ -362,7 +369,7 @@ function buildGroupBody(loggedIn) {
     // Group picker — populated from state.myGroups (already loaded)
     '<select id="cmpGroupSelect" class="cmp-select" style="min-width:160px">' +
     '<option value="">Select Group</option>' +
-    state.myGroups
+    getMyGroups()
       .map((g) => '<option value="' + g.id + '">' + escapeHtml(g.name) + '</option>')
       .join('') +
     '</select>' +
@@ -407,7 +414,7 @@ function wireGroupContent(container) {
 
     try {
       const members = await api('/api/groups/' + gid + '/members');
-      const others = members.filter((m) => m.user_id !== state.currentUserId);
+      const others = members.filter((m) => m.user_id !== getCurrentUserId());
       memberSel.innerHTML =
         '<option value="">— Select a member —</option>' +
         others
@@ -702,14 +709,15 @@ function wireCompareImportTable(container) {
  */
 export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
-  const loggedIn = !state.isGuest && !!state.token;
+  const loggedIn = isLoggedIn();
 
   // Re-check group membership every time the Compare tab is opened.
   // refreshMyGroups() is a no-op if already loaded; we reset the flag
   // to force a fresh fetch each time so the accordion visibility is current.
-  state.myGroupsLoaded = false;
+  resetMyGroupsLoaded();
   await refreshMyGroups();
-  const hasGroups = loggedIn && state.myGroups && state.myGroups.length > 0;
+  const myGroups = getMyGroups();
+  const hasGroups = loggedIn && myGroups && myGroups.length > 0;
 
   // If the group accordion was open but the user no longer has groups
   // (e.g. they left their last group), collapse it silently.
@@ -720,7 +728,7 @@ export async function renderDashCompare() {
 
   // ── Build accordion bodies (only when open — avoids rendering heavy
   //    row lists that would never be visible while collapsed) ──────
-  const groupBody = activeAccordion === 'group' ? buildGroupBody(loggedIn) : '';
+  const groupBody = activeAccordion === 'group' ? buildGroupBody() : '';
 
   const importedBody = activeAccordion === 'imported' ? buildImportedBody() : '';
 

@@ -10,6 +10,7 @@
 import { state } from '../state/state.js';
 import { showToast } from '../components/show-toast.js';
 import { SHAPES, EXPORT_MARK_COLORS } from '../config/constants.js';
+import { getCurrentUsername, getIsGuest } from '../state/user-state.js';
 
 /**
  * @brief Selects the best video URL for Excel hyperlink.
@@ -64,7 +65,7 @@ export async function exportToExcel() {
     return;
   }
 
-  const headerName = !state.isGuest && state.currentUsername ? state.currentUsername : 'Guest';
+  const headerName = !getIsGuest() && getCurrentUsername() ? getCurrentUsername() : 'Guest';
 
   if (btn) {
     btn.disabled = true;

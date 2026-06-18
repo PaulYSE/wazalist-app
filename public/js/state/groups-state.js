@@ -24,119 +24,78 @@ const groupState = {
   groupsSearchQuery: '',
 };
 
-// ── Getters ──────────────────────────────────────────────────
+// ── Selected ID ──────────────────────────────────────────────
 
 /**
- * @brief Gets the currently selected group ID.
+ * @brief Accessors for the currently selected group ID.
  *
- * @return {number|null}
+ * - getGroupsSelectedId() → {number|null}
+ * - setGroupsSelectedId(id) → {void}
+ * - resetGroupsSelectedId() → {void}
  */
 export function getGroupsSelectedId() {
   return groupState.groupsSelectedId;
 }
-
-/**
- * @brief Gets the cached groups data.
- *
- * @return {Object[]}
- */
-export function getGroupsData() {
-  return groupState.groupsData;
-}
-
-/**
- * @brief Gets whether groups are loaded.
- *
- * @return {boolean}
- */
-export function getGroupsLoaded() {
-  return groupState.groupsLoaded;
-}
-
-/**
- * @brief Gets the current group search query.
- *
- * @return {string}
- */
-export function getGroupsSearchQuery() {
-  return groupState.groupsSearchQuery;
-}
-
-// ── Setters ──────────────────────────────────────────────────
-
-/**
- * @brief Sets the selected group ID.
- *
- * @param {number|null} id - Group ID to select, or null to clear.
- * @return {void}
- */
 export function setGroupsSelectedId(id) {
   groupState.groupsSelectedId = id;
 }
-
-/**
- * @brief Updates the groups cache with a fresh list.
- *
- * @param {Object[]} groups - Array of group objects.
- * @return {void}
- */
-export function setGroupsData(groups) {
-  groupState.groupsData = Array.isArray(groups) ? groups : [];
-}
-
-/**
- * @brief Marks the group list as loaded.
- *
- * @return {void}
- */
-export function setGroupsLoaded() {
-  groupState.groupsLoaded = true;
-}
-
-/**
- * @brief Sets the group search query.
- *
- * @param {string} query - Search query string.
- * @return {void}
- */
-export function setGroupsSearchQuery(query) {
-  groupState.groupsSearchQuery = query;
-}
-
-// ── Individual resets ────────────────────────────────────────
-
-/**
- * @brief Resets the selected group ID to null.
- *
- * @return {void}
- */
 export function resetGroupsSelectedId() {
   groupState.groupsSelectedId = null;
 }
 
+// ── Groups Data ──────────────────────────────────────────────
+
 /**
- * @brief Resets the groups data cache to an empty array.
+ * @brief Accessors for the cached groups data.
  *
- * @return {void}
+ * - getGroupsData() → {Object[]}
+ * - setGroupsData(groups) → {void}
+ * - resetGroupsData() → {void}
  */
+export function getGroupsData() {
+  return groupState.groupsData;
+}
+export function setGroupsData(groups) {
+  groupState.groupsData = Array.isArray(groups) ? groups : [];
+}
 export function resetGroupsData() {
   groupState.groupsData = [];
 }
 
+// ── Loaded Flag ──────────────────────────────────────────────
+
 /**
- * @brief Resets the groups loaded flag to false.
+ * @brief Accessors for the groups loaded flag.
  *
- * @return {void}
+ * - getGroupsLoaded() → {boolean}
+ * - setGroupsLoaded() → {void}
+ * - resetGroupsLoaded() → {void}
  */
+export function getGroupsLoaded() {
+  return groupState.groupsLoaded;
+}
+export function setGroupsLoaded() {
+  groupState.groupsLoaded = true;
+}
 export function resetGroupsLoaded() {
   groupState.groupsLoaded = false;
 }
 
+// ── Search Query ─────────────────────────────────────────────
+
 /**
- * @brief Resets the group search query to an empty string.
+ * @brief Accessors for the group search query.
  *
- * @return {void}
+ * - getGroupsSearchQuery() → {string}
+ * - setGroupsSearchQuery(query) → {void}
+ * - resetGroupsSearchQuery() → {void}
  */
+export function getGroupsSearchQuery() {
+  return groupState.groupsSearchQuery;
+}
+export function setGroupsSearchQuery(query) {
+  groupState.groupsSearchQuery = query;
+}
 export function resetGroupsSearchQuery() {
   groupState.groupsSearchQuery = '';
 }

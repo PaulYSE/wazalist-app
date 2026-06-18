@@ -15,6 +15,7 @@ import { SHAPES } from '../../config/constants.js';
 import { dispName } from '../../lib/search.js';
 import { saveP, saveLabels } from '../../services/progress.js';
 import { showToast } from '../../components/show-toast.js';
+import { getIsGuest, getToken } from '../../state/user-state.js';
 
 /**
  * @brief Renders the import UI based on current parsing state.
@@ -116,7 +117,7 @@ export function renderImport() {
         const hasLabelNames = Object.keys(tiState.excelColorLabels).length > 0;
         const usedMarkings = new Set(Object.values(tiState.colorMapping).filter((idx) => idx >= 0));
 
-        if (hasLabelNames && usedMarkings.size > 0 && !state.isGuest && state.token) {
+        if (hasLabelNames && usedMarkings.size > 0 && !getIsGuest() && getToken()) {
           // Build a list of changes
           const changes = [];
           for (const [color, markingIdx] of Object.entries(tiState.colorMapping)) {

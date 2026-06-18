@@ -7,11 +7,11 @@
  * @brief Contribution view. Allows logged-in users to submit new waza suggestions and view their contribution history with status tracking.
  */
 
-import { state } from '../state/state.js';
 import { api } from '../services/api.js';
 import { doLogout } from '../services/auth.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openNewWazaModal } from '../modals/waza-new.js';
+import { isLoggedIn } from '../state/user-state.js';
 
 /**
  * @brief Renders the contribute view with sign-in prompt, action buttons, and contribution history.
@@ -20,7 +20,7 @@ import { openNewWazaModal } from '../modals/waza-new.js';
  */
 export async function renderContribute() {
   const container = document.getElementById('contributeContent');
-  const loggedIn = !state.isGuest && !!state.token;
+  const loggedIn = isLoggedIn();
 
   // Sign-in prompt for guests / logged-out users
   const authPrompt = loggedIn

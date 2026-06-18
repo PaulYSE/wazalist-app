@@ -8,13 +8,13 @@
  */
 
 import { api } from '../services/api.js';
-import { state } from '../state/state.js';
 import { escapeHtml } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
 import { openEditGroup } from '../modals/group-edit.js';
 import { refreshGroups } from './groups-browse-list.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
 import { resetGroupsLoaded, resetGroupsSelectedId } from '../state/groups-state.js';
+import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
 
 // ── Group detail panel ────────────────────────────────────────
 
@@ -30,7 +30,7 @@ export async function renderGroupDetail(groupId) {
 
   panel.innerHTML = '<div class="d-empty" style="color:var(--text3)">Loading…</div>';
 
-  const loggedIn = !state.isGuest && !!state.token;
+  const loggedIn = isLoggedIn();
 
   try {
     // Fetch detail + status in parallel
@@ -132,7 +132,7 @@ export async function renderGroupDetail(groupId) {
                 '" style="flex-shrink:0">' +
                 (m.role === 'admin' ? 'Admin' : 'Member') +
                 '</span>' +
-                (isAdmin && m.user_id !== state.currentUserId
+                (isAdmin && m.user_id !== getCurrentUserId()
                   ? '<div class="vlink-actions" style="flex-shrink:0">' +
                     '<button class="btn" data-action="set-tag" data-uid="' +
                     m.user_id +
@@ -260,7 +260,7 @@ export async function renderGroupDetail(groupId) {
     // Leave
     panel.querySelector('#leaveGroupBtn')?.addEventListener('click', async () => {
       if (!confirm('Leave ' + g.name + '?')) return;
-      const res = await api('/api/groups/' + groupId + '/members/' + state.currentUserId, 'DELETE');
+      const res = await api('/api/groups/' + groupId + '/members/' + getCurrentUserId(), 'DELETE');
       if (res.error) {
         showToast(res.error, 'red');
         return;

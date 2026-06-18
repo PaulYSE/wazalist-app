@@ -20,6 +20,7 @@ import { selectWaza } from './waza-detail.js';
 import { LS_VIEW, LS_SORT } from '../state/localStorage.js';
 import { updateMarkingFilterUI, setSearchInput } from '../app/shell.js';
 import { openNewWazaModal } from '../modals/waza-new.js';
+import { getIsGuest, getToken } from '../state/user-state.js';
 
 // ── Browse sort ───────────────────────────────────────────────
 // Single entry point for changing sort. Pass either field, order, or both;
@@ -196,7 +197,7 @@ export function renderList() {
     filtered.length + ' of ' + state.wazaData.length + ' Waza';
   const list = document.getElementById('wazaList');
   if (!filtered.length) {
-    const canAdd = !state.isGuest && !!state.token;
+    const canAdd = !getIsGuest() && !!getToken();
     list.innerHTML =
       '<div style="padding:24px 20px;text-align:center;color:var(--text3)">' +
       '<div style="font-size:14px;color:var(--text2)">No Waza found</div>' +

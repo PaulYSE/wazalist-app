@@ -20,6 +20,14 @@ import { renderDashStats } from '../views/stats.js';
 import { activateTab, startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
 import { parseRoute, replaceRoute } from './router.js';
+import {
+  getCurrentUsername,
+  getIsAdmin,
+  getIsGuest,
+  setCurrentUserId,
+  setCurrentUsername,
+  setIsAdmin,
+} from '../state/user-state.js';
 
 // ── Initialization entry point ─────────────────────────────────────
 
@@ -36,15 +44,15 @@ import { parseRoute, replaceRoute } from './router.js';
 export async function initApp() {
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-  document.getElementById('guestBadge').style.display = state.isGuest ? '' : 'none';
-  document.getElementById('logoutBtn').textContent = state.isGuest ? 'Sign in' : 'Sign out';
+  document.getElementById('guestBadge').style.display = getIsGuest() ? '' : 'none';
+  document.getElementById('logoutBtn').textContent = getIsGuest() ? 'Sign in' : 'Sign out';
   const mobLogoutBtn = document.getElementById('mobLogoutBtn');
-  mobLogoutBtn.innerHTML = state.isGuest
+  mobLogoutBtn.innerHTML = getIsGuest()
     ? '<span class="mob-menu-item-icon">←</span><span>Sign in</span>'
     : '<span class="mob-menu-item-icon">→</span><span>Sign out</span>';
   const ub = document.getElementById('usernameBadge');
-  if (!state.isGuest && state.currentUsername) {
-    ub.textContent = '@' + state.currentUsername;
+  if (!getIsGuest() && getCurrentUsername()) {
+    ub.textContent = '@' + getCurrentUsername();
     ub.style.display = '';
   } else {
     ub.style.display = 'none';
@@ -56,15 +64,15 @@ export async function initApp() {
   document.getElementById('countBar').textContent = 'Loading Waza…';
   const wazaRes = await api('/api/waza');
   state.wazaData = Array.isArray(wazaRes) ? wazaRes : [];
-  if (!state.isGuest) {
+  if (!getIsGuest()) {
     // Re-derive identity (incl. admin status) from the session token.
     // This is what fixes admin status vanishing on refresh.
     try {
       const meRes = await api('/api/me');
       if (meRes && meRes.user) {
-        state.isAdmin = !!meRes.user.is_admin;
-        state.currentUsername = meRes.user.username;
-        state.currentUserId = meRes.user.id;
+        setIsAdmin(meRes.user.is_admin);
+        setCurrentUsername(meRes.user.username);
+        setCurrentUserId(meRes.user.id);
       }
     } catch (err) {
       console.warn('Session restore error:', err);
@@ -106,7 +114,7 @@ export async function initApp() {
   renderDashStats();
 
   // Show admin-only chrome now that isAdmin is known from the session.
-  if (state.isAdmin) {
+  if (getIsAdmin()) {
     document.getElementById('adminLink').style.display = '';
     document.getElementById('mobAdminLink').style.display = '';
   }

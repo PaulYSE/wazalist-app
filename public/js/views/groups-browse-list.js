@@ -9,7 +9,6 @@
  */
 
 import { api } from '../services/api.js';
-import { state } from '../state/state.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openCreateGroup } from '../modals/group-new.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
@@ -27,6 +26,16 @@ import {
   resetGroupsSearchQuery,
   setGroupsSearchQuery,
 } from '../state/groups-state.js';
+import {
+  getIsAdmin,
+  getIsGuest,
+  getToken,
+  isLoggedIn,
+  resetMyGroups,
+  resetMyGroupsLoaded,
+  setMyGroups,
+  setMyGroupsLoaded,
+} from '../state/user-state.js';
 
 // ── TEMPORARY: BLOCK START ────────────────────────────────────
 // ── Admin-only access during development ──────────────────────
@@ -41,7 +50,7 @@ import {
  * @return {void}
  */
 function enableGroupsForAdmins() {
-  const isAdmin = state.isAdmin;
+  const isAdmin = getIsAdmin();
   document.querySelector('.ntab[data-tab="groups"]').style.display = isAdmin ? '' : 'none';
   document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = isAdmin
     ? ''
@@ -144,24 +153,25 @@ export async function refreshGroups() {
  * @return {Promise<void>}
  */
 export async function refreshMyGroups() {
-  if (state.isGuest || !state.token) {
-    state.myGroups = [];
-    state.myGroupsLoaded = true;
+  if (getIsGuest() || !getToken()) {
+    resetMyGroups();
+    setMyGroupsLoaded();
     return;
   }
   try {
     const res = await api('/api/groups/mine');
-    state.myGroups = Array.isArray(res) ? res : [];
-    state.myGroupsLoaded = true;
+    setMyGroups(res);
+    setMyGroupsLoaded();
   } catch (e) {
     console.error('Failed to load my groups:', e);
-    state.myGroups = [];
+    resetMyGroups();
+    resetMyGroupsLoaded();
   }
 }
 
 // ── Group list panel ──────────────────────────────────────────
 function makeCreateGroupBtn(id, style, text) {
-  if (state.isGuest || !state.token) return '';
+  if (getIsGuest() || !getToken()) return '';
 
   return '<button class="btn" id="' + id + '" style="' + style + '">' + text + '</button>';
 }
@@ -185,7 +195,7 @@ function renderGroupList() {
   if (!countBar || !listEl) return;
 
   const filtered = filterGroups();
-  const loggedIn = !state.isGuest && !!state.token;
+  const loggedIn = isLoggedIn();
 
   countBar.innerHTML =
     '<span>' + filtered.length + ' Group' + (filtered.length !== 1 ? 's' : '') + '</span>';

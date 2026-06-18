@@ -24,6 +24,13 @@ import {
 } from '../services/theme.js';
 import { THEME_REGISTRY } from '../config/theme-registry.js';
 import { showToast } from '../components/show-toast.js';
+import {
+  getCurrentUsername,
+  getIsAdmin,
+  isLoggedIn,
+  setCurrentUsername,
+} from '../state/user-state.js';
+import { doLogout } from '../services/auth.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -99,7 +106,7 @@ function accSection(key, label, innerHTML) {
  */
 export async function renderAccount() {
   const container = document.getElementById('accountContent');
-  const loggedIn = !state.isGuest && !!state.token;
+  const loggedIn = isLoggedIn();
 
   // ── Appearance ────────────────────────────────────────────────
   const themeMode = getThemeMode();
@@ -220,11 +227,11 @@ export async function renderAccount() {
         <div style="display:grid;gap:10px;font-size:13px">
           <div style="display:flex;gap:8px">
             <span style="color:var(--text3);min-width:100px">Username:</span>
-            <span style="font-weight:500">${escapeHtml(state.currentUsername)}</span>
+            <span style="font-weight:500">${escapeHtml(getCurrentUsername())}</span>
           </div>
           <div style="display:flex;gap:8px">
             <span style="color:var(--text3);min-width:100px">Account type:</span>
-            <span>${state.isAdmin ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
+            <span>${getIsAdmin() ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
           </div>
         </div>
       </div>`
@@ -345,8 +352,7 @@ Permanently delete your account and everything tied to it — your login, all ma
       return;
     }
     // Update local identity to match the server.
-    state.currentUsername = res.username;
-    localStorage.setItem('wl_username', res.username);
+    setCurrentUsername(res.username);
     const badge = document.getElementById('usernameBadge');
     if (badge) badge.textContent = '@' + res.username;
     msg.className = 'acc-form-msg ok';
@@ -377,8 +383,7 @@ Permanently delete your account and everything tied to it — your login, all ma
     msg.className = 'acc-form-msg ok';
     msg.textContent = 'Password changed. Signing you out…';
     setTimeout(() => {
-      localStorage.removeItem('wl_token');
-      localStorage.removeItem('wl_username');
+      doLogout();
       location.reload();
     }, 1200);
   });

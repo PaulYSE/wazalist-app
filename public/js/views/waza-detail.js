@@ -24,6 +24,7 @@ import { openSuggestEdit, openVideoSuggest } from '../modals/waza-edit.js';
 import { renderList, updateListRowMarkings, surpriseMe } from './waza-browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
+import { getIsGuest, getToken } from '../state/user-state.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -254,7 +255,7 @@ export function renderDetail() {
     (isSaving
       ? ' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>'
       : '') +
-    (!state.token || state.isGuest
+    (!getToken() || getIsGuest()
       ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>'
       : '') +
     '<div class="like-pill-wrap">' +
@@ -262,7 +263,7 @@ export function renderDetail() {
     '<button class="like-pill-half' +
     (p.like === 1 ? ' like-on' : '') +
     '"' +
-    (!state.token || state.isGuest || isSaving ? ' disabled' : '') +
+    (!getToken() || getIsGuest() || isSaving ? ' disabled' : '') +
     ' id="likeBtn">' +
     '👍 <span class="pill-count">' +
     (w.like_count || 0) +
@@ -270,7 +271,7 @@ export function renderDetail() {
     '<button class="like-pill-half' +
     (p.like === -1 ? ' dislike-on' : '') +
     '"' +
-    (!state.token || state.isGuest || isSaving ? ' disabled' : '') +
+    (!getToken() || getIsGuest() || isSaving ? ' disabled' : '') +
     ' id="dislikeBtn">' +
     '👎 <span class="pill-count">' +
     (w.dislike_count || 0) +
@@ -311,7 +312,7 @@ export function renderDetail() {
     '<div class="dsec"><h3>Video references</h3><div class="vlinks">' +
     videoHTML +
     '</div>' +
-    (!state.isGuest && state.token
+    (!getIsGuest() && getToken()
       ? '<div class="suggest-video-bar" id="suggestVideoBar">🎥 Suggest a video!</div>'
       : '') +
     '</div>' +
@@ -422,7 +423,7 @@ export function renderDetail() {
               : ''),
         )
       : '') +
-    (!state.isGuest && state.token
+    (!getIsGuest() && getToken()
       ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>'
       : '');
 

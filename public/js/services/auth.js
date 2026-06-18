@@ -12,6 +12,15 @@ import { loadLocal } from '../state/localStorage.js';
 import { api } from '../services/api.js';
 import { initApp } from '../app/init.js';
 import { showOnboarding } from '../features/onboarding.js';
+import {
+  resetToken,
+  resetUserState,
+  setCurrentUserId,
+  setCurrentUsername,
+  setIsAdmin,
+  setIsGuest,
+  setToken,
+} from '../state/user-state.js';
 
 // ── Auth actions ──────────────────────────────────────────────
 
@@ -25,8 +34,8 @@ import { showOnboarding } from '../features/onboarding.js';
  * @return {void}
  */
 function startGuest() {
-  state.isGuest = true;
-  state.token = '';
+  setIsGuest(true);
+  resetToken();
   Object.entries(loadLocal()).forEach(([id, p]) => {
     state.prog[+id] = p;
   });
@@ -39,11 +48,7 @@ function startGuest() {
  * @return {void}
  */
 export const doLogout = () => {
-  state.token = '';
-  state.isGuest = false;
-  state.currentUsername = '';
-  localStorage.removeItem('wl_token');
-  localStorage.removeItem('wl_username');
+  resetUserState();
   location.reload();
 };
 
@@ -71,12 +76,10 @@ async function doLogin() {
     e.textContent = res.error;
     return;
   }
-  state.token = res.token;
-  localStorage.setItem('wl_token', state.token);
-  state.currentUsername = res.user.username;
-  localStorage.setItem('wl_username', state.currentUsername);
-  state.isAdmin = !!res.user.is_admin;
-  state.currentUserId = res.user.id;
+  setToken(res.token);
+  setCurrentUsername(res.user.username);
+  setIsAdmin(res.user.is_admin);
+  setCurrentUserId(res.user.id);
   initApp();
 }
 
@@ -115,11 +118,9 @@ async function doRegister() {
   e.textContent = 'Account created! Signing you in…';
   const li = await api('/api/login', 'POST', { username, password });
   if (li.token) {
-    state.token = li.token;
-    localStorage.setItem('wl_token', state.token);
-    state.currentUsername = li.user.username;
-    localStorage.setItem('wl_username', state.currentUsername);
-    state.currentUserId = li.user.id;
+    setToken(li.token);
+    setCurrentUsername(li.user.username);
+    setCurrentUserId(li.user.id);
     initApp();
     showOnboarding();
   }

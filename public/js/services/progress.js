@@ -13,6 +13,7 @@ import { api } from './api.js';
 import { renderList } from '../views/waza-browse-list.js';
 import { renderDetail } from '../views/waza-detail.js';
 import { showToast } from '../components/show-toast.js';
+import { getIsGuest, getToken } from '../state/user-state.js';
 
 // ── Progress helpers ─────────────────────────────────────────
 
@@ -49,7 +50,7 @@ export async function saveLabels() {
   localStorage.setItem(LS_LABELS, JSON.stringify(state.markingLabels));
 
   // For logged-in users, also save to server
-  if (!state.isGuest && state.token) {
+  if (!getIsGuest() && getToken()) {
     try {
       await api('/api/labels', 'POST', { labels: state.markingLabels });
     } catch (err) {
@@ -79,7 +80,7 @@ export async function saveLabels() {
 export async function saveP(id, patch, opts = {}) {
   const skipListRender = !!opts.skipListRender;
   state.prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
-  if (state.isGuest) {
+  if (getIsGuest()) {
     const l = loadLocal();
     l[id] = state.prog[id];
     saveLocal(l);

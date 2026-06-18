@@ -7,7 +7,7 @@
  * @brief Authenticated API request wrapper for backend communication. Handles token injection, JSON parsing, and session expiry.
  */
 
-import { state } from '../state/state.js';
+import { getIsGuest, getToken, resetUserState } from '../state/user-state.js';
 
 /**
  * @brief Performs an authenticated API request to the backend.
@@ -26,7 +26,7 @@ export const api = async (path, method = 'GET', body = null) => {
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...(state.token ? { Authorization: 'Bearer ' + state.token } : {}),
+      ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
     },
   };
   if (body) opts.body = JSON.stringify(body);
@@ -37,8 +37,8 @@ export const api = async (path, method = 'GET', body = null) => {
   if (
     res.status === 401 &&
     data?.error === 'Authentication required' &&
-    state.token &&
-    !state.isGuest
+    getToken() &&
+    !getIsGuest()
   ) {
     handleSessionExpired();
   }
@@ -56,8 +56,7 @@ let sessionExpiryHandled = false;
 function handleSessionExpired() {
   if (sessionExpiryHandled) return;
   sessionExpiryHandled = true;
-  localStorage.removeItem('wl_token');
-  localStorage.removeItem('wl_username');
+  resetUserState();
   // Brief, so the user isn't confused by a silent jump.
   alert('Your session has expired. Please sign in again.');
   location.reload();
