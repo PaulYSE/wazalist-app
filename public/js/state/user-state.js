@@ -96,6 +96,12 @@ export function resetToken() {
   userState.token = '';
   localStorage.removeItem('wl_token');
 }
+export function initToken() {
+  const saved = localStorage.getItem('wl_token');
+  if (saved) {
+    userState.token = saved;
+  }
+}
 
 // ── isGuest ──────────────────────────────────────────────────
 

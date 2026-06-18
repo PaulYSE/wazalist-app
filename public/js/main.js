@@ -28,7 +28,7 @@ import { renderDashCompare } from './views/compare.js';
 import { initGroups } from './views/groups-browse-list.js';
 import { initCreateGroup } from './modals/group-new.js';
 import { initEditGroup } from './modals/group-edit.js';
-import { getToken } from './state/user-state.js';
+import { getToken, initToken } from './state/user-state.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
@@ -139,4 +139,5 @@ initAuth();
 initTheme();
 
 // If token exists (logged-in user), start the app immediately
+initToken();
 if (getToken()) initApp();
