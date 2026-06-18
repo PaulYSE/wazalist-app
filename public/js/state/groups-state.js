@@ -3,44 +3,24 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-17
+ * @date 2026-06-18
  * @brief Shared mutable state for groups feature. Tracks selected group, cached group list, load status, and search query.
  */
 
 // ── Group state ───────────────────────────────────────────────
 
-/**
- * @brief Groups state container.
- *
- * @type {Object}
- */
+/** @type {Object} Groups state container. */
 const groupState = {
-  /**
-   * The currently selected group ID (for detail panel).
-   *
-   * @type {number|null}
-   */
+  /** @type {number|null} The currently selected group ID (for detail panel). */
   groupsSelectedId: null,
 
-  /**
-   * Cache of all groups fetched from /api/groups.
-   *
-   * @type {Object[]}
-   */
+  /** @type {Object[]} Cache of all groups fetched from /api/groups. */
   groupsData: [],
 
-  /**
-   * Whether the group list has been loaded at least once.
-   *
-   * @type {boolean}
-   */
+  /** @type {boolean} Whether the group list has been loaded at least once. */
   groupsLoaded: false,
 
-  /**
-   * Current search query for filtering the group list.
-   *
-   * @type {string}
-   */
+  /** @type {string} Current search query for filtering the group list. */
   groupsSearchQuery: '',
 };
 
@@ -107,7 +87,6 @@ export function setGroupsData(groups) {
 /**
  * @brief Marks the group list as loaded.
  *
- * @param {boolean} loaded - Whether groups are loaded.
  * @return {void}
  */
 export function setGroupsLoaded() {
@@ -124,17 +103,40 @@ export function setGroupsSearchQuery(query) {
   groupState.groupsSearchQuery = query;
 }
 
-// ── Reset ─────────────────────────────────────────────────────
+// ── Individual resets ────────────────────────────────────────
 
+/**
+ * @brief Resets the selected group ID to null.
+ *
+ * @return {void}
+ */
 export function resetGroupsSelectedId() {
   groupState.groupsSelectedId = null;
 }
+
+/**
+ * @brief Resets the groups data cache to an empty array.
+ *
+ * @return {void}
+ */
 export function resetGroupsData() {
   groupState.groupsData = [];
 }
+
+/**
+ * @brief Resets the groups loaded flag to false.
+ *
+ * @return {void}
+ */
 export function resetGroupsLoaded() {
   groupState.groupsLoaded = false;
 }
+
+/**
+ * @brief Resets the group search query to an empty string.
+ *
+ * @return {void}
+ */
 export function resetGroupsSearchQuery() {
   groupState.groupsSearchQuery = '';
 }
