@@ -252,9 +252,6 @@ export function renderDetail() {
     '</div>' +
     // Like/Dislike pill
     '<div class="dsec">' +
-    (isSaving
-      ? ' <span style="font-size:10px;color:var(--text3);font-weight:400">syncing…</span>'
-      : '') +
     (!getToken() || getIsGuest()
       ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>'
       : '') +
