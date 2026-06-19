@@ -109,7 +109,7 @@ export function initToken() {
  * @brief Accessors for the guest mode flag.
  *
  * - getIsGuest() → {boolean}
- * - setIsGuest(val) → {void}
+ * - setIsGuest() → {void}
  * - resetIsGuest() → {void}
  */
 export function getIsGuest() {

@@ -34,7 +34,7 @@ import {
  * @return {void}
  */
 function startGuest() {
-  setIsGuest(true);
+  setIsGuest();
   resetToken();
   Object.entries(loadLocal()).forEach(([id, p]) => {
     state.prog[+id] = p;
