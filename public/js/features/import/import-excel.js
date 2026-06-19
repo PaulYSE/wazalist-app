@@ -1,14 +1,21 @@
 /**
- * @file import-excel.js
+ * @file features/import/import-excel.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-19
  * @brief Excel file parsing module. Extracts text and cell background colors for color-based marking auto-mapping during import.
  */
 
-import { tiState } from '../../state/state.js';
 import { parseTextImport } from '../../lib/parser.js';
+import {
+  getImportExcelColors,
+  pushImportExcelColorItem,
+  resetImportExcelColors,
+  resetImportParsedMode,
+  setImportParsed,
+  setImportParsedMode,
+} from '../../state/import-state.js';
 
 /**
  * @brief Parses an Excel file and extracts text content with cell color information.
@@ -26,7 +33,7 @@ export async function parseExcelFile(file) {
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
   const range = XLSX.utils.decode_range(firstSheet['!ref']);
 
-  tiState.excelColors = {};
+  resetImportExcelColors();
   const allLines = [];
 
   // Read cells with color information
@@ -50,22 +57,23 @@ export async function parseExcelFile(file) {
       }
 
       // Group by color
-      if (!tiState.excelColors[fillColor]) tiState.excelColors[fillColor] = [];
-      tiState.excelColors[fillColor].push(text);
+      pushImportExcelColorItem(fillColor, text);
       allLines.push(text);
     }
   }
 
   // If we detected colors other than white, show color mapping UI
-  const colorKeys = Object.keys(tiState.excelColors).filter(
+  const colorKeys = Object.keys(getImportExcelColors()).filter(
     (c) => c !== 'FFFFFF' && c !== 'ffffff',
   );
   if (colorKeys.length > 0) {
     // Parse the text to match waza
     parseTextImport(allLines.join('\n'));
-    tiState.parsed = 'excel'; // Special mode for color mapping
+    setImportParsed();
+    setImportParsedMode('excel');
   } else {
     // No colors detected, treat as regular text import
     parseTextImport(allLines.join('\n'));
+    resetImportParsedMode();
   }
 }

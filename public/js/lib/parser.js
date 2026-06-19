@@ -1,15 +1,28 @@
 /**
- * @file parser.js
+ * @file lib/parser.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-19
  * @brief Text import engine for parsing waza lists with status detection, label extraction, tab-separated column detection, and fuzzy matching. No DOM manipulation.
  */
 
-import { state, tiState } from '../state/state.js';
+import { state } from '../state/state.js';
 import { normalizeForSearch, isFuzzyMatch } from '../lib/search.js';
 import { STATUS_TO_SHAPE_MAP, HEADER_KEYWORDS, DECORATIVE_PATTERNS } from '../config/constants.js';
+import {
+  getImportAutoMapping,
+  getImportFoundLabels,
+  getImportLabelNames,
+  pushImportMatched,
+  pushImportUnmatched,
+  resetImportMatched,
+  resetImportUnmatched,
+  setImportAutoMapping,
+  setImportFoundLabels,
+  setImportLabelNames,
+  setImportParsed,
+} from '../state/import-state.js';
 
 // Fuzzy status matching - find closest known status label
 
@@ -204,7 +217,7 @@ function parseWazaName(text) {
   return { english: text, japanese: '', original: text };
 }
 
-// Detect tab-separated format and parse status + waza (Phase 2: enhanced)
+// Detect tab-separated format and parse status + waza
 
 /**
  * @brief Parses a tab-separated line into waza name and status.
@@ -222,7 +235,7 @@ function parseTabSeparated(line, columnLayout = null) {
     .filter(Boolean);
   if (parts.length < 2) return null;
 
-  // Phase 2: Use detected layout if available
+  // Use detected layout if available
   if (columnLayout === 'STATUS_WAZA') {
     return { waza: parts[1], status: parts[0] || null };
   } else if (columnLayout === 'WAZA_STATUS') {
@@ -233,27 +246,23 @@ function parseTabSeparated(line, columnLayout = null) {
   const firstHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[0]);
   const secondHasJapanese = /[\u3040-\u30ff\u4e00-\u9fff]/.test(parts[1]);
 
-  // Phase 2: Use fuzzy status detection
   const firstIsStatus = fuzzyMatchStatus(parts[0]) !== null;
   const secondIsStatus = fuzzyMatchStatus(parts[1]) !== null;
 
   if (parts[0].includes('(') && firstHasJapanese) {
-    // Column A = Waza, Column B = Status
     return { waza: parts[0], status: parts[1] || null };
   } else if (parts[1].includes('(') && secondHasJapanese) {
-    // Column A = Status, Column B = Waza
     return { waza: parts[1], status: parts[0] || null };
   } else if (firstIsStatus && !secondIsStatus) {
     return { waza: parts[1], status: parts[0] };
   } else if (secondIsStatus && !firstIsStatus) {
     return { waza: parts[0], status: parts[1] };
-  } else {
-    // Ambiguous - assume first is waza
-    return { waza: parts[0], status: parts[1] || null };
   }
+
+  return { waza: parts[0], status: parts[1] || null };
 }
 
-// Map status text to marking index (0-5) - Phase 2: with fuzzy matching
+// Map status text to marking index (0-5) with fuzzy matching
 
 /**
  * @brief Maps status text to marking index using fuzzy matching.
@@ -263,7 +272,7 @@ function parseTabSeparated(line, columnLayout = null) {
  */
 function mapStatusToMarking(statusText) {
   if (!statusText) return null;
-  return fuzzyMatchStatus(statusText); // Use Phase 2 fuzzy matcher
+  return fuzzyMatchStatus(statusText);
 }
 
 // Matches any [...], {...} encapsulation on a line
@@ -311,7 +320,7 @@ function stripAllLabels(line) {
 function detectLabelOnLine(line) {
   const tokens = extractEncapsulations(line);
   for (const tok of tokens) {
-    if (tiState.foundLabels.includes(tok)) return tok;
+    if (getImportFoundLabels().includes(tok)) return tok;
   }
   return null;
 }
@@ -343,34 +352,32 @@ function collectLabels(rawText) {
  * @brief Finds a waza object matching a line of text.
  *
  * Uses hyperlink extraction, Japanese/English name parsing, exact matches,
- * and fuzzy matching with distance threshold of 2.
+ * and fuzzy matching with distance threshold of 1.
  *
  * @param {string} line - Text line to match.
  * @return {Object|null} Matching waza object or null.
  */
 function findWazaForLine(line) {
-  // Phase 1: Try hyperlink extraction first
+  // Try hyperlink extraction first
   const hyperlinkMatch = extractFromHyperlink(line);
   if (hyperlinkMatch) {
     line = hyperlinkMatch;
   }
 
-  // Phase 1: Strip decorations (but we'll check for favorites later)
+  // Strip decorations
   const { cleaned: decorationStripped } = stripDecorations(line);
   line = decorationStripped;
 
   const cleaned = stripAllLabels(line);
   if (!cleaned) return null;
 
-  // Phase 1: Parse "English (Japanese)" format
+  // Parse "English (Japanese)" format
   const { english, japanese } = parseWazaName(cleaned);
 
-  // Try matching with both English and Japanese parts
   const norm = normalizeForSearch(cleaned);
   const normEnglish = normalizeForSearch(english);
   const normJapanese = normalizeForSearch(japanese);
 
-  // Exact match - prioritize Japanese, then English, then full text
   let hit;
 
   // 1. Try exact Japanese match
@@ -388,7 +395,7 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // 3. Try exact match on full cleaned text (fallback)
+  // 3. Try exact match on full cleaned text
   hit = state.wazaData.find(
     (w) =>
       normalizeForSearch(w.name_jp || '') === norm ||
@@ -397,7 +404,7 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // Fuzzy match - try Japanese first, then English
+  // 4. Fuzzy match - try Japanese first, then English (maxDistance=1)
   if (japanese) {
     hit = state.wazaData.find((w) => isFuzzyMatch(w.name_jp, japanese, 1));
     if (hit) return hit;
@@ -411,7 +418,7 @@ function findWazaForLine(line) {
   );
   if (hit) return hit;
 
-  // Final fallback: fuzzy on full text
+  // 5. Final fallback: fuzzy on full text
   hit = state.wazaData.find(
     (w) =>
       isFuzzyMatch(w.name_jp, cleaned, 1) ||
@@ -425,30 +432,36 @@ function findWazaForLine(line) {
  * @brief Main entry point for parsing imported text into matched waza.
  *
  * Collects labels, builds auto-mapping, detects column layout, processes lines,
- * and populates tiState with matched and unmatched items.
+ * and populates importState with matched and unmatched items.
  *
  * @param {string} rawText - Raw import text.
  * @return {void}
  */
 export function parseTextImport(rawText) {
   // 1. Collect all unique labels in document order
-  tiState.foundLabels = collectLabels(rawText);
+  setImportFoundLabels(collectLabels(rawText));
 
-  // 2. Seed tiState.autoMapping for new labels (preserve existing assignments)
-  tiState.foundLabels.forEach((lbl, i) => {
-    if (tiState.autoMapping[lbl] === undefined) {
-      // Phase 1: Try to map known status labels automatically
-      const statusMarking = mapStatusToMarking(lbl.slice(1, -1)); // Remove brackets
-      tiState.autoMapping[lbl] = statusMarking !== null ? statusMarking : i < 6 ? i : -1;
+  // 2. Seed autoMapping for new labels (preserve existing assignments)
+  const foundLabels = getImportFoundLabels();
+  const autoMapping = getImportAutoMapping();
+  const labelNames = getImportLabelNames();
+
+  foundLabels.forEach((lbl, i) => {
+    if (autoMapping[lbl] === undefined) {
+      const statusMarking = mapStatusToMarking(lbl.slice(1, -1));
+      autoMapping[lbl] = statusMarking !== null ? statusMarking : i < 6 ? i : -1;
     }
   });
 
-  // 3. Seed tiState.labelNames for new labels (default = inner text without brackets)
-  tiState.foundLabels.forEach((lbl) => {
-    if (tiState.labelNames[lbl] === undefined) {
-      tiState.labelNames[lbl] = lbl.slice(1, -1); // strip outer bracket pair
+  // 3. Seed labelNames for new labels (default = inner text without brackets)
+  foundLabels.forEach((lbl) => {
+    if (labelNames[lbl] === undefined) {
+      labelNames[lbl] = lbl.slice(1, -1);
     }
   });
+
+  setImportAutoMapping(autoMapping);
+  setImportLabelNames(labelNames);
 
   // 4. Parse lines
   const lines = rawText
@@ -456,29 +469,28 @@ export function parseTextImport(rawText) {
     .map((l) => l.trim())
     .filter(Boolean);
 
-  // Phase 2: Detect column layout for tab-separated format
   const columnLayout = detectColumnLayout(lines);
 
   let currentLabel = null;
-  let currentCategory = null; // Phase 2: Track category context
-  tiState.matched = [];
-  tiState.unmatched = [];
+  let currentCategory = null;
+  resetImportMatched();
+  resetImportUnmatched();
 
   lines.forEach((line) => {
-    // Phase 1: Skip header lines
+    // Skip header lines
     if (isHeaderLine(line)) {
       return;
     }
 
-    // Phase 2: Check if line is a category header
+    // Check if line is a category header
     const detectedCategory = detectCategory(line);
     if (detectedCategory) {
       currentCategory = detectedCategory;
-      return; // Skip category header line itself
+      return;
     }
 
-    // Phase 1: Handle tab-separated format
-    const tabParsed = parseTabSeparated(line, columnLayout); // Phase 2: Pass detected layout
+    // Handle tab-separated format
+    const tabParsed = parseTabSeparated(line, columnLayout);
     let lineToProcess = line;
     let detectedStatus = null;
 
@@ -487,24 +499,21 @@ export function parseTextImport(rawText) {
       detectedStatus = tabParsed.status;
     }
 
-    // Phase 1: Check for decorative markers (favorites)
+    // Check for decorative markers (favorites)
     const { isFavorite } = stripDecorations(lineToProcess);
 
     const stripped = stripAllLabels(lineToProcess);
     const lineLabel = detectLabelOnLine(lineToProcess);
 
     if (!stripped) {
-      // Pure label header line — update running context
       if (lineLabel) currentLabel = lineLabel;
       return;
     }
 
-    // Effective label: inline takes priority over running context
     let effectiveLabel = lineLabel || currentLabel;
 
-    // Phase 2: Use category as label if no other label present
     if (!effectiveLabel && currentCategory) {
-      effectiveLabel = `[${currentCategory}]`; // Wrap in brackets to match label format
+      effectiveLabel = `[${currentCategory}]`;
     }
 
     const waza = findWazaForLine(lineToProcess);
@@ -516,21 +525,19 @@ export function parseTextImport(rawText) {
         manualMarkings: Array(6).fill(false),
       };
 
-      // Phase 1: Auto-assign markings from status or decorations
       if (detectedStatus) {
         const markingIdx = mapStatusToMarking(detectedStatus);
         if (markingIdx !== null) {
           matchedItem.manualMarkings[markingIdx] = true;
         }
       } else if (isFavorite) {
-        // Auto-assign Favourite marking for decorated waza
-        matchedItem.manualMarkings[3] = true; // Marking 4 (index 3)
+        matchedItem.manualMarkings[3] = true;
       }
 
-      tiState.matched.push(matchedItem);
+      pushImportMatched(matchedItem);
     } else {
-      tiState.unmatched.push(line);
+      pushImportUnmatched(line);
     }
   });
-  tiState.parsed = true;
+  setImportParsed();
 }
