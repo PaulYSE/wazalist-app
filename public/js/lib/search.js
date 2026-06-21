@@ -1,17 +1,26 @@
 /**
- * @file search.js
+ * @file lib/search.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-11
+ * @date 2026-06-21
  * @brief Search string normalization, fuzzy (Levenshtein) matching, scoped search prefixes, and filterWaza() for producing the currently-visible list.
  */
 
 import { state } from '../state/state.js';
 import { getP } from '../services/progress.js';
-import { getBrowseSortField, getBrowseSortOrder } from '../state/waza-browse-state.js';
+import {
+  getBrowseMarkingFilters,
+  getBrowseSearchFilter,
+  getBrowseSortField,
+  getBrowseSortOrder,
+  isAnyMarkingFilterActive,
+  isBrowseFilterAny,
+} from '../state/waza-browse-state.js';
 
-// Fields to search within each waza for the search query
+// ── Constants ─────────────────────────────────────────────────
+
+/** @type {string[]} Fields to search within each waza for the search query. */
 const SEARCH_FIELDS = [
   'name_jp',
   'name_en',
@@ -30,8 +39,13 @@ const SEARCH_FIELDS = [
   'author_en1',
 ];
 
-// Scoped-search prefixes: PREFIX:query restricts matching to these fields only.
-// Add a new scoped filter by adding an entry here — nothing else changes.
+/**
+ * @brief Scoped-search prefixes: PREFIX:query restricts matching to these fields only.
+ *
+ * Add a new scoped filter by adding an entry here — nothing else changes.
+ *
+ * @type {Object<string, string[]>}
+ */
 const SEARCH_SCOPES = {
   author: ['author_jp0', 'author_en0', 'author_jp1', 'author_en1'],
   parent: ['parent_jp0', 'parent_en0', 'parent_jp1', 'parent_en1'],
@@ -56,7 +70,7 @@ export function normalizeForSearch(text) {
     .replace(/[\u0300-\u036f]/g, ''); // remove diacritical marks
 }
 
-// String Matching
+// ── Exact Matching ────────────────────────────────────────────
 
 /**
  * @brief Checks if text exactly matches the query after normalization.
@@ -95,7 +109,7 @@ function matchesQuery(text, query) {
   return false;
 }
 
-// ── Levenshtein distance implementation ───────────────────────────────────────
+// ── Levenshtein distance implementation ──────────────────────
 
 /**
  * @brief Calculates Levenshtein edit distance between two strings.
@@ -251,16 +265,16 @@ export function wazaMatchesSearch(w, search) {
  * @return {Array} Filtered and sorted array of waza objects.
  */
 export function filterWaza() {
-  const { search, markings } = state.filters;
-  const anyMarkingActive = markings.some(Boolean);
+  const search = getBrowseSearchFilter();
+  const markings = getBrowseMarkingFilters();
   let results = state.wazaData.filter((w) => {
     // "Any" mode: only show waza that have at least one marking
-    if (state.browseFilterAny) {
+    if (isBrowseFilterAny()) {
       const p = getP(w.id);
       if (!(p.markings && p.markings.some(Boolean))) return false;
     }
     if (!wazaMatchesSearch(w, search)) return false;
-    if (anyMarkingActive) {
+    if (isAnyMarkingFilterActive()) {
       const p = getP(w.id);
       const ws = p.markings || Array(6).fill(false);
       if (!markings.every((on, i) => !on || ws[i])) return false;

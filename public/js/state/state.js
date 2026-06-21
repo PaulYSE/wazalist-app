@@ -1,44 +1,30 @@
 /**
- * @file state.js
+ * @file state/state.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
- * @brief Manages global mutable application state and localStorage synchronization helpers.
+ * @date 2026-06-21
+ * @brief Manages global mutable application state.
  */
 
-import { LS_SORT, LS_VIEW, LS_LABELS } from './localStorage.js';
-
-/**
- * @brief Loads saved sort preferences from localStorage.
- *
- * @return {object} An object with `field` and `order` properties, defaulting to { field: 'default', order: 'asc' } if none exist or parsing fails.
- */
-const loadSortPrefs = () => {
-  try {
-    const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
-    return { field: prefs.field || 'default', order: prefs.order || 'asc' };
-  } catch {
-    // If parsing fails, fall back to default sort preferences
-    return { field: 'default', order: 'asc' };
-  }
-};
-const savedSort = loadSortPrefs();
+import { LS_LABELS } from './localStorage.js';
 
 // ── Shared mutable state ─────────────────────────────────────
 
-/**
- * @brief Global application state object.
- *
- * Stores authentication status, user data, waza list, progress, UI filters,
- * sort preferences, view mode, and custom marking labels.
- */
+/** @type {Object} Global application state object. */
 export const state = {
+  /** @type {Object[]} Array of all waza data loaded from the server. */
   wazaData: [],
+
+  /** @type {Object<number, {markings: boolean[], like: number|null, updated_at: string|null}>} */
   prog: {},
+
+  /** @type {number|null} ID of the currently selected waza for detail view. */
   selectedId: null,
+
+  /** @type {Set<number>} Set of waza IDs currently being saved. */
   savingIds: new Set(),
-  filters: { search: '', markings: Array(6).fill(false) },
-  browseFilterAny: false,
+
+  /** @type {string[]} Custom labels for each of the 6 marking shapes. */
   markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
 };

@@ -1,9 +1,9 @@
 /**
- * @file waza-browse-list.js
+ * @file views/waza-browse-list.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-21
  * @brief Browse list view rendering and controls. Handles list/card/compact view modes, sorting, filtering, and selection.
  */
 
@@ -17,10 +17,16 @@ import { state } from '../state/state.js';
 import { filterWaza, dispName } from '../lib/search.js';
 import { getP } from '../services/progress.js';
 import { selectWaza } from './waza-detail.js';
-import { LS_VIEW, LS_SORT } from '../state/localStorage.js';
 import { updateMarkingFilterUI, setSearchInput } from '../app/shell.js';
 import { openNewWazaModal } from '../modals/waza-new.js';
 import { getIsGuest, getToken } from '../state/user-state.js';
+import {
+  getBrowseListView,
+  getBrowseSortField,
+  getBrowseSortOrder,
+  setBrowseListView,
+  setBrowseSortState,
+} from '../state/waza-browse-state.js';
 
 // ── Browse sort ───────────────────────────────────────────────
 // Single entry point for changing sort. Pass either field, order, or both;
@@ -37,12 +43,9 @@ import { getIsGuest, getToken } from '../state/user-state.js';
  * @return {void}
  */
 export function setBrowseSort({ field, order } = {}) {
-  if (field !== undefined) state.browseSortField = field;
-  if (order !== undefined) state.browseSortOrder = order;
-  localStorage.setItem(
-    LS_SORT,
-    JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
-  );
+  if (field !== undefined || order !== undefined) {
+    setBrowseSortState({ field, order });
+  }
   updateMarkingFilterUI();
   syncBrowseSortControls();
   renderList();
@@ -58,15 +61,17 @@ export function setBrowseSort({ field, order } = {}) {
  * @return {void}
  */
 export function syncBrowseSortControls() {
-  const isDefault = state.browseSortField === 'default';
+  const sortField = getBrowseSortField();
+  const sortOrder = getBrowseSortOrder();
+  const isDefault = sortField === 'default';
   ['browseSortField', 'browseSortFieldMob'].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.value = state.browseSortField;
+    if (el) el.value = sortField;
   });
   ['browseSortOrder', 'browseSortOrderMob'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
-      el.value = state.browseSortOrder;
+      el.value = sortOrder;
       el.disabled = isDefault;
     }
   });
@@ -85,8 +90,7 @@ export function syncBrowseSortControls() {
  * @return {void}
  */
 export function setBrowseView(view) {
-  state.browseListView = view;
-  localStorage.setItem(LS_VIEW, view);
+  setBrowseListView(view);
   syncBrowseViewControls();
   renderList();
 }
@@ -100,9 +104,10 @@ export function setBrowseView(view) {
  * @return {void}
  */
 export function syncBrowseViewControls() {
+  const viewMode = getBrowseListView();
   ['browseViewSelect', 'browseViewSelectMob', 'viewStyleSelectMobile'].forEach((id) => {
     const el = document.getElementById(id);
-    if (el) el.value = state.browseListView;
+    if (el) el.value = viewMode;
   });
 }
 
@@ -213,7 +218,8 @@ export function renderList() {
     return;
   }
 
-  if (state.browseListView === 'expanded') {
+  const viewMode = getBrowseListView();
+  if (viewMode === 'expanded') {
     list.innerHTML = filtered
       .map((w) => {
         const p = getP(w.id);
@@ -250,7 +256,7 @@ export function renderList() {
         );
       })
       .join('');
-  } else if (state.browseListView === 'list') {
+  } else if (viewMode === 'list') {
     list.innerHTML = filtered
       .map((w) => {
         const p = getP(w.id);

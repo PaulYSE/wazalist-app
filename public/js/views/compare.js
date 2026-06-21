@@ -1,9 +1,9 @@
 /**
- * @file compare.js
+ * @file views/compare.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-21
  * @brief Compare tab view. Centralized top controls, label comparison editor, and side-by-side marks (their pips vs. your segmented mark-pill) with in-place toggling.
  */
 
@@ -305,7 +305,7 @@ function renderCompareResult() {
       );
     } else {
       labelsHtml = buildCompareMarkingLabelsTableHTML('My Marking Labels', {
-        labels: state.markingLabels, 
+        labels: state.markingLabels,
         counts: myMarkingCounts,
       });
     }
@@ -502,7 +502,7 @@ function wireGroupContent(container) {
       // Render into the shared section
       renderCompareResult();
     } catch {
-      showToast("Couldn't load this member's list.", 'red');   
+      showToast("Couldn't load this member's list.", 'red');
     }
 
     loadBtn.disabled = false;

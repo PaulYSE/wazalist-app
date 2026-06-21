@@ -1,5 +1,5 @@
 /**
- * @file escape.js
+ * @file lib/escape.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App

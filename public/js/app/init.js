@@ -1,9 +1,9 @@
 /**
- * @file init.js
+ * @file app/init.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-21
  * @brief Application initialization module. Sets up UI, loads user session, waza data, progress, labels, and handles URL parameters.
  */
 
@@ -42,6 +42,7 @@ import {
  * @return {Promise<void>}
  */
 export async function initApp() {
+  // ── UI shell setup ──────────────────────────────────────────
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   document.getElementById('guestBadge').style.display = getIsGuest() ? '' : 'none';
@@ -50,20 +51,19 @@ export async function initApp() {
   mobLogoutBtn.innerHTML = getIsGuest()
     ? '<span class="mob-menu-item-icon">←</span><span>Sign in</span>'
     : '<span class="mob-menu-item-icon">→</span><span>Sign out</span>';
-  const ub = document.getElementById('usernameBadge');
-  if (!getIsGuest() && getCurrentUsername()) {
-    ub.textContent = '@' + getCurrentUsername();
-    ub.style.display = '';
-  } else {
-    ub.style.display = 'none';
-  }
+
+  // Hide admin/new-waza buttons until user identity is confirmed.
   document.getElementById('adminLink').style.display = 'none';
   document.getElementById('mobAdminLink').style.display = 'none';
   document.getElementById('newWazaBtn').style.display = 'none';
   document.getElementById('mobNewWazaBtn').style.display = 'none';
   document.getElementById('countBar').textContent = 'Loading Waza…';
+
+  // ── Load waza data ─────────────────────────────────────────
   const wazaRes = await api('/api/waza');
   state.wazaData = Array.isArray(wazaRes) ? wazaRes : [];
+
+  // ── Load user-specific data (if logged in) ─────────────────
   if (!getIsGuest()) {
     // Re-derive identity (incl. admin status) from the session token.
     // This is what fixes admin status vanishing on refresh.
@@ -77,6 +77,8 @@ export async function initApp() {
     } catch (err) {
       console.warn('Session restore error:', err);
     }
+
+    // Load progress
     try {
       const progRes = await api('/api/progress');
       if (Array.isArray(progRes))
@@ -109,30 +111,42 @@ export async function initApp() {
       console.warn('Labels load error:', err);
     }
   }
+
+  // ── Username badge ─────────────────────────────────────────
+  const ub = document.getElementById('usernameBadge');
+  if (!getIsGuest() && getCurrentUsername()) {
+    ub.textContent = '@' + getCurrentUsername();
+    ub.style.display = '';
+  } else {
+    ub.style.display = 'none';
+  }
+
+  // ── Render views ────────────────────────────────────────────
   renderList();
   renderDetail();
   renderDashStats();
 
-  // Show admin-only chrome now that isAdmin is known from the session.
+  // ── Admin-only chrome ──────────────────────────────────────
   if (getIsAdmin()) {
     document.getElementById('adminLink').style.display = '';
     document.getElementById('mobAdminLink').style.display = '';
   }
 
-  // Sync sort dropdowns with loaded preferences
+  // ── Sync UI controls ───────────────────────────────────────
   syncBrowseSortControls();
-
-  // Sync view style dropdowns with loaded preference
   syncBrowseViewControls();
 
+  // ── Background tasks ───────────────────────────────────────
   startWazaPlaceholderRotation();
   checkAutoImport();
 
+  // ── Route reconciliation ──────────────────────────────────
   // Boot into whatever view the URL describes (tab + optional waza).
   const { tab, wazaParam } = parseRoute();
   if (tab !== 'browse') {
     activateTab(tab); // visual switch into the deep-linked tab
   }
+
   // Normalize the initial entry so it carries state + a clean slug URL
   // (e.g. "/" becomes "/browse"). replaceRoute — don't add a history entry.
   if (wazaParam && tab === 'browse') {

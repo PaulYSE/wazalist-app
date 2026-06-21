@@ -1,11 +1,19 @@
 /**
- * @file router.js
+ * @file app/router.js
  * @author Paul Yong Shao En
- * @brief Maps the URL (path + ?waza=) to app view state and back. Owns the
- *        slug↔tab mapping and all history writes for tab + waza navigation.
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-21
+ * @brief Maps the URL (path + ?waza=) to app view state and back. Owns the slug↔tab mapping and all history writes for tab + waza navigation.
  */
 
-// Internal tab key (data-tab value) ↔ URL slug. "browse" tab → /browse.
+// ── Constants ──────────────────────────────────────────────────
+
+/**
+ * @brief Internal tab key (data-tab value) → URL slug mapping.
+ *
+ * @type {Object<string, string>}
+ */
 const TAB_TO_SLUG = {
   browse: 'browse',
   stats: 'stats',
@@ -13,14 +21,24 @@ const TAB_TO_SLUG = {
   contribute: 'contribute',
   account: 'account',
 };
+
+/**
+ * @brief URL slug → internal tab key mapping (inverse of TAB_TO_SLUG).
+ *
+ * @type {Object<string, string>}
+ */
 const SLUG_TO_TAB = Object.fromEntries(Object.entries(TAB_TO_SLUG).map(([t, s]) => [s, t]));
 
+/** @type {string} Default tab when no valid slug is present. */
 const DEFAULT_TAB = 'browse';
+
+// ── Route parsing ─────────────────────────────────────────────
 
 /**
  * @brief Parse the current URL into { tab, wazaParam }.
- *        wazaParam is the raw ?waza= string (id or JP-name slug) or null,
- *        and is only meaningful when tab === 'browse'.
+ *
+ * wazaParam is the raw ?waza= string (id or JP-name slug) or null,
+ * and is only meaningful when tab === 'browse'.
  *
  * @return {{tab: string, wazaParam: string|null}}
  */
@@ -31,6 +49,8 @@ export function parseRoute() {
   const wazaParam = tab === 'browse' ? u.searchParams.get('waza') : null;
   return { tab, wazaParam };
 }
+
+// ── URL building ──────────────────────────────────────────────
 
 /**
  * @brief Build the URL string for a given view. Waza only encoded on browse.
@@ -45,6 +65,8 @@ export function buildUrl(tab, wazaId = null) {
   if (tab === 'browse' && wazaId != null) url += '?waza=' + wazaId;
   return url;
 }
+
+// ── History operations ────────────────────────────────────────
 
 /**
  * @brief Push a new history entry for the given view.

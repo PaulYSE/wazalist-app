@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-09
+ * @date 2026-06-21
  * @brief Application entry point. Initializes all modules, sets up event listeners, and boots the app based on authentication state.
  */
 
@@ -117,12 +117,16 @@ function resolveWaza(param) {
  * 2. Waza detail panel handlers
  * 3. UI shell components (search, filters, mobile menu)
  * 4. Share/import modal handlers
- * 5. New waza submission modal
- * 6. Suggest edit modal
- * 7. Onboarding tour
- * 8. Authentication UI
- * 9. If token exists, initialize main app
- * 9. Theme change event handler
+ * 5. Groups browse list handlers
+ * 6. Create group modal handlers
+ * 7. Edit group modal handlers
+ * 8. New waza submission modal
+ * 9. Suggest edit modal
+ * 10. Field edit modal (video suggest, field-specific edits)
+ * 11. Onboarding tour
+ * 12. Authentication UI
+ * 13. Theme system
+ * 14. If token exists, initialize main app
  */
 initBrowseList();
 initWazaDetail();
@@ -138,6 +142,5 @@ initOnboarding();
 initAuth();
 initTheme();
 
-// If token exists (logged-in user), start the app immediately
 initToken();
 if (getToken()) initApp();

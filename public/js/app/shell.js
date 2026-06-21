@@ -1,9 +1,9 @@
 /**
- * @file shell.js
+ * @file app/shell.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
+ * @date 2026-06-21
  * @brief Core UI shell module. Manages search placeholder rotation, marking filter UI sync, mobile menu, filter sheet, and navigation tabs.
  */
 
@@ -18,7 +18,20 @@ import { openNewWazaModal } from '../modals/waza-new.js';
 import { pushRoute } from './router.js';
 import { closeDetailNoHistory } from '../views/waza-detail.js';
 import { renderGroups } from '../views/groups-browse-list.js';
-import { getBrowseSortField, getBrowseSortOrder, setBrowseSortField, setBrowseSortOrder } from '../state/waza-browse-state.js';
+import {
+  getBrowseMarkingFilters,
+  hasActiveFilter,
+  isAllMarkingFiltersActive,
+  isAnyMarkingFilterActive,
+  isBrowseFilterAny,
+  resetBrowseFilterAny,
+  setAllBrowseMarkingFilters,
+  setBrowseMarkingFilters,
+  setBrowseSearchFilter,
+  setBrowseSortField,
+  setBrowseSortOrder,
+  toggleBrowseFilterAny,
+} from '../state/waza-browse-state.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -109,35 +122,24 @@ export function startWazaPlaceholderRotation() {
  * @return {void}
  */
 export function updateMarkingFilterUI() {
+  const filterAny = isBrowseFilterAny();
+  const markingFilters = getBrowseMarkingFilters();
+  const allOn = isAllMarkingFiltersActive();
+
   // Desktop
-  document
-    .getElementById('filterMarkingAll')
-    .classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
-  document.getElementById('filterMarkingAny').classList.toggle('active', state.browseFilterAny);
+  document.getElementById('filterMarkingAll').classList.toggle('active', !filterAny && allOn);
+  document.getElementById('filterMarkingAny').classList.toggle('active', filterAny);
   document.querySelectorAll('.marking-filter-btn').forEach((btn) => {
-    btn.classList.toggle(
-      'active',
-      !state.browseFilterAny && state.filters.markings[+btn.dataset.si],
-    );
+    btn.classList.toggle('active', !filterAny && markingFilters[+btn.dataset.si]);
   });
   // Mobile sheet mirrors
-  document
-    .getElementById('filterMarkingAllMob')
-    .classList.toggle('active', !state.browseFilterAny && state.filters.markings.every(Boolean));
-  document.getElementById('filterMarkingAnyMob').classList.toggle('active', state.browseFilterAny);
+  document.getElementById('filterMarkingAllMob').classList.toggle('active', !filterAny && allOn);
+  document.getElementById('filterMarkingAnyMob').classList.toggle('active', filterAny);
   document.querySelectorAll('.marking-filter-btn-mob').forEach((btn) => {
-    btn.classList.toggle(
-      'active',
-      !state.browseFilterAny && state.filters.markings[+btn.dataset.si],
-    );
+    btn.classList.toggle('active', !filterAny && markingFilters[+btn.dataset.si]);
   });
   // Filter dot: visible when any non-default filter is active
-  const hasFilter =
-    state.browseFilterAny ||
-    state.filters.markings.some(Boolean) ||
-    getBrowseSortField() !== 'default' ||
-    getBrowseSortOrder() !== 'asc';
-  document.getElementById('filterDot').classList.toggle('visible', hasFilter);
+  document.getElementById('filterDot').classList.toggle('visible', hasActiveFilter());
 }
 
 // ── Mobile ⋮ menu (element refs + helpers) ────────────────────
@@ -212,26 +214,26 @@ export function initUi() {
   });
 
   document.getElementById('filterMarkingAll').addEventListener('click', () => {
-    state.browseFilterAny = false;
-    const anyOn = state.filters.markings.some(Boolean);
+    resetBrowseFilterAny();
     // If any on → turn all off; if all off → turn all on
-    state.filters.markings = Array(6).fill(!anyOn);
+    setAllBrowseMarkingFilters(!isAnyMarkingFilterActive());
     updateMarkingFilterUI();
     renderList();
   });
 
   document.getElementById('filterMarkingAny').addEventListener('click', () => {
-    state.browseFilterAny = !state.browseFilterAny;
-    if (state.browseFilterAny) state.filters.markings = Array(6).fill(false); // clear specific state.filters when entering Any mode
+    const anyOn = toggleBrowseFilterAny();
+    if (anyOn) setAllBrowseMarkingFilters(false);
     updateMarkingFilterUI();
     renderList();
   });
 
   document.querySelectorAll('.marking-filter-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.browseFilterAny = false; // specific marking filter exits Any mode
+      resetBrowseFilterAny(); // specific marking filter exits Any mode
       const i = +btn.dataset.si;
-      state.filters.markings = state.filters.markings.map((v, idx) => (idx === i ? !v : v));
+      const markingFilters = getBrowseMarkingFilters();
+      setBrowseMarkingFilters(markingFilters.map((v, idx) => (idx === i ? !v : v)));
       updateMarkingFilterUI();
       renderList();
     });
@@ -291,21 +293,21 @@ export function initUi() {
 
   // Mobile marking buttons — stage only, applied on Confirm
   document.getElementById('filterMarkingAllMob').addEventListener('click', () => {
-    state.browseFilterAny = false;
-    const anyOn = state.filters.markings.some(Boolean);
-    state.filters.markings = Array(6).fill(!anyOn);
+    resetBrowseFilterAny();
+    setAllBrowseMarkingFilters(!isAnyMarkingFilterActive());
     updateMarkingFilterUI();
   });
   document.getElementById('filterMarkingAnyMob').addEventListener('click', () => {
-    state.browseFilterAny = !state.browseFilterAny;
-    if (state.browseFilterAny) state.filters.markings = Array(6).fill(false);
+    const anyOn = toggleBrowseFilterAny();
+    if (anyOn) setAllBrowseMarkingFilters(false);
     updateMarkingFilterUI();
   });
   document.querySelectorAll('.marking-filter-btn-mob').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.browseFilterAny = false;
+      resetBrowseFilterAny();
       const i = +btn.dataset.si;
-      state.filters.markings = state.filters.markings.map((v, idx) => (idx === i ? !v : v));
+      const markingFilters = getBrowseMarkingFilters();
+      setBrowseMarkingFilters(markingFilters.map((v, idx) => (idx === i ? !v : v)));
       updateMarkingFilterUI();
     });
   });
@@ -410,7 +412,7 @@ export function switchTab(t) {
  * @return {void}
  */
 export function setSearchInput(query) {
-  state.filters.search = query;
+  setBrowseSearchFilter(query);
   const input = document.getElementById('searchInput');
   if (!input) return;
   input.value = query;

@@ -1,5 +1,5 @@
 /**
- * @file groups.js
+ * @file groups-api.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App

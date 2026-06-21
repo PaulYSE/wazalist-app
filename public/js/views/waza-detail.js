@@ -1,9 +1,9 @@
 /**
- * @file waza-detail.js
+ * @file views/waza-detail.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-09
+ * @date 2026-06-21
  * @brief Renders the detail panel for a selected waza, handles like/dislike, marking toggles, video embedding with oEmbed metadata, collapsible sections, navigation to similar waza, and history API integration.
  */
 
@@ -25,6 +25,7 @@ import { renderList, updateListRowMarkings, surpriseMe } from './waza-browse-lis
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
 import { getIsGuest, getToken } from '../state/user-state.js';
+import { isAnyMarkingFilterActive } from '../state/waza-browse-state.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -441,7 +442,7 @@ export function renderDetail() {
       // If a marking-filter is active, toggling a marking can change whether
       // this waza belongs in the filtered list, so a full re-render is needed.
       // Otherwise, patch just this one row instead of rebuilding all rows.
-      const markingFilterActive = state.filters.markings.some(Boolean);
+      const markingFilterActive = isAnyMarkingFilterActive();
 
       saveP(w.id, { markings: ns }, { skipListRender: !markingFilterActive }).then(() => {
         if (!markingFilterActive) updateListRowMarkings(w.id);
