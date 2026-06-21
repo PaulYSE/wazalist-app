@@ -303,6 +303,11 @@ function renderCompareResult() {
         { labels: state.markingLabels, counts: myMarkingCounts },
         { labels: imp.labels || Array(6).fill(''), counts: impMarkingCounts },
       );
+    } else {
+      labelsHtml = buildCompareMarkingLabelsTableHTML('My Marking Labels', {
+        labels: state.markingLabels, 
+        counts: myMarkingCounts,
+      });
     }
 
     // Rows
@@ -453,6 +458,7 @@ function wireGroupContent(container) {
       const data = await api('/api/groups/' + gid + '/members/' + uid + '/progress');
 
       if (data.error) {
+        showToast(data.error, 'red');
         loadBtn.disabled = false;
         loadBtn.textContent = 'Compare';
         return;
@@ -496,7 +502,7 @@ function wireGroupContent(container) {
       // Render into the shared section
       renderCompareResult();
     } catch {
-      // no-empty rule
+      showToast("Couldn't load this member's list.", 'red');   
     }
 
     loadBtn.disabled = false;
@@ -675,12 +681,9 @@ function wireCompareImportTable(container) {
 
   container.querySelector('#cmpImportBtn')?.addEventListener('click', () => openImportModal());
 
-  wireSaveLabelsButton(container);
-
   // List picker — re-render the whole tab to reflect the new selection
   container.querySelector('#cmpSelect')?.addEventListener('change', (e) => {
     compareSelectedKey = e.target.value || null;
-    renderCompareResult();
     renderDashCompare();
   });
 
