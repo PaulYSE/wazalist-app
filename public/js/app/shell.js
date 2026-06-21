@@ -18,6 +18,7 @@ import { openNewWazaModal } from '../modals/waza-new.js';
 import { pushRoute } from './router.js';
 import { closeDetailNoHistory } from '../views/waza-detail.js';
 import { renderGroups } from '../views/groups-browse-list.js';
+import { getBrowseSortField, getBrowseSortOrder, setBrowseSortField, setBrowseSortOrder } from '../state/waza-browse-state.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -134,8 +135,8 @@ export function updateMarkingFilterUI() {
   const hasFilter =
     state.browseFilterAny ||
     state.filters.markings.some(Boolean) ||
-    state.browseSortField !== 'default' ||
-    state.browseSortOrder !== 'asc';
+    getBrowseSortField() !== 'default' ||
+    getBrowseSortOrder() !== 'asc';
   document.getElementById('filterDot').classList.toggle('visible', hasFilter);
 }
 
@@ -237,27 +238,17 @@ export function initUi() {
   });
 
   document.getElementById('browseSortField').addEventListener('change', (e) => {
-    state.browseSortField = e.target.value;
-    const isDefault = state.browseSortField === 'default';
+    setBrowseSortField(e.target.value);
+    const isDefault = e.target.value === 'default';
     document.getElementById('browseSortOrder').disabled = isDefault;
     document.getElementById('browseSortOrderMob').disabled = isDefault;
-    // Save to localStorage
-    localStorage.setItem(
-      'wl_sort_prefs',
-      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
-    );
     updateMarkingFilterUI();
     renderList();
   });
 
   document.getElementById('browseSortOrder').addEventListener('change', (e) => {
-    state.browseSortOrder = e.target.value;
+    setBrowseSortOrder(e.target.value);
     document.getElementById('browseSortOrderMob').value = e.target.value;
-    // Save to localStorage
-    localStorage.setItem(
-      'wl_sort_prefs',
-      JSON.stringify({ field: state.browseSortField, order: state.browseSortOrder }),
-    );
     updateMarkingFilterUI();
     renderList();
   });

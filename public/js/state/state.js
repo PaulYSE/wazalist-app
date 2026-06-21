@@ -40,8 +40,5 @@ export const state = {
   savingIds: new Set(),
   filters: { search: '', markings: Array(6).fill(false) },
   browseFilterAny: false,
-  browseSortField: savedSort.field,
-  browseSortOrder: savedSort.order,
-  browseListView: localStorage.getItem(LS_VIEW) || 'expanded',
   markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
 };
