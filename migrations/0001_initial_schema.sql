@@ -121,5 +121,6 @@ CREATE INDEX IF NOT EXISTS idx_contributions_status ON contributions(status);
 CREATE INDEX IF NOT EXISTS idx_contributions_user   ON contributions(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_user   ON group_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_group  ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_groups_invite_key ON groups(invite_key);
 CREATE INDEX IF NOT EXISTS idx_group_applications_user  ON group_applications(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_applications_group ON group_applications(group_id);
