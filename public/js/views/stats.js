@@ -1,9 +1,9 @@
 /**
- * @file stats.js
+ * @file views/stats.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-11
+ * @date 2026-06-22
  * @brief Stats dashboard: always-open Your Progress, plus collapsible Favourite Waza / Waza Family Statistics / Recent Activity sections.
  */
 
@@ -14,6 +14,7 @@ import { markingStyle, markingPips } from '../components/render-helpers.js';
 import { selectWaza } from './waza-detail.js';
 import { navigateToBrowse, setSearchInput } from '../app/shell.js';
 import { escapeHtml } from '../lib/escape.js';
+import { buildAccordion, closeAllAccordions, toggleAccordionDOM } from '../app/accordion-shell.js';
 
 // ── Persisted UI state (module scope: survives the re-render each toggle fires) ──
 let rankByFamily = false; // false = author, true = family
@@ -78,37 +79,6 @@ function compareMarkingOrder(a, b) {
     if (va !== vb) return va - vb;
   }
   return 0;
-}
-
-// Animated collapsible section (grid 0fr→1fr), mutually-exclusive open/close.
-
-/**
- * @brief Generates an animated collapsible section with header and body.
- *
- * @param {string} key - Section identifier for state tracking.
- * @param {string} label - Section title.
- * @param {string} controlsHTML - HTML for control buttons inside the header area.
- * @param {string} bodyHTML - HTML for the collapsible body content.
- * @return {string} Accordion section HTML.
- */
-function accSection(key, label, controlsHTML, bodyHTML) {
-  const open = accOpen[key];
-  return (
-    '<div class="dsec2">' +
-    '<div class="dsec-toggle stat-acc-toggle' +
-    (open ? '' : ' collapsed') +
-    '" data-acc="' +
-    key +
-    '"><h3 style="margin-bottom:0;border-bottom:none;padding-bottom:0">' +
-    label +
-    '</h3><span class="toggle-arrow">▾</span></div>' +
-    '<div class="acc-body' +
-    (open ? ' open' : '') +
-    '"><div class="acc-body-inner"><div class="acc-body-box">' +
-    controlsHTML +
-    bodyHTML +
-    '</div></div></div></div>'
-  );
 }
 
 /**
@@ -264,7 +234,9 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No Families to show.</div>';
 
-  const rankSection = accSection('rank', 'Favourite Waza', rankControls, rankHead + rankBody);
+  const rankSection = buildAccordion('rank', 'Favourite Waza', rankControls + rankHead + rankBody, {
+    open: accOpen['rank'],
+  });
 
   // ── Waza Family Statistics ─────────────────────────────────────────
   const families = {};
@@ -329,7 +301,9 @@ export function renderDashStats() {
         .join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px 0">No families to show.</div>';
 
-  const famSection = accSection('family', 'Waza Family Statistics', famControls, covBody);
+  const famSection = buildAccordion('family', 'Waza Family Statistics', famControls + covBody, {
+    open: accOpen['family'],
+  });
 
   // ── Recent Activity (selectable count) ──────────────────────
   const recent = state.wazaData
@@ -389,7 +363,9 @@ export function renderDashStats() {
           .join('')
       : '') + (recent.length < recentLimit ? sentinelRow : '');
 
-  const recentSection = accSection('recent', 'Recent Activity', recentControls, recentBody);
+  const recentSection = buildAccordion('recent', 'Recent Activity', recentControls + recentBody, {
+    open: accOpen['recent'],
+  });
 
   // ── Assemble ────────────────────────────────────────────────
   const container = document.getElementById('dashStats');
@@ -403,19 +379,24 @@ export function renderDashStats() {
   };
 
   // Accordion toggles (mutually exclusive).
-  container.querySelectorAll('.stat-acc-toggle').forEach((el) => {
+  container.querySelectorAll('.acc-toggle').forEach((el) => {
     el.addEventListener('click', () => {
       const key = el.dataset.acc;
       const wasOpen = accOpen[key];
+
+      // Update state: mutually exclusive
       Object.keys(accOpen).forEach((k) => {
         accOpen[k] = false;
       });
       if (!wasOpen) accOpen[key] = true;
-      container.querySelectorAll('.stat-acc-toggle').forEach((t) => {
-        const open = accOpen[t.dataset.acc];
-        t.classList.toggle('collapsed', !open);
-        t.nextElementSibling.classList.toggle('open', open);
-      });
+
+      // Animate DOM
+      if (wasOpen) {
+        toggleAccordionDOM(el, false);
+      } else {
+        closeAllAccordions(container);
+        toggleAccordionDOM(el, true);
+      }
     });
   });
 
