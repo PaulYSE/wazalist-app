@@ -487,7 +487,9 @@ export function renderDetail() {
     el.addEventListener('click', () => {
       const key = el.dataset.key;
       collapsed[key] = !collapsed[key];
-      toggleAccordionDOM(el, !collapsed[key]);
+      requestAnimationFrame(() => {
+        toggleAccordionDOM(el, open);
+      });
     }),
   );
   // Search-and-exit: set the search term, then drop back to the list panel.
