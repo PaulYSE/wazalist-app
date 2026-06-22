@@ -52,7 +52,7 @@ import {
 function enableGroupsForAdmins() {
   const admin = isAdmin();
   document.querySelector('.ntab[data-tab="groups"]').style.display = admin ? '' : 'none';
-  document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = isAdmin
+  document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = admin
     ? ''
     : 'none';
   document.getElementById('groupsView').style.display = admin ? '' : 'none';
