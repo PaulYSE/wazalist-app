@@ -19,6 +19,7 @@ import {
   getCurrentUserId,
   getMyGroups,
   getMyGroupsLoaded,
+  isAdmin, //temp for blocking bulk accordion while in development
   isLoggedIn,
 } from '../state/user-state.js';
 import {
@@ -60,6 +61,36 @@ import {
   setBulkCompareWazaNameDisplay,
 } from '../state/compare-bulk-state.js';
 import { buildCompareMatrixHTML } from '../components/compare-matrix.js';
+
+// ── TEMPORARY: BLOCK START ────────────────────────────────────
+// ── Admin-only access during development ──────────────────────
+// TODO: Remove this entire block when Bulk Compare feature is ready.
+
+function hideBulkCompare() {
+  if (isAdmin()) return;
+  const accordion = document.querySelector('.acc-toggle[data-acc="bulk"]');
+  if (accordion) {
+    accordion.closest('.dsec2').style.display = 'none';
+  }
+}
+
+// Run after each render
+const _origRenderDashCompare = renderDashCompare;
+renderDashCompare = async function () {
+  await _origRenderDashCompare.apply(this, arguments);
+  hideBulkCompare();
+};
+
+// Expose for dev console
+window.enableBulkCompareForAdmins = () => {
+  window._bulkCompareOverride = !window._bulkCompareOverride;
+  if (window._bulkCompareOverride) {
+    const accordion = document.querySelector('.acc-toggle[data-acc="bulk"]');
+    if (accordion) accordion.closest('.dsec2').style.display = '';
+  }
+};
+
+// ── TEMPORARY: BLOCK END ──────────────────────────────────────
 
 /**
  * @brief Renders the shared comparison result section below the accordions.
