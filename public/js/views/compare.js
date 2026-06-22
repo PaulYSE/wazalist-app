@@ -41,6 +41,25 @@ import {
   wireCompareTableListeners,
   wireSaveLabelsButton,
 } from '../components/compare-table.js';
+import {
+  getBulkCompareData,
+  getBulkCompareGroupId,
+  getBulkCompareSelectedListKeys,
+  getBulkCompareSelectedUserIds,
+  getBulkCompareSourceType,
+  getBulkCompareWazaNameDisplay,
+  hasBulkCompareSelection,
+  isBulkCompareEditMode,
+  resetBulkCompareState,
+  setBulkCompareData,
+  setBulkCompareEditMode,
+  setBulkCompareGroupId,
+  setBulkCompareSelectedListKeys,
+  setBulkCompareSelectedUserIds,
+  setBulkCompareSourceType,
+  setBulkCompareWazaNameDisplay,
+} from '../state/compare-bulk-state.js';
+import { buildCompareMatrixHTML } from '../components/compare-matrix.js';
 
 /**
  * @brief Renders the shared comparison result section below the accordions.
@@ -399,6 +418,336 @@ function wireCompareImportTable(container) {
 }
 
 /**
+ * @brief Builds the inner HTML for the "Bulk Compare" accordion body.
+ *
+ * Shows source type selector, group/list picker, and the comparison matrix.
+ *
+ * @return {string} HTML string.
+ */
+function buildBulkBody() {
+  const sourceType = getBulkCompareSourceType();
+  const selectedUserIds = getBulkCompareSelectedUserIds();
+  const selectedListKeys = getBulkCompareSelectedListKeys();
+  const editMode = isBulkCompareEditMode();
+  const wazaNameDisplay = getBulkCompareWazaNameDisplay();
+  const hasSelection = hasBulkCompareSelection();
+
+  // ── Source type selector ────────────────────────────────
+  let controlsHtml =
+    '<div class="cmp-controls">' +
+    '<select id="cmpBulkSourceType" class="cmp-select" style="min-width:140px">' +
+    '<option value="">Select source…</option>' +
+    '<option value="group"' +
+    (sourceType === 'group' ? ' selected' : '') +
+    '>Group Members</option>' +
+    '<option value="imported"' +
+    (sourceType === 'imported' ? ' selected' : '') +
+    '>Imported Lists</option>' +
+    '</select>';
+
+  // ── Group picker ─────────────────────────────────────────
+  if (sourceType === 'group') {
+    const groupId = getBulkCompareGroupId();
+    controlsHtml +=
+      '<select id="cmpBulkGroupSelect" class="cmp-select" style="min-width:160px">' +
+      '<option value="">Select Group</option>' +
+      getMyGroups()
+        .map(
+          (g) =>
+            '<option value="' +
+            g.id +
+            '"' +
+            (g.id === groupId ? ' selected' : '') +
+            '>' +
+            escapeHtml(g.name) +
+            '</option>',
+        )
+        .join('') +
+      '</select>';
+  }
+
+  // ── Imported list picker ─────────────────────────────────
+  if (sourceType === 'imported') {
+    const keys = getImportedListKeys();
+    controlsHtml +=
+      '<select id="cmpBulkListSelect" class="cmp-select" style="min-width:160px">' +
+      '<option value="">Select List</option>' +
+      keys
+        .map(
+          (k) =>
+            '<option value="' +
+            escapeHtml(k) +
+            '">' +
+            escapeHtml(getImportedList(k).name) +
+            '</option>',
+        )
+        .join('') +
+      '</select>' +
+      '<button class="btn" id="cmpBulkAddListBtn">Add List</button>';
+  }
+
+  // ── Action buttons ───────────────────────────────────────
+  controlsHtml +=
+    (hasSelection
+      ? '<button class="btn" id="cmpBulkEditBtn">' +
+        (editMode ? 'Done' : 'Edit') +
+        '</button>' +
+        '<button class="btn" id="cmpBulkClearBtn">Clear All</button>'
+      : '') + '</div>';
+
+  // ── Matrix ───────────────────────────────────────────────
+  let matrixHtml;
+  if (hasSelection && getBulkCompareData()) {
+    const data = getBulkCompareData();
+    const allWazaIds = new Set();
+
+    // Collect all waza IDs from all selected users
+    selectedUserIds.forEach((uid) => {
+      if (data[uid] && data[uid].markings) {
+        Object.keys(data[uid].markings).forEach((id) => allWazaIds.add(+id));
+      }
+    });
+
+    // Build membersData array
+    const membersData = [];
+    // Other users first
+    selectedUserIds.forEach((uid) => {
+      if (data[uid]) {
+        membersData.push({
+          userId: uid,
+          username: data[uid].username || 'User ' + uid,
+          markings: data[uid].markings || {},
+          labels: data[uid].labels || [],
+        });
+      }
+    });
+    // You last
+    const yourData = data[getCurrentUserId()];
+    if (yourData) {
+      membersData.push({
+        userId: getCurrentUserId(),
+        username: 'You',
+        markings: yourData.markings || {},
+        labels: yourData.labels || [],
+      });
+    }
+
+    // Waza name display toggle
+    const nameToggleHtml =
+      '<div class="cmp-controls" style="margin-bottom:12px">' +
+      '<span style="font-size:12px;color:var(--text3);margin-right:8px">Waza names:</span>' +
+      '<div class="seg-pill">' +
+      '<button class="seg-item' +
+      (wazaNameDisplay === 'both' ? ' on' : '') +
+      '" data-display="both">Both</button>' +
+      '<button class="seg-item' +
+      (wazaNameDisplay === 'jp' ? ' on' : '') +
+      '" data-display="jp">JP</button>' +
+      '<button class="seg-item' +
+      (wazaNameDisplay === 'en' ? ' on' : '') +
+      '" data-display="en">EN</button>' +
+      '</div>' +
+      '</div>';
+
+    matrixHtml =
+      nameToggleHtml +
+      buildCompareMatrixHTML(allWazaIds, membersData, getCurrentUserId(), {
+        editMode,
+        wazaNameDisplay,
+        emptyMessage: 'No waza have been marked by the selected members.',
+      });
+  } else if (hasSelection && !getBulkCompareData()) {
+    matrixHtml =
+      '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Loading comparison data…</div>';
+  } else {
+    matrixHtml =
+      '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Select a source and add lists to compare.</div>';
+  }
+
+  return controlsHtml + matrixHtml;
+}
+
+/**
+ * @brief Wires all event listeners for the "Bulk Compare" body.
+ *
+ * @param {HTMLElement} container - The #dashCompare element.
+ * @return {void}
+ */
+function wireBulkContent(container) {
+  // ── Source type selector ─────────────────────────────────
+  container.querySelector('#cmpBulkSourceType')?.addEventListener('change', (e) => {
+    setBulkCompareSourceType(e.target.value || null);
+    setBulkCompareGroupId(null);
+    setBulkCompareSelectedUserIds([]);
+    setBulkCompareSelectedListKeys([]);
+    setBulkCompareData(null);
+    renderDashCompare();
+  });
+
+  // ── Group selection → load members ───────────────────────
+  container.querySelector('#cmpBulkGroupSelect')?.addEventListener('change', async (e) => {
+    const gid = +e.target.value;
+    setBulkCompareGroupId(gid || null);
+    setBulkCompareSelectedUserIds([]);
+    setBulkCompareData(null);
+    if (!gid) {
+      renderDashCompare();
+      return;
+    }
+
+    // Render member checkboxes
+    try {
+      const members = await api('/api/groups/' + gid + '/members');
+      const others = members.filter((m) => m.user_id !== getCurrentUserId());
+      renderDashCompare(); // rebuild to show checkboxes
+
+      // After rebuild, inject the member list
+      const memberArea = container.querySelector('#cmpBulkMemberArea');
+      if (memberArea) {
+        memberArea.innerHTML = others
+          .map(
+            (m) =>
+              '<label class="cmp-bulk-member-label">' +
+              '<input type="checkbox" class="cmp-bulk-member-cb" value="' +
+              m.user_id +
+              '"> ' +
+              escapeHtml(m.username) +
+              (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
+              '</label>',
+          )
+          .join('');
+
+        memberArea.querySelector('button')?.addEventListener('click', async () => {
+          const checked = memberArea.querySelectorAll('.cmp-bulk-member-cb:checked');
+          const ids = Array.from(checked).map((cb) => +cb.value);
+          setBulkCompareSelectedUserIds(ids);
+          await loadBulkData();
+          renderDashCompare();
+        });
+      }
+    } catch {
+      showToast("Couldn't load members.", 'red');
+    }
+  });
+
+  // ── Imported list "Add" button ───────────────────────────
+  container.querySelector('#cmpBulkAddListBtn')?.addEventListener('click', () => {
+    const sel = container.querySelector('#cmpBulkListSelect');
+    if (!sel || !sel.value) return;
+    const current = getBulkCompareSelectedListKeys();
+    if (!current.includes(sel.value)) {
+      setBulkCompareSelectedListKeys([...current, sel.value]);
+    }
+    loadBulkData();
+    renderDashCompare();
+  });
+
+  // ── Edit/Done toggle ─────────────────────────────────────
+  container.querySelector('#cmpBulkEditBtn')?.addEventListener('click', () => {
+    setBulkCompareEditMode(!isBulkCompareEditMode());
+    renderDashCompare();
+  });
+
+  // ── Clear All ────────────────────────────────────────────
+  container.querySelector('#cmpBulkClearBtn')?.addEventListener('click', () => {
+    resetBulkCompareState();
+    renderDashCompare();
+  });
+
+  // ── Remove column buttons (in edit mode) ─────────────────
+  container.querySelectorAll('.cmp-matrix-remove-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const uid = +btn.dataset.uid;
+      const current = getBulkCompareSelectedUserIds();
+      setBulkCompareSelectedUserIds(current.filter((id) => id !== uid));
+      loadBulkData();
+      renderDashCompare();
+    });
+  });
+
+  // ── Waza name display toggle ─────────────────────────────
+  container.querySelectorAll('[data-display]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setBulkCompareWazaNameDisplay(btn.dataset.display);
+      renderDashCompare();
+    });
+  });
+
+  // ── Marking toggles in edit mode ─────────────────────────
+  if (isBulkCompareEditMode()) {
+    wireCompareTableListeners(container);
+  }
+
+  // ── Save labels button ───────────────────────────────────
+  wireSaveLabelsButton(container);
+}
+
+/**
+ * @brief Loads bulk comparison data from the current source.
+ *
+ * Handles both group members (API call) and imported lists (local data).
+ * Always includes the current user's own progress.
+ *
+ * @return {Promise<void>}
+ */
+async function loadBulkData() {
+  const sourceType = getBulkCompareSourceType();
+  const data = {};
+
+  // Always include your own progress
+  const yourProgress = {};
+  Object.entries(state.prog).forEach(([id, p]) => {
+    if (p.markings && p.markings.some(Boolean)) {
+      yourProgress[id] = p.markings;
+    }
+  });
+  data[getCurrentUserId()] = {
+    username: 'You',
+    markings: yourProgress,
+    labels: state.markingLabels,
+  };
+
+  if (sourceType === 'group') {
+    const gid = getBulkCompareGroupId();
+    const uids = getBulkCompareSelectedUserIds();
+    if (!gid || !uids.length) {
+      setBulkCompareData(data);
+      return;
+    }
+
+    try {
+      const res = await api('/api/groups/' + gid + '/bulk-progress', 'POST', { user_ids: uids });
+      // Merge API response with our data
+      Object.entries(res).forEach(([uid, memberData]) => {
+        data[+uid] = memberData;
+      });
+    } catch {
+      showToast("Couldn't load group data.", 'red');
+    }
+  }
+
+  if (sourceType === 'imported') {
+    const keys = getBulkCompareSelectedListKeys();
+    keys.forEach((key) => {
+      const list = getImportedList(key);
+      if (list && list.marks) {
+        data[key] = {
+          username: list.name || 'List ' + key.slice(0, 8),
+          markings: {},
+          labels: list.labels || [],
+        };
+        Object.entries(list.marks).forEach(([wazaId, mark]) => {
+          data[key].markings[+wazaId] = mark.markings || Array(6).fill(false);
+        });
+      }
+    });
+  }
+
+  setBulkCompareData(data);
+}
+
+/**
  * @brief Renders the Compare tab as two mutually exclusive accordions.
  *
  * "Compare with Group" is hidden when the user has no groups.
@@ -428,6 +777,7 @@ export async function renderDashCompare() {
   //    row lists that would never be visible while collapsed) ──────
   const groupBody = buildGroupBody();
   const importedBody = buildImportedBody();
+  const bulkBody = buildBulkBody();
 
   // ── Render both accordion shells ──────────────────────────────
   container.innerHTML =
@@ -437,6 +787,9 @@ export async function renderDashCompare() {
     }) +
     buildAccordion('imported', 'Compare with Imported List', importedBody, {
       open: getCompareAccordion() === 'imported',
+    }) +
+    buildAccordion('bulk', 'Bulk Compare', bulkBody, {
+      open: getCompareAccordion() === 'bulk',
     }) +
     '<div id="cmpResult"></div>';
 
@@ -456,9 +809,10 @@ export async function renderDashCompare() {
     });
   });
 
-  // ── Wire content event listeners (only for the open section) ──
+  // ── Wire content event listeners ──
   wireGroupContent(container);
   wireCompareImportTable(container);
+  wireBulkContent(container);
 
   renderCompareResult();
 }

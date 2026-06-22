@@ -996,6 +996,69 @@ export default {
 		return json({ markings, labels });
 		}
 
+		// POST /api/groups/:id/bulk-progress — fetch markings for multiple members at once
+		if (path.match(/^\/api\/groups\/\d+\/bulk-progress$/) && request.method === "POST") {
+		const user = await getUser();
+		if (!user) return err("Authentication required", 401);
+
+		const parts = path.split("/");
+		const groupId = +parts[3];
+
+		// Caller must be a member
+		const callerRole = await getGroupRole(groupId, user.id);
+		if (!callerRole) return err("Forbidden", 403);
+
+		const body = await request.json() as { user_ids?: number[] };
+		const userIds = body.user_ids;
+
+		if (!Array.isArray(userIds) || userIds.length === 0) {
+			return err("user_ids must be a non-empty array");
+		}
+		if (userIds.length > 10) {
+			return err("Maximum 10 users per bulk request");
+		}
+
+		// Verify all requested users are members of this group
+		const placeholders = userIds.map(() => "?").join(",");
+		const memberCheck = await env.DB.prepare(
+			`SELECT user_id FROM group_members WHERE group_id = ? AND user_id IN (${placeholders})`
+		).bind(groupId, ...userIds).all();
+
+		const validIds = new Set(memberCheck.results.map((r: any) => r.user_id));
+		const invalidIds = userIds.filter((id: number) => !validIds.has(id));
+		if (invalidIds.length > 0) {
+			return err(`Users not in group: ${invalidIds.join(", ")}`);
+		}
+
+		// Fetch progress for all requested users
+		const result: Record<number, { markings: Record<number, boolean[]>; labels: string[] }> = {};
+
+		for (const uid of userIds) {
+			const { results: progressRows } = await env.DB.prepare(
+			"SELECT waza_id, markings FROM progress WHERE user_id = ?"
+			).bind(uid).all();
+
+			const labelsRow = await env.DB.prepare(
+			"SELECT shape_labels FROM users WHERE id = ?"
+			).bind(uid).first();
+
+			const markings: Record<number, boolean[]> = {};
+			for (const row of progressRows) {
+			let parsed = Array(6).fill(false);
+			try { parsed = JSON.parse(row.markings as string); } catch { /* keep default */ }
+			markings[row.waza_id as number] = parsed;
+			}
+
+			const labels = labelsRow?.shape_labels
+			? JSON.parse(labelsRow.shape_labels as string)
+			: ["", "", "", "", "", ""];
+
+			result[uid] = { markings, labels };
+		}
+
+		return json(result);
+		}
+
 		// GET /api/groups/:id/applications — pending applications (Group admin only)
 		if (path.match(/^\/api\/groups\/\d+\/applications$/) && request.method === "GET") {
 		const user = await getUser();
