@@ -1,9 +1,9 @@
 /**
- * @file account.js
+ * @file views/account.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-11
+ * @date 2026-06-22
  * @brief Account management view. Handles import/export UI, username/password changes, progress reset, and account deletion with accordion sections.
  */
 
@@ -31,6 +31,7 @@ import {
   setCurrentUsername,
 } from '../state/user-state.js';
 import { doLogout } from '../services/auth.js';
+import { buildAccordion, toggleAccordionDOM } from '../app/accordion-shell.js';
 
 // Open one accordion section, closing any others. Exported so other modules
 // (e.g. onboarding's "import from Excel" redirect) can jump to a section.
@@ -49,8 +50,7 @@ export function openAccountSection(key) {
   });
   document.querySelectorAll('.acc-toggle').forEach((el) => {
     const open = el.dataset.acc === key;
-    el.classList.toggle('collapsed', !open);
-    el.nextElementSibling.classList.toggle('open', open); // animate via class, not display
+    toggleAccordionDOM(el, open);
   });
 }
 
@@ -63,36 +63,6 @@ const accOpen = {
   export: false,
   manage: false,
 };
-
-// Collapsible accordion section, reusing the .dsec-toggle / .dsec-body mechanism.
-
-/**
- * @brief Generates HTML for a collapsible accordion section.
- *
- * @param {string} key - Section identifier.
- * @param {string} label - Section title.
- * @param {string} innerHTML - Inner HTML content.
- * @return {string} Accordion section HTML.
- */
-function accSection(key, label, innerHTML) {
-  const open = accOpen[key];
-  return (
-    '<div class="dsec2">' +
-    '<div class="dsec-toggle acc-toggle' +
-    (open ? '' : ' collapsed') +
-    '" data-acc="' +
-    key +
-    '">' +
-    '<h3 style="margin-bottom:0;border-bottom:none;padding-bottom:0">' +
-    label +
-    '</h3><span class="toggle-arrow">▾</span></div>' +
-    '<div class="acc-body' +
-    (open ? ' open' : '') +
-    '"><div class="acc-body-inner"><div class="acc-body-box">' +
-    innerHTML +
-    '</div></div></div></div>'
-  );
-}
 
 // ── Account ───────────────────────────────────────────────────
 
@@ -286,8 +256,9 @@ export async function renderAccount() {
     ? `<div style="border:1px solid var(--red);border-radius:var(--rl);padding:16px">
         <h4 style="color:var(--red);font-size:13px;font-weight:600;margin:0 0 8px">Delete Account</h4>
         <p style="font-size:12px;color:var(--text2);margin:0 0 12px">
-Permanently delete your account and everything tied to it — your login, all marked Waza,
-          likes and dislikes, Marking Labels, contribution history, and active sessions. This cannot be undone.        </p>
+          Permanently delete your account and everything tied to it — your login, all marked Waza,
+          likes and dislikes, Marking Labels, contribution history, and active sessions. This cannot be undone.
+        </p>
         <button class="btn" id="deleteAccountBtn" style="background:var(--red);border:1px solid var(--red);color:white">
           Delete My Account
         </button>
@@ -299,11 +270,11 @@ Permanently delete your account and everything tied to it — your login, all ma
 
   // ── Assemble accordions ───────────────────────────────────────
   container.innerHTML =
-    accSection('appearance', 'Appearance', appearanceBody) +
-    accSection('labels', 'Marking Labels', labelsBody) +
-    accSection('import', 'Import Wazalist', importBody) +
-    accSection('export', 'Export Wazalist', exportBody) +
-    accSection('manage', 'Manage Account', manageBody);
+    buildAccordion('appearance', 'Appearance', appearanceBody, { open: accOpen['appearance'] }) +
+    buildAccordion('labels', 'Marking Labels', labelsBody, { open: accOpen['labels'] }) +
+    buildAccordion('import', 'Import Wazalist', importBody, { open: accOpen['import'] }) +
+    buildAccordion('export', 'Export Wazalist', exportBody, { open: accOpen['export'] }) +
+    buildAccordion('manage', 'Manage Account', manageBody, { open: accOpen['manage'] });
 
   // Populate the import UI (renders into #dashImport, even if the section is collapsed)
   renderImport();
@@ -314,8 +285,7 @@ Permanently delete your account and everything tied to it — your login, all ma
       const key = el.dataset.acc;
       if (accOpen[key]) {
         accOpen[key] = false;
-        el.classList.toggle('collapsed', true);
-        el.nextElementSibling.classList.remove('open');
+        toggleAccordionDOM(el, false);
       } else {
         openAccountSection(key);
       }
