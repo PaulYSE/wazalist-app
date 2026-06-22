@@ -1,7 +1,14 @@
 /**
  * @file app/accordion-shell.js
- * @brief Unified accordion shell builder. Produces the animated collapsible
- *        section HTML used by Stats, Account, Compare, and Waza Detail tabs.
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-06-22
+ * @brief Unified accordion shell builder. Produces the animated collapsible section HTML used by Stats, Account, Compare, and Waza Detail tabs.
+ */
+
+/**
+ * @brief Builds an accordion section HTML string.
  *
  * @param {string}  key        - Unique identifier for this accordion section.
  * @param {string}  label      - Header text displayed in the toggle bar.

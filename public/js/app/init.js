@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-22
  * @brief Application initialization module. Sets up UI, loads user session, waza data, progress, labels, and handles URL parameters.
  */
 
@@ -133,10 +133,9 @@ export async function initApp() {
     document.getElementById('mobAdminLink').style.display = '';
   }
 
-  // Load localStorage UI controls
-  initBrowseState();
-
   // ── Sync UI controls ───────────────────────────────────────
+  // Load localStorage UI controls first, then sync controls
+  initBrowseState();
   syncBrowseSortControls();
   syncBrowseViewControls();
 

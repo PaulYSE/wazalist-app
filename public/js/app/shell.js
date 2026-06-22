@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-22
  * @brief Core UI shell module. Manages search placeholder rotation, marking filter UI sync, mobile menu, filter sheet, and navigation tabs.
  */
 
