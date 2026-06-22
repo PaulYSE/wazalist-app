@@ -9,14 +9,9 @@
 
 import { api } from '../services/api.js';
 import { state } from '../state/state.js';
-import { SHAPES } from '../config/constants.js';
-import { saveLabels, getP, saveP } from '../services/progress.js';
+import { getP } from '../services/progress.js';
 import { showToast } from '../components/show-toast.js';
 import { escapeHtml } from '../lib/escape.js';
-import { dispName } from '../lib/search.js';
-import { markingPips } from '../components/render-helpers.js';
-import { navigateToBrowse } from '../app/shell.js';
-import { selectWaza } from './waza-detail.js';
 import { openImportModal, openExportModal } from '../features/share-list.js';
 import { refreshMyGroups } from './groups-browse-list.js';
 import { buildAccordion, closeAllAccordions, toggleAccordionDOM } from '../app/accordion-shell.js';
@@ -40,194 +35,12 @@ import {
   setCompareLastGroupData,
   setCompareSelectedKey,
 } from '../state/compare-state.js';
-
-// ── Compare Table Builder ──────────────────────────────────
-
-/**
- * @brief Builds the HTML for a marking labels comparison table.
- *
- * Renders a table comparing marking labels between two users (or just the current user).
- * Displays shape symbols, label inputs, and waza counts. When a second user is provided,
- * shows a two-column layout (their labels read-only, your labels editable).
- *
- * @param {string} title - Section title to display.
- * @param {Object} userFirst - First user's data object containing { labels: string[], counts: number[] }.
- * @param {Object} [userSecond] - Optional second user's data object for two-column comparison.
- * @return {string} HTML string for the labels comparison section.
- */
-function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond) {
-  // ── Build the 6 rows ──────────────────────────────────────
-  const rowsHtml = SHAPES.map((s, i) => {
-    const myLabels = userFirst.labels[i] || '';
-    const myCounts = userFirst.counts[i];
-
-    if (userSecond) {
-      const theirLabels = userSecond.labels[i] || '';
-      const theirCounts = userSecond.counts[i];
-
-      return (
-        '<div class="cmp-labels-row">' +
-        // Marking symbol
-        '<span class="cmp-labels-marking">' +
-        s +
-        '</span>' +
-        // Their label (read-only)
-        '<div class="cmp-labels-their">' +
-        (theirLabels
-          ? '<span class="label-names">' + escapeHtml(theirLabels) + '</span>'
-          : '<span class="label-unset">Unlabelled</span>') +
-        '<span class="cmp-labels-count">' +
-        theirCounts +
-        ' waza</span>' +
-        '</div>' +
-        // Your label (editable input)
-        '<div class="cmp-labels-mine">' +
-        '<input class="cmp-labels-input" data-si="' +
-        i +
-        '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
-        myLabels.replace(/"/g, '&quot;') +
-        '">' +
-        '<span class="cmp-labels-count">' +
-        myCounts +
-        ' waza</span>' +
-        '</div>' +
-        '</div>'
-      );
-    } else {
-      // Single-column: just your label (editable) with count
-      return (
-        '<div class="cmp-labels-row cmp-labels-row-solo">' +
-        '<span class="cmp-labels-marking">' +
-        s +
-        '</span>' +
-        '<div class="cmp-labels-mine">' +
-        '<input class="cmp-labels-input" data-si="' +
-        i +
-        '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
-        myLabels.replace(/"/g, '&quot;') +
-        '">' +
-        '<span class="cmp-labels-count">' +
-        myCounts +
-        ' waza</span>' +
-        '</div>' +
-        '</div>'
-      );
-    }
-  }).join('');
-
-  // ── Save Marking Labels Button ──────────────────────────────────────
-  const saveBtnRow =
-    '<div class="cmp-labels-actions">' +
-    '<button class="btn" id="cmpSaveLabelsBtn">Save Marking Labels</button>' +
-    '</div>';
-
-  // ── Assemble the full section ──────────────────────────────
-  return (
-    '<div class="dsec2">' +
-    '<h3>' +
-    escapeHtml(title) +
-    '</h3>' +
-    '<div class="cmp-labels-table">' +
-    rowsHtml +
-    '</div>' +
-    saveBtnRow +
-    '</div>'
-  );
-}
-
-/**
- * @brief Wires the "Save Marking Labels" button inside a container.
- *
- * Reads all .cmp-labels-input values, writes them to state.markingLabels,
- * persists via saveLabels(), and shows a toast.
- *
- * @param {HTMLElement} container - DOM element containing #cmpSaveLabelsBtn and .cmp-labels-input elements.
- * @return {void}
- */
-function wireSaveLabelsButton(container) {
-  container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
-    container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
-      state.markingLabels[+inp.dataset.si] = inp.value;
-    });
-    saveLabels();
-    showToast('Marking Labels saved', 'green');
-  });
-}
-
-/**
- * @brief Builds an HTML string for the waza comparison rows table.
- *
- * Renders column headers ("Waza", theirLabel, "Your marks") and a row per waza.
- * Each row shows the waza names, their marking pips (read-only), and your marking
- * toggle buttons (interactive — wiring happens after render via wireCompareListeners).
- *
- * @param {Set<number>}              wazaIds       - Set of waza IDs to display.
- * @param {Object<number, boolean[]>} theirMarkings - Map of wazaId → marking booleans.
- * @param {string}                   theirName    - Text for the "their" column header.
- * @param {string}                   emptyMessage  - Message shown when no waza have marks.
- * @return {string} HTML string for the comparison table (col-headers + rows).
- */
-function buildCompareMarkingTableRowsHTML(wazaIds, theirMarkings, theirName, emptyMessage) {
-  const rows = state.wazaData.filter((w) => wazaIds.has(w.id));
-
-  // ── Empty state ───────────────────────────────────────────
-  if (!rows.length) {
-    return '<div class="cmp-empty">' + emptyMessage + '</div>';
-  }
-
-  // ── Column headers ────────────────────────────────────────
-  const colHeaders =
-    '<div class="cmp-col-headers">' +
-    '<span>Waza</span>' +
-    '<span>' +
-    escapeHtml(theirName) +
-    '</span>' +
-    '<span>Your marks</span>' +
-    '</div>';
-
-  // ── Rows ──────────────────────────────────────────────────
-  const rowsHtml = rows
-    .map((w) => {
-      const theirs = theirMarkings[w.id] || Array(6).fill(false);
-      const mine = (getP(w.id).markings || Array(6).fill(false)).slice();
-
-      return (
-        '<div class="cmp-row" data-id="' +
-        w.id +
-        '">' +
-        '<div class="cmp-names">' +
-        '<div class="cmp-name-jp">' +
-        escapeHtml(w.name_jp || '—') +
-        '</div>' +
-        '<div class="cmp-name-en">' +
-        escapeHtml(dispName(w)) +
-        '</div>' +
-        '</div>' +
-        '<div class="cmp-markings-imported">' +
-        markingPips(theirs) +
-        '</div>' +
-        '<div class="cmp-mark-pill">' +
-        SHAPES.map(
-          (s, i) =>
-            '<button class="cmp-mark-seg' +
-            (mine[i] ? ' on' : '') +
-            '" data-wid="' +
-            w.id +
-            '" data-si="' +
-            i +
-            '" title="' +
-            escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
-            '">' +
-            s +
-            '</button>',
-        ).join('') +
-        '</div></div>'
-      );
-    })
-    .join('');
-
-  return colHeaders + rowsHtml;
-}
+import {
+  buildCompareMarkingLabelsTableHTML,
+  buildCompareMarkingTableRowsHTML,
+  wireCompareTableListeners,
+  wireSaveLabelsButton,
+} from '../components/compare-table.js';
 
 /**
  * @brief Renders the shared comparison result section below the accordions.
@@ -553,40 +366,6 @@ function buildImportedBody() {
     '<button class="btn" id="cmpExportBtn">↑ Export My List</button>' +
     '</div>'
   );
-}
-
-/**
- * @brief Wires marking toggles and row-click navigation inside a container.
- *
- * Call this after setting innerHTML that contains .cmp-mark-seg buttons
- * and .cmp-row elements. Safe to call multiple times — uses querySelectorAll
- * which only targets elements present at call time.
- *
- * @param {HTMLElement} container - DOM element containing compare rows.
- * @return {void}
- */
-function wireCompareTableListeners(container) {
-  // ── Marking toggles ────────────────────────────────────
-  container.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const wid = +btn.dataset.wid;
-      const si = +btn.dataset.si;
-      const ns = (getP(wid).markings || Array(6).fill(false)).slice();
-      ns[si] = !ns[si];
-      btn.classList.toggle('on', ns[si]);
-      saveP(wid, { markings: ns });
-    });
-  });
-
-  // ── Row clicks → navigate to Browse ────────────────────
-  container.querySelectorAll('.cmp-row').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('.cmp-mark-pill')) return;
-      navigateToBrowse();
-      selectWaza(+el.dataset.id);
-    });
-  });
 }
 
 /**
