@@ -19,7 +19,7 @@ import { navigateToBrowse } from '../app/shell.js';
 import { selectWaza } from './waza-detail.js';
 import { openImportModal, openExportModal } from '../features/share-list.js';
 import { refreshMyGroups } from './groups-browse-list.js';
-import { buildAccordion, closeAllAccordions } from '../app/accordion-shell.js';
+import { buildAccordion, closeAllAccordions, toggleAccordionDOM } from '../app/accordion-shell.js';
 import {
   getCurrentUserId,
   getMyGroups,
@@ -669,12 +669,10 @@ export async function renderDashCompare() {
 
       setCompareAccordion(key);
       if (isOpen) {
-        el.classList.add('collapsed');
-        el.nextElementSibling?.classList.remove('open');
+        toggleAccordionDOM(el, false);
       } else {
         closeAllAccordions(container);
-        el.classList.remove('collapsed');
-        el.nextElementSibling?.classList.add('open');
+        toggleAccordionDOM(el, true);
       }
     });
   });

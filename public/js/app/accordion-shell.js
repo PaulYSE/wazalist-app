@@ -60,8 +60,10 @@ export function buildAccordion(key, label, bodyHtml, opts = {}) {
  * @return {void}
  */
 export function toggleAccordionDOM(toggleEl, open) {
-  toggleEl.classList.toggle('collapsed', !open);
-  toggleEl.nextElementSibling?.classList.toggle('open', open);
+  requestAnimationFrame(() => {
+    toggleEl.classList.toggle('collapsed', !open);
+    toggleEl.nextElementSibling?.classList.toggle('open', open);
+  });
 }
 
 /**

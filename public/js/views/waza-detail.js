@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-22
  * @brief Renders the detail panel for a selected waza, handles like/dislike, marking toggles, video embedding with oEmbed metadata, collapsible sections, navigation to similar waza, and history API integration.
  */
 
@@ -26,6 +26,7 @@ import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
 import { isGuest, getToken } from '../state/user-state.js';
 import { isAnyMarkingFilterActive } from '../state/waza-browse-state.js';
+import { buildAccordion, toggleAccordionDOM } from '../app/accordion-shell.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -114,6 +115,7 @@ export function renderDetail() {
   }
   const w = state.wazaData.find((x) => x.id === state.selectedId);
   if (!w) return;
+
   const p = getP(w.id);
   const markings = p.markings || Array(6).fill(false);
 
@@ -220,26 +222,104 @@ export function renderDetail() {
         .join('')
     : '<span style="color:var(--text3);font-size:13px">None found</span>';
 
-  // Collapsible section helper (animated open/close, independent per section).
-  const sec = (key, label, inner) => {
-    const isCollapsed = collapsed[key];
-    return (
-      '<div class="dsec">' +
-      '<div class="dsec-toggle' +
-      (isCollapsed ? ' collapsed' : '') +
-      '" data-key="' +
-      key +
-      '">' +
-      '<h3>' +
-      label +
-      '</h3><span class="toggle-arrow">▾</span></div>' +
-      '<div class="acc-body' +
-      (isCollapsed ? '' : ' open') +
-      '"><div class="acc-body-inner"><div class="acc-body-box">' +
-      inner +
-      '</div></div></div></div>'
-    );
-  };
+  let similarHTML = '';
+  if (siblings.length) {
+    similarHTML = '<div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div>';
+  }
+
+  const namesHTML =
+    '<div class="dgrid">' +
+    '<div class="dfield"><div class="lbl">Japanese</div><div class="val">' +
+    (w.name_jp || '—') +
+    '</div></div>' +
+    '<div class="dfield"><div class="lbl">English</div><div class="val">' +
+    (w.name_en || '—') +
+    '</div></div>' +
+    '<div class="dfield"><div class="lbl">Romaji</div><div class="val">' +
+    (w.name_en_literal || '—') +
+    '</div></div>' +
+    '<div class="dfield"><div class="lbl">Google Translate EN</div><div class="val">' +
+    (w.name_en_gtranslate || '—') +
+    '</div></div>' +
+    '<div class="dfield"><div class="lbl">Google Translate CN</div><div class="val">' +
+    (w.name_cn_gtranslate || '—') +
+    '</div></div>' +
+    '</div>';
+
+  let parentsHTML = '';
+  if (w.parent_jp0 || w.parent_en0 || w.parent_jp1 || w.parent_en1) {
+    parentsHTML =
+      (w.parent_jp0 || w.parent_en0
+        ? '<span class="chip chip-2line" data-parent="' +
+          escapeHtml(w.parent_en0 || w.parent_jp0 || '') +
+          '">' +
+          '<span class="chip-en">' +
+          escapeHtml(w.parent_en0 || '') +
+          '</span>' +
+          '<span class="chip-jp">' +
+          escapeHtml(w.parent_jp0 || '') +
+          '</span>' +
+          '</span>'
+        : '') +
+      (w.parent_jp1 || w.parent_en1
+        ? '<span class="chip chip-2line" data-parent="' +
+          escapeHtml(w.parent_en1 || w.parent_jp1 || '') +
+          '">' +
+          '<span class="chip-en">' +
+          escapeHtml(w.parent_en1 || '') +
+          '</span>' +
+          '<span class="chip-jp">' +
+          escapeHtml(w.parent_jp1 || '') +
+          '</span>' +
+          '</span>'
+        : '');
+  }
+
+  let creatorHTML = '';
+  if (w.author_jp0 || w.author_en0 || w.author_jp1 || w.author_en1) {
+    creatorHTML =
+      '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      (w.author_jp0 || w.author_en0
+        ? '<div class="author-2line author-click" data-author="' +
+          escapeHtml(w.author_en0 || w.author_jp0 || '') +
+          '">' +
+          '<div class="author-en">' +
+          escapeHtml(w.author_en0 || '—') +
+          '</div>' +
+          '<div class="author-jp">' +
+          escapeHtml(w.author_jp0 || '') +
+          '</div>' +
+          '</div>'
+        : '') +
+      (w.author_jp1 || w.author_en1
+        ? '<div class="author-2line author-click" data-author="' +
+          escapeHtml(w.author_en1 || w.author_jp1 || '') +
+          '">' +
+          '<div class="author-en">' +
+          escapeHtml(w.author_en1 || '—') +
+          '</div>' +
+          '<div class="author-jp">' +
+          escapeHtml(w.author_jp1 || '') +
+          '</div>' +
+          '</div>'
+        : '') +
+      '</div>';
+  }
+
+  let classifHTML = '';
+  if (w.tag || w.reference) {
+    classifHTML =
+      (w.tag
+        ? '<div style="margin-bottom:10px"><span class="chip tag-pill">' +
+          escapeHtml(w.tag) +
+          '</span></div>'
+        : '') +
+      (w.reference
+        ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
+          w.reference +
+          '</div></div></div>'
+        : '');
+  }
 
   const isSaving = state.savingIds.has(w.id);
   const savingAttr = isSaving ? ' disabled style="opacity:.5;cursor:default"' : '';
@@ -315,111 +395,33 @@ export function renderDetail() {
       : '') +
     '</div>' +
     // Collapsible sections
-    sec(
-      'names',
-      'Names',
-      '<div class="dgrid">' +
-        '<div class="dfield"><div class="lbl">Japanese</div><div class="val">' +
-        (w.name_jp || '—') +
-        '</div></div>' +
-        '<div class="dfield"><div class="lbl">English</div><div class="val">' +
-        (w.name_en || '—') +
-        '</div></div>' +
-        '<div class="dfield"><div class="lbl">Romaji</div><div class="val">' +
-        (w.name_en_literal || '—') +
-        '</div></div>' +
-        '<div class="dfield"><div class="lbl">Google Translate EN</div><div class="val">' +
-        (w.name_en_gtranslate || '—') +
-        '</div></div>' +
-        '<div class="dfield"><div class="lbl">Google Translate CN</div><div class="val">' +
-        (w.name_cn_gtranslate || '—') +
-        '</div></div>' +
-        '</div>',
-    ) +
-    (w.parent_jp0 || w.parent_en0 || w.parent_jp1 || w.parent_en1
-      ? sec(
-          'parents',
-          'Parent Waza',
-          (w.parent_jp0 || w.parent_en0
-            ? '<span class="chip chip-2line" data-parent="' +
-              escapeHtml(w.parent_en0 || w.parent_jp0 || '') +
-              '">' +
-              '<span class="chip-en">' +
-              escapeHtml(w.parent_en0 || '') +
-              '</span>' +
-              '<span class="chip-jp">' +
-              escapeHtml(w.parent_jp0 || '') +
-              '</span>' +
-              '</span>'
-            : '') +
-            (w.parent_jp1 || w.parent_en1
-              ? '<span class="chip chip-2line" data-parent="' +
-                escapeHtml(w.parent_en1 || w.parent_jp1 || '') +
-                '">' +
-                '<span class="chip-en">' +
-                escapeHtml(w.parent_en1 || '') +
-                '</span>' +
-                '<span class="chip-jp">' +
-                escapeHtml(w.parent_jp1 || '') +
-                '</span>' +
-                '</span>'
-              : ''),
-        )
+    buildAccordion('names', 'Names', namesHTML, {
+      open: !collapsed['names'],
+      wrapper: 'dsec',
+    }) +
+    (parentsHTML
+      ? buildAccordion('parents', 'Parent Waza', parentsHTML, {
+          open: !collapsed['parents'],
+          wrapper: 'dsec',
+        })
       : '') +
-    (w.author_jp0 || w.author_en0 || w.author_jp1 || w.author_en1
-      ? sec(
-          'creator',
-          'Creator',
-          '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
-            (w.author_jp0 || w.author_en0
-              ? '<div class="author-2line author-click" data-author="' +
-                escapeHtml(w.author_en0 || w.author_jp0 || '') +
-                '">' +
-                '<div class="author-en">' +
-                escapeHtml(w.author_en0 || '—') +
-                '</div>' +
-                '<div class="author-jp">' +
-                escapeHtml(w.author_jp0 || '') +
-                '</div>' +
-                '</div>'
-              : '') +
-            (w.author_jp1 || w.author_en1
-              ? '<div class="author-2line author-click" data-author="' +
-                escapeHtml(w.author_en1 || w.author_jp1 || '') +
-                '">' +
-                '<div class="author-en">' +
-                escapeHtml(w.author_en1 || '—') +
-                '</div>' +
-                '<div class="author-jp">' +
-                escapeHtml(w.author_jp1 || '') +
-                '</div>' +
-                '</div>'
-              : '') +
-            '</div>',
-        )
+    (creatorHTML
+      ? buildAccordion('creator', 'Creator', creatorHTML, {
+          open: !collapsed['creator'],
+          wrapper: 'dsec',
+        })
       : '') +
-    (siblings.length
-      ? sec(
-          'similar',
-          'Similar Waza',
-          '<div style="display:flex;flex-wrap:wrap;gap:4px">' + sibHTML + '</div>',
-        )
+    (similarHTML
+      ? buildAccordion('similar', 'Similar Waza', similarHTML, {
+          open: !collapsed['similar'],
+          wrapper: 'dsec',
+        })
       : '') +
-    (w.tag || w.reference
-      ? sec(
-          'classif',
-          'Extra Information',
-          (w.tag
-            ? '<div style="margin-bottom:10px"><span class="chip tag-pill">' +
-              escapeHtml(w.tag) +
-              '</span></div>'
-            : '') +
-            (w.reference
-              ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
-                w.reference +
-                '</div></div></div>'
-              : ''),
-        )
+    (classifHTML
+      ? buildAccordion('classif', 'Extra Information', classifHTML, {
+          open: !collapsed['classif'],
+          wrapper: 'dsec',
+        })
       : '') +
     (!isGuest() && getToken()
       ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>'
@@ -485,8 +487,7 @@ export function renderDetail() {
     el.addEventListener('click', () => {
       const key = el.dataset.key;
       collapsed[key] = !collapsed[key];
-      el.classList.toggle('collapsed', collapsed[key]);
-      el.nextElementSibling.classList.toggle('open', !collapsed[key]);
+      toggleAccordionDOM(el, !collapsed[key]);
     }),
   );
   // Search-and-exit: set the search term, then drop back to the list panel.
