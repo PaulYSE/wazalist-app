@@ -22,12 +22,13 @@ import { checkAutoImport } from '../features/share-list.js';
 import { parseRoute, replaceRoute } from './router.js';
 import {
   getCurrentUsername,
-  getIsAdmin,
-  getIsGuest,
+  isAdmin,
+  isGuest,
   setCurrentUserId,
   setCurrentUsername,
   setIsAdmin,
 } from '../state/user-state.js';
+import { initBrowseState } from '../state/waza-browse-state.js';
 
 // ── Initialization entry point ─────────────────────────────────────
 
@@ -45,10 +46,10 @@ export async function initApp() {
   // ── UI shell setup ──────────────────────────────────────────
   document.getElementById('authWrap').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-  document.getElementById('guestBadge').style.display = getIsGuest() ? '' : 'none';
-  document.getElementById('logoutBtn').textContent = getIsGuest() ? 'Sign in' : 'Sign out';
+  document.getElementById('guestBadge').style.display = isGuest() ? '' : 'none';
+  document.getElementById('logoutBtn').textContent = isGuest() ? 'Sign in' : 'Sign out';
   const mobLogoutBtn = document.getElementById('mobLogoutBtn');
-  mobLogoutBtn.innerHTML = getIsGuest()
+  mobLogoutBtn.innerHTML = isGuest()
     ? '<span class="mob-menu-item-icon">←</span><span>Sign in</span>'
     : '<span class="mob-menu-item-icon">→</span><span>Sign out</span>';
 
@@ -64,7 +65,7 @@ export async function initApp() {
   state.wazaData = Array.isArray(wazaRes) ? wazaRes : [];
 
   // ── Load user-specific data (if logged in) ─────────────────
-  if (!getIsGuest()) {
+  if (!isGuest()) {
     // Re-derive identity (incl. admin status) from the session token.
     // This is what fixes admin status vanishing on refresh.
     try {
@@ -114,7 +115,7 @@ export async function initApp() {
 
   // ── Username badge ─────────────────────────────────────────
   const ub = document.getElementById('usernameBadge');
-  if (!getIsGuest() && getCurrentUsername()) {
+  if (!isGuest() && getCurrentUsername()) {
     ub.textContent = '@' + getCurrentUsername();
     ub.style.display = '';
   } else {
@@ -127,10 +128,13 @@ export async function initApp() {
   renderDashStats();
 
   // ── Admin-only chrome ──────────────────────────────────────
-  if (getIsAdmin()) {
+  if (isAdmin()) {
     document.getElementById('adminLink').style.display = '';
     document.getElementById('mobAdminLink').style.display = '';
   }
+
+  // Load localStorage UI controls
+  initBrowseState();
 
   // ── Sync UI controls ───────────────────────────────────────
   syncBrowseSortControls();

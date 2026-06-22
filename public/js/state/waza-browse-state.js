@@ -78,7 +78,7 @@ function saveSortToLS() {
  *
  * @return {void}
  */
-export function initSearchPreferences() {
+export function initBrowseState() {
   const sort = loadSortFromLS();
   wazaBrowseState.browseSortField = sort.field;
   wazaBrowseState.browseSortOrder = sort.order;
@@ -153,17 +153,17 @@ export function resetBrowseListView() {
 /**
  * @brief Accessors for the search filter.
  *
- * - getBrowseSearchFilter() → {string}
- * - setBrowseSearchFilter(val) → {void}
- * - resetBrowseSearchFilter() → {void}
+ * - getBrowseSearchString() → {string}
+ * - setBrowseSearchString(val) → {void}
+ * - resetBrowseSearchString() → {void}
  */
-export function getBrowseSearchFilter() {
+export function getBrowseSearchString() {
   return wazaBrowseState.filters.search;
 }
-export function setBrowseSearchFilter(val) {
+export function setBrowseSearchString(val) {
   wazaBrowseState.filters.search = val;
 }
-export function resetBrowseSearchFilter() {
+export function resetBrowseSearchString() {
   wazaBrowseState.filters.search = '';
 }
 
@@ -297,6 +297,6 @@ export function resetBrowseState() {
   resetBrowseSortOrder();
   resetBrowseListView();
   resetBrowseMarkingFilters();
-  resetBrowseSearchFilter();
+  resetBrowseSearchString();
   resetBrowseFilterAny();
 }

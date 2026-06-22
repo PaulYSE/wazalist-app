@@ -15,7 +15,7 @@ import { SHAPES } from '../../config/constants.js';
 import { dispName } from '../../lib/search.js';
 import { saveP, saveLabels } from '../../services/progress.js';
 import { showToast } from '../../components/show-toast.js';
-import { getIsGuest, getToken } from '../../state/user-state.js';
+import { isGuest, getToken } from '../../state/user-state.js';
 import {
   getImportAutoMappingKey,
   getImportColorMapping,
@@ -32,7 +32,7 @@ import {
   isImportPreviewMode,
   resetImportParsedMode,
   resetImportPreviewMode,
-  resetImportStateAll,
+  resetImportState,
   setImportAutoMappingKey,
   setImportColorMappingKey,
   setImportExcelColorLabelKey,
@@ -144,7 +144,7 @@ export function renderImport() {
           Object.values(getImportColorMapping()).filter((idx) => idx >= 0),
         );
 
-        if (hasLabelNames && usedMarkings.size > 0 && !getIsGuest() && getToken()) {
+        if (hasLabelNames && usedMarkings.size > 0 && !isGuest() && getToken()) {
           // Build a list of changes
           const changes = [];
           for (const [color, markingIdx] of Object.entries(getImportColorMapping())) {
@@ -225,7 +225,7 @@ export function renderImport() {
       });
 
       container.querySelector('#tiCancelExcelBtn')?.addEventListener('click', () => {
-        resetImportStateAll();
+        resetImportState();
         renderImport();
       });
 
@@ -477,7 +477,7 @@ export function renderImport() {
     }
     if (count) {
       showToast('Applied markings to ' + count + ' waza!', 'green');
-      resetImportStateAll();
+      resetImportState();
       renderImport();
     } else {
       showToast('No markings were toggled on — toggle at least one marking per waza.', 'amber');
@@ -498,7 +498,7 @@ export function renderImport() {
 
     if (count) {
       showToast('Committed ' + count + ' waza markings to database!', 'green');
-      resetImportStateAll();
+      resetImportState();
       renderImport();
     } else {
       showToast('No markings were marked — adjust the markings or clear preview.', 'amber');
@@ -522,7 +522,7 @@ export function renderImport() {
 
   // Reset
   container.querySelector('#tiResetBtn')?.addEventListener('click', () => {
-    resetImportStateAll();
+    resetImportState();
     renderImport();
   });
 }

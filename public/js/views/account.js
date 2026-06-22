@@ -26,7 +26,7 @@ import { THEME_REGISTRY } from '../config/theme-registry.js';
 import { showToast } from '../components/show-toast.js';
 import {
   getCurrentUsername,
-  getIsAdmin,
+  isAdmin,
   isLoggedIn,
   setCurrentUsername,
 } from '../state/user-state.js';
@@ -231,7 +231,7 @@ export async function renderAccount() {
           </div>
           <div style="display:flex;gap:8px">
             <span style="color:var(--text3);min-width:100px">Account type:</span>
-            <span>${getIsAdmin() ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
+            <span>${isAdmin() ? '<span style="color:var(--accent)">Admin</span>' : 'User'}</span>
           </div>
         </div>
       </div>`

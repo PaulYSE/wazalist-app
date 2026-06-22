@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-22
  * @brief Compare tab view. Centralized top controls, label comparison editor, and side-by-side marks (their pips vs. your segmented mark-pill) with in-place toggling.
  */
 
@@ -17,32 +17,29 @@ import { dispName } from '../lib/search.js';
 import { markingPips } from '../components/render-helpers.js';
 import { navigateToBrowse } from '../app/shell.js';
 import { selectWaza } from './waza-detail.js';
-import {
-  openImportModal,
-  importedLists,
-  saveImported,
-  openExportModal,
-} from '../features/share-list.js';
+import { openImportModal, openExportModal } from '../features/share-list.js';
 import { refreshMyGroups } from './groups-browse-list.js';
+import { buildAccordion, closeAllAccordions } from '../app/accordion-shell.js';
 import {
   getCurrentUserId,
   getMyGroups,
+  getMyGroupsLoaded,
   isLoggedIn,
-  resetMyGroupsLoaded,
 } from '../state/user-state.js';
-
-/** @brief Cached data from the last successful group comparison API call. */
-let _lastGroupData = null;
-
-// ── Module-level state ────────────────────────────────────────
-/** @brief Key of the currently displayed imported list. */
-let compareSelectedKey = null;
-
-/**
- * @brief Which accordion is currently open.
- * 'group' | 'imported' | null (both collapsed)
- */
-let activeAccordion = null;
+import {
+  clearCompareData,
+  getCompareAccordion,
+  getCompareLastGroupData,
+  getCompareSelectedKey,
+  getImportedList,
+  getImportedListKeys,
+  hasImportedList,
+  removeImportedList,
+  resetCompareAccordion,
+  setCompareAccordion,
+  setCompareLastGroupData,
+  setCompareSelectedKey,
+} from '../state/compare-state.js';
 
 // ── Compare Table Builder ──────────────────────────────────
 
@@ -246,9 +243,9 @@ function renderCompareResult() {
   if (!resultEl) return;
 
   // ── Group mode ──────────────────────────────────────────
-  if (activeAccordion === 'group' && _lastGroupData) {
+  if (getCompareAccordion() === 'group' && getCompareLastGroupData()) {
     const { memberName, importedIds, theirMarkingsLookup, theirLabels, myCounts, theirCounts } =
-      _lastGroupData;
+      getCompareLastGroupData();
 
     const labelsHtml = buildCompareMarkingLabelsTableHTML(
       'Marking Labels — ' + memberName,
@@ -270,8 +267,9 @@ function renderCompareResult() {
   }
 
   // ── Imported mode ───────────────────────────────────────
-  if (activeAccordion === 'imported') {
-    const imp = compareSelectedKey ? importedLists[compareSelectedKey] : null;
+  if (getCompareAccordion() === 'imported') {
+    const key = getCompareSelectedKey();
+    const imp = key ? getImportedList(key) : null;
 
     // Counts
     const impMarkingCounts = Array(6).fill(0);
@@ -312,7 +310,7 @@ function renderCompareResult() {
 
     // Rows
     let rowsHtml;
-    const keys = Object.keys(importedLists);
+    const keys = getImportedListKeys();
     if (!keys.length) {
       rowsHtml =
         '<div class="cmp-empty">No imported lists yet.<br>Use <b>↓ Import List</b> to add one.</div>';
@@ -490,14 +488,14 @@ function wireGroupContent(container) {
       }
 
       // Store the data for renderCompareResult to use
-      _lastGroupData = {
+      setCompareLastGroupData({
         memberName,
         importedIds,
         theirMarkingsLookup,
         theirLabels: data.labels || Array(6).fill(''),
         myCounts: myMarkingCounts,
         theirCounts: theirMarkingCounts,
-      };
+      });
 
       // Render into the shared section
       renderCompareResult();
@@ -513,86 +511,6 @@ function wireGroupContent(container) {
 // ── Data helpers ──────────────────────────────────────────────
 
 /**
- * @brief Wipes all active comparison state.
- *
- * Called whenever an accordion is closed or switched so the next
- * accordion always starts with a blank slate.
- *
- * @return {void}
- */
-function clearCompareData() {
-  compareSelectedKey = null;
-  _lastGroupData = null;
-  // Visual clearing is handled by the next renderDashCompare() call.
-  // No DOM manipulation needed here — keeping this function pure.
-}
-
-/**
- * @brief Toggles an accordion open or closed (mutually exclusive).
- *
- * Rules:
- *   - Clicking the open accordion → close it, clear data.
- *   - Clicking a closed accordion → clear data, close the other, open this one.
- *
- * @param {string} key - 'group' | 'imported'
- * @return {void}
- */
-function toggleAccordion(key) {
-  if (activeAccordion === key) {
-    // User clicked the currently open accordion — close it.
-    clearCompareData();
-    activeAccordion = null;
-  } else {
-    // User clicked a different accordion — switch.
-    clearCompareData();
-    activeAccordion = key;
-  }
-  renderDashCompare();
-}
-
-/**
- * @brief Builds the HTML string for one accordion panel.
- *
- * Reuses the existing .dsec-toggle / .acc-body pattern used by
- * the Stats and Account tabs. The arrow rotates via CSS when the
- * 'collapsed' class is present on the toggle.
- *
- * @param {string}  key      - Identifier stored in data-acc (e.g. 'group').
- * @param {string}  label    - Text shown in the accordion header.
- * @param {boolean} visible  - False → wraps the whole thing in display:none.
- * @param {boolean} open     - True → body has the .open class (expanded).
- * @param {string}  bodyHtml - Inner HTML rendered inside the body when open.
- * @return {string} HTML string.
- */
-function accShell(key, label, visible, open, bodyHtml) {
-  return (
-    // Outer wrapper: hidden entirely when visible = false (e.g. no groups)
-    '<div class="dsec2"' +
-    (visible ? '' : ' style="display:none"') +
-    '>' +
-    // Header row — clicking this fires toggleAccordion(key)
-    '<div class="dsec-toggle cmp-acc-toggle' +
-    (open ? '' : ' collapsed') +
-    '" data-acc="' +
-    key +
-    '">' +
-    '<h3 style="margin-bottom:0;border-bottom:none;padding-bottom:0">' +
-    label +
-    '</h3>' +
-    '<span class="toggle-arrow">▾</span>' + // rotates via CSS .collapsed rule
-    '</div>' +
-    // Collapsible body — .open triggers the grid 0fr→1fr animation in panels.css
-    '<div class="acc-body' +
-    (open ? ' open' : '') +
-    '">' +
-    '<div class="acc-body-inner"><div class="acc-body-box">' +
-    bodyHtml +
-    '</div></div></div>' +
-    '</div>'
-  );
-}
-
-/**
  * @brief Builds the inner HTML for the "Compare with Imported List" accordion body.
  *
  * Renders the list selector controls, the marking-labels comparison table,
@@ -601,11 +519,12 @@ function accShell(key, label, visible, open, bodyHtml) {
  * @return {string} HTML string.
  */
 function buildImportedBody() {
-  const keys = Object.keys(importedLists);
+  const keys = getImportedListKeys();
+  const selectedKey = getCompareSelectedKey();
 
-  // Keep compareSelectedKey valid
-  if (compareSelectedKey && !importedLists[compareSelectedKey]) compareSelectedKey = null;
-  if (!compareSelectedKey && keys.length) compareSelectedKey = keys[0];
+  // Keep selectedKey valid
+  if (selectedKey && !hasImportedList(selectedKey)) setCompareSelectedKey(null);
+  if (!getCompareSelectedKey() && keys.length) setCompareSelectedKey(keys[0]);
 
   // ── Controls ──────────────────────────────────────────────────
   const listOpts = keys
@@ -614,9 +533,9 @@ function buildImportedBody() {
         '<option value="' +
         escapeHtml(k) +
         '"' +
-        (k === compareSelectedKey ? ' selected' : '') +
+        (k === getCompareSelectedKey() ? ' selected' : '') +
         '>' +
-        escapeHtml(importedLists[k].name) +
+        escapeHtml(getImportedList(k).name) +
         '</option>',
     )
     .join('');
@@ -627,7 +546,7 @@ function buildImportedBody() {
     '<option value="">— select a list —</option>' +
     listOpts +
     '</select>' +
-    (compareSelectedKey
+    (getCompareSelectedKey()
       ? '<button class="btn cmp-ctrl-remove" id="cmpRemoveBtn">Remove</button>'
       : '') +
     '<button class="btn" id="cmpImportBtn">↓ Import List</button>' +
@@ -683,18 +602,17 @@ function wireCompareImportTable(container) {
 
   // List picker — re-render the whole tab to reflect the new selection
   container.querySelector('#cmpSelect')?.addEventListener('change', (e) => {
-    compareSelectedKey = e.target.value || null;
+    setCompareSelectedKey(e.target.value || null);
     renderDashCompare();
   });
 
   // Remove button — deletes from localStorage and re-renders
   container.querySelector('#cmpRemoveBtn')?.addEventListener('click', () => {
-    if (!compareSelectedKey) return;
-    const name = importedLists[compareSelectedKey].name;
+    const key = getCompareSelectedKey();
+    if (!key) return;
+    const name = getImportedList(key).name;
     if (!confirm('Remove "' + name + '" from your imported lists?')) return;
-    delete importedLists[compareSelectedKey];
-    saveImported(importedLists);
-    compareSelectedKey = null;
+    removeImportedList(key);
     renderDashCompare();
   });
 
@@ -714,47 +632,56 @@ export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
   const loggedIn = isLoggedIn();
 
-  // Re-check group membership every time the Compare tab is opened.
-  // refreshMyGroups() is a no-op if already loaded; we reset the flag
-  // to force a fresh fetch each time so the accordion visibility is current.
-  resetMyGroupsLoaded();
-  await refreshMyGroups();
+  if (!getMyGroupsLoaded()) {
+    await refreshMyGroups();
+  }
   const myGroups = getMyGroups();
   const hasGroups = loggedIn && myGroups && myGroups.length > 0;
 
   // If the group accordion was open but the user no longer has groups
   // (e.g. they left their last group), collapse it silently.
-  if (activeAccordion === 'group' && !hasGroups) {
+  if (getCompareAccordion() === 'group' && !hasGroups) {
     clearCompareData();
-    activeAccordion = null;
+    resetCompareAccordion();
   }
 
   // ── Build accordion bodies (only when open — avoids rendering heavy
   //    row lists that would never be visible while collapsed) ──────
-  const groupBody = activeAccordion === 'group' ? buildGroupBody() : '';
-
-  const importedBody = activeAccordion === 'imported' ? buildImportedBody() : '';
+  const groupBody = buildGroupBody();
+  const importedBody = buildImportedBody();
 
   // ── Render both accordion shells ──────────────────────────────
   container.innerHTML =
-    accShell('group', 'Compare with Group', hasGroups, activeAccordion === 'group', groupBody) +
-    accShell(
-      'imported',
-      'Compare with Imported List',
-      true,
-      activeAccordion === 'imported',
-      importedBody,
-    ) +
+    buildAccordion('group', 'Compare with Group', groupBody, {
+      open: getCompareAccordion() === 'group',
+      visible: hasGroups,
+    }) +
+    buildAccordion('imported', 'Compare with Imported List', importedBody, {
+      open: getCompareAccordion() === 'imported',
+    }) +
     '<div id="cmpResult"></div>';
 
   // ── Wire accordion toggle buttons ─────────────────────────────
-  container.querySelectorAll('.cmp-acc-toggle').forEach((el) => {
-    el.addEventListener('click', () => toggleAccordion(el.dataset.acc));
+  container.querySelectorAll('.acc-toggle').forEach((el) => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.acc;
+      const isOpen = getCompareAccordion() === key;
+
+      setCompareAccordion(key);
+      if (isOpen) {
+        el.classList.add('collapsed');
+        el.nextElementSibling?.classList.remove('open');
+      } else {
+        closeAllAccordions(container);
+        el.classList.remove('collapsed');
+        el.nextElementSibling?.classList.add('open');
+      }
+    });
   });
 
   // ── Wire content event listeners (only for the open section) ──
-  if (activeAccordion === 'group') wireGroupContent(container);
-  if (activeAccordion === 'imported') wireCompareImportTable(container);
+  wireGroupContent(container);
+  wireCompareImportTable(container);
 
   renderCompareResult();
 }

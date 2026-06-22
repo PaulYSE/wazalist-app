@@ -27,14 +27,14 @@ import {
   setGroupsSearchQuery,
 } from '../state/groups-state.js';
 import {
-  getIsAdmin,
-  getIsGuest,
+  isGuest,
   getToken,
   isLoggedIn,
   resetMyGroups,
   resetMyGroupsLoaded,
   setMyGroups,
   setMyGroupsLoaded,
+  isAdmin,
 } from '../state/user-state.js';
 
 // ── TEMPORARY: BLOCK START ────────────────────────────────────
@@ -50,12 +50,12 @@ import {
  * @return {void}
  */
 function enableGroupsForAdmins() {
-  const isAdmin = getIsAdmin();
-  document.querySelector('.ntab[data-tab="groups"]').style.display = isAdmin ? '' : 'none';
+  const admin = isAdmin();
+  document.querySelector('.ntab[data-tab="groups"]').style.display = admin ? '' : 'none';
   document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = isAdmin
     ? ''
     : 'none';
-  document.getElementById('groupsView').style.display = isAdmin ? '' : 'none';
+  document.getElementById('groupsView').style.display = admin ? '' : 'none';
 }
 enableGroupsForAdmins();
 
@@ -153,7 +153,7 @@ export async function refreshGroups() {
  * @return {Promise<void>}
  */
 export async function refreshMyGroups() {
-  if (getIsGuest() || !getToken()) {
+  if (isGuest() || !getToken()) {
     resetMyGroups();
     setMyGroupsLoaded();
     return;
@@ -171,7 +171,7 @@ export async function refreshMyGroups() {
 
 // ── Group list panel ──────────────────────────────────────────
 function makeCreateGroupBtn(id, style, text) {
-  if (getIsGuest() || !getToken()) return '';
+  if (isGuest() || !getToken()) return '';
 
   return '<button class="btn" id="' + id + '" style="' + style + '">' + text + '</button>';
 }

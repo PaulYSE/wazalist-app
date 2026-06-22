@@ -108,11 +108,11 @@ export function initToken() {
 /**
  * @brief Accessors for the guest mode flag.
  *
- * - getIsGuest() → {boolean}
+ * - isGuest() → {boolean}
  * - setIsGuest() → {void}
  * - resetIsGuest() → {void}
  */
-export function getIsGuest() {
+export function isGuest() {
   return userState.isGuest;
 }
 export function setIsGuest() {
@@ -127,11 +127,11 @@ export function resetIsGuest() {
 /**
  * @brief Accessors for the admin flag.
  *
- * - getIsAdmin() → {boolean}
+ * - isAdmin() → {boolean}
  * - setIsAdmin(val) → {void}
  * - resetIsAdmin() → {void}
  */
-export function getIsAdmin() {
+export function isAdmin() {
   return userState.isAdmin;
 }
 export function setIsAdmin(val) {

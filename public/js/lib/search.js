@@ -11,7 +11,7 @@ import { state } from '../state/state.js';
 import { getP } from '../services/progress.js';
 import {
   getBrowseMarkingFilters,
-  getBrowseSearchFilter,
+  getBrowseSearchString,
   getBrowseSortField,
   getBrowseSortOrder,
   isAnyMarkingFilterActive,
@@ -265,7 +265,7 @@ export function wazaMatchesSearch(w, search) {
  * @return {Array} Filtered and sorted array of waza objects.
  */
 export function filterWaza() {
-  const search = getBrowseSearchFilter();
+  const search = getBrowseSearchString();
   const markings = getBrowseMarkingFilters();
   let results = state.wazaData.filter((w) => {
     // "Any" mode: only show waza that have at least one marking

@@ -19,7 +19,7 @@ import { getP } from '../services/progress.js';
 import { selectWaza } from './waza-detail.js';
 import { updateMarkingFilterUI, setSearchInput } from '../app/shell.js';
 import { openNewWazaModal } from '../modals/waza-new.js';
-import { getIsGuest, getToken } from '../state/user-state.js';
+import { isGuest, getToken } from '../state/user-state.js';
 import {
   getBrowseListView,
   getBrowseSortField,
@@ -202,7 +202,7 @@ export function renderList() {
     filtered.length + ' of ' + state.wazaData.length + ' Waza';
   const list = document.getElementById('wazaList');
   if (!filtered.length) {
-    const canAdd = !getIsGuest() && !!getToken();
+    const canAdd = !isGuest() && !!getToken();
     list.innerHTML =
       '<div style="padding:24px 20px;text-align:center;color:var(--text3)">' +
       '<div style="font-size:14px;color:var(--text2)">No Waza found</div>' +

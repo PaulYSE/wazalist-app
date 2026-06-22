@@ -340,7 +340,7 @@ export function resetImportExcelColorLabels() {
  *
  * @return {void}
  */
-export function resetImportStateAll() {
+export function resetImportState() {
   resetImportMatched();
   resetImportUnmatched();
   resetImportParsed();

@@ -24,7 +24,7 @@ import { openSuggestEdit, openVideoSuggest } from '../modals/waza-edit.js';
 import { renderList, updateListRowMarkings, surpriseMe } from './waza-browse-list.js';
 import { setSearchInput } from '../app/shell.js';
 import { pushRoute, replaceRoute } from '../app/router.js';
-import { getIsGuest, getToken } from '../state/user-state.js';
+import { isGuest, getToken } from '../state/user-state.js';
 import { isAnyMarkingFilterActive } from '../state/waza-browse-state.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
@@ -253,7 +253,7 @@ export function renderDetail() {
     '</div>' +
     // Like/Dislike pill
     '<div class="dsec">' +
-    (!getToken() || getIsGuest()
+    (!getToken() || isGuest()
       ? '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Sign in to like or dislike</div>'
       : '') +
     '<div class="like-pill-wrap">' +
@@ -261,7 +261,7 @@ export function renderDetail() {
     '<button class="like-pill-half' +
     (p.like === 1 ? ' like-on' : '') +
     '"' +
-    (!getToken() || getIsGuest() || isSaving ? ' disabled' : '') +
+    (!getToken() || isGuest() || isSaving ? ' disabled' : '') +
     ' id="likeBtn">' +
     '👍 <span class="pill-count">' +
     (w.like_count || 0) +
@@ -269,7 +269,7 @@ export function renderDetail() {
     '<button class="like-pill-half' +
     (p.like === -1 ? ' dislike-on' : '') +
     '"' +
-    (!getToken() || getIsGuest() || isSaving ? ' disabled' : '') +
+    (!getToken() || isGuest() || isSaving ? ' disabled' : '') +
     ' id="dislikeBtn">' +
     '👎 <span class="pill-count">' +
     (w.dislike_count || 0) +
@@ -310,7 +310,7 @@ export function renderDetail() {
     '<div class="dsec"><h3>Video references</h3><div class="vlinks">' +
     videoHTML +
     '</div>' +
-    (!getIsGuest() && getToken()
+    (!isGuest() && getToken()
       ? '<div class="suggest-video-bar" id="suggestVideoBar">🎥 Suggest a video!</div>'
       : '') +
     '</div>' +
@@ -421,7 +421,7 @@ export function renderDetail() {
               : ''),
         )
       : '') +
-    (!getIsGuest() && getToken()
+    (!isGuest() && getToken()
       ? '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><button class="suggest-btn" id="suggestEditBtn">✏️ Suggest an edit</button></div>'
       : '');
 

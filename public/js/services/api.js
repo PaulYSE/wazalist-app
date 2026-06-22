@@ -7,7 +7,7 @@
  * @brief Authenticated API request wrapper for backend communication. Handles token injection, JSON parsing, and session expiry.
  */
 
-import { getIsGuest, getToken, resetUserState } from '../state/user-state.js';
+import { isGuest, getToken, resetUserState } from '../state/user-state.js';
 
 /**
  * @brief Performs an authenticated API request to the backend.
@@ -34,12 +34,7 @@ export const api = async (path, method = 'GET', body = null) => {
   const res = await fetch(path, opts);
   const data = await res.json().catch(() => ({}));
 
-  if (
-    res.status === 401 &&
-    data?.error === 'Authentication required' &&
-    getToken() &&
-    !getIsGuest()
-  ) {
+  if (res.status === 401 && data?.error === 'Authentication required' && getToken() && !isGuest()) {
     handleSessionExpired();
   }
 

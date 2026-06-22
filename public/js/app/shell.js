@@ -27,11 +27,12 @@ import {
   resetBrowseFilterAny,
   setAllBrowseMarkingFilters,
   setBrowseMarkingFilters,
-  setBrowseSearchFilter,
+  setBrowseSearchString,
   setBrowseSortField,
   setBrowseSortOrder,
   toggleBrowseFilterAny,
 } from '../state/waza-browse-state.js';
+import { resetMyGroupsLoaded } from '../state/user-state.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -376,7 +377,10 @@ export function activateTab(t) {
   document.getElementById('contributeView').style.display = t === 'contribute' ? 'block' : 'none';
   document.getElementById('accountView').style.display = t === 'account' ? 'block' : 'none';
   if (t === 'stats') renderDashStats();
-  if (t === 'compare') renderDashCompare();
+  if (t === 'compare') {
+    resetMyGroupsLoaded();
+    renderDashCompare();
+  }
   if (t === 'groups') renderGroups();
   if (t === 'contribute') renderContribute();
   if (t === 'account') renderAccount();
@@ -412,7 +416,7 @@ export function switchTab(t) {
  * @return {void}
  */
 export function setSearchInput(query) {
-  setBrowseSearchFilter(query);
+  setBrowseSearchString(query);
   const input = document.getElementById('searchInput');
   if (!input) return;
   input.value = query;
