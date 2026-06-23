@@ -93,6 +93,32 @@ window.enableBulkCompareForAdmins = () => {
 // ── TEMPORARY: BLOCK END ──────────────────────────────────────
 
 /**
+ * @brief Converts an imported list's data into the same shape as a group member's data.
+ *
+ * This homogenizes the two sources so the matrix builder doesn't need to
+ * know whether the data came from a group API call or a local imported list.
+ *
+ * @param {string} key - The imported list key.
+ * @param {Object} list - The imported list object from compare-state.
+ * @return {Object} Homogenized member data: { userId, username, markings, labels }.
+ */
+function parseImportedListData(key, list) {
+  const markings = {};
+  if (list.marks) {
+    Object.entries(list.marks).forEach(([wazaId, mark]) => {
+      markings[+wazaId] = mark.markings || Array(6).fill(false);
+    });
+  }
+
+  return {
+    userId: key, // string key acts as unique ID
+    username: list.name || 'List ' + key.slice(0, 8),
+    markings,
+    labels: list.labels || [],
+  };
+}
+
+/**
  * @brief Renders the shared comparison result section below the accordions.
  *
  * Reads the current active accordion and its data, builds the labels table
@@ -104,6 +130,61 @@ window.enableBulkCompareForAdmins = () => {
 function renderCompareResult() {
   const resultEl = document.getElementById('cmpResult');
   if (!resultEl) return;
+
+  // ── Bulk mode ────────────────────────────────────────────
+  if (getCompareAccordion() === 'bulk' && hasBulkCompareSelection() && getBulkCompareData()) {
+    const data = getBulkCompareData();
+    const allWazaIds = new Set();
+    const sourceType = getBulkCompareSourceType();
+    const membersData = [];
+
+    if (sourceType === 'group') {
+      const selectedUserIds = getBulkCompareSelectedUserIds();
+      selectedUserIds.forEach((uid) => {
+        if (data[uid] && data[uid].markings) {
+          Object.keys(data[uid].markings).forEach((id) => allWazaIds.add(+id));
+          membersData.push({
+            userId: uid,
+            username: data[uid].username || 'User ' + uid,
+            markings: data[uid].markings || {},
+            labels: data[uid].labels || [],
+          });
+        }
+      });
+    }
+
+    if (sourceType === 'imported') {
+      const selectedListKeys = getBulkCompareSelectedListKeys();
+      selectedListKeys.forEach((key) => {
+        if (data[key] && data[key].markings) {
+          Object.keys(data[key].markings).forEach((id) => allWazaIds.add(+id));
+          membersData.push(data[key]); // Already homogenized from loadBulkData
+        }
+      });
+    }
+
+    // You last
+    const yourData = data[getCurrentUserId()];
+    if (yourData) {
+      membersData.push({
+        userId: getCurrentUserId(),
+        username: 'You',
+        markings: yourData.markings || {},
+        labels: yourData.labels || [],
+      });
+    }
+
+    resultEl.innerHTML = buildCompareMatrixHTML(allWazaIds, membersData, getCurrentUserId(), {
+      editMode: isBulkCompareEditMode(),
+      wazaNameDisplay: getBulkCompareWazaNameDisplay(),
+      emptyMessage: 'No waza have been marked by the selected members.',
+    });
+    wireSaveLabelsButton(resultEl);
+    if (isBulkCompareEditMode()) {
+      wireCompareTableListeners(resultEl);
+    }
+    return;
+  }
 
   // ── Group mode ──────────────────────────────────────────
   if (getCompareAccordion() === 'group' && getCompareLastGroupData()) {
@@ -494,7 +575,8 @@ function buildBulkBody() {
             '</option>',
         )
         .join('') +
-      '</select>';
+      '</select>' +
+      '<div id="cmpBulkMemberArea" style="margin-top:8px"></div>';
   }
 
   // ── Imported list picker ─────────────────────────────────
@@ -527,73 +609,10 @@ function buildBulkBody() {
       : '') + '</div>';
 
   // ── Matrix ───────────────────────────────────────────────
-  let matrixHtml;
-  if (hasSelection && getBulkCompareData()) {
-    const data = getBulkCompareData();
-    const allWazaIds = new Set();
-
-    // Collect all waza IDs from all selected users
-    selectedUserIds.forEach((uid) => {
-      if (data[uid] && data[uid].markings) {
-        Object.keys(data[uid].markings).forEach((id) => allWazaIds.add(+id));
-      }
-    });
-
-    // Build membersData array
-    const membersData = [];
-    // Other users first
-    selectedUserIds.forEach((uid) => {
-      if (data[uid]) {
-        membersData.push({
-          userId: uid,
-          username: data[uid].username || 'User ' + uid,
-          markings: data[uid].markings || {},
-          labels: data[uid].labels || [],
-        });
-      }
-    });
-    // You last
-    const yourData = data[getCurrentUserId()];
-    if (yourData) {
-      membersData.push({
-        userId: getCurrentUserId(),
-        username: 'You',
-        markings: yourData.markings || {},
-        labels: yourData.labels || [],
-      });
-    }
-
-    // Waza name display toggle
-    const nameToggleHtml =
-      '<div class="cmp-controls" style="margin-bottom:12px">' +
-      '<span style="font-size:12px;color:var(--text3);margin-right:8px">Waza names:</span>' +
-      '<div class="seg-pill">' +
-      '<button class="seg-item' +
-      (wazaNameDisplay === 'both' ? ' on' : '') +
-      '" data-display="both">Both</button>' +
-      '<button class="seg-item' +
-      (wazaNameDisplay === 'jp' ? ' on' : '') +
-      '" data-display="jp">JP</button>' +
-      '<button class="seg-item' +
-      (wazaNameDisplay === 'en' ? ' on' : '') +
-      '" data-display="en">EN</button>' +
-      '</div>' +
-      '</div>';
-
-    matrixHtml =
-      nameToggleHtml +
-      buildCompareMatrixHTML(allWazaIds, membersData, getCurrentUserId(), {
-        editMode,
-        wazaNameDisplay,
-        emptyMessage: 'No waza have been marked by the selected members.',
-      });
-  } else if (hasSelection && !getBulkCompareData()) {
-    matrixHtml =
-      '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Loading comparison data…</div>';
-  } else {
-    matrixHtml =
-      '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Select a source and add lists to compare.</div>';
-  }
+  const matrixHtml =
+    hasSelection && !getBulkCompareData()
+      ? '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Loading comparison data…</div>'
+      : '';
 
   return controlsHtml + matrixHtml;
 }
@@ -635,20 +654,22 @@ function wireBulkContent(container) {
       // After rebuild, inject the member list
       const memberArea = container.querySelector('#cmpBulkMemberArea');
       if (memberArea) {
-        memberArea.innerHTML = others
-          .map(
-            (m) =>
-              '<label class="cmp-bulk-member-label">' +
-              '<input type="checkbox" class="cmp-bulk-member-cb" value="' +
-              m.user_id +
-              '"> ' +
-              escapeHtml(m.username) +
-              (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
-              '</label>',
-          )
-          .join('');
+        memberArea.innerHTML =
+          others
+            .map(
+              (m) =>
+                '<label class="cmp-bulk-member-label">' +
+                '<input type="checkbox" class="cmp-bulk-member-cb" value="' +
+                m.user_id +
+                '"> ' +
+                escapeHtml(m.username) +
+                (m.tag ? ' (' + escapeHtml(m.tag) + ')' : '') +
+                '</label>',
+            )
+            .join('') +
+          '<button class="btn" id="cmpBulkAddMembersBtn" style="margin-top:8px">Add Selected</button>';
 
-        memberArea.querySelector('button')?.addEventListener('click', async () => {
+        memberArea.querySelector('#cmpBulkAddMembersBtn')?.addEventListener('click', async () => {
           const checked = memberArea.querySelectorAll('.cmp-bulk-member-cb:checked');
           const ids = Array.from(checked).map((cb) => +cb.value);
           setBulkCompareSelectedUserIds(ids);
@@ -689,9 +710,17 @@ function wireBulkContent(container) {
   container.querySelectorAll('.cmp-matrix-remove-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const uid = +btn.dataset.uid;
-      const current = getBulkCompareSelectedUserIds();
-      setBulkCompareSelectedUserIds(current.filter((id) => id !== uid));
+      const id = btn.dataset.uid;
+      const sourceType = getBulkCompareSourceType();
+
+      if (sourceType === 'group') {
+        const current = getBulkCompareSelectedUserIds();
+        setBulkCompareSelectedUserIds(current.filter((uid) => uid !== +id));
+      } else if (sourceType === 'imported') {
+        const current = getBulkCompareSelectedListKeys();
+        setBulkCompareSelectedListKeys(current.filter((key) => key !== id));
+      }
+
       loadBulkData();
       renderDashCompare();
     });
@@ -763,14 +792,7 @@ async function loadBulkData() {
     keys.forEach((key) => {
       const list = getImportedList(key);
       if (list && list.marks) {
-        data[key] = {
-          username: list.name || 'List ' + key.slice(0, 8),
-          markings: {},
-          labels: list.labels || [],
-        };
-        Object.entries(list.marks).forEach(([wazaId, mark]) => {
-          data[key].markings[+wazaId] = mark.markings || Array(6).fill(false);
-        });
+        data[key] = parseImportedListData(key, list);
       }
     });
   }
