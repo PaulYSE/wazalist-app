@@ -3,10 +3,16 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-23
- * @brief Shared compare table builders and wiring helpers. Used by the Compare tab
- *        to render marking labels tables and waza comparison rows, and to wire
- *        interactive marking toggles and row-click navigation.
+ * @date 2026-06-24
+ * @brief Unified comparison matrix builder for the Compare tab, plus the
+ *        shared wiring helpers (save labels, mark toggles, row navigation,
+ *        column removal) used after the matrix is rendered.
+ *
+ *        Supersedes the old two-party-only table builders and the separate
+ *        N-column bulk matrix builder — both are now the same function.
+ *        A comparison with zero added entries, one entry, or many entries
+ *        all flow through buildCompareMatrixHTML(); the only thing that
+ *        changes is how many columns get rendered.
  */
 
 import { state } from '../state/state.js';
@@ -19,73 +25,120 @@ import { markingPips } from './render-helpers.js';
 import { navigateToBrowse } from '../app/shell.js';
 import { selectWaza } from '../views/waza-detail.js';
 
-// ── Labels Table ────────────────────────────────────────────
+// ── Main Entry Point ────────────────────────────────────────
 
 /**
- * @brief Builds the HTML for a marking labels comparison table.
+ * @brief Builds the full HTML for the Compare tab's result section:
+ *        the Marking Labels table, followed by the waza comparison rows.
  *
- * Renders a table comparing marking labels between two users (or just the current user).
- * Displays shape symbols, label inputs, and waza counts. When a second user is provided,
- * shows a two-column layout (their labels read-only, your labels editable).
- *
- * @param {string} title - Section title to display.
- * @param {Object} userFirst - First user's data object containing { labels: string[], counts: number[] }.
- * @param {Object} [userSecond] - Optional second user's data object for two-column comparison.
- * @return {string} HTML string for the labels comparison section.
+ * @param {Object[]} entries - Added comparison entries (sourceType 'member'|'imported'), NOT including "you".
+ * @param {Object} yourEntry - Your own entry, shape { sourceType: 'self', sourceId, username: 'You', markings, labels }.
+ * @param {Object} [opts]
+ * @param {'both'|'jp'|'en'} [opts.wazaNameDisplay='both'] - Waza name display mode.
+ *   @todo Extend to primary/secondary language pairs (JP+CN, EN+CN, etc.)
+ *         once that preference UI exists. Only 'both' (JP+EN), 'jp', and
+ *         'en' are implemented today.
+ * @param {string} [opts.emptyMessage] - Shown when entries is empty (no comparison added yet).
+ * @return {string} HTML string.
  */
-export function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond) {
+export function buildCompareMatrixHTML(entries, yourEntry, opts = {}) {
+  const {
+    wazaNameDisplay = 'both',
+    emptyMessage = 'Add a Group member or Imported List to start comparing.',
+  } = opts;
+
+  const allMembers = [...entries, yourEntry]; // entries first, "you" always last
+
+  // ── Zero entries: just your own labels, nothing to compare against ──
+  if (!entries.length) {
+    return buildLabelsTableHTML(allMembers) + '<div class="cmp-empty">' + emptyMessage + '</div>';
+  }
+
+  // Row set is anchored on what the OTHER parties have marked — matching
+  // the original design (your own marks alone never produce rows; the
+  // comparison is "what have they marked, and how do you compare").
+  const wazaIds = new Set();
+  entries.forEach((e) => Object.keys(e.markings || {}).forEach((id) => wazaIds.add(+id)));
+  const rows = state.wazaData.filter((w) => wazaIds.has(w.id));
+
+  const labelsHtml = buildLabelsTableHTML(allMembers);
+
+  if (!rows.length) {
+    return (
+      labelsHtml +
+      '<div class="cmp-empty">None of the added members or lists have marked any Waza yet.</div>'
+    );
+  }
+
+  const headersHtml = buildHeadersHTML(allMembers);
+  const rowsHtml = rows.map((w) => buildRowHTML(w, allMembers, wazaNameDisplay)).join('');
+
+  return labelsHtml + headersHtml + rowsHtml;
+}
+
+// ── Labels Section ──────────────────────────────────────────
+
+/**
+ * @brief Counts how many waza have a given marking index active.
+ *
+ * @param {Object<number, boolean[]>} markings
+ * @param {number} markingIndex
+ * @return {number}
+ */
+function countMarking(markings, markingIndex) {
+  let count = 0;
+  Object.values(markings || {}).forEach((arr) => {
+    if (arr && arr[markingIndex]) count++;
+  });
+  return count;
+}
+
+/**
+ * @brief Builds the Marking Labels comparison section.
+ *
+ * One row per marking (●▲■♥★◆). Every non-"you" column is read-only;
+ * "you" always gets an editable input, regardless of how many other
+ * columns are present — including the zero-entries case.
+ *
+ * @param {Object[]} allMembers - entries + your own entry, "you" last.
+ * @return {string} HTML string.
+ */
+function buildLabelsTableHTML(allMembers) {
+  const others = allMembers.filter((m) => m.sourceType !== 'self');
+  const yours = allMembers.find((m) => m.sourceType === 'self');
+
+  const columnCount = others.length + 2; // marking symbol + others + you
+  const gridStyle = 'style="grid-template-columns: 40px repeat(' + (columnCount - 1) + ', 1fr)"';
+
   const rowsHtml = SHAPES.map((s, i) => {
-    const myLabels = userFirst.labels[i] || '';
-    const myCounts = userFirst.counts[i];
+    let row = '<div class="cmp-labels-row" ' + gridStyle + '>';
+    row += '<span class="cmp-labels-marking">' + s + '</span>';
 
-    if (userSecond) {
-      const theirLabels = userSecond.labels[i] || '';
-      const theirCounts = userSecond.counts[i];
+    others.forEach((m) => {
+      const label = (m.labels && m.labels[i]) || '';
+      const count = countMarking(m.markings, i);
+      row += '<div class="cmp-labels-their">';
+      row += label
+        ? '<span class="label-names">' + escapeHtml(label) + '</span>'
+        : '<span class="label-unset">Unlabelled</span>';
+      row += '<span class="cmp-labels-count">' + count + ' waza</span>';
+      row += '</div>';
+    });
 
-      return (
-        '<div class="cmp-labels-row">' +
-        '<span class="cmp-labels-marking">' +
-        s +
-        '</span>' +
-        '<div class="cmp-labels-their">' +
-        (theirLabels
-          ? '<span class="label-names">' + escapeHtml(theirLabels) + '</span>'
-          : '<span class="label-unset">Unlabelled</span>') +
-        '<span class="cmp-labels-count">' +
-        theirCounts +
-        ' waza</span>' +
-        '</div>' +
-        '<div class="cmp-labels-mine">' +
-        '<input class="cmp-labels-input" data-si="' +
-        i +
-        '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
-        myLabels.replace(/"/g, '&quot;') +
-        '">' +
-        '<span class="cmp-labels-count">' +
-        myCounts +
-        ' waza</span>' +
-        '</div>' +
-        '</div>'
-      );
-    } else {
-      return (
-        '<div class="cmp-labels-row cmp-labels-row-solo">' +
-        '<span class="cmp-labels-marking">' +
-        s +
-        '</span>' +
-        '<div class="cmp-labels-mine">' +
-        '<input class="cmp-labels-input" data-si="' +
-        i +
-        '" type="text" maxlength="32" placeholder="Label this Marking…" value="' +
-        myLabels.replace(/"/g, '&quot;') +
-        '">' +
-        '<span class="cmp-labels-count">' +
-        myCounts +
-        ' waza</span>' +
-        '</div>' +
-        '</div>'
-      );
-    }
+    const yourLabel = (yours && yours.labels && yours.labels[i]) || '';
+    const yourCount = yours ? countMarking(yours.markings, i) : 0;
+    row += '<div class="cmp-labels-mine">';
+    row +=
+      '<input class="cmp-labels-input" data-si="' +
+      i +
+      '" type="text" maxlength="32" placeholder="Your Marking Label…" value="' +
+      yourLabel.replace(/"/g, '&quot;') +
+      '">';
+    row += '<span class="cmp-labels-count">' + yourCount + ' waza</span>';
+    row += '</div>';
+
+    row += '</div>';
+    return row;
   }).join('');
 
   const saveBtnRow =
@@ -95,9 +148,7 @@ export function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond)
 
   return (
     '<div class="dsec2">' +
-    '<h3>' +
-    escapeHtml(title) +
-    '</h3>' +
+    '<h3>Marking Labels</h3>' +
     '<div class="cmp-labels-table">' +
     rowsHtml +
     '</div>' +
@@ -106,78 +157,107 @@ export function buildCompareMarkingLabelsTableHTML(title, userFirst, userSecond)
   );
 }
 
-// ── Waza Rows Table ─────────────────────────────────────────
+// ── Column Headers ──────────────────────────────────────────
 
 /**
- * @brief Builds an HTML string for the waza comparison rows table.
+ * @brief Builds the column header row: waza name + one header per member.
  *
- * Renders column headers ("Waza", theirLabel, "Your marks") and a row per waza.
- * Each row shows the waza names, their marking pips (read-only), and your marking
- * toggle buttons (interactive — wiring happens after render via wireCompareTableListeners).
+ * Every non-"you" column gets a ✕ remove button. There is no edit-mode
+ * gate any more — removing a column is always available, the same way
+ * it was always available to switch lists in the old single-compare view.
  *
- * @param {Set<number>}              wazaIds       - Set of waza IDs to display.
- * @param {Object<number, boolean[]>} theirMarkings - Map of wazaId → marking booleans.
- * @param {string}                   theirName    - Text for the "their" column header.
- * @param {string}                   emptyMessage  - Message shown when no waza have marks.
- * @return {string} HTML string for the comparison table (col-headers + rows).
+ * @param {Object[]} allMembers
+ * @return {string} HTML string.
  */
-export function buildCompareMarkingTableRowsHTML(wazaIds, theirMarkings, theirName, emptyMessage) {
-  const rows = state.wazaData.filter((w) => wazaIds.has(w.id));
+function buildHeadersHTML(allMembers) {
+  const columnCount = allMembers.length + 1; // waza name + members
+  const gridStyle = 'style="grid-template-columns: 1fr repeat(' + (columnCount - 1) + ', auto)"';
 
-  if (!rows.length) {
-    return '<div class="cmp-empty">' + emptyMessage + '</div>';
+  let html = '<div class="cmp-col-headers cmp-matrix-headers" ' + gridStyle + '>';
+  html += '<span>Waza</span>';
+
+  allMembers.forEach((m) => {
+    html += '<span class="cmp-matrix-header-cell">';
+    html += escapeHtml(m.username);
+    if (m.sourceType !== 'self') {
+      // data-source-id is always a string here (DOM dataset attributes are
+      // always strings) — the caller wiring removeCompareEntry() must
+      // convert back to a number for 'member' sourceType before comparing.
+      html +=
+        ' <button class="cmp-matrix-remove-btn" data-source-type="' +
+        m.sourceType +
+        '" data-source-id="' +
+        m.sourceId +
+        '" title="Remove ' +
+        escapeHtml(m.username) +
+        '">✕</button>';
+    }
+    html += '</span>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// ── Matrix Row ──────────────────────────────────────────────
+
+/**
+ * @brief Builds a single waza row across all member columns.
+ *
+ * @param {Object} w - Waza object from state.wazaData.
+ * @param {Object[]} allMembers
+ * @param {'both'|'jp'|'en'} wazaNameDisplay
+ * @return {string} HTML string.
+ */
+function buildRowHTML(w, allMembers, wazaNameDisplay) {
+  const columnCount = allMembers.length + 1;
+  const gridStyle = 'style="grid-template-columns: 1fr repeat(' + (columnCount - 1) + ', auto)"';
+
+  let html = '<div class="cmp-row cmp-matrix-row" data-id="' + w.id + '" ' + gridStyle + '>';
+
+  // Waza name cell
+  html += '<div class="cmp-names">';
+  if (wazaNameDisplay === 'jp') {
+    html += '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>';
+  } else if (wazaNameDisplay === 'en') {
+    // FIX: was incorrectly using class="cmp-name-jp" here (copy-paste from
+    // the 'jp' branch above) — the English name now gets its own class.
+    html += '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>';
+  } else {
+    html += '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>';
+    html += '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>';
   }
+  html += '</div>';
 
-  const colHeaders =
-    '<div class="cmp-col-headers">' +
-    '<span>Waza</span>' +
-    '<span>' +
-    escapeHtml(theirName) +
-    '</span>' +
-    '<span>Your marks</span>' +
-    '</div>';
+  // Member columns — "you" is always an interactive toggle pill;
+  // everyone else is always read-only pips. No mode switch.
+  allMembers.forEach((m) => {
+    const markings = (m.markings && m.markings[w.id]) || Array(6).fill(false);
 
-  const rowsHtml = rows
-    .map((w) => {
-      const theirs = theirMarkings[w.id] || Array(6).fill(false);
-      const mine = (getP(w.id).markings || Array(6).fill(false)).slice();
+    if (m.sourceType === 'self') {
+      html += '<div class="cmp-mark-pill">';
+      html += SHAPES.map(
+        (s, i) =>
+          '<button class="cmp-mark-seg' +
+          (markings[i] ? ' on' : '') +
+          '" data-wid="' +
+          w.id +
+          '" data-si="' +
+          i +
+          '" title="' +
+          escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
+          '">' +
+          s +
+          '</button>',
+      ).join('');
+      html += '</div>';
+    } else {
+      html += '<div class="cmp-markings-imported">' + markingPips(markings) + '</div>';
+    }
+  });
 
-      return (
-        '<div class="cmp-row" data-id="' +
-        w.id +
-        '">' +
-        '<div class="cmp-names">' +
-        '<div class="cmp-name-jp">' +
-        escapeHtml(w.name_jp || '—') +
-        '</div>' +
-        '<div class="cmp-name-en">' +
-        escapeHtml(dispName(w)) +
-        '</div>' +
-        '</div>' +
-        '<div class="cmp-markings-imported">' +
-        markingPips(theirs) +
-        '</div>' +
-        '<div class="cmp-mark-pill">' +
-        SHAPES.map(
-          (s, i) =>
-            '<button class="cmp-mark-seg' +
-            (mine[i] ? ' on' : '') +
-            '" data-wid="' +
-            w.id +
-            '" data-si="' +
-            i +
-            '" title="' +
-            escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
-            '">' +
-            s +
-            '</button>',
-        ).join('') +
-        '</div></div>'
-      );
-    })
-    .join('');
-
-  return colHeaders + rowsHtml;
+  html += '</div>';
+  return html;
 }
 
 // ── Wiring Helpers ──────────────────────────────────────────
@@ -202,16 +282,21 @@ export function wireSaveLabelsButton(container) {
 }
 
 /**
- * @brief Wires marking toggles and row-click navigation inside a container.
+ * @brief Wires mark toggles, row-click navigation, and column-remove buttons.
  *
- * Call this after setting innerHTML that contains .cmp-mark-seg buttons
- * and .cmp-row elements. Safe to call multiple times — uses querySelectorAll
- * which only targets elements present at call time.
+ * Call this after setting innerHTML that contains .cmp-mark-seg buttons,
+ * .cmp-row elements, and/or .cmp-matrix-remove-btn buttons. Safe to call
+ * multiple times — uses querySelectorAll, which only targets elements
+ * present at call time.
  *
- * @param {HTMLElement} container - DOM element containing compare rows.
+ * @param {HTMLElement} container - DOM element containing the rendered matrix.
+ * @param {Function} [onRemove] - Called as onRemove(sourceType, sourceIdString)
+ *   when a column's ✕ is clicked. Conversion of sourceIdString back to a
+ *   number (for 'member' entries) is the caller's responsibility, since
+ *   this module doesn't know which sourceType needs which ID type.
  * @return {void}
  */
-export function wireCompareTableListeners(container) {
+export function wireCompareTableListeners(container, onRemove) {
   container.querySelectorAll('.cmp-mark-seg').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -231,4 +316,13 @@ export function wireCompareTableListeners(container) {
       selectWaza(+el.dataset.id);
     });
   });
+
+  if (onRemove) {
+    container.querySelectorAll('.cmp-matrix-remove-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onRemove(btn.dataset.sourceType, btn.dataset.sourceId);
+      });
+    });
+  }
 }
