@@ -3,8 +3,8 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-08
- * @brief Main Cloudflare Worker entry point. Handles all API routes for authentication, waza data, progress tracking, labels, list sharing (KV), account management, contributions, admin panel, and serves the HTML frontend.
+ * @date 2026-06-24
+ * @brief Main Cloudflare Worker entry point. Handles all API routes for authentication, waza data, progress tracking, labels, list sharing (KV), account management, contributions, groups, admin panel, and serves the HTML frontend.
  */
 
 import { renderHtml } from "./renderHtml";
@@ -312,13 +312,12 @@ export default {
 			// Delete child rows first, then the user — in one atomic batch.
 			// FK cascade can't be relied on (enforcement is off by default, and
 			// progress/contributions have no ON DELETE rule anyway).
-			// src/index.ts — DELETE /api/account
 			await env.DB.batch([
 				env.DB.prepare("DELETE FROM sessions             WHERE user_id = ?").bind(user.id),
 				env.DB.prepare("DELETE FROM progress             WHERE user_id = ?").bind(user.id),
 				env.DB.prepare("DELETE FROM contributions        WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM group_members        WHERE user_id = ?").bind(user.id),  // ← ADD
-				env.DB.prepare("DELETE FROM group_applications   WHERE user_id = ?").bind(user.id),  // ← ADD
+				env.DB.prepare("DELETE FROM group_members        WHERE user_id = ?").bind(user.id),
+				env.DB.prepare("DELETE FROM group_applications   WHERE user_id = ?").bind(user.id),
 				env.DB.prepare("DELETE FROM users                WHERE id      = ?").bind(user.id),
 			]);
 
@@ -825,7 +824,7 @@ export default {
 			"UPDATE group_applications SET status = 'approved' WHERE group_id = ? AND user_id = ?"
 			).bind(groupId, targetId),
 			env.DB.prepare(
-			"INSERT OR IGNORE INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')"
+				"INSERT OR IGNORE INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')"
 			).bind(groupId, targetId),
 		]);
 
