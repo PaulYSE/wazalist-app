@@ -220,8 +220,6 @@ function buildRowHTML(w, allMembers, wazaNameDisplay) {
   if (wazaNameDisplay === 'jp') {
     html += '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>';
   } else if (wazaNameDisplay === 'en') {
-    // FIX: was incorrectly using class="cmp-name-jp" here (copy-paste from
-    // the 'jp' branch above) — the English name now gets its own class.
     html += '<div class="cmp-name-en">' + escapeHtml(dispName(w)) + '</div>';
   } else {
     html += '<div class="cmp-name-jp">' + escapeHtml(w.name_jp || '—') + '</div>';
