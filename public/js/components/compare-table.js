@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-24
+ * @date 2026-06-25
  * @brief Unified comparison matrix builder for the Compare tab, plus the
  *        shared wiring helpers (save labels, mark toggles, row navigation,
  *        column removal) used after the matrix is rendered.
@@ -96,7 +96,9 @@ function countMarking(markings, markingIndex) {
 /**
  * @brief Builds the Marking Labels comparison section.
  *
- * One row per marking (●▲■♥★◆). Every non-"you" column is read-only;
+ * A header row identifies which column belongs to which entry (matching
+ * the same identification the waza-rows header below it provides), followed
+ * by one row per marking (●▲■♥★◆). Every non-"you" column is read-only;
  * "you" always gets an editable input, regardless of how many other
  * columns are present — including the zero-entries case.
  *
@@ -109,6 +111,15 @@ function buildLabelsTableHTML(allMembers) {
 
   const columnCount = others.length + 2; // marking symbol + others + you
   const gridStyle = 'style="grid-template-columns: 40px repeat(' + (columnCount - 1) + ', 1fr)"';
+
+  // ── Header row: whose column is whose ──────────────────────
+  let headerRow = '<div class="cmp-labels-row cmp-labels-header" ' + gridStyle + '>';
+  headerRow += '<span class="cmp-labels-marking"></span>';
+  others.forEach((m) => {
+    headerRow += '<span class="cmp-labels-col-name">' + escapeHtml(m.username) + '</span>';
+  });
+  headerRow += '<span class="cmp-labels-col-name cmp-labels-col-name-you">You</span>';
+  headerRow += '</div>';
 
   const rowsHtml = SHAPES.map((s, i) => {
     let row = '<div class="cmp-labels-row" ' + gridStyle + '>';
@@ -150,6 +161,7 @@ function buildLabelsTableHTML(allMembers) {
     '<div class="dsec2">' +
     '<h3>Marking Labels</h3>' +
     '<div class="cmp-labels-table">' +
+    headerRow +
     rowsHtml +
     '</div>' +
     saveBtnRow +

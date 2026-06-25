@@ -278,6 +278,28 @@
   font-size: 16px;
   text-align: center;
 }
+
+/* ── Compare: Marking Labels header row (whose column is whose) ──── */
+.cmp-labels-header {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text3);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.cmp-labels-col-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmp-labels-col-name-you {
+  color: var(--accent);
+}
+
 .cmp-labels-their,
 .cmp-labels-mine {
   display: flex;
@@ -326,6 +348,16 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
+}
+
+/* ── Compare matrix: column header cell ───────────────────────────
+   Matches the gap used by .cmp-markings-imported below it, so the
+   username + remove-button spacing lines up with the marking pips. */
+.cmp-matrix-header-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
 }
 
 /* ── Compare: your-marks segmented pill ── */
@@ -386,6 +418,24 @@
   padding: 6px 0;
   font-size: 13px;
   cursor: pointer;
+}
+
+/* ── Compare matrix: remove-column button ─────────────────────── */
+.cmp-matrix-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.cmp-matrix-remove-btn:hover {
+  background: var(--red-bg);
+  color: var(--red);
 }
 
 .ti-textarea {
