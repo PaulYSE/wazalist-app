@@ -3,8 +3,8 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
- * @brief Maps the URL (path + ?waza=) to app view state and back. Owns the slug↔tab mapping and all history writes for tab + waza navigation.
+ * @date 2026-06-28
+ * @brief Maps the URL (path + ?waza= or ?group=) to app view state and back. Owns the slug↔tab mapping and all history writes for tab, waza, and group navigation.
  */
 
 // ── Constants ──────────────────────────────────────────────────
@@ -18,6 +18,7 @@ const TAB_TO_SLUG = {
   browse: 'browse',
   stats: 'stats',
   compare: 'compare',
+  groups: 'groups',
   contribute: 'contribute',
   account: 'account',
 };
@@ -35,34 +36,39 @@ const DEFAULT_TAB = 'browse';
 // ── Route parsing ─────────────────────────────────────────────
 
 /**
- * @brief Parse the current URL into { tab, wazaParam }.
+ * @brief Parse the current URL into { tab, wazaParam, groupParam }.
  *
  * wazaParam is the raw ?waza= string (id or JP-name slug) or null,
  * and is only meaningful when tab === 'browse'.
+ * groupParam is the raw ?group= string (numeric id) or null,
+ * and is only meaningful when tab === 'groups'.
  *
- * @return {{tab: string, wazaParam: string|null}}
+ * @return {{tab: string, wazaParam: string|null, groupParam: string|null}}
  */
 export function parseRoute() {
   const u = new URL(location.href);
-  const slug = u.pathname.replace(/^\/+|\/+$/g, ''); // strip slashes → "stats", ""
+  const slug = u.pathname.replace(/^\/+|\/+$/g, '');
   const tab = SLUG_TO_TAB[slug] || DEFAULT_TAB;
   const wazaParam = tab === 'browse' ? u.searchParams.get('waza') : null;
-  return { tab, wazaParam };
+  const groupParam = tab === 'groups' ? u.searchParams.get('group') : null;
+  return { tab, wazaParam, groupParam };
 }
 
 // ── URL building ──────────────────────────────────────────────
 
 /**
- * @brief Build the URL string for a given view. Waza only encoded on browse.
+ * @brief Build the URL string for a given view.
  *
  * @param {string} tab - Internal tab key.
- * @param {number|null} wazaId - Open waza id, or null.
- * @return {string} Absolute path+query, e.g. "/browse?waza=5" or "/stats".
+ * @param {number|null} wazaId - Open waza id, or null (browse only).
+ * @param {number|null} groupId - Open group id, or null (groups only).
+ * @return {string} Absolute path+query, e.g. "/browse?waza=5" or "/groups?group=3".
  */
-export function buildUrl(tab, wazaId = null) {
+export function buildUrl(tab, wazaId = null, groupId = null) {
   const slug = TAB_TO_SLUG[tab] || DEFAULT_TAB;
   let url = '/' + slug;
   if (tab === 'browse' && wazaId != null) url += '?waza=' + wazaId;
+  if (tab === 'groups' && groupId != null) url += '?group=' + groupId;
   return url;
 }
 
@@ -73,10 +79,15 @@ export function buildUrl(tab, wazaId = null) {
  *
  * @param {string} tab
  * @param {number|null} wazaId
+ * @param {number|null} groupId
  * @return {void}
  */
-export function pushRoute(tab, wazaId = null) {
-  history.pushState({ tab, wazaId: wazaId ?? null }, '', buildUrl(tab, wazaId));
+export function pushRoute(tab, wazaId = null, groupId = null) {
+  history.pushState(
+    { tab, wazaId: wazaId ?? null, groupId: groupId ?? null },
+    '',
+    buildUrl(tab, wazaId, groupId),
+  );
 }
 
 /**
@@ -84,8 +95,13 @@ export function pushRoute(tab, wazaId = null) {
  *
  * @param {string} tab
  * @param {number|null} wazaId
+ * @param {number|null} groupId
  * @return {void}
  */
-export function replaceRoute(tab, wazaId = null) {
-  history.replaceState({ tab, wazaId: wazaId ?? null }, '', buildUrl(tab, wazaId));
+export function replaceRoute(tab, wazaId = null, groupId = null) {
+  history.replaceState(
+    { tab, wazaId: wazaId ?? null, groupId: groupId ?? null },
+    '',
+    buildUrl(tab, wazaId, groupId),
+  );
 }

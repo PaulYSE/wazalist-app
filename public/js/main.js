@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-28
  * @brief Application entry point. Initializes all modules, sets up event listeners, and boots the app based on authentication state.
  */
 
@@ -25,7 +25,12 @@ import { parseRoute } from './app/router.js';
 import { initTheme } from './services/theme.js';
 import { renderDashStats } from './views/stats.js';
 import { renderDashCompare } from './views/compare.js';
-import { initGroups } from './views/groups-browse-list.js';
+import {
+  initGroups,
+  selectGroupFromHistory,
+  closeGroupDetailFromHistory,
+} from './views/groups-browse-list.js';
+import { getGroupsSelectedId } from './state/groups-state.js';
 import { initCreateGroup } from './modals/group-new.js';
 import { initEditGroup } from './modals/group-edit.js';
 import { getToken, initToken } from './state/user-state.js';
@@ -50,13 +55,15 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 // ── Popstate — back button closes the detail panel ────────────
 
 /**
- * @brief Handles browser back/forward navigation to restore tab and waza detail state from URL.
+ * @brief Handles browser back/forward navigation to restore tab and waza/group
+ *        detail state from URL.
  *
- * Parses the current URL for tab and waza parameters, reconciles the active tab
- * (without writing history), and opens/closes the detail panel as needed.
+ * Parses the current URL for tab and waza/group parameters, reconciles the
+ * active tab (without writing history), and opens/closes the relevant detail
+ * panel as needed.
  */
 window.addEventListener('popstate', () => {
-  const { tab, wazaParam } = parseRoute();
+  const { tab, wazaParam, groupParam } = parseRoute();
 
   // 1. Reconcile the tab (visual switch only — no history write).
   const currentTab = document.querySelector('.ntab.active')?.dataset.tab;
@@ -68,6 +75,16 @@ window.addEventListener('popstate', () => {
     if (state.selectedId !== targetId) selectWazaFromHistory(targetId);
   } else if (state.selectedId !== null) {
     closeDetailPanelFromHistory();
+  }
+
+  // 3. Reconcile the group (only meaningful on groups). Group ids are
+  // purely numeric — no name-slug fallback exists for groups the way
+  // it does for waza, so an invalid/non-numeric param is just ignored.
+  const targetGroupId = groupParam ? parseInt(groupParam) : null;
+  if (targetGroupId != null && !isNaN(targetGroupId)) {
+    if (getGroupsSelectedId() !== targetGroupId) selectGroupFromHistory(targetGroupId);
+  } else if (getGroupsSelectedId() !== null) {
+    closeGroupDetailFromHistory();
   }
 });
 
@@ -142,5 +159,6 @@ initOnboarding();
 initAuth();
 initTheme();
 
+// Initialize token state from localStorage, then boot if logged in
 initToken();
 if (getToken()) initApp();

@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-22
+ * @date 2026-06-28
  * @brief Application initialization module. Sets up UI, loads user session, waza data, progress, labels, and handles URL parameters.
  */
 
@@ -29,6 +29,7 @@ import {
   setIsAdmin,
 } from '../state/user-state.js';
 import { initBrowseState } from '../state/waza-browse-state.js';
+import { selectGroupFromHistory } from '../views/groups-browse-list.js';
 
 // ── Initialization entry point ─────────────────────────────────────
 
@@ -37,7 +38,7 @@ import { initBrowseState } from '../state/waza-browse-state.js';
  *
  * Hides auth UI, shows main app, applies guest/admin chrome, loads waza data,
  * fetches user progress and labels (if authenticated), renders browse list and stats,
- * syncs sort/view controls, handles waza URL parameters, starts placeholder rotation,
+ * syncs sort/view controls, handles waza and group URL parameters, starts placeholder rotation,
  * and checks for auto-import from share links.
  *
  * @return {Promise<void>}
@@ -144,8 +145,8 @@ export async function initApp() {
   checkAutoImport();
 
   // ── Route reconciliation ──────────────────────────────────
-  // Boot into whatever view the URL describes (tab + optional waza).
-  const { tab, wazaParam } = parseRoute();
+  // Boot into whatever view the URL describes (tab + optional waza/group).
+  const { tab, wazaParam, groupParam } = parseRoute();
   if (tab !== 'browse') {
     activateTab(tab); // visual switch into the deep-linked tab
   }
@@ -166,7 +167,15 @@ export async function initApp() {
     } else {
       replaceRoute('browse', null);
     }
+  } else if (groupParam && tab === 'groups') {
+    const target = parseInt(groupParam);
+    if (!isNaN(target)) {
+      selectGroupFromHistory(target); // open without pushing
+      replaceRoute('groups', null, target);
+    } else {
+      replaceRoute('groups', null, null);
+    }
   } else {
-    replaceRoute(tab, null);
+    replaceRoute(tab, null, null);
   }
 }

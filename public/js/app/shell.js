@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-22
+ * @date 2026-06-28
  * @brief Core UI shell module. Manages search placeholder rotation, marking filter UI sync, mobile menu, filter sheet, and navigation tabs.
  */
 
@@ -17,7 +17,7 @@ import { doLogout } from '../services/auth.js';
 import { openNewWazaModal } from '../modals/waza-new.js';
 import { pushRoute } from './router.js';
 import { closeDetailNoHistory } from '../views/waza-detail.js';
-import { renderGroups } from '../views/groups-browse-list.js';
+import { renderGroups, closeGroupDetailNoHistory } from '../views/groups-browse-list.js';
 import {
   getBrowseMarkingFilters,
   hasActiveFilter,
@@ -33,6 +33,7 @@ import {
   toggleBrowseFilterAny,
 } from '../state/waza-browse-state.js';
 import { resetMyGroupsLoaded } from '../state/user-state.js';
+import { getGroupsSelectedId } from '../state/groups-state.js';
 
 // ── Rotating search placeholder ───────────────────────────────
 
@@ -364,7 +365,7 @@ export function navigateToBrowse() {
  * Updates the active tab UI, toggles view visibility, and renders the appropriate view content.
  * Does not modify browser history or close detail panels.
  *
- * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'contribute', 'account').
+ * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'groups', 'contribute', 'account').
  * @return {void}
  */
 export function activateTab(t) {
@@ -388,21 +389,31 @@ export function activateTab(t) {
 }
 
 /**
- * @brief User-initiated tab switch: closes any open waza, switches view, and pushes history state.
+ * @brief User-initiated tab switch: closes any open waza or group detail,
+ *        switches view, and pushes history state.
  *
- * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'contribute', 'account').
+ * Captures whether a waza or group was open BEFORE closing it, since both
+ * close functions clear their own selection state as a side effect — checking
+ * after closing would always read false.
+ *
+ * @param {string} t - Tab identifier ('browse', 'stats', 'compare', 'groups', 'contribute', 'account').
  * @return {void}
  */
 export function switchTab(t) {
   const current = document.querySelector('.ntab.active')?.dataset.tab;
-  // Leaving browse with a waza open: close it (no separate history write — the
-  // single pushRoute below records the destination view).
-  if (state.selectedId !== null) {
-    closeDetailNoHistory();
-  }
+
+  const hadWazaOpen = state.selectedId !== null;
+  const hadGroupOpen = getGroupsSelectedId() !== null;
+
+  // Leaving Browse with a waza open, or leaving Groups with a group open:
+  // close first (no separate history write — the single pushRoute below
+  // records the destination view).
+  if (hadWazaOpen) closeDetailNoHistory();
+  if (hadGroupOpen) closeGroupDetailNoHistory();
+
   activateTab(t);
-  if (t !== current || state.selectedId !== null) {
-    pushRoute(t, null);
+  if (t !== current || hadWazaOpen || hadGroupOpen) {
+    pushRoute(t, null, null);
   }
 }
 

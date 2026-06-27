@@ -1,11 +1,10 @@
 /**
- * @file groups-browse-list.js
+ * @file views/groups-browse-list.js
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-14
- * @brief Groups tab view. Two-panel browse/detail layout for discovering, joining,
- *        and managing Wotagei Groups.
+ * @date 2026-06-28
+ * @brief Groups browse list view. Renders the left-panel group list with search, filtering, and selection.
  */
 
 import { api } from '../services/api.js';
@@ -36,6 +35,7 @@ import {
   setMyGroupsLoaded,
   isAdmin,
 } from '../state/user-state.js';
+import { pushRoute, replaceRoute } from '../app/router.js';
 
 // ── TEMPORARY: BLOCK START ────────────────────────────────────
 // ── Admin-only access during development ──────────────────────
@@ -63,6 +63,94 @@ enableGroupsForAdmins();
 window.enableGroupsForAdmins = enableGroupsForAdmins;
 
 // ── TEMPORARY: BLOCK END ──────────────────────────────────────
+
+let isPopping = false;
+
+/**
+ * @brief Selects a group by ID, renders its detail panel, and (unless
+ *        reconciling from history) pushes a new history entry.
+ *
+ * @param {number} id - Group ID to select.
+ * @return {void}
+ */
+function selectGroup(id) {
+  setGroupsSelectedId(id);
+  renderGroupList();
+  renderGroupDetail(id);
+  document.querySelector('#groupsView .main').classList.add('waza-selected');
+
+  if (!isPopping) {
+    pushRoute('groups', null, id);
+  }
+}
+
+/**
+ * @brief Closes the group detail panel back to the list-only view, and
+ *        (unless reconciling from history) replaces the current history
+ *        entry so the URL drops its ?group= param.
+ *
+ * @return {void}
+ */
+function closeGroupDetail() {
+  setGroupsSelectedId(null);
+  document.querySelector('#groupsView .main').classList.remove('waza-selected');
+  renderGroupList();
+  document.getElementById('groupDetailContent').innerHTML =
+    '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
+
+  if (!isPopping) {
+    replaceRoute('groups', null, null);
+  }
+}
+
+/**
+ * @brief Selects a group from history navigation (back/forward) without
+ *        pushing a new history entry.
+ *
+ * @param {number} id - Group ID to select.
+ * @return {void}
+ */
+export function selectGroupFromHistory(id) {
+  isPopping = true;
+  try {
+    selectGroup(id);
+  } finally {
+    isPopping = false;
+  }
+}
+
+/**
+ * @brief Closes the group detail panel from history navigation without
+ *        pushing a new history entry.
+ *
+ * @return {void}
+ */
+export function closeGroupDetailFromHistory() {
+  isPopping = true;
+  try {
+    closeGroupDetail();
+  } finally {
+    isPopping = false;
+  }
+}
+
+/**
+ * @brief Closes the group detail panel without writing a history entry.
+ *
+ * Used when a tab switch is about to push its own history entry (the
+ * destination tab), avoiding a separate "close group" entry in the
+ * navigation stack. Mirrors closeDetailNoHistory() in waza-detail.js.
+ *
+ * @return {void}
+ */
+export function closeGroupDetailNoHistory() {
+  isPopping = true;
+  try {
+    closeGroupDetail();
+  } finally {
+    isPopping = false;
+  }
+}
 
 // ── Search input ──────────────────────────────────────────────
 
@@ -170,11 +258,26 @@ export async function refreshMyGroups() {
 }
 
 // ── Group list panel ──────────────────────────────────────────
+
+/**
+ * @brief Generates HTML for the "Create Group" button if the user is logged in.
+ *
+ * @param {string} id - DOM ID for the button.
+ * @param {string} style - Inline style string.
+ * @param {string} text - Button text.
+ * @return {string} HTML string or empty string.
+ */
 function makeCreateGroupBtn(id, style, text) {
   if (isGuest() || !getToken()) return '';
-
   return '<button class="btn" id="' + id + '" style="' + style + '">' + text + '</button>';
 }
+
+/**
+ * @brief Wires the "Create Group" button click handler.
+ *
+ * @param {string} id - DOM ID of the button.
+ * @return {void}
+ */
 function wireCreateGroupBtn(id) {
   document.getElementById(id)?.addEventListener('click', () => {
     openCreateGroup(async () => {
@@ -242,16 +345,13 @@ function renderGroupList() {
 
   listEl.querySelectorAll('[data-gid]').forEach((el) => {
     el.addEventListener('click', () => {
-      setGroupsSelectedId(+el.dataset.gid);
-      renderGroupList();
-      renderGroupDetail(getGroupsSelectedId());
-      document.querySelector('#groupsView .main').classList.add('waza-selected');
+      selectGroup(+el.dataset.gid);
     });
   });
 }
 
 /**
- * @brief Initialises the Groups tab mobile back button.
+ * @brief Initialises the Groups tab mobile back button and search.
  *
  * @return {void}
  */
@@ -259,11 +359,7 @@ export function initGroups() {
   wireGroupSearchInput();
   wireCreateGroupBtn();
   document.getElementById('groupMobileBack')?.addEventListener('click', () => {
-    setGroupsSelectedId(null);
-    document.querySelector('#groupsView .main').classList.remove('waza-selected');
-    renderGroupList();
-    document.getElementById('groupDetailContent').innerHTML =
-      '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
+    closeGroupDetail();
   });
   refreshMyGroups();
 }
