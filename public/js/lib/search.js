@@ -3,7 +3,7 @@
  * @author Paul Yong Shao En
  * @email paulyse99@gmail.com
  * @project Wazalist App
- * @date 2026-06-21
+ * @date 2026-06-28
  * @brief Search string normalization, fuzzy (Levenshtein) matching, scoped search prefixes, and filterWaza() for producing the currently-visible list.
  */
 
@@ -52,6 +52,42 @@ const SEARCH_SCOPES = {
   name: ['name_jp', 'name_en', 'name_en_literal', 'name_en_gtranslate', 'name_cn_gtranslate'],
   tag: ['tag'],
 };
+
+/**
+ * @brief Unicode "smart quote" and fullwidth quote variants mapped to the
+ *        plain ASCII double quote (").
+ *
+ * Mobile keyboards frequently substitute the straight ASCII quote for one
+ * of these when autocorrect/smart-punctuation is on — iOS and Android both
+ * do this by default on English keyboards (producing U+201C/U+201D), and
+ * Japanese/Chinese IME keyboards commonly produce the fullwidth form
+ * (U+FF02) instead. Since the exact-match feature only recognizes a literal
+ * ASCII '"' at the start/end of a query, any of these substitutions would
+ * silently fall through to fuzzy search instead of triggering exact match.
+ *
+ * @type {Object<string, string>}
+ */
+const SMART_QUOTE_MAP = {
+  '\u201C': '"', // “ LEFT DOUBLE QUOTATION MARK
+  '\u201D': '"', // ” RIGHT DOUBLE QUOTATION MARK
+  '\u201E': '"', // „ DOUBLE LOW-9 QUOTATION MARK
+  '\u201F': '"', // ‟ DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+  '\uFF02': '"', // ＂ FULLWIDTH QUOTATION MARK (common from JP/CN IME input)
+};
+
+/**
+ * @brief Replaces any smart/fullwidth quote variant with a plain ASCII '"'.
+ *
+ * Called once at the top of wazaMatchesSearch() so every downstream check
+ * — both the scoped-prefix parser and the global-search exact-match check —
+ * only ever has to recognize one quote character.
+ *
+ * @param {string} text - Raw search input, possibly containing smart quotes.
+ * @return {string} Same text with all recognized quote variants normalized.
+ */
+function normalizeQuotes(text) {
+  return text.replace(/[\u201C\u201D\u201E\u201F\uFF02]/g, (ch) => SMART_QUOTE_MAP[ch]);
+}
 
 // ── Normalize user search entry ───────────────────────────────
 
@@ -241,6 +277,11 @@ function parseScopedSearch(search) {
  */
 export function wazaMatchesSearch(w, search) {
   if (!search) return true;
+
+  // Normalize mobile/IME smart quotes to plain '"' before any quote-based
+  // logic runs, so both the scoped-prefix exact check below AND the
+  // global-search exact check further down both benefit from one pass.
+  search = normalizeQuotes(search);
 
   // (Scoped search): PREFIX:QUERY = fuzzy, PREFIX:"QUERY" = exact
   const scoped = parseScopedSearch(search);
