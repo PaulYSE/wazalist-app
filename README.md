@@ -1,146 +1,240 @@
-# Wazalist — Wotagei Skills Database
+# Wazalist
 
-A web application for tracking and managing wotagei (Japanese idol fan-dance) techniques. Browse waza (techniques), mark your progress, and sync your learning across devices.
+**Wotagei Skills Database** — Track, learn, and share Wotagei techniques (Waza) with a modern, full-featured web application.
 
-## Technical Description
+---
 
-Wazalist is a full-stack web application for browsing, tracking, and collaborating on a database of Wotagei techniques (Waza). It is built entirely on Cloudflare's serverless platform with no external backend infrastructure.
+## Introduction
+
+Wazalist is a comprehensive database and tracking tool for **Wotagei** (Japanese idol fan-dance) techniques, known as **Waza**. Whether you're a beginner learning your first moves or an advanced practitioner with hundreds of techniques, Wazalist helps you organize, track, and share your progress.
+
+The application is built entirely on Cloudflare's serverless platform, offering:
+- Zero infrastructure management — runs on Cloudflare Workers
+- Global availability — data stored in Cloudflare D1 and KV
+- Device sync — your progress follows you across devices
+- Guest mode — start using immediately without an account
+
+## Project Description
+
+Wazalist serves as a living database of Wotagei Waza, allowing users to:
+
+- Browse the complete Waza database with fuzzy search, filtering, and multiple view modes
+- Track progress with 6 customizable markings (● ▲ ■ ♥ ★ ◆) + Like/Dislike
+- Compare your progress with group members or imported lists
+- Contribute to the database by suggesting edits or submitting new Waza
+- Share your list via shareable keys (90-day expiry)
+- Import/Export Excel files with color-coded progress tracking
+- Join Groups to collaborate and compare with other practitioners
+
+The application is designed for both guest users (local storage only) and authenticated users (cloud sync), making it accessible to anyone while offering full features to registered users.
 
 ## Features
 
-### Browse & Search
-- Fuzzy, typo-tolerant full-text search across Japanese, English, romaji, and translation fields
-- Exact-phrase search with quotes (e.g. `"technique name"`)
-- **Scoped search**: `AUTHOR:"name"` and `PARENT:"name"` restrict matching to that field with exact whole-field matching (so `AUTHOR:SHUN` matches only SHUN, not SHUNMINA)
-- Three view modes: Card, List, Compact
+### Core Features
+- Smart Search: Fuzzy, typo-tolerant search with exact-phrase matching ("exact phrase")
+- Scoped Search: AUTHOR:"name", PARENT:"name", NAME:"query", TAG:"tag"
+- 3 View Modes: List, Cards, Compact — switch anytime
+- 6 Custom Markings: Name each marking to match your learning style
+- Like/Dislike: Community-driven popularity scoring
+- Stats Dashboard: Progress overview, top authors/families, recent activity
 
-### Filtering & Sorting
-- Filter by the 6 markings (● ▲ ■ ♥ ★ ◆), in any combination
-- "Any" quick-filter to show only waza you've marked
-- Sort by name or by community like count (ascending/descending)
-- Mobile filter bottom-sheet mirrors the desktop controls
+### Social & Collaboration
+- Groups: Create/join groups with open, approval, or invite-only policies
+- Compare: Side-by-side comparison with group members and imported lists
+- Share Lists: Export your progress as a shareable key (90-day KV storage)
+- Import Lists: Import others' lists via share key
 
-### Progress Tracking
-- 6 markings per waza, meaning defined by you
-- Custom labels for what each marking means
-- Like/Dislike (stored as integers: `null`/`1`/`-1`)
-- Syncs across devices when signed in; guest mode persists to `localStorage`
+### Data Management
+- Export to Excel: Download your list with color-coded markings
+- Import from Excel: Upload Excel files with colored cells → automatically map to markings
+- Text Import: Paste plain text lists with support for [Labels] and {Categories}
+- Contribution System: Suggest edits or new Waza with admin review workflow
 
-### Tabs
-- **Browse** — search, filter, sort, and the waza detail panel
-- **Stats** — your progress counts, a combined toggleable Top Authors / Top Family ranking (you vs. community), family completion, and recent activity
-- **Compare** — import other users' lists and compare side-by-side
-- **Contribute** — suggest edits or submit new waza (signed-in users)
-- **Account** — collapsible sections for Import, Export, and Manage Account (account info, change username, change password, reset progress, delete account)
+### User Experience
+- 20+ Themes: Light, dark, and system-follow with 18+ curated themes
+- Mobile-First: Fully responsive with mobile menu and filter sheet
+- Interactive Onboarding: 10-slide guided tour for new users
+- Accessibility: Keyboard navigation, screen reader support
 
-### Authentication & Account Management
-- Register (email optional), or continue as guest
-- PBKDF2 password hashing (100,000 iterations) with per-user salt
-- Session tokens (30-day expiry), sent via the `Authorization` header
-- Change username (case-sensitive, 3–32 characters, requires current password)
-- Change password (requires current password; invalidates all sessions, forcing re-login)
-- Self-service account deletion (requires password; the last admin can't delete themselves)
-- Expired sessions are detected globally and return the user to the sign-in screen
+### Technical
+- Secure Authentication: PBKDF2 password hashing (100k iterations) with per-user salt
+- Dual Storage: Guests = localStorage; Users = Cloudflare D1
+- Global CDN: Served via Cloudflare's edge network
+- Zero Framework: Vanilla JS with ES modules — no build-step overhead
 
-### Video References
-- Up to 10 video links per waza
-- YouTube, Bilibili, NicoNico, Twitter/X, Facebook detection
-- In-app embedded player (YouTube, Bilibili, NicoNico) with lazy iframe loading
-- oEmbed title/author metadata, fetched progressively and cached per session
+## Requirements & Dependencies
 
-### Contributions
-- Suggest edits to existing waza or submit new ones
-- Admin review queue with diff view, inline editing, approve/reject, and notes
-- Per-user contribution history
+### Development Requirements
+- Node.js >= 22.0.0
+- npm >= 10.0.0
+- Cloudflare Account (for deployment)
+- Wrangler CLI (installed via npm)
 
-### List Sharing
-- Export your marked list to a SHA-256-keyed shareable link (Cloudflare KV, 90-day expiry)
-- Import others' lists for comparison
-- Export to a styled Excel (.xlsx) with cell colours per marking
-- Import from Excel (cell colours → markings) or pasted text
+### Core Dependencies
+{
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.3",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "5.9.3",
+    "vite": "^8.0.16",
+    "wrangler": "^4.97.0"
+  }
+}
 
-### UX
-- Multi-slide interactive onboarding for new users
-- Rotating search placeholder cycling through real waza names
-- Collapsible detail sections; animated single-open accordions in Account
-- `content-visibility`-based list virtualization for smooth scrolling of long lists
-- Mobile-responsive; dark theme
+Note: Frontend uses vanilla JavaScript with ES modules. No frontend frameworks are used — everything is custom-built.
+
+### Runtime Dependencies (CDN)
+- SheetJS (XLSX) — Excel import
+- ExcelJS — Styled Excel export
 
 ## Tech Stack
 
-**Backend** — Cloudflare Workers (TypeScript), Cloudflare D1 (SQLite), Cloudflare KV (list sharing). PBKDF2 auth with session tokens.
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| Cloudflare Workers | Serverless compute platform |
+| Cloudflare D1 | SQLite database (serverless) |
+| Cloudflare KV | Shareable list storage (90-day TTL) |
+| TypeScript | Backend type safety |
+| Wrangler | Development & deployment tool |
 
-**Frontend** — Vanilla JS as **ES modules**, bundled by **Vite**. No framework. Custom dark-theme CSS (Grid/Flexbox). Client-side fuzzy search and filtering; oEmbed for video metadata; `localStorage` for guest mode.
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| Vanilla JS (ES Modules) | Application logic |
+| Vite | Development server & build tool |
+| CSS Variables | Theming (20+ themes) |
+| CSS Grid/Flexbox | Responsive layout |
+| SheetJS + ExcelJS | Excel import/export |
+| Web Crypto API | Password hashing (PBKDF2) |
+| Service Worker API | Fetch interception (Cloudflare) |
 
-**Tooling** — ESLint 9 (flat config) + `eslint-plugin-import-x`, Prettier. Lint: `npm run lint`; format: `npm run format`.
+### Storage
+| Service | Usage |
+|---------|-------|
+| D1 (SQLite) | Users, sessions, waza, progress, contributions, groups |
+| KV (Key-Value) | Shareable list keys (90-day expiry) |
+| localStorage | Guest progress, themes, preferences |
 
 ## Project Structure
 
-```
 wazalist-app/
-├── src/                        # Backend — Cloudflare Worker (TypeScript)
-│   ├── index.ts                # Router: all /api/... endpoints + fallbacks
-│   ├── auth.ts                 # PBKDF2 hashing, token generation, session lookup
-│   ├── renderHtml.ts           # Serves public/index.html via ASSETS
-│   └── renderAdmin.ts          # Serves public/admin.html via ASSETS
-├── public/                     # Frontend (built by Vite)
-│   ├── index.html              # Main app markup
-│   ├── admin.html              # Admin panel (standalone; loads js/admin.js)
-│   ├── css/                    # base, waza, panels, modals, mobile, onboarding, admin
-│   └── js/                     # ES-module frontend (see below)
-│       ├── main.js             # Boot orchestrator — imports + calls each initX()
-│       ├── app/                # init.js (initApp), shell.js (nav/filters/menu)
-│       ├── services/           # api.js, auth.js, progress.js
-│       ├── views/              # browse-list, waza-detail, stats, compare,
-│       │                       #   contribute, account
-│       ├── features/           # export-to-excel, onboarding, share-list,
-│       │                       #   import/ (import-ui, import-excel)
-│       ├── modals/             # suggest-edit, new-waza
-│       ├── lib/                # search.js, parser.js, escape.js
-│       ├── components/         # render-helpers.js, Toast.js
-│       ├── config/             # constants.js
-│       ├── state/              # state.js, localStorage.js
-│       └── admin/admin.js      # Admin panel logic (standalone island)
-├── migrations/                 # D1 SQL schema
-├── wrangler.json               # Cloudflare Workers + D1 + KV config
-├── vite.config.*               # Vite build config
-├── eslint.config.mjs           # ESLint 9 flat config
-├── package.json
-└── README.md
-```
+├── src/                           # Backend — Cloudflare Worker (TypeScript)
+│   ├── index.ts                   # Router: all /api/... endpoints + fallbacks
+│   ├── auth.ts                    # PBKDF2 hashing, token generation, session lookup
+│   ├── renderHtml.ts              # Serves public/index.html via ASSETS
+│   └── renderAdmin.ts             # Serves public/admin.html via ASSETS
+│
+├── public/                        # Frontend — served as static assets
+│   ├── index.html                 # Main app markup (SPA shell)
+│   ├── admin.html                 # Admin panel (standalone)
+│   ├── icons/                     # App icons (SVG, PNG)
+│   ├── css/                       # All stylesheets
+│   │   ├── base.css               # Reset, body, auth, layout, filter row
+│   │   ├── waza.css               # Waza list, cards, marking pips, detail, videos
+│   │   ├── panels.css             # Dashboard, stats, nav, contributions
+│   │   ├── modals.css             # All modals (contribution, compare, import/share)
+│   │   ├── mobile.css             # Mobile menu, filter sheet, responsive overrides
+│   │   ├── onboarding.css         # Interactive onboarding overlay
+│   │   ├── admin.css              # Admin panel styles
+│   │   └── themes.css             # 20+ theme palettes (light/dark)
+│   │
+│   └── js/                        # Frontend JavaScript (ES modules)
+│       ├── main.js                # Entry point — orchestrates all modules
+│       │
+│       ├── app/                   # Core application orchestration
+│       │   ├── init.js            # initApp() — loads data, renders views
+│       │   ├── shell.js           # UI shell: nav, search, filters, mobile menu
+│       │   ├── router.js          # URL routing (history API integration)
+│       │   └── accordion-shell.js # Reusable accordion builder
+│       │
+│       ├── config/                # Configuration & constants
+│       │   ├── constants.js       # SHAPES, platforms, status maps, templates
+│       │   ├── theme-registry.js  # Available themes (20+ entries)
+│       │   └── groups-config.js   # Group policy labels
+│       │
+│       ├── state/                 # Application state containers
+│       │   ├── state.js           # Global app state (wazaData, prog, selectedId)
+│       │   ├── user-state.js      # User identity, auth, groups
+│       │   ├── waza-browse-state.js # Search filters, view mode, sort
+│       │   ├── compare-state.js   # Comparison entries, imported lists
+│       │   ├── groups-state.js    # Groups list, selected group, search
+│       │   ├── import-state.js    # Text/Excel import parsing state
+│       │   └── localStorage.js    # localStorage helpers & keys
+│       │
+│       ├── services/              # External services & API
+│       │   ├── api.js             # Authenticated API wrapper
+│       │   ├── auth.js            # Login, register, guest, logout
+│       │   ├── progress.js        # Progress saving with localStorage fallback
+│       │   ├── theme.js           # Theme management (system/explicit)
+│       │   └── compare-data.js    # Fetches & shapes comparison data
+│       │
+│       ├── views/                 # Render functions for each tab
+│       │   ├── waza-browse-list.js # Browse list: 3 view modes + sorting
+│       │   ├── waza-detail.js     # Detail panel: collapsible sections, video embedding
+│       │   ├── stats.js           # Stats dashboard: progress, rankings, activity
+│       │   ├── compare.js         # Compare tab orchestrator
+│       │   ├── compare-controls.js # Compare: add panel, group/imported pickers
+│       │   ├── groups-browse-list.js # Groups list + search
+│       │   ├── groups-detail.js   # Group detail: members, join/leave, admin
+│       │   ├── account.js         # Account: import/export, labels, themes, reset
+│       │   └── contribute.js      # Contribution submission & history
+│       │
+│       ├── features/              # Standalone feature modules
+│       │   ├── export-to-excel.js # Excel export with colored cells
+│       │   ├── share-list.js      # Share/import via KV keys
+│       │   ├── onboarding.js      # Interactive 10-slide tour
+│       │   └── import/            # Import subsystem
+│       │       ├── import-ui.js   # Import UI rendering & events
+│       │       ├── import-excel.js # Excel file parsing
+│       │       └── parser.js      # Text import engine (no DOM)
+│       │
+│       ├── modals/                # Modal controllers
+│       │   ├── waza-edit.js       # Suggest edit & video suggest modals
+│       │   ├── waza-new.js        # New Waza submission
+│       │   ├── group-edit.js      # Edit group modal
+│       │   └── group-new.js       # Create group modal
+│       │
+│       ├── components/            # Reusable UI components
+│       │   ├── render-helpers.js  # Marking styles, pips, video buttons, oEmbed
+│       │   ├── compare-table.js   # Comparison matrix builder
+│       │   ├── show-toast.js      # Toast notification helper
+│       │   └── render-groups-socials.js # Social link list builder
+│       │
+│       ├── lib/                   # Utilities
+│       │   ├── search.js          # Fuzzy matching, scoped search, filterWaza()
+│       │   ├── parser.js          # Text import: label extraction, waza matching
+│       │   └── escape.js          # HTML escaping
+│       │
+│       └── admin/                 # Admin panel (standalone island)
+│           └── admin.js           # Admin contribution review queue
+│
+├── migrations/                    # D1 SQL schema migrations
+│   └── 0001_initial_schema.sql   # Initial database schema
+│
+├── wrangler.json                  # Cloudflare Workers + D1 + KV config
+├── vite.config.js                 # Vite build configuration
+├── tsconfig.json                  # TypeScript configuration
+├── package.json                   # npm scripts & dependencies
+├── package-lock.json              # Locked dependency versions
+├── CONTRIBUTING.md                # Contribution guidelines
+└── README.md                      # This file
 
-> **Module architecture.** The frontend is ES modules with one-directional
-> dependencies (config/state → services → views/features). Every module is
-> side-effect-free on import; `main.js` is the only entry point and calls each
-> module's `initX()` in order. `admin/admin.js` is a deliberate standalone
-> island (its own `api`/`escapeHtml`/`timeAgo`) loaded directly by `admin.html`,
-> outside the `main.js` graph.
+## SQL Schema
 
-## Database Schema
+### Tables
+
+#### Users
+Stores user accounts, authentication data, and custom marking labels.
 
 ```sql
-CREATE TABLE waza (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name_jp TEXT,
-    name_en TEXT,
-    name_en_literal TEXT,        -- romaji
-    name_en_gtranslate TEXT,     -- Google Translate (EN)
-    name_cn_gtranslate TEXT,     -- Google Translate (CN)
-    reference TEXT,              -- lore / notes
-    tag TEXT,                    -- classification category
-    parent_jp0 TEXT, parent_en0 TEXT,   -- primary parent waza
-    parent_jp1 TEXT, parent_en1 TEXT,   -- secondary parent waza
-    author_jp0 TEXT, author_en0 TEXT,   -- primary author
-    author_jp1 TEXT, author_en1 TEXT,   -- secondary author
-    video0 TEXT, video1 TEXT, video2 TEXT, video3 TEXT, video4 TEXT,
-    video5 TEXT, video6 TEXT, video7 TEXT, video8 TEXT, video9 TEXT
-);
-
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE,
-    password_hash TEXT NOT NULL,          -- "salt:hash"
+    password_hash TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     is_admin INTEGER DEFAULT 0,
@@ -148,19 +242,49 @@ CREATE TABLE users (
 );
 
 CREATE TABLE sessions (
-    id TEXT PRIMARY KEY,                  -- 64-char random hex
+    id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    expires_at TEXT NOT NULL,             -- 30 days from creation
+    expires_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE waza (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name_jp TEXT,
+    name_en TEXT,
+    name_en_literal TEXT,
+    name_en_gtranslate TEXT,
+    name_cn_gtranslate TEXT,
+    reference TEXT,
+    tag TEXT,
+    parent_jp0 TEXT,
+    parent_en0 TEXT,
+    parent_jp1 TEXT,
+    parent_en1 TEXT,
+    author_jp0 TEXT,
+    author_en0 TEXT,
+    author_jp1 TEXT,
+    author_en1 TEXT,
+    video0 TEXT,
+    video1 TEXT,
+    video2 TEXT,
+    video3 TEXT,
+    video4 TEXT,
+    video5 TEXT,
+    video6 TEXT,
+    video7 TEXT,
+    video8 TEXT,
+    video9 TEXT,
+    UNIQUE(name_jp, name_en)
 );
 
 CREATE TABLE progress (
     user_id INTEGER NOT NULL,
     waza_id INTEGER NOT NULL,
-    markings TEXT NOT NULL DEFAULT '[]',  -- JSON array of 6 booleans
+    markings TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    like INTEGER,                         -- null / 1 / -1
+    like INTEGER,
     PRIMARY KEY (user_id, waza_id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -168,130 +292,136 @@ CREATE TABLE progress (
 CREATE TABLE contributions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id),
-    type TEXT NOT NULL,                   -- "edit" | "new_waza"
-    waza_id INTEGER REFERENCES waza(id),  -- null for new_waza
-    payload TEXT NOT NULL,                -- JSON of field changes
-    status TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected
+    type TEXT NOT NULL,
+    waza_id INTEGER REFERENCES waza(id),
+    payload TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
     admin_note TEXT,
     created_at DATETIME NOT NULL DEFAULT (datetime('now')),
     reviewed_at DATETIME
 );
 
-CREATE INDEX idx_contributions_status ON contributions(status);
-CREATE INDEX idx_contributions_user ON contributions(user_id);
+CREATE TABLE groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    join_policy TEXT NOT NULL DEFAULT 'open'
+        CHECK(join_policy IN ('open', 'approval', 'invite')),
+    invite_key TEXT UNIQUE,
+    social TEXT,
+    created_by INTEGER NOT NULL REFERENCES users(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX idx_groups_invite_key ON groups(invite_key);
+
+CREATE TABLE group_members (
+    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member'
+        CHECK(role IN ('admin', 'member')),
+    tag TEXT,
+    joined_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (group_id, user_id)
+);
+
+CREATE INDEX idx_group_members_user ON group_members(user_id);
+CREATE INDEX idx_group_members_group ON group_members(group_id);
+
+CREATE TABLE group_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'pending'
+        CHECK(status IN ('pending', 'approved', 'rejected')),
+    applied_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(group_id, user_id)
+);
+
+CREATE INDEX idx_group_applications_group ON group_applications(group_id);
+CREATE INDEX idx_group_applications_user ON group_applications(user_id);
 ```
 
-> **Foreign-key note.** D1 has FK enforcement off by default, and `progress`/
-> `contributions` have no `ON DELETE` cascade to `waza`. Account deletion and
-> any bulk waza reload delete child rows explicitly (or run with
-> `PRAGMA foreign_keys=OFF` in a single batch) rather than relying on cascade.
+## License & Contributing
 
-## API Endpoints
+### License
+This project is licensed under the **MIT License** — see the LICENSE file for details.
 
-**Public**
-- `GET /` — main app
-- `GET /api/waza` — all waza with aggregated like/dislike counts
-- `POST /api/login` — authenticate (returns token + user)
-- `POST /api/register` — create account
+### Contributing
+We welcome contributions! Please read our Contributing Guide (CONTRIBUTING.md) for:
 
-**Authenticated** (session token via `Authorization: Bearer`)
-- `GET /api/me` — current user (rehydrates session/admin status on refresh)
-- `GET /api/progress` · `POST /api/progress` · `DELETE /api/progress`
-- `GET /api/labels` · `POST /api/labels`
-- `GET /api/contributions/mine` · `POST /api/contributions`
-- `POST /api/account/username` — change username (requires current password)
-- `POST /api/account/password` — change password (requires current; clears all sessions)
-- `DELETE /api/account` — delete account (requires password)
+- Code conventions (ES modules, plain JS, no frontend frameworks)
+- Project structure (where to find what)
+- Development workflow (npm run dev, npm run deploy)
+- Pull request process
 
-**List sharing (KV)**
-- `POST /api/list` — store a list (SHA-256 key)
-- `GET /api/list?key=<hash>` — retrieve
+#### Quick Start for Contributors
 
-**Admin**
-- `GET /admin` — admin panel
-- `GET /api/admin/contributions?status=` — queue by status
-- `GET /api/admin/waza/:id` — waza detail for diffing
-- `POST /api/admin/contributions/:id/approve` · `.../reject`
+# Clone the repository
+git clone https://github.com/yourusername/wazalist-app.git
+cd wazalist-app
 
-## Data Models
-
-```javascript
-// Progress (per waza, in state.prog keyed by waza_id)
-{ markings: [bool×6], like: null | 1 | -1, updated_at: "ISO string" }
-
-// Marking labels (per user)
-["Want to Learn", "Learning", "Complete", "Favourite", "Oriwaza", "Forgotten"]
-
-// Shared list payload (KV)
-{ name: "...", labels: [...], marks: { "123": { markings: [...], like: 1 } } }
-```
-
-## Storage Notes
-
-- **like**: INTEGER (`null`/`1`/`-1`) — compact, and enables aggregate counts in SQL
-- **markings**: TEXT, JSON array of 6 booleans
-- **shape_labels**: TEXT, JSON array of 6 strings (default all-empty)
-- like/dislike counts are computed in the `/api/waza` query, not stored
-
-## Constants
-
-```javascript
-const SHAPES = ['●', '▲', '■', '♥', '★', '◆'];
-const LIKE_NONE = null, LIKE_UP = 1, LIKE_DOWN = -1;
-```
-
-## Development
-
-```bash
+# Install dependencies
 npm install
-npm run dev      # Vite dev + Wrangler (local)
-npm run lint     # ESLint
-npm run format   # Prettier
-npm run build    # Vite build
-```
+
+# Start development server
+npm run dev
+
+# Make changes to frontend (public/) — refresh browser
+# Make changes to backend (src/) — Wrangler reloads automatically
+
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+
+# Deploy (maintainers only)
+npm run deploy
 
 ## Deployment
 
-**Prerequisites:** Cloudflare account with Workers, D1, and KV; Wrangler CLI.
+### Prerequisites
+- Cloudflare account with Workers, D1, and KV enabled
+- Wrangler CLI installed (npm install -g wrangler)
 
-1. Apply migrations: `npx wrangler d1 migrations apply DB --remote`
-2. Set your D1 `database_id` and KV namespace `id` in `wrangler.json`
-3. `npx wrangler deploy`
+### Steps
 
-`wrangler.json` bindings:
-```json
-{
-  "d1_databases": [
-    { "binding": "DB", "database_name": "wazalist-db", "database_id": "..." }
-  ],
-  "kv_namespaces": [
-    { "binding": "LIST_STORE", "id": "..." }
-  ]
-}
-```
+1. Configure wrangler.json with your database and KV namespace IDs:
+   {
+     "d1_databases": [
+       { "binding": "DB", "database_name": "wazalist-db", "database_id": "..." }
+     ],
+     "kv_namespaces": [
+       { "binding": "LIST_STORE", "id": "..." }
+     ]
+   }
 
-Static assets in `public/` are served by the Workers ASSETS binding; the Worker
-falls back to assets before serving `index.html`, so real files (JS, CSS, icons,
-`admin.js`) are served correctly and only genuine misses get the SPA shell.
+2. Apply database migrations:
+   npx wrangler d1 migrations apply DB --remote
 
-## Security
+3. Deploy the Worker:
+   npm run deploy
 
-- PBKDF2 (100k iterations) + per-user salt; hashes stored as `salt:hash`
-- 64-char random session tokens, 30-day expiry; password change clears all sessions
-- All user-supplied content (waza fields, names, labels, notes) is HTML-escaped on render
-- Contributions require admin approval; full audit trail (`created_at`/`reviewed_at`/`admin_note`)
-- Guest data stays local; shared lists use SHA-256 keys with 90-day expiry
+4. Set environment variables (if needed):
+   npx wrangler secret put SECRET_KEY
 
-## Browser Support
+### Local Development
+npm run dev          # Local D1 + Worker + Vite UI (hot reload)
+npm run dev:remote   # Remote D1 (read/write to production database)
 
-Latest two versions of Chrome, Firefox, Safari, Edge; iOS Safari and Android
-Chrome. Requires ES modules, Fetch, `localStorage`, CSS Grid/Flexbox, and
-`content-visibility`.
 
-## License
+## Credits
 
-[Add your license here]
+**Author**: Paul Yong Shao En  
+**Email**: paulyse99@gmail.com  
+**Project**: Wazalist App  
 
----
+Built with passion and AI Tools for the Wotagei community.
 
-**Wazalist** — track your wotagei journey, one waza at a time.
+## Acknowledgments
+
+- Wotagei Community — for inspiration and feedback
+- Cloudflare — for providing the serverless platform
+- Open Source Libraries — SheetJS, ExcelJS, and all dependencies
+
+Wazalist — Track your Wotagei journey, one Waza at a time.
