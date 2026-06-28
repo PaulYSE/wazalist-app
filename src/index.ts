@@ -35,6 +35,18 @@ const err = (msg: string, status = 400) => json({ error: msg }, status);
 
 export default {
 	async fetch(request, env) {
+		// D1 has foreign key enforcement OFF by default, and it's a per-connection
+		// SQLite setting rather than something baked into the database file —
+		// so it has to be (re-)enabled at the start of every request. Wrapped in
+		// try/catch defensively: if a future D1 runtime ever rejects this PRAGMA,
+		// the app should degrade to "no FK enforcement" (today's behavior),
+		// not fail every single request.
+		try {
+			await env.DB.exec("PRAGMA foreign_keys = ON;");
+		} catch (e) {
+			console.error("Failed to enable foreign_keys PRAGMA:", e);
+		}
+
 		let url: URL;
 		try {
 			url = new URL(request.url);
@@ -763,17 +775,13 @@ export default {
 		}
 
 		if (policy === "approval") {
-			// Delete any prior rejected row so the user can re-apply
-			await env.DB.prepare(
-			"DELETE FROM group_applications WHERE group_id = ? AND user_id = ? AND status = 'rejected'"
-			).bind(groupId, user.id).run();
 			try {
-			await env.DB.prepare(`
+				await env.DB.prepare(`
 				INSERT INTO group_applications (group_id, user_id, status)
 				VALUES (?, ?, 'pending')
-			`).bind(groupId, user.id).run();
+				`).bind(groupId, user.id).run();
 			} catch {
-			return err("You already have a pending application for this group");
+				return err("You already have a pending application for this group");
 			}
 			return json({ success: true, status: "pending" });
 		}
@@ -783,17 +791,18 @@ export default {
 			const provided = (body.invite_key as string | undefined)?.trim();
 			if (!provided) return err("An invite key is required to join this group");
 			if (provided !== group.invite_key) return err("Invalid invite key");
-			// Key is valid — create a pending application (still needs admin approval)
-			await env.DB.prepare(
-			"DELETE FROM group_applications WHERE group_id = ? AND user_id = ? AND status = 'rejected'"
-			).bind(groupId, user.id).run();
+			// Key is valid — create a pending application (still needs admin approval).
+			// No pre-delete here: the partial unique index on group_applications
+			// (group_id, user_id) WHERE status = 'pending' is what now prevents a
+			// duplicate pending row, while still letting past approved/rejected rows
+			// accumulate as history.
 			try {
-			await env.DB.prepare(`
+				await env.DB.prepare(`
 				INSERT INTO group_applications (group_id, user_id, status)
 				VALUES (?, ?, 'pending')
-			`).bind(groupId, user.id).run();
+				`).bind(groupId, user.id).run();
 			} catch {
-			return err("You already have a pending application for this group");
+				return err("You already have a pending application for this group");
 			}
 			return json({ success: true, status: "pending" });
 		}
@@ -803,57 +812,61 @@ export default {
 
 		// POST /api/groups/:id/members/:uid/approve — approve application
 		if (path.match(/^\/api\/groups\/\d+\/members\/\d+\/approve$/) && request.method === "POST") {
-		const user = await getUser();
-		if (!user) return err("Authentication required", 401);
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
 
-		const parts = path.split("/");
-		const groupId = +parts[3];
-		const targetId = +parts[5];
+			const parts = path.split("/");
+			const groupId = +parts[3];
+			const targetId = +parts[5];
 
-		const role = await getGroupRole(groupId, user.id);
-		if (role !== "admin") return err("Forbidden", 403);
+			const role = await getGroupRole(groupId, user.id);
+			if (role !== "admin") return err("Forbidden", 403);
 
-		const app = await env.DB.prepare(
-			"SELECT id, status FROM group_applications WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, targetId).first();
-		if (!app) return err("Application not found", 404);
-		if ((app.status as string) !== "pending") return err("Application is not pending");
+			// With application history now preserved, a (group, user) pair can have
+			// multiple past rows — always act on the MOST RECENT one, and update by
+			// its specific id, never by (group_id, user_id), so older historical
+			// rows are never touched.
+			const app = await env.DB.prepare(
+				"SELECT id, status FROM group_applications WHERE group_id = ? AND user_id = ? ORDER BY applied_at DESC LIMIT 1"
+			).bind(groupId, targetId).first();
+			if (!app) return err("Application not found", 404);
+			if ((app.status as string) !== "pending") return err("Application is not pending");
 
-		await env.DB.batch([
-			env.DB.prepare(
-			"UPDATE group_applications SET status = 'approved' WHERE group_id = ? AND user_id = ?"
-			).bind(groupId, targetId),
-			env.DB.prepare(
+			await env.DB.batch([
+				env.DB.prepare(
+				"UPDATE group_applications SET status = 'approved' WHERE id = ?"
+				).bind(app.id as number),
+				env.DB.prepare(
 				"INSERT OR IGNORE INTO group_members (group_id, user_id, role) VALUES (?, ?, 'member')"
-			).bind(groupId, targetId),
-		]);
+				).bind(groupId, targetId),
+			]);
 
-		return json({ success: true });
+			return json({ success: true });
 		}
 
 		// POST /api/groups/:id/members/:uid/reject — reject application
 		if (path.match(/^\/api\/groups\/\d+\/members\/\d+\/reject$/) && request.method === "POST") {
-		const user = await getUser();
-		if (!user) return err("Authentication required", 401);
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
 
-		const parts = path.split("/");
-		const groupId = +parts[3];
-		const targetId = +parts[5];
+			const parts = path.split("/");
+			const groupId = +parts[3];
+			const targetId = +parts[5];
 
-		const role = await getGroupRole(groupId, user.id);
-		if (role !== "admin") return err("Forbidden", 403);
+			const role = await getGroupRole(groupId, user.id);
+			if (role !== "admin") return err("Forbidden", 403);
 
-		const app = await env.DB.prepare(
-			"SELECT id, status FROM group_applications WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, targetId).first();
-		if (!app) return err("Application not found", 404);
-		if ((app.status as string) !== "pending") return err("Application is not pending");
+			const app = await env.DB.prepare(
+				"SELECT id, status FROM group_applications WHERE group_id = ? AND user_id = ? ORDER BY applied_at DESC LIMIT 1"
+			).bind(groupId, targetId).first();
+			if (!app) return err("Application not found", 404);
+			if ((app.status as string) !== "pending") return err("Application is not pending");
 
-		await env.DB.prepare(
-			"UPDATE group_applications SET status = 'rejected' WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, targetId).run();
+			await env.DB.prepare(
+				"UPDATE group_applications SET status = 'rejected' WHERE id = ?"
+			).bind(app.id as number).run();
 
-		return json({ success: true });
+			return json({ success: true });
 		}
 
 		// PUT /api/groups/:id/members/:uid — update member tag or role
@@ -944,9 +957,6 @@ export default {
 		await env.DB.batch([
 			env.DB.prepare(
 			"DELETE FROM group_members WHERE group_id = ? AND user_id = ?"
-			).bind(groupId, targetId),
-			env.DB.prepare(
-			"DELETE FROM group_applications WHERE group_id = ? AND user_id = ?"
 			).bind(groupId, targetId),
 		]);
 
@@ -1104,21 +1114,28 @@ export default {
 
 		// GET /api/groups/:id/my-status — caller's relationship to a group (public endpoint, auth optional)
 		if (path.match(/^\/api\/groups\/\d+\/my-status$/) && request.method === "GET") {
-		const groupId = +path.split("/")[3];
-		const user = await getUser();
-		if (!user) return json({ status: "guest" });
+			const groupId = +path.split("/")[3];
+			const user = await getUser();
+			if (!user) return json({ status: "guest" });
 
-		const member = await env.DB.prepare(
-			"SELECT role FROM group_members WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, user.id).first();
-		if (member) return json({ status: "member", role: member.role });
+			const member = await env.DB.prepare(
+				"SELECT role FROM group_members WHERE group_id = ? AND user_id = ?"
+			).bind(groupId, user.id).first();
+			if (member) return json({ status: "member", role: member.role });
 
-		const app = await env.DB.prepare(
-			"SELECT status FROM group_applications WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, user.id).first();
-		if (app) return json({ status: "applied", application_status: app.status });
+			// Look at the user's most recent application for this group. With
+			// history now preserved, an old 'approved' row can exist for someone
+			// who has since left or been removed — that's not an actionable
+			// "applied" state (they have no pending request), so only 'pending'
+			// or 'rejected' should be surfaced as status: 'applied' here.
+			const app = await env.DB.prepare(
+				"SELECT status FROM group_applications WHERE group_id = ? AND user_id = ? ORDER BY applied_at DESC LIMIT 1"
+			).bind(groupId, user.id).first();
+			if (app && (app.status === "pending" || app.status === "rejected")) {
+				return json({ status: "applied", application_status: app.status });
+			}
 
-		return json({ status: "none" });
+			return json({ status: "none" });
 		}
 
 		// GET /api/groups/:id/invite-key — retrieve current invite key (Group admin only)
