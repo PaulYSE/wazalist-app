@@ -73,10 +73,12 @@ CREATE TABLE IF NOT EXISTS progress (
 CREATE TABLE IF NOT EXISTS contributions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id     INTEGER NOT NULL REFERENCES users(id),
-    type        TEXT NOT NULL,            -- 'edit' | 'new_waza'
+    type        TEXT NOT NULL
+                  CHECK(type IN ('edit', 'new_waza')),
     waza_id     INTEGER REFERENCES waza(id),
-    payload     TEXT NOT NULL,            -- JSON of field changes
-    status      TEXT NOT NULL DEFAULT 'pending',  -- 'pending' | 'approved' | 'rejected'
+    payload     TEXT NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'pending'
+                  CHECK(status IN ('pending', 'approved', 'rejected')),
     admin_note  TEXT,
     created_at  DATETIME NOT NULL DEFAULT (datetime('now')),
     reviewed_at DATETIME
