@@ -63,9 +63,10 @@ CREATE TABLE IF NOT EXISTS progress (
     waza_id    INTEGER NOT NULL,
     markings   TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    "like"     INTEGER,
+    "like"     INTEGER CHECK ("like" IN (-1, 1) OR "like" IS NULL),
     PRIMARY KEY (user_id, waza_id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (waza_id) REFERENCES waza(id) ON DELETE CASCADE
 );
 
 -- User-submitted edits / new waza, pending admin review.
@@ -91,7 +92,7 @@ CREATE TABLE IF NOT EXISTS groups (
                 CHECK(join_policy IN ('open','approval','invite')),
   invite_key  TEXT    UNIQUE,
   social      TEXT,
-  created_by  INTEGER NOT NULL REFERENCES users(id),
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -106,17 +107,27 @@ CREATE TABLE IF NOT EXISTS group_members (
   PRIMARY KEY (group_id, user_id)
 );
 
--- Join applications (all three join policies route through here)
+-- Join applications (all three join policies route through here).
+-- No table-wide UNIQUE(group_id, user_id) — see the partial unique
+-- index below, which preserves application history across re-applications.
 CREATE TABLE IF NOT EXISTS group_applications (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   group_id   INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
   user_id    INTEGER NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
   status     TEXT    NOT NULL DEFAULT 'pending'
                CHECK(status IN ('pending','approved','rejected')),
-  applied_at TEXT    NOT NULL DEFAULT (datetime('now')),
-  UNIQUE(group_id, user_id)
+  applied_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_group_applications_one_pending
+  ON group_applications(group_id, user_id)
+  WHERE status = 'pending';
+
+-- ── Indexes ───────────────────────────────────────────────────
+
+CREATE INDEX IF NOT EXISTS idx_progress_waza ON progress(waza_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_contributions_status ON contributions(status);
 CREATE INDEX IF NOT EXISTS idx_contributions_user   ON contributions(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_user   ON group_members(user_id);
@@ -124,3 +135,4 @@ CREATE INDEX IF NOT EXISTS idx_group_members_group  ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_groups_invite_key ON groups(invite_key);
 CREATE INDEX IF NOT EXISTS idx_group_applications_user  ON group_applications(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_applications_group ON group_applications(group_id);
+CREATE INDEX IF NOT EXISTS idx_groups_created_by_at ON groups(created_by, created_at);
