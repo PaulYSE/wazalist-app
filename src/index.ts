@@ -1159,4 +1159,38 @@ export default {
 		const html = await renderHtml(env, request);
 		return new Response(html, { headers: { "content-type": "text/html" } });
 	},
+	/**
+	 * @brief Cron-triggered handler. Deletes expired session rows.
+	 *
+	 * Runs on the schedule defined in wrangler.json's triggers.crons array.
+	 * Cloudflare invokes this independently of any HTTP request — there is
+	 * no request object, and nothing here is reachable from the public
+	 * internet. idx_sessions_expires (migration 0002) keeps this query
+	 * fast even as the sessions table grows.
+	 *
+	 * @param {ScheduledController} controller - Cron metadata (which
+	 *   schedule fired, scheduled execution time). Unused here, but part
+	 *   of the required signature.
+	 * @param {Env} env - Same environment bindings fetch() receives (DB, etc).
+	 * @param {ExecutionContext} ctx - Allows extending the Worker's
+	 *   lifetime past the handler's return via ctx.waitUntil(), if needed.
+	 * @return {Promise<void>}
+	 */
+	async scheduled(controller, env, ctx) {
+		try {
+			const result = await env.DB.prepare(
+				"DELETE FROM sessions WHERE expires_at < datetime('now')"
+			).run();
+			console.log(
+				"Session cleanup: deleted",
+				result.meta.changes,
+				"expired session(s)"
+			);
+		} catch (e) {
+			// A failed cleanup run should never crash the cron invocation —
+			// log it and let the next scheduled run try again. There is no
+			// user-facing request to return an error to here.
+			console.error("Session cleanup failed:", e);
+		}
+	},
 } satisfies ExportedHandler<Env>;
