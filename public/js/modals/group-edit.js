@@ -32,9 +32,12 @@ function renderGroupInviteKeyHTML(idPrefix) {
     '-copy-key" style="font-size:12px">Copy key</button>' +
     '<button class="btn" id="' +
     idPrefix +
+    '-copy-link" style="font-size:12px">🔗 Copy link</button>' +
+    '<button class="btn" id="' +
+    idPrefix +
     '-regen-key" style="font-size:12px;color:var(--amber);border-color:var(--amber)">🔑 Regenerate</button>' +
     '</div>' +
-    '<div style="font-size:12px;color:var(--text3);margin-top:6px">Regenerating invalidates the old key immediately.</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:6px">Anyone with the link or key can join immediately, regardless of this Group\'s join policy. Regenerating invalidates both right away.</div>' +
     '</div>'
   );
 }
@@ -50,22 +53,39 @@ function renderGroupInviteKeyHTML(idPrefix) {
 function wireGroupInviteKeyEvents(section, idPrefix, groupId) {
   const keyDisplay = section.querySelector('#' + idPrefix + '-current-key');
   const copyBtn = section.querySelector('#' + idPrefix + '-copy-key');
+  const copyLinkBtn = section.querySelector('#' + idPrefix + '-copy-link');
   const regenBtn = section.querySelector('#' + idPrefix + '-regen-key');
+
+  // Shared guard: the key display still shows a placeholder, not a real key.
+  const keyNotReady = () => {
+    const key = keyDisplay.textContent;
+    return !key || key === 'Could not load key.' || key === 'Loading…';
+  };
 
   // Copy handler
   copyBtn.addEventListener('click', async () => {
-    const key = keyDisplay.textContent;
-    if (!key || key === 'Could not load key.' || key === 'Loading…') return;
-    await navigator.clipboard.writeText(key);
+    if (keyNotReady()) return;
+    await navigator.clipboard.writeText(keyDisplay.textContent);
     copyBtn.textContent = 'Copied!';
     setTimeout(() => {
       copyBtn.textContent = 'Copy key';
     }, 1800);
   });
 
+  // Copy link handler — same key, wrapped in the app's join-by-key URL shape.
+  copyLinkBtn.addEventListener('click', async () => {
+    if (keyNotReady()) return;
+    const link = location.origin + '/?groupJoinKey=' + keyDisplay.textContent;
+    await navigator.clipboard.writeText(link);
+    copyLinkBtn.textContent = 'Copied!';
+    setTimeout(() => {
+      copyLinkBtn.textContent = '🔗 Copy link';
+    }, 1800);
+  });
+
   // Regenerate handler
   regenBtn.addEventListener('click', async () => {
-    if (!confirm('Regenerate the invite key? The old key will stop working immediately.')) return;
+    if (!confirm('Regenerate the invite key? The old key AND any links built from it will stop working immediately.')) return;
     regenBtn.disabled = true;
     regenBtn.textContent = 'Regenerating…';
     const newKey = await createGroupInviteKey(groupId);
