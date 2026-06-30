@@ -717,6 +717,65 @@ export default {
 		return json({ success: true, invite_key });
 		}
 
+		// GET /api/groups/by-key/:key — public lookup, resolves a join key to just
+		// enough info to show "Sign in to join [Group Name]" before the visitor
+		// has authenticated. Deliberately returns ONLY name + member_count — never
+		// id, join_policy, invite_key, or anything else — so a logged-out visitor
+		// can't use this to fish for information about a group beyond "does this
+		// key point to something real, and what's it called."
+		if (path.match(/^\/api\/groups\/by-key\/[0-9a-f]{64}$/) && request.method === "GET") {
+			const key = path.split("/")[4];
+
+			const group = await env.DB.prepare(
+				"SELECT name, (SELECT COUNT(*) FROM group_members WHERE group_id = groups.id) AS member_count FROM groups WHERE invite_key = ?"
+			).bind(key).first();
+
+			if (!group) return err("Invalid or expired join link", 404);
+
+			return json({ name: group.name, member_count: group.member_count });
+		}
+
+		// POST /api/groups/join-by-key — auth required. Looks up a group by its
+		// invite_key and joins the caller DIRECTLY as a member, bypassing
+		// join_policy entirely (open/approval/invite all resolve the same way
+		// here) — this is the explicit behavior difference from the existing
+		// POST /api/groups/:id/join route, which always respects join_policy.
+		// A join-by-key link is meant to function like a direct invite: whoever
+		// holds the key is trusted to join immediately, no application step.
+		if (path === "/api/groups/join-by-key" && request.method === "POST") {
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
+
+			const body = await request.json() as Record<string, unknown>;
+			const key = (body.key as string | undefined)?.trim();
+			if (!key || !/^[0-9a-f]{64}$/.test(key)) return err("Invalid join link");
+
+			const group = await env.DB.prepare(
+				"SELECT id, name FROM groups WHERE invite_key = ?"
+			).bind(key).first();
+			if (!group) return err("Invalid or expired join link", 404);
+
+			const groupId = group.id as number;
+
+			const existing = await getGroupRole(groupId, user.id);
+			if (existing) {
+				return json({ success: true, status: "already_member", group_id: groupId, group_name: group.name });
+			}
+
+			await env.DB.prepare(`
+				INSERT INTO group_members (group_id, user_id, role)
+				VALUES (?, ?, 'member')
+			`).bind(groupId, user.id).run();
+
+			// Clean up any stale pending application — joining directly via key
+			// supersedes whatever application-flow state may have existed.
+			await env.DB.prepare(
+				"DELETE FROM group_applications WHERE group_id = ? AND user_id = ? AND status = 'pending'"
+			).bind(groupId, user.id).run();
+
+			return json({ success: true, status: "joined", group_id: groupId, group_name: group.name });
+		}
+
 		// GET /api/groups/:id/members — member list (members only)
 		if (path.match(/^\/api\/groups\/\d+\/members$/) && request.method === "GET") {
 		const user = await getUser();
