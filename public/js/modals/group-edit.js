@@ -85,7 +85,12 @@ function wireGroupInviteKeyEvents(section, idPrefix, groupId) {
 
   // Regenerate handler
   regenBtn.addEventListener('click', async () => {
-    if (!confirm('Regenerate the invite key? The old key AND any links built from it will stop working immediately.')) return;
+    if (
+      !confirm(
+        'Regenerate the invite key? The old key AND any links built from it will stop working immediately.',
+      )
+    )
+      return;
     regenBtn.disabled = true;
     regenBtn.textContent = 'Regenerating…';
     const newKey = await createGroupInviteKey(groupId);

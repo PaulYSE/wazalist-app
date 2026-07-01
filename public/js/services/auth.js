@@ -21,6 +21,9 @@ import {
   setIsGuest,
   setToken,
 } from '../state/user-state.js';
+import { activateTab } from '../app/shell.js';
+import { selectGroupFromHistory } from '../views/groups-browse-list.js';
+import { firePendingGroupJoin, hasPendingGroupJoin } from '../features/group-join-link.js';
 
 // ── Auth actions ──────────────────────────────────────────────
 
@@ -80,7 +83,14 @@ async function doLogin() {
   setCurrentUsername(res.user.username);
   setIsAdmin(res.user.is_admin);
   setCurrentUserId(res.user.id);
-  initApp();
+  await initApp();
+
+  if (hasPendingGroupJoin()) {
+    await firePendingGroupJoin((groupId) => {
+      activateTab('groups');
+      selectGroupFromHistory(groupId);
+    });
+  }
 }
 
 /**
@@ -121,8 +131,15 @@ async function doRegister() {
     setToken(li.token);
     setCurrentUsername(li.user.username);
     setCurrentUserId(li.user.id);
-    initApp();
+    await initApp();
     showOnboarding();
+
+    if (hasPendingGroupJoin()) {
+      await firePendingGroupJoin((groupId) => {
+        activateTab('groups');
+        selectGroupFromHistory(groupId);
+      });
+    }
   }
 }
 

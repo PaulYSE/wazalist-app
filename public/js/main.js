@@ -34,6 +34,11 @@ import { getGroupsSelectedId } from './state/groups-state.js';
 import { initCreateGroup } from './modals/group-new.js';
 import { initEditGroup } from './modals/group-edit.js';
 import { getToken, initToken } from './state/user-state.js';
+import {
+  checkForGroupJoinKey,
+  hasPendingGroupJoin,
+  showPendingJoinBanner,
+} from './features/group-join-link.js';
 
 // ── Guide buttons ─────────────────────────────────────────────
 
@@ -161,4 +166,10 @@ initTheme();
 
 // Initialize token state from localStorage, then boot if logged in
 initToken();
-if (getToken()) initApp();
+if (getToken()) {
+  initApp();
+} else {
+  checkForGroupJoinKey().then(() => {
+    if (hasPendingGroupJoin()) showPendingJoinBanner();
+  });
+}

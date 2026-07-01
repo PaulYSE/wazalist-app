@@ -30,6 +30,13 @@ import {
 } from '../state/user-state.js';
 import { initBrowseState } from '../state/waza-browse-state.js';
 import { selectGroupFromHistory } from '../views/groups-browse-list.js';
+import {
+  checkForGroupJoinKey,
+  firePendingGroupJoin,
+  hasPendingGroupJoin,
+  dismissPendingJoin,
+} from '../features/group-join-link.js';
+import { showToast } from '../components/show-toast.js';
 
 // ── Initialization entry point ─────────────────────────────────────
 
@@ -60,6 +67,9 @@ export async function initApp() {
   document.getElementById('newWazaBtn').style.display = 'none';
   document.getElementById('mobNewWazaBtn').style.display = 'none';
   document.getElementById('countBar').textContent = 'Loading Waza…';
+
+  // ── Check for a pending group join link ────────────────────
+  await checkForGroupJoinKey();
 
   // ── Load waza data ─────────────────────────────────────────
   const wazaRes = await api('/api/waza');
@@ -177,5 +187,24 @@ export async function initApp() {
     }
   } else {
     replaceRoute(tab, null, null);
+  }
+  if (hasPendingGroupJoin()) {
+    if (isGuest()) {
+      // Guest users can't join groups — show a gentle nudge instead
+      // of the full banner (which asks them to sign in).
+      showToast('Sign in to join this group.', 'amber');
+      dismissPendingJoin();
+    } else {
+      // Already logged in — fire the join immediately.
+      // The navigateToGroup callback: switch to the Groups tab and
+      // select the group whose id we just got back from the API.
+      await firePendingGroupJoin((groupId) => {
+        // activateTab is already imported in shell.js and re-exported.
+        // selectGroup is the function we added in Phase 1 of the
+        // deep-linking work.
+        activateTab('groups');
+        selectGroupFromHistory(groupId);
+      });
+    }
   }
 }
