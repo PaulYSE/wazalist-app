@@ -76,6 +76,28 @@ export default {
 				headers: { "Content-Type": "text/plain" },
 			});
 		}
+
+		// ── Rate limiting helper ──────────────────────────────────────
+		const isRateLimited = async (
+		db: D1Database,
+		table: string,
+		userCol: string,
+		timeCol: string,
+		userId: number,
+		limit: number,
+		window: string,
+		): Promise<boolean> => {
+		const row = await db
+			.prepare(
+			`SELECT COUNT(*) AS n FROM ${table}
+			WHERE ${userCol} = ?
+			AND ${timeCol} >= datetime('now', ?)`,
+			)
+			.bind(userId, window)
+			.first<{ n: number }>();
+
+		return (row?.n ?? 0) >= limit;
+		};
 		
 		// ── Waza ──────────────────────────────────────────────────
 		if (path === "/api/waza") {
@@ -616,6 +638,27 @@ export default {
 		const user = await getUser();
 		if (!user) return err("Authentication required", 401);
 
+		// ── Rate limit: max 5 groups created per user per 24 hours ──
+		// Admins are exempt — they may need to create groups freely for
+		// testing or moderation purposes.
+		if (!user.is_admin) {
+			const limited = await isRateLimited(
+			env.DB,
+			"groups",
+			"created_by",
+			"created_at",
+			user.id,
+			5,
+			"-24 hours",
+			);
+			if (limited) {
+			return err(
+				"You have created too many groups recently. Please wait before creating another.",
+				429,
+			);
+			}
+		}
+
 		const body = await request.json() as Record<string, unknown>;
 		const name = (body.name as string | undefined)?.trim();
 		const join_policy = (body.join_policy as string | undefined) ?? "open";
@@ -820,6 +863,29 @@ export default {
 		if (!group) return err("Group not found", 404);
 
 		const policy = group.join_policy as string;
+
+		// ── Rate limit: max 10 join applications per user per hour ──
+		// Only applies to policies that write to group_applications
+		// (approval + invite). Open-policy joins go directly to
+		// group_members and don't need this limit.
+		// Admins are exempt.
+		if (!user.is_admin && policy !== "open") {
+			const limited = await isRateLimited(
+			env.DB,
+			"group_applications",
+			"user_id",
+			"applied_at",
+			user.id,
+			10,
+			"-1 hour",
+			);
+			if (limited) {
+			return err(
+				"You have submitted too many join requests recently. Please wait before applying again.",
+				429,
+			);
+			}
+		}
 
 		if (policy === "open") {
 			await env.DB.prepare(`
