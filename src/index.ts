@@ -358,6 +358,8 @@ export default {
 			return json({ success: true });
 		}
 
+		// ── Change username ───────────────────────────────────────
+
 		// POST /api/account/username — change username (requires current password)
 		if (path === "/api/account/username" && request.method === "POST") {
 			const user = await getUser();
@@ -398,6 +400,8 @@ export default {
 			return json({ success: true, username: trimmed });
 		}
 
+		// ── Change password ───────────────────────────────────────
+		
 		// POST /api/account/password — change password (requires current password)
 		if (path === "/api/account/password" && request.method === "POST") {
 			const user = await getUser();
@@ -426,6 +430,28 @@ export default {
 				.run();
 
 			return json({ success: true });
+		}
+		
+		// ── Reset password ────────────────────────────────────────
+
+		// POST /api/admin/reset-password - app admin force-reset password
+		if (path === "/api/admin/reset-password" && request.method === "POST") {
+			const caller = await getUser();
+			if (!caller || !caller.is_admin) return err("Forbidden", 403);
+
+			const { username, new_password } = await request.json() as Record<string, string>;
+			if (!username || !new_password) return err("username and new_password are required");
+
+			const target = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(username).first();
+			if (!target) return err("User not found", 404);
+
+			const { hash, salt } = await hashPassword(new_password);
+
+			// Kick from all existing sessions
+			// User must log in
+			await env.DB.batch([env.DB.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").bind(`${salt}:${hash}`,target.id as number),
+								env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id as number),]);
+			return json({ success: true, message: "Password reset. All existing sessions invalidated." });
 		}
 
 		// ── Contributions ─────────────────────────────────────────
