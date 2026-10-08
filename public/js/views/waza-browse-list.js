@@ -27,6 +27,7 @@ import {
   setBrowseListView,
   setBrowseSortState,
 } from '../state/waza-browse-state.js';
+import { escapeHtml } from '../lib/escape.js';
 
 // ── Browse sort ───────────────────────────────────────────────
 // Single entry point for changing sort. Pass either field, order, or both;
@@ -244,10 +245,10 @@ export function renderList() {
           '">' +
           '<div class="wce-header">' +
           '<div class="njp">' +
-          (w.name_jp || '—') +
+          escapeHtml(w.name_jp || '—') +
           '</div>' +
           '<div class="nen">' +
-          dispName(w) +
+          escapeHtml(dispName(w)) +
           '</div>' +
           bottomRow +
           '</div>' +
@@ -280,10 +281,10 @@ export function renderList() {
           _ms2.style +
           '">' +
           '<div class="njp">' +
-          (w.name_jp || '—') +
+          escapeHtml(w.name_jp || '—') +
           '</div>' +
           '<div class="nen">' +
-          dispName(w) +
+          escapeHtml(dispName(w)) +
           '</div>' +
           bottomRow +
           '</div>'
@@ -307,10 +308,10 @@ export function renderList() {
           _ms3.style +
           '">' +
           '<span class="drn">' +
-          (w.name_jp || '—') +
+          escapeHtml(w.name_jp || '—') +
           '</span>' +
           '<span class="drs">' +
-          dispName(w) +
+          escapeHtml(dispName(w)) +
           '</span>' +
           '<div class="markings-row" style="flex-shrink:0">' +
           markingPips(markings) +
