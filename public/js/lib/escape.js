@@ -15,10 +15,11 @@
  * @param {string} s - The input string to escape.
  * @return {string} Escaped HTML-safe string.
  */
-export function escapeHtml(s) {
-  return String(s || '')
+export function escapeHtml(value) {
+  return String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
