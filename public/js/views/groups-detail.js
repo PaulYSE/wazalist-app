@@ -87,7 +87,8 @@ export async function renderGroupDetail(groupId) {
             (link) =>
               '<a href="' +
               escapeHtml(link.url) +
-              '" target="_blank" rel="apeHtml(link.platform) +
+              '" target="_blank" rel="noopener" class="vid-btn">' +
+              escapeHtml(s.platform) +
               ' ↗</a>',
           )
           .join('') +
