@@ -8,7 +8,7 @@
  */
 
 import { api } from '../services/api.js';
-import { escapeHtml } from '../lib/escape.js';
+import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
 import { openEditGroup } from '../modals/group-edit.js';
 import { refreshGroups } from './groups-browse-list.js';
@@ -52,20 +52,42 @@ export async function renderGroupDetail(groupId) {
 
     // Social links
     let social = [];
+    
     try {
-      social = JSON.parse(g.social || '[]');
+      const parsed = JSON.parse(g.social || '[]');
+      social = Array.isArray(parsed) ? parsed : [];
     } catch {
-      /* empty */
+      // Invalid stored JSON: show no social links.
     }
-    const socialHTML = social.length
-      ? '<div class="dsec"><h3>Links</h3><div style="display:flex;flex-wrap:wrap;gap:8px">' +
-        social
+    
+    const validSocial = social.flatMap((link) => {
+      if (
+        link === null ||
+        typeof link !== 'object' ||
+        Array.isArray(link) ||
+        typeof link.platform !== 'string'
+      ) {
+        return [];
+      }
+    
+      const url = safeWebUrl(link.url);
+      if (!url) return [];
+    
+      return [{
+        platform: link.platform.trim() || 'Link',
+        url,
+      }];
+    });
+    
+    const socialHTML = validSocial.length
+      ? '<div class="dsec"><h3>Links</h3>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+        validSocial
           .map(
-            (s) =>
+            (link) =>
               '<a href="' +
-              escapeHtml(s.url) +
-              '" target="_blank" rel="noopener" class="vid-btn">' +
-              escapeHtml(s.platform) +
+              escapeHtml(link.url) +
+              '" target="_blank" rel="apeHtml(link.platform) +
               ' ↗</a>',
           )
           .join('') +
