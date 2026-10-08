@@ -70,6 +70,20 @@ const FIELD_LABELS = {
  * @type {string[]}
  */
 const ALL_FIELDS = Object.keys(FIELD_LABELS);
+const STATUS_PRESENTATION = Object.freeze({
+  pending: {
+    className: 's-pending',
+    label: 'pending',
+  },
+  approved: {
+    className: 's-approved',
+    label: 'approved',
+  },
+  rejected: {
+    className: 's-rejected',
+    label: 'rejected',
+  },
+});
 
 let queue = [],
   selectedId = null,
@@ -136,8 +150,8 @@ function renderQueue() {
       const ago = timeAgo(c.created_at);
       return `<div class="queue-item${selectedId === c.id ? ' selected' : ''}" data-id="${c.id}">
       <div class="qi-type ${isNew ? 'new' : 'edit'}">${isNew ? 'New Waza' : 'Edit'}</div>
-      <div class="qi-name">${label}</div>
-      <div class="qi-meta">${c.username} · ${ago}</div>
+      <div class="qi-name">${escapeHtml(label)}</div>
+      <div class="qi-meta">${escapeHtml(c.username)} · ${ago}</div>
     </div>`;
     })
     .join('');
@@ -179,7 +193,15 @@ async function selectItem(id) {
     if (currentWaza && currentWaza.error) currentWaza = null;
   }
 
-  const statusBadge = `<span class="status-badge s-${c.status}">${c.status}</span>`;
+  const statusPresentation =
+    Object.prototype.hasOwnProperty.call(STATUS_PRESENTATION, c.status)
+      ? STATUS_PRESENTATION[c.status]
+      : { className: '', label: 'unknown' };
+  
+  const statusBadge =
+    `<span class="status-badge ${statusPresentation.className}">` +
+    `${statusPresentation.label}</span>`;
+  
   const typeLabel = isNew
     ? '<span style="color:var(--amber);font-weight:600">New Waza</span>'
     : '<span style="color:var(--blue);font-weight:600">Edit Suggestion</span>';
@@ -199,8 +221,8 @@ async function selectItem(id) {
         <label>${FIELD_LABELS[f]}</label>
         ${
           isVideo
-            ? `<input type="url" data-field="${f}" value="${escapeHtml(v)}" placeholder="https://…">`
-            : `<input type="text" data-field="${f}" value="${escapeHtml(v)}">`
+            ? `<input type="url" data-field="${escapeHtml(f)}" value="${escapeHtml(v)}" placeholder="https://…">`
+            : `<input type="text" data-field="${escapeHtml(f)}" value="${escapeHtml(v)}">`
         }
       </div>`;
     });
@@ -217,9 +239,9 @@ async function selectItem(id) {
       const prop = payload[f] || '';
       const changed = cur !== prop;
       fieldsHTML += `<tr class="${changed ? 'changed' : ''}">
-        <td class="field-name">${FIELD_LABELS[f] || f}</td>
+        <td class="field-name">${escapeHtml(FIELD_LABELS[f] || f)}</td>
         <td class="val-current">${cur ? escapeHtml(cur) : '<span class="val-empty">empty</span>'}</td>
-        <td><input type="text" data-field="${f}" value="${escapeHtml(prop)}" style="width:100%;padding:4px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text1);font-size:13px;outline:none" ${!isPending ? 'disabled' : ''}></td>
+        <td><input type="text" data-field="${escapeHtml(f)}" value="${escapeHtml(prop)}" style="width:100%;padding:4px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text1);font-size:13px;outline:none" ${!isPending ? 'disabled' : ''}></td>
       </tr>`;
     });
     fieldsHTML += `</tbody></table></div>`;
@@ -333,12 +355,13 @@ async function doAction(c, action) {
  * @param {string} s - Input string.
  * @return {string} Escaped string.
  */
-function escapeHtml(s) {
-  return String(s || '')
+function escapeHtml(value) {
+  return String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /**
