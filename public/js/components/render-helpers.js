@@ -397,7 +397,10 @@ export function videoButtons(w) {
           escapeHtml(url) +
           '" target="_blank" rel="noopener" ' +
           'onclick="event.stopPropagation()">' +
-          '<atLabel[pl] +
+          '<span class="vid-dot" style="background:' +
+          platColor[pl] +
+          '"></span>' +
+          platLabel[pl] +
           ' ' +
           (i + 1) +
           '</a>'
@@ -407,7 +410,6 @@ export function videoButtons(w) {
     '</div>'
   );
 }
-
 
 // Mini like/dislike pill for list/card views
 
