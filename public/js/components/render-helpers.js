@@ -17,6 +17,7 @@ import {
 } from '../config/constants.js';
 import { state } from '../state/state.js';
 import { THEME_REGISTRY } from '../config/theme-registry.js';
+import { escapeHtml } from '../lib/escape.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -139,7 +140,7 @@ export const markingPips = (markings) =>
       '<span class="marking-pip' +
       (markings[i] ? ' on' : '') +
       '" title="' +
-      (state.markingLabels[i] || 'Marking ' + (i + 1)) +
+      escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
       '">' +
       s +
       '</span>',
