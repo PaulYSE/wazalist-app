@@ -230,19 +230,19 @@ export function renderDetail() {
   const namesHTML =
     '<div class="dgrid">' +
     '<div class="dfield"><div class="lbl">Japanese</div><div class="val">' +
-    (w.name_jp || '—') +
+    escapeHtml(w.name_jp || '—') +
     '</div></div>' +
     '<div class="dfield"><div class="lbl">English</div><div class="val">' +
-    (w.name_en || '—') +
+    escapeHtml(w.name_en || '—') +
     '</div></div>' +
     '<div class="dfield"><div class="lbl">Romaji</div><div class="val">' +
-    (w.name_en_literal || '—') +
+    escapeHtml(w.name_en_literal || '—') +
     '</div></div>' +
     '<div class="dfield"><div class="lbl">Google Translate EN</div><div class="val">' +
-    (w.name_en_gtranslate || '—') +
+    escapeHtml(w.name_en_gtranslate || '—') +
     '</div></div>' +
     '<div class="dfield"><div class="lbl">Google Translate CN</div><div class="val">' +
-    (w.name_cn_gtranslate || '—') +
+    escapeHtml(w.name_cn_gtranslate || '—') +
     '</div></div>' +
     '</div>';
 
@@ -316,7 +316,7 @@ export function renderDetail() {
         : '') +
       (w.reference
         ? '<div class="dgrid"><div class="dfield" style="grid-column:1/-1"><div class="lbl">Reference / lore</div><div class="val">' +
-          w.reference +
+          escapeHtml(w.reference) +
           '</div></div></div>'
         : '');
   }
@@ -326,10 +326,10 @@ export function renderDetail() {
 
   panel.innerHTML =
     '<div class="d-njp">' +
-    (w.name_jp || '—') +
+    escapeHtml(w.name_jp || '—') +
     '</div>' +
     '<div class="d-nen">' +
-    dispName(w) +
+    escapeHtml(dispName(w)) +
     '</div>' +
     // Like/Dislike pill
     '<div class="dsec">' +
@@ -379,7 +379,7 @@ export function renderDetail() {
         ' data-si="' +
         i +
         '" title="' +
-        (state.markingLabels[i] || 'Marking ' + (i + 1)) +
+        escapeHtml(state.markingLabels[i] || 'Marking ' + (i + 1)) +
         '">' +
         s +
         '</button>',
