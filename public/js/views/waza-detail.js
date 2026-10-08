@@ -17,7 +17,6 @@ import {
 } from '../components/render-helpers.js';
 import { state } from '../state/state.js';
 import { SHAPES, platLabel, platColor } from '../config/constants.js';
-import { escapeHtml } from '../lib/escape.js';
 import { dispName } from '../lib/search.js';
 import { getP, saveP } from '../services/progress.js';
 import { openSuggestEdit, openVideoSuggest } from '../modals/waza-edit.js';
@@ -27,6 +26,7 @@ import { pushRoute, replaceRoute } from '../app/router.js';
 import { isGuest, getToken } from '../state/user-state.js';
 import { isAnyMarkingFilterActive } from '../state/waza-browse-state.js';
 import { buildAccordion, toggleAccordionDOM } from '../app/accordion-shell.js';
+import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 
 // Set while reconciling from a popstate event, so selectWaza/closeDetailPanel
 // update the UI without writing NEW history entries (which would corrupt the
@@ -130,7 +130,9 @@ export function renderDetail() {
     w.video7,
     w.video8,
     w.video9,
-  ].filter((v) => v && v.trim() && v !== '0');
+  ]
+    .map((value) => safeWebUrl(value))
+    .filter((value) => value !== null);
 
   // Resolve embed URLs — use cache if available, otherwise compute locally
   if (!embedCache.has(w.id)) {
@@ -139,7 +141,9 @@ export function renderDetail() {
       vids.map((v) => ({ url: v, pl: platform(v), eurl: embedUrl(v) })),
     );
   }
-  const resolvedVids = embedCache.get(w.id);
+  const resolvedVids = embedCache
+    .get(w.id)
+    .filter((video) => safeWebUrl(video.url) !== null);
 
   const videoHTML = resolvedVids.length
     ? resolvedVids
@@ -162,7 +166,7 @@ export function renderDetail() {
             '">' +
             '<div class="vlink-row">' +
             '<a href="' +
-            v.url +
+            escapeHtml(v.url) +
             '" target="_blank" rel="noopener">' +
             '<div class="vico" style="background:' +
             platColor[v.pl] +
@@ -187,7 +191,7 @@ export function renderDetail() {
               ? '<button class="play-btn" data-vi="' + i + '">▶ Open In-App Player</button>'
               : '') +
             '<a class="ext-link" href="' +
-            v.url +
+            escapeHtml(v.url) +
             '" target="_blank" rel="noopener" title="Open in new tab">↗</a>' +
             '</div>' +
             '</div>' +
