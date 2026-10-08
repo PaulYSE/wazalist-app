@@ -17,7 +17,7 @@ import {
 } from '../config/constants.js';
 import { state } from '../state/state.js';
 import { THEME_REGISTRY } from '../config/theme-registry.js';
-import { escapeHtml } from '../lib/escape.js';
+import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 
 // Returns { cls, style } — cls is 'sh-active' if any markings on, style is the inline color string.
 // Uses circular (vector) mean of hues so blends wrap correctly across 0°/360°.
@@ -380,21 +380,24 @@ export function videoButtons(w) {
     w.video7,
     w.video8,
     w.video9,
-  ].filter((v) => v && v.trim() && v !== '0');
+  ]
+    .map((value) => safeWebUrl(value))
+    .filter((value) => value !== null);
+
   if (!vids.length) return '';
+
   return (
     '<div class="wce-videos">' +
     vids
-      .map((v, i) => {
-        const pl = platform(v);
+      .map((url, i) => {
+        const pl = platform(url);
+
         return (
           '<a class="vid-btn" href="' +
-          v +
-          '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' +
-          '<span class="vid-dot" style="background:' +
-          platColor[pl] +
-          '"></span>' +
-          platLabel[pl] +
+          escapeHtml(url) +
+          '" target="_blank" rel="noopener" ' +
+          'onclick="event.stopPropagation()">' +
+          '<atLabel[pl] +
           ' ' +
           (i + 1) +
           '</a>'
@@ -404,6 +407,7 @@ export function videoButtons(w) {
     '</div>'
   );
 }
+
 
 // Mini like/dislike pill for list/card views
 
