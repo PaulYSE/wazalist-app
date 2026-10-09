@@ -141,9 +141,7 @@ export function renderDetail() {
       vids.map((v) => ({ url: v, pl: platform(v), eurl: embedUrl(v) })),
     );
   }
-  const resolvedVids = embedCache
-    .get(w.id)
-    .filter((video) => safeWebUrl(video.url) !== null);
+  const resolvedVids = embedCache.get(w.id).filter((video) => safeWebUrl(video.url) !== null);
 
   const videoHTML = resolvedVids.length
     ? resolvedVids
@@ -491,6 +489,7 @@ export function renderDetail() {
     el.addEventListener('click', () => {
       const key = el.dataset.key;
       collapsed[key] = !collapsed[key];
+      const open = !collapsed[key];
       requestAnimationFrame(() => {
         toggleAccordionDOM(el, open);
       });

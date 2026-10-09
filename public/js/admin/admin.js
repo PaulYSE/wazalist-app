@@ -193,15 +193,14 @@ async function selectItem(id) {
     if (currentWaza && currentWaza.error) currentWaza = null;
   }
 
-  const statusPresentation =
-    Object.prototype.hasOwnProperty.call(STATUS_PRESENTATION, c.status)
-      ? STATUS_PRESENTATION[c.status]
-      : { className: '', label: 'unknown' };
-  
+  const statusPresentation = Object.prototype.hasOwnProperty.call(STATUS_PRESENTATION, c.status)
+    ? STATUS_PRESENTATION[c.status]
+    : { className: '', label: 'unknown' };
+
   const statusBadge =
     `<span class="status-badge ${statusPresentation.className}">` +
     `${statusPresentation.label}</span>`;
-  
+
   const typeLabel = isNew
     ? '<span style="color:var(--amber);font-weight:600">New Waza</span>'
     : '<span style="color:var(--blue);font-weight:600">Edit Suggestion</span>';

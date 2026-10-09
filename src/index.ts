@@ -532,7 +532,7 @@ export default {
 			const user = await getUser();
 			if (!user || !user.is_admin)
 				return new Response("Forbidden", { status: 403 });
-			const html = await renderAdmin(env);
+			const html = await renderAdmin(env, request);
 			return new Response(html, { headers: { "content-type": "text/html" } });
 		}
 

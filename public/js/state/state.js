@@ -7,7 +7,7 @@
  * @brief Manages global mutable application state.
  */
 
-import { LS_LABELS } from './localStorage.js';
+import { loadLabels } from './localStorage.js';
 
 // ── Shared mutable state ─────────────────────────────────────
 
@@ -26,5 +26,5 @@ export const state = {
   savingIds: new Set(),
 
   /** @type {string[]} Custom labels for each of the 6 marking shapes. */
-  markingLabels: JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]'),
+  markingLabels: loadLabels(),
 };

@@ -10,7 +10,7 @@
 import { saveLabels } from '../services/progress.js';
 import { renderDashStats } from '../views/stats.js';
 import { state } from '../state/state.js';
-import { LS_LABELS } from '../state/localStorage.js';
+import { loadLabels } from '../state/localStorage.js';
 import { SHAPES, MARKING_LABELS_TEMPLATE } from '../config/constants.js';
 import { wazaMatchesSearch, dispName } from '../lib/search.js';
 import { setBrowseView } from '../views/waza-browse-list.js';
@@ -745,12 +745,7 @@ function buildLabelsPreview() {
   if (!container) return;
   container.innerHTML = '';
   // Load existing labels from app
-  let existing = ['', '', '', '', '', ''];
-  try {
-    existing = JSON.parse(localStorage.getItem(LS_LABELS) || '["","","","","",""]');
-  } catch {
-    // corrupt localStorage value — fall back to six empty labels
-  }
+  let existing = loadLabels();
   SHAPES.forEach((sh, i) => {
     const row = document.createElement('div');
     row.className = 'ob-labels-row';

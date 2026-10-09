@@ -52,14 +52,14 @@ export async function renderGroupDetail(groupId) {
 
     // Social links
     let social = [];
-    
+
     try {
       const parsed = JSON.parse(g.social || '[]');
       social = Array.isArray(parsed) ? parsed : [];
     } catch {
       // Invalid stored JSON: show no social links.
     }
-    
+
     const validSocial = social.flatMap((link) => {
       if (
         link === null ||
@@ -69,16 +69,18 @@ export async function renderGroupDetail(groupId) {
       ) {
         return [];
       }
-    
+
       const url = safeWebUrl(link.url);
       if (!url) return [];
-    
-      return [{
-        platform: link.platform.trim() || 'Link',
-        url,
-      }];
+
+      return [
+        {
+          platform: link.platform.trim() || 'Link',
+          url,
+        },
+      ];
     });
-    
+
     const socialHTML = validSocial.length
       ? '<div class="dsec"><h3>Links</h3>' +
         '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
@@ -88,7 +90,7 @@ export async function renderGroupDetail(groupId) {
               '<a href="' +
               escapeHtml(link.url) +
               '" target="_blank" rel="noopener" class="vid-btn">' +
-              escapeHtml(s.platform) +
+              escapeHtml(link.platform) +
               ' ↗</a>',
           )
           .join('') +

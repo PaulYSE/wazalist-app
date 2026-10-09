@@ -40,6 +40,7 @@ export function safeWebUrl(value) {
   if (!/^https?:\/\//i.test(raw)) return null;
 
   // Reject internal whitespace, control characters, and backslashes.
+  // eslint-disable-next-line no-control-regex -- intentional: blocks C0/DEL
   if (/[\u0000-\u0020\u007f\\]/.test(raw)) return null;
 
   try {
