@@ -359,18 +359,38 @@ export async function renderAccount() {
   });
 
   // ── Marking Labels save ───────────────────────────────────────
-  container.querySelector('#accSaveLabelsBtn')?.addEventListener('click', async () => {
-    container.querySelectorAll('.acc-labels-input').forEach((inp) => {
-      state.markingLabels[+inp.dataset.si] = inp.value;
+  container.querySelector('#accSaveLabelsBtn')
+    ?.addEventListener('click', async () => {
+      const btn = container.querySelector('#accSaveLabelsBtn');
+      const nextLabels = state.markingLabels.slice();
+  
+      container.querySelectorAll('.acc-labels-input').forEach((inp) => {
+        nextLabels[+inp.dataset.si] = inp.value;
+      });
+  
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+  
+      try {
+        const result = await saveLabels(nextLabels);
+  
+        if (!result.success) {
+          showToast(
+            'Label save not confirmed. ' + result.error,
+            'red',
+          );
+          return;
+        }
+  
+        showToast(
+          result.warning || 'Marking Labels saved',
+          result.warning ? 'amber' : 'green',
+        );
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Marking Labels';
+      }
     });
-    showToast('Saving…', 'amber');
-    try {
-      await saveLabels();
-      showToast('Marking Labels saved', 'green');
-    } catch {
-      showToast("Couldn't save your Marking Labels", 'green');
-    }
-  });
 
   // ── Reset All Progress ────────────────────────────────────────
   const resetBtn = container.querySelector('#resetAccountBtn');
