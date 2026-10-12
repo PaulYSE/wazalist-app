@@ -60,56 +60,113 @@ export async function saveLabels() {
 }
 
 /**
- * @brief Saves progress for a specific waza (markings/like) to local state and persists to storage.
+ * Saves progress and returns an explicit result.
  *
- * Updates the in-memory progress object, then writes to localStorage for guest users
- * or sends an API request for authenticated users. Also updates like/dislike counts on the
- * corresponding waza data and shows a transient "Saved" indicator.
+ * On failure, restores the previous in-memory progress.
  *
- * @param {number} id - The waza identifier.
- * @param {Object} patch - Partial progress object to merge into existing progress.
- * @param {Object} [opts={}] - Options object.
- * @param {boolean} [opts.skipListRender=false] - If true, skips re-rendering the browse list after save.
- * @see getP
- * @see loadLocal
- * @see saveLocal
- * @see renderList
- * @see renderDetail
- * @return {Promise<void>}
+ * @return {Promise<{success: boolean, error?: string}>}
  */
 export async function saveP(id, patch, opts = {}) {
   const skipListRender = !!opts.skipListRender;
-  state.prog[id] = { ...getP(id), ...patch, updated_at: new Date().toISOString() };
-  if (isGuest()) {
-    const l = loadLocal();
-    l[id] = state.prog[id];
-    saveLocal(l);
-    if (!skipListRender) renderList();
+
+  // Prevent overlapping saves for the same Waza.
+  if (state.savingIds.has(id)) {
+    return {
+      success: false,
+      error: 'A save is already in progress for this Waza.',
+    };
+  }
+
+  const hadPrevious = Object.prototype.hasOwnProperty.call(state.prog, id);
+  const previous = state.prog[id];
+
+  const next = {
+    ...getP(id),
+    ...patch,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Keep the request snapshot separate from caller-owned arrays.
+  if (Array.isArray(next.markings)) {
+    next.markings = next.markings.slice();
+  }
+
+  state.savingIds.add(id);
+  state.prog[id] = next;
+
+  let result;
+
+  try {
     renderDetail();
-  } else {
-    state.savingIds.add(id);
-    renderDetail();
-    try {
+
+    if (isGuest()) {
+      const local = loadLocal();
+      local[id] = next;
+      saveLocal(local);
+    } else {
       const res = await api('/api/progress', 'POST', {
         waza_id: id,
-        markings: JSON.stringify(state.prog[id].markings),
-        like: state.prog[id].like,
+        markings: JSON.stringify(next.markings),
+        like: next.like,
       });
+
       if (res.error) {
-        console.warn('Progress save failed:', res.error);
-      } else if (res.like_count != null) {
-        const w = state.wazaData.find((x) => x.id === id);
-        if (w) {
+        throw new Error(res.error);
+      }
+
+      // Do not accept an empty or unexpected response as confirmation.
+      if (res.success !== true) {
+        throw new Error('The server did not confirm the save.');
+      }
+
+      const w = state.wazaData.find((x) => x.id === id);
+
+      if (w) {
+        if (typeof res.like_count === 'number') {
           w.like_count = res.like_count;
+        }
+        if (typeof res.dislike_count === 'number') {
           w.dislike_count = res.dislike_count;
         }
       }
-    } catch (err) {
-      console.warn('Progress save error:', err);
     }
+
+    result = { success: true };
+  } catch (error) {
+    // Restore the exact previous local state.
+    if (hadPrevious) {
+      state.prog[id] = previous;
+    } else {
+      delete state.prog[id];
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Could not save your progress.';
+
+    console.warn('Progress save failed:', id, error);
+    result = { success: false, error: message };
+  } finally {
     state.savingIds.delete(id);
-    if (!skipListRender) renderList();
+
+    // On failure, rebuild the list to remove optimistic changes,
+    // even when the caller requested the single-row optimization.
+    if (!skipListRender || !result?.success) {
+      renderList();
+    }
+
     renderDetail();
+  }
+
+  if (!result.success) {
+    showToast(
+      'Save not confirmed. Previous local state restored. ' + result.error,
+      'red',
+    );
+  } else if (!isGuest()) {
     showToast('Saved ✓', 'green');
   }
+
+  return result;
 }
