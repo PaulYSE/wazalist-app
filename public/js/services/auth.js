@@ -21,7 +21,8 @@ import {
   setIsGuest,
   setToken,
 } from '../state/user-state.js';
-import { activateTab } from '../app/shell.js';
+import { switchTab } from '../app/shell.js';
+import { replaceRoute } from '../app/router.js';
 import { selectGroupFromHistory } from '../views/groups-browse-list.js';
 import { firePendingGroupJoin, hasPendingGroupJoin } from '../features/group-join-link.js';
 
@@ -87,8 +88,11 @@ async function doLogin() {
 
   if (hasPendingGroupJoin()) {
     await firePendingGroupJoin((groupId) => {
-      activateTab('groups');
+      switchTab('groups');
       selectGroupFromHistory(groupId);
+      replaceRoute('groups', null, groupId, {
+        preserveExtras: true,
+      });
     });
   }
 }
