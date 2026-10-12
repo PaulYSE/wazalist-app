@@ -17,7 +17,7 @@ import {
 } from '../views/waza-browse-list.js';
 import { selectWazaFromHistory, renderDetail } from '../views/waza-detail.js';
 import { renderDashStats } from '../views/stats.js';
-import { activateTab, startWazaPlaceholderRotation } from './shell.js';
+import { activateTab, switchTab, startWazaPlaceholderRotation } from './shell.js';
 import { checkAutoImport } from '../features/share-list.js';
 import { parseRoute, replaceRoute } from './router.js';
 import {
@@ -170,20 +170,20 @@ export async function initApp() {
     })();
     if (target != null) {
       selectWazaFromHistory(target); // open without pushing
-      replaceRoute('browse', target); // normalize URL to numeric id
+      replaceRoute('browse', target, null, { preserveExtras: true });
     } else {
-      replaceRoute('browse', null);
+      replaceRoute('browse', null, null, { preserveExtras: true });
     }
   } else if (groupParam && tab === 'groups') {
     const target = parseInt(groupParam);
     if (!isNaN(target)) {
       selectGroupFromHistory(target); // open without pushing
-      replaceRoute('groups', null, target);
+      replaceRoute('groups', null, target, { preserveExtras: true });
     } else {
-      replaceRoute('groups', null, null);
+      replaceRoute('groups', null, null, { preserveExtras: true });
     }
   } else {
-    replaceRoute(tab, null, null);
+    replaceRoute(tab, null, null, { preserveExtras: true });
   }
   if (hasPendingGroupJoin()) {
     if (isGuest()) {
@@ -196,11 +196,13 @@ export async function initApp() {
       // The navigateToGroup callback: switch to the Groups tab and
       // select the group whose id we just got back from the API.
       await firePendingGroupJoin((groupId) => {
-        // activateTab is already imported in shell.js and re-exported.
-        // selectGroup is the function we added in Phase 1 of the
-        // deep-linking work.
-        activateTab('groups');
+        switchTab('groups');
         selectGroupFromHistory(groupId);
+      
+        // Complete the destination entry with the selected Group.
+        replaceRoute('groups', null, groupId, {
+          preserveExtras: true,
+        });
       });
     }
   }
