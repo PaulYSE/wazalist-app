@@ -12,6 +12,10 @@ import {
 	readContributionBody,
 	validateWazaPayload,
 } from "./validation";
+import {
+  validateSharedList,
+  hashSharedList,
+} from "./sharedListValidation";
 import { renderHtml } from "./renderHtml";
 import { renderAdmin } from "./renderAdmin";
 import { hashPassword, generateToken, getUserFromSession } from "./auth";
@@ -282,14 +286,61 @@ export default {
 
 		// ── List share (KV) ──────────────────────────────────────
 
-		// POST /api/list — store serialized list, keyed by SHA-256 hash
+		// POST /api/list — validate contents and verify their SHA-256 key
 		if (path === "/api/list" && request.method === "POST") {
-			const { key, data } = await request.json();
-			if (!/^[0-9a-f]{64}$/.test(key)) return err("Invalid key format");
-			if (typeof data !== "string" || data.length > 524288) return err("Payload too large or invalid");
-			try { JSON.parse(data); } catch { return err("Payload must be valid JSON"); }
-			await env.LIST_STORE.put(key, data, { expirationTtl: 60 * 60 * 24 * 90 });
-			return json({ success: true, key });
+		  try {
+		    const body = await readContributionBody(request);
+		    const { key, data } = body;
+		
+		    if (
+		      typeof key !== "string" ||
+		      !/^[0-9a-f]{64}$/.test(key)
+		    ) {
+		      throw new ValidationError("Invalid key format");
+		    }
+		
+		    if (typeof data !== "string") {
+		      throw new ValidationError("data must be a JSON string");
+		    }
+		
+		    // Measure UTF-8 bytes, rather than JavaScript string length.
+		    if (new TextEncoder().encode(data).byteLength > 524288) {
+		      return err("Shared list payload is too large", 413);
+		    }
+		
+		    let parsed: unknown;
+		
+		    try {
+		      parsed = JSON.parse(data);
+		    } catch {
+		      throw new ValidationError("Shared list must be valid JSON");
+		    }
+		
+		    validateSharedList(parsed);
+		
+		    // Hash the original string. Do not hash JSON.stringify(parsed).
+		    const expectedKey = await hashSharedList(data);
+		
+		    if (key !== expectedKey) {
+		      throw new ValidationError(
+		        "Shared list key does not match its contents",
+		      );
+		    }
+		
+		    // Nothing is written until validation and verification pass.
+		    await env.LIST_STORE.put(key, data, {
+		      expirationTtl: 60 * 60 * 24 * 90,
+		    });
+		
+		    return json({ success: true, key });
+		  } catch (error) {
+		    if (error instanceof ValidationError) {
+		      return err(error.message, 400);
+		    }
+		
+		    console.error("Shared list upload failed:", error);
+		    return err("Could not store the shared list", 500);
+		  }
 		}
 
 		// GET /api/list?key=... — retrieve serialized list
