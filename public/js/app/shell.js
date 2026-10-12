@@ -241,22 +241,6 @@ export function initUi() {
     });
   });
 
-  document.getElementById('browseSortField').addEventListener('change', (e) => {
-    setBrowseSortField(e.target.value);
-    const isDefault = e.target.value === 'default';
-    document.getElementById('browseSortOrder').disabled = isDefault;
-    document.getElementById('browseSortOrderMob').disabled = isDefault;
-    updateMarkingFilterUI();
-    renderList();
-  });
-
-  document.getElementById('browseSortOrder').addEventListener('change', (e) => {
-    setBrowseSortOrder(e.target.value);
-    document.getElementById('browseSortOrderMob').value = e.target.value;
-    updateMarkingFilterUI();
-    renderList();
-  });
-
   // ── Mobile ⋮ menu ───────────────────────────────────────────
   mobMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
