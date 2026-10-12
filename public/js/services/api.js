@@ -29,13 +29,58 @@ export const api = async (path, method = 'GET', body = null) => {
       ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
     },
   };
-  if (body) opts.body = JSON.stringify(body);
 
-  const res = await fetch(path, opts);
-  const data = await res.json().catch(() => ({}));
+  if (body !== null) {
+    opts.body = JSON.stringify(body);
+  }
 
-  if (res.status === 401 && data?.error === 'Authentication required' && getToken() && !isGuest()) {
+  let res;
+
+  try {
+    res = await fetch(path, opts);
+  } catch (error) {
+    console.warn('API network failure:', method, path, error);
+    return {
+      error: 'Network error. Please check your connection and try again.',
+    };
+  }
+
+  let data;
+
+  try {
+    data = await res.json();
+  } catch {
+    return {
+      error: `Server returned an invalid response (HTTP ${res.status}).`,
+    };
+  }
+
+  // These API routes return objects or arrays, never JSON primitives.
+  if (data === null || typeof data !== 'object') {
+    return {
+      error: `Server returned an unexpected response (HTTP ${res.status}).`,
+    };
+  }
+
+  if (
+    res.status === 401 &&
+    data.error === 'Authentication required' &&
+    getToken() &&
+    !isGuest()
+  ) {
     handleSessionExpired();
+    return data;
+  }
+
+  // An unsuccessful HTTP response must never look like success,
+  // even when the server omitted its usual error property.
+  if (!res.ok) {
+    return {
+      error:
+        typeof data.error === 'string' && data.error.trim()
+          ? data.error
+          : `Request failed (HTTP ${res.status}).`,
+    };
   }
 
   return data;
