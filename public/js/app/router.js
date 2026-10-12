@@ -98,10 +98,56 @@ export function pushRoute(tab, wazaId = null, groupId = null) {
  * @param {number|null} groupId
  * @return {void}
  */
-export function replaceRoute(tab, wazaId = null, groupId = null) {
+export function replaceRoute(
+  tab,
+  wazaId = null,
+  groupId = null,
+  opts = {},
+) {
+  let destination = buildUrl(tab, wazaId, groupId);
+
+  if (opts.preserveExtras) {
+    const current = new URL(location.href);
+    const canonical = new URL(destination, location.origin);
+
+    current.pathname = canonical.pathname;
+
+    // Reconcile only the active tab's detail parameter.
+    // Preserve parameters belonging to other flows.
+    if (tab === 'browse') {
+      if (wazaId === null) {
+        current.searchParams.delete('waza');
+      } else {
+        current.searchParams.set('waza', String(wazaId));
+      }
+    }
+
+    if (tab === 'groups') {
+      if (groupId === null) {
+        current.searchParams.delete('group');
+      } else {
+        current.searchParams.set('group', String(groupId));
+      }
+    }
+
+    destination = current.pathname + current.search + current.hash;
+  }
+
+  const existingState =
+    history.state !== null &&
+    typeof history.state === 'object' &&
+    !Array.isArray(history.state)
+      ? history.state
+      : {};
+
   history.replaceState(
-    { tab, wazaId: wazaId ?? null, groupId: groupId ?? null },
+    {
+      ...existingState,
+      tab,
+      wazaId: wazaId ?? null,
+      groupId: groupId ?? null,
+    },
     '',
-    buildUrl(tab, wazaId, groupId),
+    destination,
   );
 }
