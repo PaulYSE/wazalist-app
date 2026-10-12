@@ -74,6 +74,11 @@ const labelsValues = ['', '', '', '', '', ''];
  * @return {void}
  */
 export function showOnboarding() {
+  const existing = loadLabels();
+  labelsValues.forEach((_, i) => {
+    labelsValues[i] = existing[i];
+  });
+  
   const el = document.getElementById('wlOnboarding');
   el.style.display = 'flex';
   requestAnimationFrame(() => {
@@ -770,22 +775,25 @@ function buildMarkingDemo() {
 function buildLabelsPreview() {
   const container = document.getElementById('obLabelsPreview');
   if (!container) return;
+
   container.innerHTML = '';
-  // Load existing labels from app
-  let existing = loadLabels();
+
   SHAPES.forEach((sh, i) => {
     const row = document.createElement('div');
     row.className = 'ob-labels-row';
     row.innerHTML = `<span class="ob-labels-marking">${sh}</span>`;
+
     const inp = document.createElement('input');
     inp.className = 'ob-labels-input';
     inp.type = 'text';
     inp.maxLength = 32;
     inp.placeholder = 'Label this marking…';
-    inp.value = existing[i] || labelsValues[i] || '';
+    inp.value = labelsValues[i];
+
     inp.oninput = () => {
       labelsValues[i] = inp.value;
     };
+
     row.appendChild(inp);
     container.appendChild(row);
   });
