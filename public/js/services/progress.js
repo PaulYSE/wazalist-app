@@ -39,23 +39,104 @@ export var getP = function (id) {
 
 // ── Labels helpers ───────────────────────────────────────────
 
-/**
- * @brief Persists marking labels to localStorage and, if the user is logged in, to the server via API.
- *
- * @see api
- * @return {Promise<void>}
- */
-export async function saveLabels() {
-  // Always save to localStorage (for guest mode and offline access)
-  localStorage.setItem(LS_LABELS, JSON.stringify(state.markingLabels));
+let labelsSaving = false;
 
-  // For logged-in users, also save to server
-  if (!isGuest() && getToken()) {
-    try {
-      await api('/api/labels', 'POST', { labels: state.markingLabels });
-    } catch (err) {
-      console.warn('Failed to save labels to server:', err);
+/**
+ * Persists six marking labels.
+ *
+ * Existing callers may omit the argument, but editors should pass
+ * their proposed labels without first changing state.markingLabels.
+ *
+ * @return {Promise<{
+ *   success: boolean,
+ *   error?: string,
+ *   warning?: string
+ * }>}
+ */
+export async function saveLabels(labels = state.markingLabels) {
+  if (
+    !Array.isArray(labels) ||
+    labels.length !== 6 ||
+    !labels.every((label) => typeof label === 'string')
+  ) {
+    return {
+      success: false,
+      error: 'Marking Labels must contain exactly six strings.',
+    };
+  }
+
+  if (labelsSaving) {
+    return {
+      success: false,
+      error: 'A label save is already in progress.',
+    };
+  }
+
+  const next = labels.slice();
+  labelsSaving = true;
+
+  try {
+    if (isGuest()) {
+      // For guests, browser storage is the persistence destination.
+      // Do not update active state if this write fails.
+      localStorage.setItem(LS_LABELS, JSON.stringify(next));
+      state.markingLabels = next;
+
+      return { success: true };
     }
+
+    if (!getToken()) {
+      return {
+        success: false,
+        error: 'Please sign in before saving your Marking Labels.',
+      };
+    }
+
+    const res = await api('/api/labels', 'POST', {
+      labels: next,
+    });
+
+    if (res.error) {
+      return { success: false, error: res.error };
+    }
+
+    if (res.success !== true) {
+      return {
+        success: false,
+        error: 'The server did not confirm the label save.',
+      };
+    }
+
+    // The account save is confirmed.
+    state.markingLabels = next;
+
+    // Browser storage is only a cache for authenticated users.
+    // A cache failure must not misreport the account save as failed.
+    try {
+      localStorage.setItem(LS_LABELS, JSON.stringify(next));
+    } catch (error) {
+      console.warn('Label cache update failed:', error);
+
+      return {
+        success: true,
+        warning:
+          'Labels saved to your account, but the browser cache could not be updated.',
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.warn('Label save failed:', error);
+
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Could not save your Marking Labels.',
+    };
+  } finally {
+    labelsSaving = false;
   }
 }
 
