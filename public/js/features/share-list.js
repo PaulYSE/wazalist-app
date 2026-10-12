@@ -95,8 +95,9 @@ export async function openExportModal() {
       body: JSON.stringify({ key, data }),
     });
     const json = await res.json();
-    if (json.error) {
-      document.getElementById('exportErr').textContent = json.error;
+    if (!res.ok || json.error || json.success !== true) {
+      document.getElementById('exportErr').textContent =
+        json.error || 'The server did not confirm the list upload.';
       document.getElementById('exportStatus').style.display = 'none';
       return;
     }
