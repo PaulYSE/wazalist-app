@@ -60,27 +60,36 @@
       <div class="abox" id="loginBox">
         <h2>⛩ Wazalist</h2>
         <div class="sub">Wotagei Skills Database</div>
-        <div class="field">
-          <label>Username</label
-          ><input
-            id="li-username"
-            type="text"
-            placeholder="your username"
-            autocomplete="username"
-          />
-        </div>
-        <div class="field">
-          <label>Password</label
-          ><input id="li-password" type="password" placeholder="your password" />
-        </div>
-        <button class="abtn" id="li-btn">Sign in</button>
-        <div class="aerr" id="li-err"></div>
+        <form id="loginForm">
+          <div class="field">
+            <label>Username</label>
+            <input
+              id="li-username"
+              name="username"
+              type="text"
+              placeholder="your username"
+              autocomplete="username"
+            />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input
+              id="li-password"
+              name="password"
+              type="password"
+              placeholder="your password"
+              autocomplete="current-password"
+            />
+          </div>
+          <button class="abtn" id="li-btn" type="submit">Sign in</button>
+          <div class="aerr" id="li-err"></div>
+        </form>
         <div class="adivider">
           <hr />
           <span>or</span>
           <hr />
         </div>
-        <button class="abtn-ghost" id="guestBtn">Continue as guest</button>
+        <button class="abtn-ghost" id="guestBtn" type="button">Continue as guest</button>
         <div class="aswitch" style="margin-top: 12px">
           No account? <span id="toReg">Create one</span>
         </div>
@@ -88,36 +97,40 @@
       <div class="abox" id="regBox" style="display: none">
         <h2>⛩ Wazalist</h2>
         <div class="sub">Create an account to keep your Wazalist across devices</div>
-        <div class="field">
-          <label>Username</label
-          ><input
-            id="rg-username"
-            type="text"
-            placeholder="choose a username"
-            autocomplete="username"
-          />
-        </div>
-        <div class="field">
-          <label>Email <span style="color: var(--text3); font-weight: 400">(optional)</span></label
-          ><input id="rg-email" type="email" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="field">
-          <label>Password</label
-          ><input
-            id="rg-password"
-            type="password"
-            placeholder="choose a password"
-            autocomplete="new-password"
-          />
-        </div>
-        <button class="abtn" id="rg-btn">Create account</button>
-        <div class="aerr" id="rg-err"></div>
+        <form id="registerForm">
+          <div class="field">
+            <label>Username</label
+            ><input
+              id="rg-username"
+              name="username"
+              type="text"
+              placeholder="choose a username"
+              autocomplete="username"
+            />
+          </div>
+          <div class="field">
+            <label>Email <span style="color: var(--text3); font-weight: 400">(optional)</span></label
+            ><input id="rg-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label>Password</label
+            ><input
+              id="rg-password"
+              name="password"
+              type="password"
+              placeholder="choose a password"
+              autocomplete="new-password"
+            />
+          </div>
+          <button class="abtn" id="rg-btn" type="submit">Create account</button>
+          <div class="aerr" id="rg-err"></div>
+        </form>
         <div class="adivider">
           <hr />
           <span>or</span>
           <hr />
         </div>
-        <button class="abtn-ghost" id="guestBtn2">Continue as guest</button>
+        <button class="abtn-ghost" id="guestBtn2" type="button">Continue as guest</button>
         <div class="aswitch" style="margin-top: 12px">
           Already registered? <span id="toLi">Sign in</span>
         </div>
