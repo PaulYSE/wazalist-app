@@ -20,6 +20,7 @@ import {
 } from '../components/render-helpers.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openAccountSection } from '../views/account.js';
+import { showToast } from '../components/show-toast.js';
 
 // ── Config ────────────────────────────────────────────────────
 
@@ -184,16 +185,42 @@ function renderFooter() {
     saveBtn.className = 'ob-btn ob-btn-primary';
     saveBtn.textContent = 'Save Marking Labels';
 
-    saveBtn.onclick = () => {
-      labelsValues.forEach((value, i) => {
-        state.markingLabels[i] = value.trim();
-      });
-      saveLabels();
-      if (typeof renderDashStats === 'function') renderDashStats();
-      saveBtn.textContent = 'Saved ✓';
-      setTimeout(() => {
+    saveBtn.onclick = async () => {
+      // Read the displayed inputs, including existing labels that
+      // the user has not edited.
+      const nextLabels = Array.from(
+        document.querySelectorAll('#obLabelsPreview .ob-labels-input'),
+        (inp) => inp.value.trim(),
+      );
+    
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+    
+      try {
+        const result = await saveLabels(nextLabels);
+    
+        if (!result.success) {
+          showToast(
+            'Label save not confirmed. ' + result.error,
+            'red',
+          );
+          return;
+        }
+    
+        nextLabels.forEach((label, i) => {
+          labelsValues[i] = label;
+        });
+    
+        renderDashStats();
+    
+        showToast(
+          result.warning || 'Marking Labels saved',
+          result.warning ? 'amber' : 'green',
+        );
+      } finally {
+        saveBtn.disabled = false;
         saveBtn.textContent = 'Save Marking Labels';
-      }, 1800);
+      }
     };
     footerRight.appendChild(saveBtn);
   }
