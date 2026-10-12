@@ -12,10 +12,12 @@ import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
 import { initBrowseState, initBrowseList, renderList } from './views/waza-browse-list.js';
 import {
-  initWazaDetail,
-  selectWazaFromHistory,
-  closeDetailPanelFromHistory,
-} from './views/waza-detail.js';
+initBrowseList,
+renderList,
+} from './views/waza-browse-list.js';
+import {
+initBrowseState,
+} from './state/waza-browse-state.js';
 import { initUi, closeMobMenu, activateTab } from './app/shell.js';
 import { initShare } from './features/share-list.js';
 import { initNewWaza } from './modals/waza-new.js';
