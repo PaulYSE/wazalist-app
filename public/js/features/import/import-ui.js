@@ -171,21 +171,28 @@ export function renderImport() {
             );
 
             if (shouldUpdate) {
-              // Update local marking labels
-              for (const [color, markingIdx] of Object.entries(getImportColorMapping())) {
-                if (markingIdx >= 0 && getImportExcelColorLabelKey(color)) {
-                  state.markingLabels[markingIdx] = getImportExcelColorLabelKey(color);
+              const nextLabels = state.markingLabels.slice();
+            
+              for (const [color, markingIdx] of Object.entries(
+                getImportColorMapping(),
+              )) {
+                const label = getImportExcelColorLabelKey(color);
+            
+                if (markingIdx >= 0 && markingIdx < 6 && label) {
+                  nextLabels[markingIdx] = label;
                 }
               }
-
-              // Save to server
-              try {
-                await saveLabels();
-              } catch (err) {
-                console.error('[COLOR MAP] Failed to save marking labels:', err);
-                alert(
-                  'Failed to save marking labels. Your selections will still be applied to this import.',
+            
+              const result = await saveLabels(nextLabels);
+            
+              if (!result.success) {
+                showToast(
+                  'Label save not confirmed. ' + result.error +
+                    ' Import markings will still be previewed.',
+                  'red',
                 );
+              } else if (result.warning) {
+                showToast(result.warning, 'amber');
               }
             }
           }
