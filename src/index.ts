@@ -13,8 +13,10 @@ import {
 	validateWazaPayload,
 } from "./validation";
 import {
-  validateSharedList,
-  hashSharedList,
+	validateSharedList,
+	hashSharedList,
+	readSharedListBody,
+	SharedListBodyError,
 } from "./sharedListValidation";
 import { renderHtml } from "./renderHtml";
 import { renderAdmin } from "./renderAdmin";
@@ -289,7 +291,7 @@ export default {
 		// POST /api/list — validate contents and verify their SHA-256 key
 		if (path === "/api/list" && request.method === "POST") {
 		  try {
-		    const body = await readContributionBody(request);
+		    const body = await readSharedListBody(request);
 		    const { key, data } = body;
 		
 		    if (
@@ -333,14 +335,18 @@ export default {
 		    });
 		
 		    return json({ success: true, key });
-		  } catch (error) {
-		    if (error instanceof ValidationError) {
-		      return err(error.message, 400);
-		    }
-		
-		    console.error("Shared list upload failed:", error);
-		    return err("Could not store the shared list", 500);
+		} catch (error) {
+		  if (error instanceof SharedListBodyError) {
+			return err(error.message, error.status);
 		  }
+		
+		  if (error instanceof ValidationError) {
+			return err(error.message, 400);
+		  }
+		
+		  console.error("Shared list upload failed:", error);
+		  return err("Could not store the shared list", 500);
+		}
 		}
 
 		// GET /api/list?key=... — retrieve serialized list
