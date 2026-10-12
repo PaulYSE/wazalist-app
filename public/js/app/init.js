@@ -28,7 +28,6 @@ import {
   setCurrentUsername,
   setIsAdmin,
 } from '../state/user-state.js';
-import { initBrowseState } from '../state/waza-browse-state.js';
 import { selectGroupFromHistory } from '../views/groups-browse-list.js';
 import {
   checkForGroupJoinKey,
@@ -133,6 +132,10 @@ export async function initApp() {
     ub.style.display = 'none';
   }
 
+  // ── Sync controls using already-hydrated preferences ────────
+  syncBrowseSortControls();
+  syncBrowseViewControls();
+
   // ── Render views ────────────────────────────────────────────
   renderList();
   renderDetail();
@@ -143,12 +146,6 @@ export async function initApp() {
     document.getElementById('adminLink').style.display = '';
     document.getElementById('mobAdminLink').style.display = '';
   }
-
-  // ── Sync UI controls ───────────────────────────────────────
-  // Load localStorage UI controls first, then sync controls
-  initBrowseState();
-  syncBrowseSortControls();
-  syncBrowseViewControls();
 
   // ── Background tasks ───────────────────────────────────────
   startWazaPlaceholderRotation();
