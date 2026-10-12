@@ -487,7 +487,7 @@ export function renderDetail() {
   // Collapsible toggles (animated; each section independent)
   panel.querySelectorAll('.dsec-toggle').forEach((el) =>
     el.addEventListener('click', () => {
-      const key = el.dataset.key;
+      const key = el.dataset.acc;
       collapsed[key] = !collapsed[key];
       const open = !collapsed[key];
       requestAnimationFrame(() => {
