@@ -471,7 +471,19 @@ export function renderImport() {
       if (item.manualMarkings.some(Boolean)) {
         // REPLACE markings entirely (don't merge with existing)
         const newMarkings = [...item.manualMarkings];
-        await saveP(item.waza.id, { markings: newMarkings });
+        const result = await saveP(item.waza.id, {
+          markings: newMarkings,
+        });
+        
+        if (!result.success) {
+          showToast(
+            `Import stopped: ${count} Waza saved before this failure. ` +
+              'Your preview has been kept.',
+            'red',
+          );
+          return;
+        }
+        
         count++;
       }
     }
@@ -491,7 +503,19 @@ export function renderImport() {
       if (item.manualMarkings.some(Boolean)) {
         // REPLACE markings entirely (don't merge with existing)
         const newMarkings = [...item.manualMarkings];
-        await saveP(item.waza.id, { markings: newMarkings });
+        const result = await saveP(item.waza.id, {
+          markings: newMarkings,
+        });
+        
+        if (!result.success) {
+          showToast(
+            `Import stopped: ${count} Waza saved before this failure. ` +
+              'Your preview has been kept.',
+            'red',
+          );
+          return;
+        }
+        
         count++;
       }
     }
