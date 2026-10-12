@@ -9,7 +9,6 @@
 
 import { state } from '../state/state.js';
 import { showToast } from '../components/show-toast.js';
-import { renderDashCompare } from '../views/compare.js';
 import {
   getComparePendingImport,
   getImportedList,
@@ -18,6 +17,7 @@ import {
   setComparePendingImport,
   setImportedList,
 } from '../state/compare-state.js';
+import { switchTab } from '../app/shell.js';
 
 // Check URL for ?import= key on load
 
@@ -270,13 +270,6 @@ export function initShare() {
     document.getElementById('nameImportBg').style.display = 'none';
     showToast('List imported: ' + name, 'green');
     // Switch to Compare top-level tab
-    document.querySelectorAll('.ntab').forEach((t) => t.classList.remove('active'));
-    document.querySelector('[data-tab="compare"]').classList.add('active');
-    document.getElementById('browseView').style.display = 'none';
-    document.getElementById('statsView').style.display = 'none';
-    document.getElementById('accountView').style.display = 'none';
-    document.getElementById('contributeView').style.display = 'none';
-    document.getElementById('compareView').style.display = 'block';
-    renderDashCompare();
+    switchTab('compare');
   });
 }
