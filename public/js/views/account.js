@@ -416,8 +416,24 @@ export async function renderAccount() {
 
     try {
       if (loggedIn) {
-        await api('/api/progress', 'DELETE');
-        await api('/api/labels', 'POST', { labels: ['', '', '', '', '', ''] });
+        const progressResult = await api('/api/progress', 'DELETE');
+      
+        if (progressResult.error || progressResult.success !== true) {
+          throw new Error(
+            progressResult.error || 'The server did not confirm the progress reset.',
+          );
+        }
+      
+        const labelsResult = await api('/api/labels', 'POST', {
+          labels: ['', '', '', '', '', ''],
+        });
+      
+        if (labelsResult.error || labelsResult.success !== true) {
+          throw new Error(
+            'Progress was reset, but the label reset was not confirmed. ' +
+              (labelsResult.error || 'Refresh to verify your account state.'),
+          );
+        }
       }
       localStorage.removeItem(LS_KEY);
       localStorage.removeItem(LS_LABELS);
@@ -429,7 +445,11 @@ export async function renderAccount() {
       location.reload();
     } catch (e) {
       console.error('Reset progress failed:', e);
-      alert('❌ Failed to reset progress. Please try again.');
+      alert(
+        '❌ ' +
+          (e instanceof Error ? e.message : 'Reset was not confirmed.') +
+          '\nRefresh to verify your account state before retrying.',
+      );
       resetBtn.disabled = false;
       resetBtn.textContent = '🗑️ Reset All Progress';
     }
