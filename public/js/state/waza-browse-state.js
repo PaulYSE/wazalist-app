@@ -44,9 +44,14 @@ const wazaBrowseState = {
 function loadSortFromLS() {
   try {
     const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
+
     return {
-      field: prefs.field || 'default',
-      order: prefs.order || 'asc',
+      field: ['default', 'name', 'likes'].includes(prefs?.field)
+        ? prefs.field
+        : 'default',
+      order: ['asc', 'desc'].includes(prefs?.order)
+        ? prefs.order
+        : 'asc',
     };
   } catch {
     return { field: 'default', order: 'asc' };
@@ -80,9 +85,23 @@ function saveSortToLS() {
  */
 export function initBrowseState() {
   const sort = loadSortFromLS();
+
   wazaBrowseState.browseSortField = sort.field;
   wazaBrowseState.browseSortOrder = sort.order;
-  wazaBrowseState.browseListView = localStorage.getItem(LS_VIEW) || 'expanded';
+
+  let view = 'expanded';
+
+  try {
+    const saved = localStorage.getItem(LS_VIEW);
+
+    if (['expanded', 'list', 'compact'].includes(saved)) {
+      view = saved;
+    }
+  } catch {
+    // Storage unavailable: retain the default view.
+  }
+
+  wazaBrowseState.browseListView = view;
 }
 
 // ── browseSortField ─────────────────────────────────────────
