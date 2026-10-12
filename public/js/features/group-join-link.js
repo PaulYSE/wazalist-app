@@ -44,8 +44,8 @@ let _pendingGroupName = null;
  * @return {Promise<void>}
  */
 export async function checkForGroupJoinKey() {
-  const params = new URL(location.href).searchParams;
-  const key = params.get('groupJoinKey');
+  const url = new URL(location.href);
+  const key = url.searchParams.get('groupJoinKey');
 
   // Validate: must be a 64-character lowercase hex string.
   // Anything else is either not our param or corrupted — ignore it.
@@ -56,8 +56,14 @@ export async function checkForGroupJoinKey() {
   // should NOT add a new back-button entry. The user pressed a join
   // link; pressing back should take them wherever they came from,
   // not back to the same join URL.
-  const cleanUrl = location.pathname;
-  history.replaceState({}, '', cleanUrl);
+  // Remove only the consumed join parameter.
+  url.searchParams.delete('groupJoinKey');
+  
+  history.replaceState(
+    history.state,
+    '',
+    url.pathname + url.search + url.hash,
+  );
 
   // Fetch the group name so we can show it in the banner.
   // This is the public GET /api/groups/by-key/:key route from Phase 2a.
