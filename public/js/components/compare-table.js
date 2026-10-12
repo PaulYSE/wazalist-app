@@ -282,13 +282,38 @@ function buildRowHTML(w, allMembers, wazaNameDisplay) {
  * @return {void}
  */
 export function wireSaveLabelsButton(container) {
-  container.querySelector('#cmpSaveLabelsBtn')?.addEventListener('click', () => {
-    container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
-      state.markingLabels[+inp.dataset.si] = inp.value;
+  container.querySelector('#cmpSaveLabelsBtn')
+    ?.addEventListener('click', async () => {
+      const btn = container.querySelector('#cmpSaveLabelsBtn');
+      const nextLabels = state.markingLabels.slice();
+
+      container.querySelectorAll('.cmp-labels-input').forEach((inp) => {
+        nextLabels[+inp.dataset.si] = inp.value;
+      });
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      try {
+        const result = await saveLabels(nextLabels);
+
+        if (!result.success) {
+          showToast(
+            'Label save not confirmed. ' + result.error,
+            'red',
+          );
+          return;
+        }
+
+        showToast(
+          result.warning || 'Marking Labels saved',
+          result.warning ? 'amber' : 'green',
+        );
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Marking Labels';
+      }
     });
-    saveLabels();
-    showToast('Marking Labels saved', 'green');
-  });
 }
 
 /**
