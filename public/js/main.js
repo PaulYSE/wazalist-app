@@ -10,7 +10,7 @@
 import { state } from './state/state.js';
 import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
-import { initBrowseList, renderList } from './views/waza-browse-list.js';
+import { initBrowseState, initBrowseList, renderList } from './views/waza-browse-list.js';
 import {
   initWazaDetail,
   selectWazaFromHistory,
@@ -150,6 +150,7 @@ function resolveWaza(param) {
  * 13. Theme system
  * 14. If token exists, initialize main app
  */
+initBrowseState();
 initBrowseList();
 initWazaDetail();
 initUi();
