@@ -74,3 +74,109 @@ export async function hashSharedList(data: string): Promise<string> {
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 }
+
+/**
+ * Suggested outer request limit: 4 MiB.
+ *
+ * The serialized data string has its own 512 KiB limit in index.ts.
+ * The outer JSON can be larger because it escapes characters inside data.
+ */
+const MAX_UPLOAD_BODY_BYTES = 4 * 1024 * 1024;
+
+export class SharedListBodyError extends ValidationError {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "SharedListBodyError";
+    this.status = status;
+  }
+}
+
+/**
+ * Reads an upload body with an enforced byte limit.
+ *
+ * Content-Length is an early check only. The actual stream is counted
+ * independently, including when Content-Length is missing.
+ */
+export async function readSharedListBody(
+  request: Request,
+): Promise<Record<string, unknown>> {
+  const contentLength = request.headers.get("Content-Length");
+
+  if (contentLength !== null) {
+    const declaredLength = Number(contentLength);
+
+    if (
+      !/^\d+$/.test(contentLength) ||
+      !Number.isSafeInteger(declaredLength)
+    ) {
+      throw new SharedListBodyError("Invalid Content-Length", 400);
+    }
+
+    if (declaredLength > MAX_UPLOAD_BODY_BYTES) {
+      throw new SharedListBodyError("Upload request is too large", 413);
+    }
+  }
+
+  if (!request.body) {
+    throw new SharedListBodyError("Request body is required", 400);
+  }
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      totalBytes += value.byteLength;
+
+      if (totalBytes > MAX_UPLOAD_BODY_BYTES) {
+        // Stop consuming the oversized request.
+        try {
+          await reader.cancel();
+        } catch {
+          // Cancellation failure must not hide the size-limit error.
+        }
+
+        throw new SharedListBodyError("Upload request is too large", 413);
+      }
+
+      chunks.push(value);
+    }
+  } catch (error) {
+    if (error instanceof SharedListBodyError) {
+      throw error;
+    }
+
+    throw new SharedListBodyError("Could not read upload request", 400);
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  let parsed: unknown;
+
+  try {
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    parsed = JSON.parse(text);
+  } catch {
+    throw new SharedListBodyError(
+      "Request body must be valid UTF-8 JSON",
+      400,
+    );
+  }
+
+  return requireObject(parsed, "Request body");
+}
