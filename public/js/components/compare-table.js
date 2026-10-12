@@ -315,7 +315,11 @@ export function wireCompareTableListeners(container, onRemove) {
       const ns = (getP(wid).markings || Array(6).fill(false)).slice();
       ns[si] = !ns[si];
       btn.classList.toggle('on', ns[si]);
-      saveP(wid, { markings: ns });
+      btn.disabled = true;
+      saveP(wid, { markings: ns }).then(() => {
+        btn.classList.toggle('on', !!getP(wid).markings[si]);
+        btn.disabled = false;
+      });
     });
   });
 
