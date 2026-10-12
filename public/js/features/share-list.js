@@ -27,9 +27,20 @@ import { switchTab } from '../app/shell.js';
  * @return {void}
  */
 export function checkAutoImport() {
-  const importKey = new URL(location.href).searchParams.get('import');
+  const url = new URL(location.href);
+  const importKey = url.searchParams.get('import');
+
   if (!importKey) return;
-  history.replaceState({}, '', location.pathname);
+
+  // Remove only the consumed parameter.
+  url.searchParams.delete('import');
+
+  history.replaceState(
+    history.state,
+    '',
+    url.pathname + url.search + url.hash,
+  );
+
   setTimeout(() => openImportModal(importKey), 400);
 }
 
