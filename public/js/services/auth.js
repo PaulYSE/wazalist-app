@@ -140,8 +140,11 @@ async function doRegister() {
 
     if (hasPendingGroupJoin()) {
       await firePendingGroupJoin((groupId) => {
-        activateTab('groups');
+        switchTab('groups');
         selectGroupFromHistory(groupId);
+        replaceRoute('groups', null, groupId, {
+          preserveExtras: true,
+        });
       });
     }
   }
@@ -166,6 +169,7 @@ export function initAuth() {
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('regBox').style.display = '';
   };
+
   document.getElementById('toLi').onclick = () => {
     document.getElementById('regBox').style.display = 'none';
     document.getElementById('loginBox').style.display = '';
@@ -174,19 +178,40 @@ export function initAuth() {
   document.getElementById('guestBtn').onclick = startGuest;
   document.getElementById('guestBtn2').onclick = startGuest;
 
-  document.getElementById('li-btn').onclick = doLogin;
-  ['li-username', 'li-password'].forEach((id) => {
-    document.getElementById(id).addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') doLogin();
-    });
-  });
+  // One submission path for button clicks and Enter.
+  const wireAuthForm = (formId, buttonId, errorId, action) => {
+    const form = document.getElementById(formId);
+    const button = document.getElementById(buttonId);
+    const errorEl = document.getElementById(errorId);
 
-  document.getElementById('rg-btn').onclick = doRegister;
-  ['rg-username', 'rg-email', 'rg-password'].forEach((id) => {
-    document.getElementById(id).addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') doRegister();
+    let submitting = false;
+
+    form.addEventListener('submit', async (event) => {
+      // Keep submission inside the existing JavaScript login flow.
+      event.preventDefault();
+
+      // Ignore additional submissions while this request is running.
+      if (submitting) return;
+
+      submitting = true;
+      button.disabled = true;
+
+      try {
+        await action();
+      } catch (error) {
+        console.error('Authentication submission failed:', error);
+        errorEl.className = 'aerr';
+        errorEl.textContent =
+          'Could not complete the request. Please check your connection and try again.';
+      } finally {
+        submitting = false;
+        button.disabled = false;
+      }
     });
-  });
+  };
+
+  wireAuthForm('loginForm', 'li-btn', 'li-err', doLogin);
+  wireAuthForm('registerForm', 'rg-btn', 'rg-err', doRegister);
 
   document.getElementById('logoutBtn').onclick = doLogout;
 }
