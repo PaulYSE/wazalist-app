@@ -21,6 +21,16 @@ import {
 import { renderHtml } from "./renderHtml";
 import { renderAdmin } from "./renderAdmin";
 import { hashPassword, generateToken, getUserFromSession } from "./auth";
+import {
+  readGroupBody,
+  validateGroupCreate,
+  validateGroupUpdate,
+} from "./groupsValidation";
+
+import type {
+  GroupCreateInput,
+  GroupUpdateInput,
+} from "./groupsValidation";
 
 /**
  * @brief Helper to return JSON response.
@@ -862,17 +872,20 @@ export default {
 			}
 		}
 
-		const body = await request.json() as Record<string, unknown>;
-		const name = (body.name as string | undefined)?.trim();
-		const join_policy = (body.join_policy as string | undefined) ?? "open";
-		const social = body.social ?? [];
-
-		if (!name || name.length === 0) return err("Group name is required");
-		if (name.length > 64) return err("Group name must be 64 characters or fewer");
-		if (!["open", "approval", "invite"].includes(join_policy))
-			return err("Invalid join policy");
-		if (!Array.isArray(social)) return err("social must be an array");
-		if (social.length > 10) return err("Maximum 10 social links");
+		let input: GroupCreateInput;
+		
+		try {
+		  const body = await readGroupBody(request);
+		  input = validateGroupCreate(body);
+		} catch (error) {
+		  if (error instanceof ValidationError) {
+		    return err(error.message, 400);
+		  }
+		
+		  throw error;
+		}
+		
+		const { name, join_policy, social } = input;
 
 		// Generate invite key if needed
 		let invite_key: string | null = null;
