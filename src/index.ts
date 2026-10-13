@@ -1236,11 +1236,52 @@ export default {
 		}
 		if (!updates.length) return err("Nothing to update");
 
-		values.push(groupId, targetId);
-		await env.DB.prepare(
-			`UPDATE group_members SET ${updates.join(", ")} WHERE group_id = ? AND user_id = ?`
-		).bind(...values).run();
-
+		// Only a requested demotion needs the admin-count guard.
+		const demotingToMember = body.role === "member" ? 1 : 0;
+		
+		const result = await env.DB.prepare(`
+		  UPDATE group_members
+		  SET ${updates.join(", ")}
+		  WHERE group_id = ?
+		    AND user_id = ?
+		
+		    -- Recheck the caller's authority inside the write.
+		    AND EXISTS (
+		      SELECT 1
+		      FROM group_members AS caller
+		      WHERE caller.group_id = ?
+		        AND caller.user_id = ?
+		        AND caller.role = 'admin'
+		    )
+		
+		    -- Do not demote the final admin.
+		    AND (
+		      ? = 0
+		      OR role <> 'admin'
+		      OR (
+		        SELECT COUNT(*)
+		        FROM group_members AS admins
+		        WHERE admins.group_id = ?
+		          AND admins.role = 'admin'
+		      ) > 1
+		    )
+		`).bind(
+		  ...values,
+		  groupId,
+		  targetId,
+		  groupId,
+		  user.id,
+		  demotingToMember,
+		  groupId,
+		).run();
+		
+		if (result.meta.changes !== 1) {
+		  return err(
+		    "Member update was not applied. The member or your permissions may have changed, or this would demote the only admin. Refresh and try again.",
+		    409,
+		  );
+		}
+		
 		return json({ success: true });
 		}
 
@@ -1278,12 +1319,50 @@ export default {
 			}
 		}
 
-		await env.DB.batch([
-			env.DB.prepare(
-			"DELETE FROM group_members WHERE group_id = ? AND user_id = ?"
-			).bind(groupId, targetId),
-		]);
-
+		const result = await env.DB.prepare(`
+		  DELETE FROM group_members
+		  WHERE group_id = ?
+		    AND user_id = ?
+		
+		    -- The caller must still be a member.
+		    -- Admins can remove others; members can only leave themselves.
+		    AND EXISTS (
+		      SELECT 1
+		      FROM group_members AS caller
+		      WHERE caller.group_id = ?
+		        AND caller.user_id = ?
+		        AND (
+		          caller.role = 'admin'
+		          OR caller.user_id = ?
+		        )
+		    )
+		
+		    -- Never remove the final admin through this route.
+		    AND (
+		      role <> 'admin'
+		      OR (
+		        SELECT COUNT(*)
+		        FROM group_members AS admins
+		        WHERE admins.group_id = ?
+		          AND admins.role = 'admin'
+		      ) > 1
+		    )
+		`).bind(
+		  groupId,
+		  targetId,
+		  groupId,
+		  user.id,
+		  targetId,
+		  groupId,
+		).run();
+		
+		if (result.meta.changes !== 1) {
+		  return err(
+		    "Member removal was not applied. The member or your permissions may have changed, or this would remove the only admin. Refresh and try again.",
+		    409,
+		  );
+		}
+		
 		return json({ success: true });
 		}
 
