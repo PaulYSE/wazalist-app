@@ -11,7 +11,7 @@ import { api } from '../services/api.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openCreateGroup } from '../modals/group-new.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
-import { renderGroupDetail } from './groups-detail.js';
+import { renderGroupDetail, invalidateGroupDetailRequests } from './groups-detail.js';
 import {
   getGroupsSelectedId,
   setGroupsSelectedId,
@@ -92,6 +92,8 @@ function selectGroup(id) {
  * @return {void}
  */
 function closeGroupDetail() {
+  invalidateGroupDetailRequests();
+  
   setGroupsSelectedId(null);
   document.querySelector('#groupsView .main').classList.remove('waza-selected');
   renderGroupList();
