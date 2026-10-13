@@ -8,6 +8,7 @@
  */
 
 import { api } from '../services/api.js';
+import { requireApiArray } from '../lib/api-response.js';
 import { escapeHtml } from '../lib/escape.js';
 import { openCreateGroup } from '../modals/group-new.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
@@ -65,6 +66,13 @@ window.enableGroupsForAdmins = enableGroupsForAdmins;
 // ── TEMPORARY: BLOCK END ──────────────────────────────────────
 
 let isPopping = false;
+
+let groupsLoadError = '';
+let myGroupsLoadError = '';
+
+export function getMyGroupsLoadError() {
+  return myGroupsLoadError;
+}
 
 /**
  * @brief Selects a group by ID, renders its detail panel, and (unless
@@ -221,20 +229,52 @@ export async function renderGroups() {
  * @return {Promise<void>}
  */
 export async function refreshGroups() {
-  document.getElementById('groupCountBar').textContent = 'Loading…';
+  const countBar = document.getElementById('groupCountBar');
+
+  if (countBar) countBar.textContent = 'Loading…';
+
+  groupsLoadError = '';
+
   try {
     const res = await api('/api/groups');
-    setGroupsData(Array.isArray(res) ? res : []);
-    setGroupsLoaded();
+    const groups = requireApiArray(
+      res,
+      'The server returned an invalid Groups list.',
+    );
 
-    // Also refresh state.myGroups for Compare dropdown
-    await refreshMyGroups();
-  } catch (e) {
-    console.error('Failed to load groups:', e);
-    resetGroupsData();
+    // Commit cache and loaded state only after validation.
+    setGroupsData(groups);
+    setGroupsLoaded();
+  } catch (error) {
+    console.error('Failed to load groups:', error);
+
+    groupsLoadError =
+      error instanceof Error
+        ? error.message
+        : 'Could not load Groups.';
+
+    // Preserve the previous cache, but allow a future retry.
+    resetGroupsLoaded();
+    renderGroupList();
+
+    return {
+      success: false,
+      error: groupsLoadError,
+    };
   }
+
+  // Membership failure must not invalidate a successful public list.
+  await refreshMyGroups();
+
   renderGroupList();
-  if (getGroupsSelectedId()) renderGroupDetail(getGroupsSelectedId());
+
+  const selectedId = getGroupsSelectedId();
+
+  if (selectedId !== null) {
+    renderGroupDetail(selectedId);
+  }
+
+  return { success: true };
 }
 
 /**
@@ -243,19 +283,41 @@ export async function refreshGroups() {
  * @return {Promise<void>}
  */
 export async function refreshMyGroups() {
+  myGroupsLoadError = '';
+
   if (isGuest() || !getToken()) {
     resetMyGroups();
     setMyGroupsLoaded();
-    return;
+
+    return { success: true };
   }
+
   try {
     const res = await api('/api/groups/mine');
-    setMyGroups(res);
+    const groups = requireApiArray(
+      res,
+      'The server returned an invalid membership list.',
+    );
+
+    setMyGroups(groups);
     setMyGroupsLoaded();
-  } catch (e) {
-    console.error('Failed to load my groups:', e);
-    resetMyGroups();
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to load my groups:', error);
+
+    myGroupsLoadError =
+      error instanceof Error
+        ? error.message
+        : 'Could not load your Group memberships.';
+
+    // Keep any previous cache, but do not treat it as a fresh success.
     resetMyGroupsLoaded();
+
+    return {
+      success: false,
+      error: myGroupsLoadError,
+    };
   }
 }
 
@@ -298,6 +360,26 @@ function renderGroupList() {
   const countBar = document.getElementById('groupCountBar');
   const listEl = document.getElementById('groupList');
   if (!countBar || !listEl) return;
+
+  if (groupsLoadError) {
+    countBar.textContent = 'Groups could not be loaded';
+  
+    listEl.innerHTML =
+      '<div style="padding:24px 20px;text-align:center">' +
+      '<div style="color:var(--red);font-size:13px">' +
+      escapeHtml(groupsLoadError) +
+      '</div>' +
+      '<button class="btn" id="retryGroupsBtn" ' +
+      'style="margin-top:12px">Retry</button>' +
+      '</div>';
+  
+    listEl.querySelector('#retryGroupsBtn')
+      ?.addEventListener('click', () => {
+        refreshGroups();
+      });
+  
+    return;
+  }
 
   const filtered = filterGroups();
   const loggedIn = isLoggedIn();
