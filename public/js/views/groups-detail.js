@@ -15,6 +15,10 @@ import { refreshGroups } from './groups-browse-list.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
 import { getGroupsSelectedId, resetGroupsLoaded, resetGroupsSelectedId } from '../state/groups-state.js';
 import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
+import {
+  requireApiArray,
+  requireApiObject,
+} from '../lib/api-response.js';
 
 // Each new render invalidates all older detail requests.
 let groupDetailRequestVersion = 0;
@@ -57,13 +61,25 @@ export async function renderGroupDetail(groupId) {
     ]);
     if (!isCurrentRequest()) return;
 
-    if (groupRes.error) {
-      panel.innerHTML = '<div class="d-empty">Group not found.</div>';
-      return;
+    const g = requireApiObject(
+      groupRes,
+      'The server returned invalid Group details.',
+    );
+    
+    const myStatus = requireApiObject(
+      statusRes,
+      'The server returned an invalid membership status.',
+    );
+    
+    if (g.id !== groupId || typeof g.name !== 'string') {
+      throw new Error('The server returned invalid Group details.');
     }
-
-    const g = groupRes;
-    const myStatus = statusRes; // { status: 'guest'|'none'|'applied'|'member', role?, application_status? }
+    
+    if (
+      !['guest', 'none', 'applied', 'member'].includes(myStatus.status)
+    ) {
+      throw new Error('The server returned an invalid membership status.');
+    }
 
     const isMember = myStatus.status === 'member';
     const isAdmin = myStatus.status === 'member' && myStatus.role === 'admin';
@@ -152,9 +168,16 @@ export async function renderGroupDetail(groupId) {
     let pendingHTML = '';
     if (isMember) {
       try {
-        const members = await api('/api/groups/' + groupId + '/members');
-
+        const membersRes = await api(
+          '/api/groups/' + groupId + '/members',
+        );
+        
         if (!isCurrentRequest()) return;
+        
+        const members = requireApiArray(
+          membersRes,
+          'The server returned an invalid member list.',
+        );
         
         membersHTML =
           '<div class="dsec"><h3>Members</h3>' +
@@ -203,17 +226,38 @@ export async function renderGroupDetail(groupId) {
             )
             .join('') +
           '</div></div>';
-      } catch (e) {
-        console.error('Group member load failed:', e);
+      } catch (error) {
+        if (!isCurrentRequest()) return;
+      
+        console.error('Group member load failed:', error);
+      
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Could not load members.';
+      
         membersHTML =
-          '<div class="dsec"><h3>Members</h3><div style="color:var(--text3);font-size:13px">Couldn\'t load members.</div></div>';
+          '<div class="dsec"><h3>Members</h3>' +
+          '<div style="color:var(--red);font-size:13px">' +
+          escapeHtml(message) +
+          '</div>' +
+          '<button class="btn" data-retry-group-detail ' +
+          'style="margin-top:8px">Retry</button>' +
+          '</div>';
       }
 
       if (isAdmin) {
         try {
-          const apps = await api('/api/groups/' + groupId + '/applications');
-
+          const appsRes = await api(
+            '/api/groups/' + groupId + '/applications',
+          );
+          
           if (!isCurrentRequest()) return;
+          
+          const apps = requireApiArray(
+            appsRes,
+            'The server returned an invalid application list.',
+          );
           
           if (apps.length) {
             pendingHTML =
@@ -243,8 +287,24 @@ export async function renderGroupDetail(groupId) {
                 .join('') +
               '</div></div>';
           }
-        } catch {
-          /* non-fatal */
+        } catch (error) {
+          if (!isCurrentRequest()) return;
+        
+          console.error('Group application load failed:', error);
+        
+          const message =
+            error instanceof Error
+              ? error.message
+              : 'Could not load applications.';
+        
+          pendingHTML =
+            '<div class="dsec"><h3>Pending applications</h3>' +
+            '<div style="color:var(--red);font-size:13px">' +
+            escapeHtml(message) +
+            '</div>' +
+            '<button class="btn" data-retry-group-detail ' +
+            'style="margin-top:8px">Retry</button>' +
+            '</div>';
         }
       }
     }
@@ -276,6 +336,15 @@ export async function renderGroupDetail(groupId) {
       membersHTML;
 
     // ── Wire action buttons ───────────────────────────────────
+
+    panel.querySelectorAll('[data-retry-group-detail]')
+    .forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!isCurrentRequest()) return;
+  
+        renderGroupDetail(groupId);
+      });
+    });
 
     // Join / Apply
     panel.querySelector('#joinGroupBtn')?.addEventListener('click', async () => {
@@ -441,10 +510,30 @@ export async function renderGroupDetail(groupId) {
         renderGroupDetail(groupId);
       });
     });
-  } catch (e) {
+  } catch (error) {
     if (!isCurrentRequest()) return;
-    
-    console.error('Failed to load group detail:', e);
-    panel.innerHTML = '<div class="d-empty">Couldn\'t load this Group. Please try again.</div>';
+  
+    console.error('Failed to load group detail:', error);
+  
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Could not load this Group.';
+  
+    panel.innerHTML =
+      '<div class="d-empty">' +
+      '<div style="color:var(--red)">' +
+      escapeHtml(message) +
+      '</div>' +
+      '<button class="btn" id="retryGroupDetailBtn" ' +
+      'style="margin-top:12px">Retry</button>' +
+      '</div>';
+  
+    panel.querySelector('#retryGroupDetailBtn')
+      ?.addEventListener('click', () => {
+        if (!isCurrentRequest()) return;
+  
+        renderGroupDetail(groupId);
+      });
   }
 }
