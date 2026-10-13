@@ -18,6 +18,8 @@ import { showToast } from '../components/show-toast.js';
 import { openImportModal, openExportModal } from '../features/share-list.js';
 import { getCurrentUserId, getMyGroups } from '../state/user-state.js';
 import { fetchMemberEntries, importedListToEntry } from '../services/compare-data.js';
+import { requireApiArray } from '../lib/api-response.js';
+import { getMyGroupsLoadError } from './groups-browse-list.js';
 import {
   addCompareEntry,
   closeCompareAddPanel,
@@ -107,6 +109,17 @@ function buildAddPanelHTML() {
 function buildAddMemberTabHTML() {
   const groups = getMyGroups();
   const groupId = getCompareAddPanelGroupId();
+  const loadError = getMyGroupsLoadError();
+
+  if (loadError) {
+    return (
+      '<div style="font-size:13px;color:var(--red)">' +
+      escapeHtml(loadError) +
+      '</div>' +
+      '<button class="btn" id="cmpRetryGroupsBtn" ' +
+      'style="margin-top:8px">Retry memberships</button>'
+    );
+  }
 
   if (!groups.length) {
     return (
@@ -222,6 +235,12 @@ export function wireCompareControls(container, onEntriesChanged) {
     onEntriesChanged();
   });
 
+  container.querySelector('#cmpRetryGroupsBtn')
+  ?.addEventListener('click', () => {
+    // renderDashCompare() retries because the loaded flag is false.
+    onEntriesChanged();
+  });
+
   wireMemberTab(container, onEntriesChanged);
   wireImportedTab(container, onEntriesChanged);
 }
@@ -288,9 +307,14 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
     '<div style="font-size:13px;color:var(--text3)">Loading members…</div>';
 
   try {
-    const members = await api('/api/groups/' + groupId + '/members');
+    const res = await api('/api/groups/' + groupId + '/members');
     
     if (!isCurrentRequest()) return;
+    
+    const members = requireApiArray(
+      res,
+      'The server returned an invalid member list.',
+    );
     
     const candidates = members.filter(
       (m) => m.user_id !== getCurrentUserId() && !hasCompareEntry('member', m.user_id),
@@ -358,11 +382,31 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
       closeCompareAddPanel();
       onEntriesChanged();
     });
-  } catch {
+  } catch (error) {
     if (!isCurrentRequest()) return;
-    
+  
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Could not load members.';
+  
     memberArea.innerHTML =
-      '<div style="font-size:13px;color:var(--red)">Couldn\'t load members. Please try again.</div>';
+      '<div style="font-size:13px;color:var(--red)">' +
+      escapeHtml(message) +
+      '</div>' +
+      '<button class="btn" id="cmpRetryMembersBtn" ' +
+      'style="margin-top:8px">Retry members</button>';
+  
+    memberArea.querySelector('#cmpRetryMembersBtn')
+      ?.addEventListener('click', () => {
+        if (!isCurrentRequest()) return;
+  
+        loadMemberCheckboxes(
+          container,
+          groupId,
+          onEntriesChanged,
+        );
+      });
   }
 }
 
