@@ -32,11 +32,12 @@ import {
   isLoggedIn,
   resetMyGroups,
   resetMyGroupsLoaded,
+  getMyGroups,
   setMyGroups,
   setMyGroupsLoaded,
   isAdmin,
 } from '../state/user-state.js';
-import { pushRoute, replaceRoute } from '../app/router.js';
+import { parseRoute, pushRoute, replaceRoute } from '../app/router.js';
 
 // ── TEMPORARY: BLOCK START ────────────────────────────────────
 // ── Admin-only access during development ──────────────────────
@@ -67,6 +68,53 @@ window.enableGroupsForAdmins = enableGroupsForAdmins;
 
 let isPopping = false;
 
+// Session-only record of confirmed deletions.
+// Prevents older history entries from reopening these groups.
+const deletedGroupIds = new Set();
+
+export function isGroupDeleted(id) {
+  return deletedGroupIds.has(id);
+}
+
+function removeDeletedGroupFromCurrentRoute(id) {
+  const { tab, groupParam } = parseRoute();
+
+  // Do not rewrite another group's URL or another tab.
+  if (
+    tab === 'groups' &&
+    groupParam !== null &&
+    groupParam !== undefined &&
+    Number(groupParam) === id
+  ) {
+    replaceRoute('groups', null, null);
+  }
+}
+
+export function handleConfirmedGroupDeletion(id) {
+  deletedGroupIds.add(id);
+
+  // Remove the confirmed deletion from cached lists immediately.
+  setGroupsData(
+    getGroupsData().filter((group) => group.id !== id),
+  );
+
+  setMyGroups(
+    getMyGroups().filter((group) => group.id !== id),
+  );
+
+  resetGroupsLoaded();
+  resetMyGroupsLoaded();
+
+  // Only close the detail if the deleted group is still selected.
+  if (getGroupsSelectedId() === id) {
+    closeGroupDetailNoHistory();
+  } else {
+    renderGroupList();
+  }
+
+  removeDeletedGroupFromCurrentRoute(id);
+}
+
 let groupsLoadError = '';
 let myGroupsLoadError = '';
 
@@ -82,6 +130,11 @@ export function getMyGroupsLoadError() {
  * @return {void}
  */
 function selectGroup(id) {
+  if (isGroupDeleted(id)) {
+    closeGroupDetailNoHistory();
+    removeDeletedGroupFromCurrentRoute(id);
+    return;
+  }
   setGroupsSelectedId(id);
   renderGroupList();
   renderGroupDetail(id);
@@ -243,7 +296,9 @@ export async function refreshGroups() {
     );
 
     // Commit cache and loaded state only after validation.
-    setGroupsData(groups);
+    setGroupsData(
+      groups.filter((group) => !isGroupDeleted(group.id)),
+    );
     setGroupsLoaded();
   } catch (error) {
     console.error('Failed to load groups:', error);
@@ -299,7 +354,9 @@ export async function refreshMyGroups() {
       'The server returned an invalid membership list.',
     );
 
-    setMyGroups(groups);
+    setMyGroups(
+      groups.filter((group) => !isGroupDeleted(group.id)),
+    );
     setMyGroupsLoaded();
 
     return { success: true };
