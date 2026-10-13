@@ -13,8 +13,15 @@ import { showToast } from '../components/show-toast.js';
 import { openEditGroup } from '../modals/group-edit.js';
 import { refreshGroups } from './groups-browse-list.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
-import { resetGroupsLoaded, resetGroupsSelectedId } from '../state/groups-state.js';
+import { getGroupsSelectedId, resetGroupsLoaded, resetGroupsSelectedId } from '../state/groups-state.js';
 import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
+
+// Each new render invalidates all older detail requests.
+let groupDetailRequestVersion = 0;
+
+export function invalidateGroupDetailRequests() {
+  groupDetailRequestVersion++;
+}
 
 // ── Group detail panel ────────────────────────────────────────
 
@@ -26,9 +33,19 @@ import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
  */
 export async function renderGroupDetail(groupId) {
   const panel = document.getElementById('groupDetailContent');
-  if (!panel) return;
 
-  panel.innerHTML = '<div class="d-empty" style="color:var(--text3)">Loading…</div>';
+  // Do not reopen a group that is no longer selected.
+  if (!panel || getGroupsSelectedId() !== groupId) return;
+
+  const requestVersion = ++groupDetailRequestVersion;
+
+  const isCurrentRequest = () =>
+    requestVersion === groupDetailRequestVersion &&
+    getGroupsSelectedId() === groupId &&
+    panel.isConnected;
+
+  panel.innerHTML =
+    '<div class="d-empty" style="color:var(--text3)">Loading…</div>';
 
   const loggedIn = isLoggedIn();
 
@@ -38,6 +55,7 @@ export async function renderGroupDetail(groupId) {
       api('/api/groups/' + groupId),
       api('/api/groups/' + groupId + '/my-status'),
     ]);
+    if (!isCurrentRequest()) return;
 
     if (groupRes.error) {
       panel.innerHTML = '<div class="d-empty">Group not found.</div>';
@@ -135,6 +153,9 @@ export async function renderGroupDetail(groupId) {
     if (isMember) {
       try {
         const members = await api('/api/groups/' + groupId + '/members');
+
+        if (!isCurrentRequest()) return;
+        
         membersHTML =
           '<div class="dsec"><h3>Members</h3>' +
           '<div style="display:flex;flex-direction:column;gap:4px">' +
@@ -191,6 +212,9 @@ export async function renderGroupDetail(groupId) {
       if (isAdmin) {
         try {
           const apps = await api('/api/groups/' + groupId + '/applications');
+
+          if (!isCurrentRequest()) return;
+          
           if (apps.length) {
             pendingHTML =
               '<div class="dsec"><h3>Pending applications <span class="badge cs-pending" style="font-size:11px">' +
@@ -226,6 +250,8 @@ export async function renderGroupDetail(groupId) {
     }
 
     // Assemble
+    if (!isCurrentRequest()) return;
+    
     panel.innerHTML =
       '<div class="d-njp">' +
       escapeHtml(g.name) +
@@ -416,6 +442,8 @@ export async function renderGroupDetail(groupId) {
       });
     });
   } catch (e) {
+    if (!isCurrentRequest()) return;
+    
     console.error('Failed to load group detail:', e);
     panel.innerHTML = '<div class="d-empty">Couldn\'t load this Group. Please try again.</div>';
   }
