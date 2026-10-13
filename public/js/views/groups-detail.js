@@ -11,9 +11,9 @@ import { api } from '../services/api.js';
 import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
 import { openEditGroup } from '../modals/group-edit.js';
-import { refreshGroups } from './groups-browse-list.js';
+import { refreshGroups, handleConfirmedGroupDeletion, isGroupDeleted } from './groups-browse-list.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
-import { getGroupsSelectedId, resetGroupsLoaded, resetGroupsSelectedId } from '../state/groups-state.js';
+import { getGroupsSelectedId, resetGroupsLoaded } from '../state/groups-state.js';
 import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
 import {
   requireApiArray,
@@ -39,13 +39,20 @@ export async function renderGroupDetail(groupId) {
   const panel = document.getElementById('groupDetailContent');
 
   // Do not reopen a group that is no longer selected.
-  if (!panel || getGroupsSelectedId() !== groupId) return;
+  if (
+    !panel ||
+    getGroupsSelectedId() !== groupId ||
+    isGroupDeleted(groupId)
+  ) {
+    return;
+  }
 
   const requestVersion = ++groupDetailRequestVersion;
 
   const isCurrentRequest = () =>
     requestVersion === groupDetailRequestVersion &&
     getGroupsSelectedId() === groupId &&
+    !isGroupDeleted(groupId) &&
     panel.isConnected;
 
   panel.innerHTML =
@@ -401,25 +408,69 @@ export async function renderGroupDetail(groupId) {
     });
 
     // Delete
-    panel.querySelector('#deleteGroupBtn')?.addEventListener('click', async () => {
+    panel.querySelector('#deleteGroupBtn')
+    ?.addEventListener('click', async (event) => {
+      if (!isCurrentRequest()) return;
+  
+      const btn = event.currentTarget;
+  
+      if (btn.disabled) return;
+  
       if (
         !confirm(
-          'Permanently delete "' + g.name + '" and remove all members? This cannot be undone.',
+          'Permanently delete "' +
+            g.name +
+            '" and remove all members? This cannot be undone.',
         )
-      )
-        return;
-      const res = await api('/api/groups/' + groupId, 'DELETE');
-      if (res.error) {
-        showToast(res.error, 'red');
+      ) {
         return;
       }
-      showToast(g.name + ' has been deleted.', 'green');
-      resetGroupsSelectedId;
-      resetGroupsLoaded();
-      await refreshGroups();
-      document.getElementById('groupDetailContent').innerHTML =
-        '<div class="d-empty"><div style="font-size:32px">👥</div><div>Select a Group to view details</div></div>';
-      document.querySelector('#groupsView .main').classList.remove('waza-selected');
+  
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+  
+      try {
+        const res = await api(
+          '/api/groups/' + groupId,
+          'DELETE',
+        );
+  
+        if (res.error) {
+          showToast(res.error, 'red');
+          return;
+        }
+  
+        if (res.success !== true) {
+          showToast(
+            'Group deletion was not confirmed. Refresh to verify before retrying.',
+            'red',
+          );
+          return;
+        }
+  
+        // Cleanup uses the current selection, not the selection
+        // captured when this request started.
+        handleConfirmedGroupDeletion(groupId);
+  
+        showToast(g.name + ' has been deleted.', 'green');
+  
+        // Refresh after local cleanup. A failed refresh must not
+        // restore the deleted selection or cached group.
+        await refreshGroups();
+      } catch (error) {
+        console.error('Group deletion failed:', error);
+  
+        showToast(
+          'Group deletion was not confirmed. Refresh to verify before retrying.',
+          'red',
+        );
+      } finally {
+        // The original button may have been removed by navigation.
+        if (btn.isConnected) {
+          btn.disabled = false;
+          btn.textContent = 'Delete Group';
+        }
+      }
     });
 
     // Approve / Reject applications
