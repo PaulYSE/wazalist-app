@@ -949,26 +949,36 @@ export default {
 		const role = await getGroupRole(groupId, user.id);
 		if (role !== "admin") return err("Forbidden", 403);
 
-		const body = await request.json() as Record<string, unknown>;
+		let input: GroupUpdateInput;
+		
+		try {
+		  const body = await readGroupBody(request);
+		  input = validateGroupUpdate(body);
+		} catch (error) {
+		  if (error instanceof ValidationError) {
+		    return err(error.message, 400);
+		  }
+		
+		  throw error;
+		}
+		
 		const updates: string[] = [];
-		const values: unknown[] = [];
-
-		if (body.name !== undefined) {
-			const name = (body.name as string).trim();
-			if (!name || name.length > 64) return err("Invalid group name");
-			updates.push("name = ?"); values.push(name);
+		const values: (string | number)[] = [];
+		
+		if (input.name !== undefined) {
+		  updates.push("name = ?");
+		  values.push(input.name);
 		}
-		if (body.join_policy !== undefined) {
-			if (!["open", "approval", "invite"].includes(body.join_policy as string))
-			return err("Invalid join policy");
-			updates.push("join_policy = ?"); values.push(body.join_policy);
+		
+		if (input.join_policy !== undefined) {
+		  updates.push("join_policy = ?");
+		  values.push(input.join_policy);
 		}
-		if (body.social !== undefined) {
-			if (!Array.isArray(body.social)) return err("social must be an array");
-			if ((body.social as unknown[]).length > 10) return err("Maximum 10 social links");
-			updates.push("social = ?"); values.push(JSON.stringify(body.social));
+		
+		if (input.social !== undefined) {
+		  updates.push("social = ?");
+		  values.push(JSON.stringify(input.social));
 		}
-		if (!updates.length) return err("Nothing to update");
 
 		values.push(groupId);
 		await env.DB.prepare(`UPDATE groups SET ${updates.join(", ")} WHERE id = ?`)
