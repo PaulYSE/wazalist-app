@@ -32,6 +32,9 @@ import {
   setCompareAddPanelSourceType,
 } from '../state/compare-state.js';
 
+// Track the latest request separately for each rendered member area.
+const memberAreaRequestVersions = new WeakMap();
+
 // ── HTML Builders ─────────────────────────────────────────────
 
 /**
@@ -267,10 +270,28 @@ function wireMemberTab(container, onEntriesChanged) {
 async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
   const memberArea = container.querySelector('#cmpAddMemberArea');
   if (!memberArea) return;
-  memberArea.innerHTML = '<div style="font-size:13px;color:var(--text3)">Loading members…</div>';
+  
+  const requestVersion =
+    (memberAreaRequestVersions.get(memberArea) || 0) + 1;
+  
+  memberAreaRequestVersions.set(memberArea, requestVersion);
+  
+  const isCurrentRequest = () =>
+    memberAreaRequestVersions.get(memberArea) === requestVersion &&
+    memberArea.isConnected &&
+    container.querySelector('#cmpAddMemberArea') === memberArea &&
+    isCompareAddPanelOpen() &&
+    getCompareAddPanelSourceType() === 'member' &&
+    getCompareAddPanelGroupId() === groupId;
+  
+  memberArea.innerHTML =
+    '<div style="font-size:13px;color:var(--text3)">Loading members…</div>';
 
   try {
     const members = await api('/api/groups/' + groupId + '/members');
+    
+    if (!isCurrentRequest()) return;
+    
     const candidates = members.filter(
       (m) => m.user_id !== getCurrentUserId() && !hasCompareEntry('member', m.user_id),
     );
@@ -310,6 +331,8 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
     });
 
     submitBtn.addEventListener('click', async () => {
+      if (!isCurrentRequest()) return;
+      
       const checked = memberArea.querySelectorAll('.cmp-add-member-cb:checked');
       const selected = Array.from(checked).map((cb) => ({
         id: +cb.value,
@@ -321,6 +344,9 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
       submitBtn.textContent = 'Adding…';
 
       const { entries, error } = await fetchMemberEntries(groupId, selected);
+      
+      if (!isCurrentRequest()) return;
+      
       if (error) {
         showToast(error, 'red');
         submitBtn.disabled = false;
@@ -333,6 +359,8 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
       onEntriesChanged();
     });
   } catch {
+    if (!isCurrentRequest()) return;
+    
     memberArea.innerHTML =
       '<div style="font-size:13px;color:var(--red)">Couldn\'t load members. Please try again.</div>';
   }
