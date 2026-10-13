@@ -408,16 +408,52 @@ export default {
 			// Delete child rows first, then the user — in one atomic batch.
 			// FK cascade can't be relied on (enforcement is off by default, and
 			// progress/contributions have no ON DELETE rule anyway).
-			await env.DB.batch([
-				env.DB.prepare("DELETE FROM sessions             WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM progress             WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM contributions        WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM group_members        WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM group_applications   WHERE user_id = ?").bind(user.id),
-				env.DB.prepare("DELETE FROM users                WHERE id      = ?").bind(user.id),
-			]);
-
-			return json({ success: true });
+			try {
+			  await env.DB.batch([
+			    env.DB.prepare(
+			      "DELETE FROM sessions WHERE user_id = ?",
+			    ).bind(user.id),
+			
+			    env.DB.prepare(
+			      "DELETE FROM progress WHERE user_id = ?",
+			    ).bind(user.id),
+			
+			    env.DB.prepare(
+			      "DELETE FROM contributions WHERE user_id = ?",
+			    ).bind(user.id),
+			
+			    env.DB.prepare(
+			      "DELETE FROM group_members WHERE user_id = ?",
+			    ).bind(user.id),
+			
+			    env.DB.prepare(
+			      "DELETE FROM group_applications WHERE user_id = ?",
+			    ).bind(user.id),
+			
+			    env.DB.prepare(
+			      "DELETE FROM users WHERE id = ?",
+			    ).bind(user.id),
+			  ]);
+			
+			  return json({ success: true });
+			} catch (error) {
+			  const message =
+			    error instanceof Error ? error.message : String(error);
+			
+			  if (message.includes("GROUP_LAST_ADMIN")) {
+			    return err(
+			      "Account deletion was cancelled because you are now the only admin of a group. Promote another member or delete the group, then try again.",
+			      409,
+			    );
+			  }
+			
+			  console.error("Account deletion failed:", error);
+			
+			  return err(
+			    "Could not delete your account. Please refresh to verify your account state before retrying.",
+			    500,
+			  );
+			}
 		}
 
 		// ── Change username ───────────────────────────────────────
