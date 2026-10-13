@@ -30,6 +30,8 @@ import {
 } from '../components/compare-table.js';
 import { buildCompareControlsHTML, wireCompareControls } from './compare-controls.js';
 
+let compareRenderVersion = 0;
+
 /**
  * @brief Renders the Compare tab.
  *
@@ -38,12 +40,18 @@ import { buildCompareControlsHTML, wireCompareControls } from './compare-control
 export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
   if (!container) return;
-
-  // Group picker in the add panel needs state.myGroups populated. Lazy-load
-  // once per session — joining/leaving a group elsewhere already resets
-  // the loaded flag, so this stays correct without forcing a refetch here.
+   
+  const renderVersion = ++compareRenderVersion;
+   
   if (!getMyGroupsLoaded()) {
     await refreshMyGroups();
+  }
+   
+  if (
+    renderVersion !== compareRenderVersion ||
+    !container.isConnected
+  ) {
+    return;
   }
 
   const entries = getCompareEntries();
