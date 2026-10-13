@@ -843,20 +843,52 @@ export default {
 		const buf = crypto.getRandomValues(new Uint8Array(32));
 		invite_key = Array.from(buf).map(b => b.toString(16).padStart(2, "0")).join("");
 
-		const result = await env.DB.prepare(`
-			INSERT INTO groups (name, join_policy, invite_key, social, created_by)
-			VALUES (?, ?, ?, ?, ?)
-		`).bind(name, join_policy, invite_key, JSON.stringify(social), user.id).run();
-
-		const groupId = result.meta.last_row_id as number;
-
-		// Add creator as admin member
-		await env.DB.prepare(`
-			INSERT INTO group_members (group_id, user_id, role)
-			VALUES (?, ?, 'admin')
-		`).bind(groupId, user.id).run();
-
-		return json({ success: true, group_id: groupId, invite_key });
+		try {
+		  const [groupResult] = await env.DB.batch([
+		    // Statement 1: create the group.
+		    env.DB.prepare(`
+		      INSERT INTO groups
+		        (name, join_policy, invite_key, social, created_by)
+		      VALUES (?, ?, ?, ?, ?)
+		    `).bind(
+		      name,
+		      join_policy,
+		      invite_key,
+		      JSON.stringify(social),
+		      user.id,
+		    ),
+		
+		    // Statement 2: add this group's creator as its admin.
+		    // The unique invite key identifies the group created above.
+		    env.DB.prepare(`
+		      INSERT INTO group_members (group_id, user_id, role)
+		      VALUES (
+		        (SELECT id FROM groups WHERE invite_key = ?),
+		        ?,
+		        'admin'
+		      )
+		    `).bind(
+		      invite_key,
+		      user.id,
+		    ),
+		  ]);
+		
+		  const groupId = groupResult.meta.last_row_id;
+		
+		  return json({
+		    success: true,
+		    group_id: groupId,
+		    invite_key,
+		  });
+		} catch (error) {
+		  // Do not log the invite key or return raw database errors.
+		  console.error("Atomic group creation failed:", error);
+		
+		  return err(
+		    "Could not create the group. Please try again.",
+		    500,
+		  );
+		}
 		}
 
 		// PUT /api/groups/:id — update group (Group admin only)
