@@ -39,33 +39,6 @@ import {
 } from '../state/user-state.js';
 import { parseRoute, pushRoute, replaceRoute } from '../app/router.js';
 
-// ── TEMPORARY: BLOCK START ────────────────────────────────────
-// ── Admin-only access during development ──────────────────────
-// TODO: Remove this block when Groups feature is ready for all users.
-
-/**
- * @brief Hides the Groups tab from non-admin users.
- *
- * Call this manually from the dev console after login:
- *   enableGroupsForAdmins()
- *
- * @return {void}
- */
-function enableGroupsForAdmins() {
-  const admin = isAdmin();
-  document.querySelector('.ntab[data-tab="groups"]').style.display = admin ? '' : 'none';
-  document.querySelector('.mob-menu-item[data-menu-tab="groups"]').style.display = admin
-    ? ''
-    : 'none';
-  document.getElementById('groupsView').style.display = admin ? '' : 'none';
-}
-enableGroupsForAdmins();
-
-// Expose globally for dev-console access
-window.enableGroupsForAdmins = enableGroupsForAdmins;
-
-// ── TEMPORARY: BLOCK END ──────────────────────────────────────
-
 let isPopping = false;
 
 // Session-only record of confirmed deletions.
