@@ -44,14 +44,19 @@ import {
 // ── Guide buttons ─────────────────────────────────────────────
 
 /**
- * @brief Help button click handler that shows onboarding.
+ * Shows the onboarding guide when the Help button is clicked.
+ *
+ * @return {void}
  */
 document.getElementById('helpBtn').addEventListener('click', () => {
   showOnboarding();
 });
 
 /**
- * @brief Mobile help button click handler that closes mobile menu and shows onboarding.
+ * Closes the mobile menu and shows the onboarding guide when the
+ * Help button is clicked.
+ *
+ * @return {void}
  */
 document.getElementById('mobHelpBtn').addEventListener('click', () => {
   closeMobMenu();
@@ -61,13 +66,16 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 // ── Popstate — back button closes the detail panel ────────────
 
 /**
- * @brief Handles browser back/forward navigation to restore tab and waza/group
- *        detail state from URL.
- *
- * Parses the current URL for tab and waza/group parameters, reconciles the
- * active tab (without writing history), and opens/closes the relevant detail
- * panel as needed.
- */
+* Reconciles application navigation state after browser history navigation.
+*
+* Restores the active tab and corresponding Waza or Group detail state
+* from the current URL without creating additional history entries.
+* Waza parameters are resolved through resolveWaza(), while Group
+* parameters must be numeric. Missing or invalid detail parameters close
+* any corresponding open detail selection.
+*
+* @return {void}
+*/
 window.addEventListener('popstate', () => {
   const { tab, wazaParam, groupParam } = parseRoute();
 
@@ -95,16 +103,15 @@ window.addEventListener('popstate', () => {
 });
 
 /**
- * @brief Handles theme change events by re-rendering views with theme-dependent marking tints.
+ * Handles theme changes by re-rendering views with theme-dependent marking tints.
  *
  * Marking tints are baked into inline styles at render time and depend on the
- * current theme's color scheme (e.g., hue blend backgrounds for marking combinations).
- * When the theme changes, this listener regenerates the affected views to apply
- * the correct theme-based styling.
+ * current theme's color scheme. Re-renders the Browse, Stats, and Compare
+ * views so their marking styles reflect the newly active theme.
+ *
+ * @return {void}
  */
 window.addEventListener('themechange', () => {
-  // Marking tints are baked into inline styles at render time and are
-  // theme-dependent; regenerate the views that show them.
   renderList();
   renderDashStats();
   renderDashCompare();
