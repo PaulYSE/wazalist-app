@@ -242,15 +242,19 @@ for (
   }
 }
 
-  // Also check word-by-word for multi-word queries
-  const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
-  if (queryWords.length > 1) {
-    const textWords = normalizedText.split(' ');
-return queryWords.every((queryWord) =>
-  textWords.some((textWord) =>
-    levenshteinDistance(textWord, queryWord) <= actualMaxDist,
-  ),
-);
+// Require every significant query word to match a word in this field.
+const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
+
+if (queryWords.length > 1) {
+  const textWords = normalizedText.split(' ');
+
+  return queryWords.every((queryWord) =>
+    textWords.some(
+      (textWord) =>
+        levenshteinDistance(textWord, queryWord) <= actualMaxDist,
+    ),
+  );
+}
 
   return false;
 }
