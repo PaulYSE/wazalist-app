@@ -117,7 +117,13 @@ export function normalizeForSearch(text) {
  */
 function matchesExactField(text, query) {
   if (!text || !query) return false;
-  return normalizeForSearch(text) === normalizeForSearch(query);
+
+  const normalizedText = normalizeForSearch(text);
+  const normalizedQuery = normalizeForSearch(query);
+
+  if (!normalizedText || !normalizedQuery) return false;
+
+  return normalizedText === normalizedQuery;
 }
 
 // ── Substring Matching ───────────────────────────────────────
@@ -134,6 +140,8 @@ function matchesQuery(text, query) {
 
   const normalizedText = normalizeForSearch(text);
   const normalizedQuery = normalizeForSearch(query);
+  
+  if (!normalizedText || !normalizedQuery) return false;
 
   // Level 1: Exact substring match (fast path)
   if (normalizedText.includes(normalizedQuery)) return true;
@@ -193,6 +201,8 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
 
   const normalizedText = normalizeForSearch(text);
   const normalizedQuery = normalizeForSearch(query);
+
+  if (!normalizedText || !normalizedQuery) return false;
 
   // For general search (maxDistance = 2), use adaptive scaling for longer queries
   // For strict matching (maxDistance = 1), use exactly the specified distance
@@ -317,24 +327,39 @@ function parseScopedSearch(search) {
 export function wazaMatchesSearch(w, search) {
   if (!search) return true;
 
-  // Normalize mobile/IME smart quotes to plain '"' before any quote-based
-  // logic runs, so both the scoped-prefix exact check below AND the
-  // global-search exact check further down both benefit from one pass.
-  search = normalizeQuotes(search);
+  // Normalize quote variants and ignore outer whitespace before parsing.
+  search = normalizeQuotes(search).trim();
 
-  // (Scoped search): PREFIX:QUERY = fuzzy, PREFIX:"QUERY" = exact
+  if (!normalizeForSearch(search)) return true;
+
+  // Scoped quoted queries use normalized whole-field equality.
   const scoped = parseScopedSearch(search);
+
   if (scoped) {
-    if (!scoped.query) return true; // "AUTHOR:" with nothing yet → don't filter
+    if (!normalizeForSearch(scoped.query)) return true;
+
     const matchFn = scoped.exact ? matchesExactField : isFuzzyMatch;
-    return scoped.fields.some((f) => w[f] && matchFn(w[f], scoped.query));
+
+    return scoped.fields.some(
+      (field) => w[field] && matchFn(w[field], scoped.query),
+    );
   }
 
-  // (Global search): QUERY = fuzzy, "QUERY" = substring
-  const isExact = search.startsWith('"') && search.endsWith('"');
-  const matchFn = isExact ? matchesQuery : isFuzzyMatch;
-  const query = isExact ? search.slice(1, -1).trim() : search;
-  return SEARCH_FIELDS.some((f) => w[f] && matchFn(w[f], query));
+  // Global quoted queries use non-fuzzy substring/all-word matching.
+  const isQuoted =
+    search.length >= 2 &&
+    search.startsWith('"') &&
+    search.endsWith('"');
+
+  const query = isQuoted ? search.slice(1, -1).trim() : search;
+
+  if (!normalizeForSearch(query)) return true;
+
+  const matchFn = isQuoted ? matchesQuery : isFuzzyMatch;
+
+  return SEARCH_FIELDS.some(
+    (field) => w[field] && matchFn(w[field], query),
+  );
 }
 
 /**
