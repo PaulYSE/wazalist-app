@@ -76,14 +76,13 @@ const SMART_QUOTE_MAP = {
 };
 
 /**
- * @brief Replaces any smart/fullwidth quote variant with a plain ASCII '"'.
+ * Replaces recognized Unicode double-quote variants with ASCII double quotes.
  *
- * Called once at the top of wazaMatchesSearch() so every downstream check
- * — both the scoped-prefix parser and the global-search exact-match check —
- * only ever has to recognize one quote character.
+ * Normalizes U+201C, U+201D, U+201E, U+201F, and U+FF02.
+ * Leaves all other characters unchanged.
  *
- * @param {string} text - Raw search input, possibly containing smart quotes.
- * @return {string} Same text with all recognized quote variants normalized.
+ * @param {string} text Search input to normalize.
+ * @return {string} Text with recognized quote variants replaced.
  */
 function normalizeQuotes(text) {
   return text.replace(/[\u201C\u201D\u201E\u201F\uFF02]/g, (ch) => SMART_QUOTE_MAP[ch]);
@@ -92,10 +91,14 @@ function normalizeQuotes(text) {
 // ── Normalize user search entry ───────────────────────────────
 
 /**
- * @brief Normalizes a string for case-insensitive and diacritic-insensitive search.
+ * Normalizes text for case-insensitive search and selected accent removal.
  *
- * @param {string} text - Input text.
- * @return {string} Normalized lowercase string without diacritics.
+ * Converts text to lowercase, trims surrounding whitespace, collapses
+ * internal whitespace to single spaces, applies Unicode NFD decomposition,
+ * and removes combining marks in U+0300–U+036F.
+ *
+ * @param {string} text Text to normalize.
+ * @return {string} Normalized search text.
  */
 export function normalizeForSearch(text) {
   return text
@@ -109,11 +112,14 @@ export function normalizeForSearch(text) {
 // ── Exact Matching ────────────────────────────────────────────
 
 /**
- * @brief Checks if text exactly matches the query after normalization.
+ * Checks whether text and query are equal after search normalization.
  *
- * @param {string} text - Text to match.
- * @param {string} query - Query string.
- * @return {boolean} True if exact match.
+ * Returns false if either input is empty or becomes empty after
+ * normalization. Uses normalizeForSearch() for both inputs.
+ *
+ * @param {string} text Text to match.
+ * @param {string} query Query to compare against the complete text.
+ * @return {boolean} Whether both normalized values are nonempty and equal.
  */
 function matchesExactField(text, query) {
   if (!text || !query) return false;
