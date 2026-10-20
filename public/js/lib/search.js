@@ -206,16 +206,41 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
     actualMaxDist = Math.min(maxDistance, adaptiveMaxDist);
   }
 
-  // Check if query is a substring of text (within distance)
-  for (let i = 0; i <= normalizedText.length - normalizedQuery.length + actualMaxDist; i++) {
-    const substring = normalizedText.substring(
-      Math.max(0, i - actualMaxDist),
-      Math.min(normalizedText.length, i + normalizedQuery.length + actualMaxDist),
-    );
-    if (levenshteinDistance(substring, normalizedQuery) <= actualMaxDist) {
+// Accept exact substrings without calculating edit distance.
+if (normalizedText.includes(normalizedQuery)) return true;
+
+// Insertions and deletions can change the matching substring's length.
+// Examine every candidate length within the permitted distance.
+const minLength = Math.max(
+  0,
+  normalizedQuery.length - actualMaxDist,
+);
+const maxLength = normalizedQuery.length + actualMaxDist;
+
+for (
+  let start = 0;
+  start <= normalizedText.length - minLength;
+  start++
+) {
+  const availableMaxLength = Math.min(
+    maxLength,
+    normalizedText.length - start,
+  );
+
+  for (
+    let length = minLength;
+    length <= availableMaxLength;
+    length++
+  ) {
+    const candidate = normalizedText.slice(start, start + length);
+
+    if (
+      levenshteinDistance(candidate, normalizedQuery) <= actualMaxDist
+    ) {
       return true;
     }
   }
+}
 
   // Also check word-by-word for multi-word queries
   const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
