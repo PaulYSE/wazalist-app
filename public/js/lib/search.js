@@ -246,10 +246,11 @@ for (
   const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
   if (queryWords.length > 1) {
     const textWords = normalizedText.split(' ');
-    return queryWords.some((queryWord) =>
-      textWords.some((textWord) => levenshteinDistance(textWord, queryWord) <= actualMaxDist),
-    );
-  }
+return queryWords.every((queryWord) =>
+  textWords.some((textWord) =>
+    levenshteinDistance(textWord, queryWord) <= actualMaxDist,
+  ),
+);
 
   return false;
 }
