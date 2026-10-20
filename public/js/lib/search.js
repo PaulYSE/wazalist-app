@@ -252,13 +252,22 @@ export const dispName = (w) =>
 function parseScopedSearch(search) {
   const m = search.match(/^([a-z]+)\s*:\s*(.*)$/i);
   if (!m) return null;
+
   const scope = m[1].toLowerCase();
+
+  // Only explicitly configured scopes are recognized.
+  if (!Object.prototype.hasOwnProperty.call(SEARCH_SCOPES, scope)) {
+    return null;
+  }
+
   const fields = SEARCH_SCOPES[scope];
-  if (!fields) return null; // unknown prefix → treat as a normal search, not scoped
 
   let rest = m[2].trim();
-  // Honour the same "quoted = exact" convention as the global search.
-  const exact = rest.startsWith('"') && rest.endsWith('"') && rest.length >= 2;
+  const exact =
+    rest.startsWith('"') &&
+    rest.endsWith('"') &&
+    rest.length >= 2;
+
   if (exact) rest = rest.slice(1, -1).trim();
 
   return { fields, query: rest, exact };
