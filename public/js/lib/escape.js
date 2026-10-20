@@ -8,12 +8,18 @@
  */
 
 /**
- * @brief Escapes special HTML characters in a string.
+ * Escapes a value for insertion as HTML text or a quoted attribute value.
  *
- * Converts &, <, >, and " to their HTML entity equivalents.
+ * Converts null and undefined to an empty string and converts other
+ * values to strings. Escapes ampersands, angle brackets, double quotes,
+ * and apostrophes.
  *
- * @param {string} s - The input string to escape.
- * @return {string} Escaped HTML-safe string.
+ * Does not validate URLs or sanitize HTML markup. Do not use this
+ * function as an encoder for JavaScript, CSS, or unquoted attributes.
+ * Existing HTML entities are escaped again.
+ *
+ * @param {*} value Value to convert to a string and escape.
+ * @return {string} String with special HTML characters escaped.
  */
 export function escapeHtml(value) {
   return String(value ?? '')
@@ -25,10 +31,19 @@ export function escapeHtml(value) {
 }
 
 /**
- * Validates an external web link.
+ * Validates a URL against the application's HTTP(S) link policy.
  *
- * Returns the trimmed original URL when permitted, otherwise null.
- * Does not HTML-escape the result.
+ * Requires a string with an explicit HTTP(S) scheme, a parseable URL,
+ * a hostname, and no parsed username or password. After trimming,
+ * rejects ASCII spaces, C0 control characters, DEL, and backslashes.
+ *
+ * Returns the trimmed input without URL normalization or HTML escaping.
+ * Does not restrict hosts, require a different origin, or verify the
+ * destination's availability or trustworthiness.
+ *
+ * @param {*} value URL candidate to validate.
+ * @return {?string} Trimmed original URL when permitted, or null when
+ *     the input is invalid or URL parsing fails.
  */
 export function safeWebUrl(value) {
   if (typeof value !== 'string') return null;
@@ -39,7 +54,7 @@ export function safeWebUrl(value) {
   // Require an explicit HTTP(S) scheme and authority.
   if (!/^https?:\/\//i.test(raw)) return null;
 
-  // Reject internal whitespace, control characters, and backslashes.
+  // Reject ASCII spaces, C0 controls, DEL, and backslashes.
   // eslint-disable-next-line no-control-regex -- intentional: blocks C0/DEL
   if (/[\u0000-\u0020\u007f\\]/.test(raw)) return null;
 
