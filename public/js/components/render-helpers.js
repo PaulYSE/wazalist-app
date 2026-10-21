@@ -419,30 +419,187 @@ export function oembedEndpoint(url) {
 // Fetch oEmbed for a single URL and update all matching DOM spans in the detail panel
 
 /**
- * @brief Fetches oEmbed metadata for a URL and updates DOM.
+ * Fetches and caches video metadata, then updates matching DOM elements.
  *
- * @param {string} url - Video URL.
- * @return {Promise<void>}
+ * Shares in-flight work between callers. Retries network failures,
+ * timeouts, HTTP 408, and HTTP 5xx up to three total attempts, with
+ * one-second and two-second delays.
+ *
+ * HTTP 429 defers retries according to Retry-After, with a minimum
+ * 30-second cooldown. Exhausted temporary failures also receive a
+ * 30-second cooldown. A later call is required to start another cycle.
+ *
+ * Unsupported URLs, other HTTP errors, and malformed metadata remain
+ * failed for the page lifetime. Cached successes are reused.
+ *
+ * @param {string} url Video URL whose metadata should be fetched.
+ * @return {!Promise<void>} Resolves after shared work and its DOM update,
+ *     or immediately when no request is needed. Request failures are
+ *     represented by the failed cache state, not a rejected promise.
  */
 export async function fetchOembed(url) {
-  if (oembedCache.has(url)) return;
-  oembedCache.set(url, 'pending');
-  const endpoint = oembedEndpoint(url);
-  if (!endpoint) {
-    oembedCache.set(url, 'failed');
+  const pending = oembedInFlight.get(url);
+  if (pending) return pending;
+
+  const cached = oembedCache.get(url);
+
+  if (cached && cached !== 'pending' && cached !== 'failed') {
     applyOembedToDOM(url);
     return;
   }
-  try {
-    const r = await fetch(endpoint, { signal: AbortSignal.timeout(5000) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const d = await r.json();
-    const meta = { title: d.title || '', author: d.author_name || '' };
-    oembedCache.set(url, meta);
-  } catch {
-    oembedCache.set(url, 'failed');
+
+  if (
+    cached === 'failed' &&
+    Date.now() < (oembedRetryAt.get(url) || 0)
+  ) {
+    applyOembedToDOM(url);
+    return;
   }
-  applyOembedToDOM(url);
+
+  const operation = (async () => {
+    // Defer execution until the shared promise has been registered.
+    await Promise.resolve();
+
+    oembedCache.set(url, 'pending');
+
+    // Default to terminal failure unless a temporary failure is detected.
+    let retryAt = Infinity;
+
+    try {
+      const endpoint = oembedEndpoint(url);
+      if (!endpoint) return;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        let response;
+
+        try {
+          response = await fetch(endpoint, {
+            signal: AbortSignal.timeout(5000),
+          });
+        } catch {
+          retryAt = Date.now() + 30000;
+
+          if (attempt === 3) return;
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, attempt * 1000);
+          });
+          continue;
+        }
+
+        if (response.status === 429) {
+          const header = response.headers.get('Retry-After');
+          let delay = 30000;
+
+          if (header !== null) {
+            const value = header.trim();
+
+            if (/^\d+$/.test(value)) {
+              const milliseconds = Number(value) * 1000;
+
+              if (Number.isFinite(milliseconds)) {
+                delay = Math.max(delay, milliseconds);
+              }
+            } else {
+              const date = Date.parse(value);
+
+              if (Number.isFinite(date)) {
+                delay = Math.max(delay, date - Date.now());
+              }
+            }
+          }
+
+          retryAt = Date.now() + delay;
+          return;
+        }
+
+        if (!response.ok) {
+          const temporary =
+            response.status === 408 ||
+            (response.status >= 500 && response.status <= 599);
+
+          if (!temporary) {
+            retryAt = Infinity;
+            return;
+          }
+
+          retryAt = Date.now() + 30000;
+
+          if (attempt === 3) return;
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, attempt * 1000);
+          });
+          continue;
+        }
+
+        let data;
+
+        try {
+          data = await response.json();
+        } catch (error) {
+          // Invalid JSON is terminal; body-read/network failures may retry.
+          if (error instanceof SyntaxError) {
+            retryAt = Infinity;
+            return;
+          }
+
+          retryAt = Date.now() + 30000;
+
+          if (attempt === 3) return;
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, attempt * 1000);
+          });
+          continue;
+        }
+
+        if (
+          !data ||
+          typeof data !== 'object' ||
+          Array.isArray(data) ||
+          data.error
+        ) {
+          retryAt = Infinity;
+          return;
+        }
+
+        const meta = {
+          title: typeof data.title === 'string' ? data.title : '',
+          author:
+            typeof data.author_name === 'string'
+              ? data.author_name
+              : '',
+        };
+
+        if (!meta.title.trim() && !meta.author.trim()) {
+          retryAt = Infinity;
+          return;
+        }
+
+        oembedCache.set(url, meta);
+        oembedRetryAt.delete(url);
+        return;
+      }
+    } catch {
+      // Includes endpoint-construction failures.
+      retryAt = Infinity;
+    } finally {
+      if (oembedCache.get(url) === 'pending') {
+        oembedCache.set(url, 'failed');
+        oembedRetryAt.set(url, retryAt);
+      }
+    }
+  })();
+
+  oembedInFlight.set(url, operation);
+
+  try {
+    await operation;
+  } finally {
+    oembedInFlight.delete(url);
+    applyOembedToDOM(url);
+  }
 }
 
 // Update the DOM spans for a specific URL after metadata arrives
@@ -472,20 +629,19 @@ export function applyOembedToDOM(url) {
 // Kick off oEmbed fetches for all videos of a waza (called after renderDetail)
 
 /**
- * @brief Prefetches oEmbed metadata for all videos of a waza.
+ * Starts metadata retrieval for video URLs without awaiting completion.
  *
- * @param {Array<Object>} vids - Array of video objects with 'url' property.
+ * Applies completed cache entries immediately. Failed entries are passed
+ * to fetchOembed(), which enforces retry eligibility and cooldowns.
+ *
+ * @param {!Array<{url: string}>} vids Videos whose metadata is needed.
  * @return {void}
  */
 export function prefetchOembeds(vids) {
-  vids.forEach((v) => {
-    const cached = oembedCache.get(v.url);
-    if (cached && cached !== 'pending') {
-      // Already have data — apply immediately (DOM was just rebuilt)
-      applyOembedToDOM(v.url);
-    } else {
-      fetchOembed(v.url);
-    }
+  vids.forEach((video) => {
+    void fetchOembed(video.url).catch((error) => {
+      console.warn('oEmbed metadata update failed:', error);
+    });
   });
 }
 
