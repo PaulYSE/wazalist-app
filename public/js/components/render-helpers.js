@@ -615,7 +615,7 @@ export function videoKey(url) {
         : path.match(/^\/(BV[A-Za-z0-9]+)(?:\/|$)/i);
 
       if (bvMatch) {
-        return 'bili:' + bvMatch[1].toLowerCase();
+        return 'bili:' + bvMatch[1];
       }
 
       const avMatch = isBilibili
