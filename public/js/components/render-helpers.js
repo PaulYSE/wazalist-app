@@ -569,6 +569,24 @@ export function cardLikePill(w, p) {
   );
 }
 
+/**
+ * Builds a comparison key from a recognized video ID or serialized URL.
+ *
+ * Recognized YouTube, Bilibili, NicoNico, and Twitter/X video formats
+ * use platform-prefixed IDs, ignoring timestamps and other URL components.
+ * Extracted BV identifiers retain their original case.
+ *
+ * Other valid HTTP(S) URLs use a raw-prefixed serialized URL, preserving
+ * path case, query parameters, and fragments. URL serialization may
+ * normalize components; the original input is not preserved verbatim.
+ *
+ * Does not resolve redirects, convert between BV and AV identifiers,
+ * or verify that different URLs identify the same video.
+ *
+ * @param {string} url Video URL to inspect.
+ * @return {?string} Comparison key, or null for empty, invalid, or
+ *     non-HTTP(S) input.
+ */
 export function videoKey(url) {
   if (typeof url !== 'string' || !url.trim()) return null;
 
