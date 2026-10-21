@@ -605,9 +605,17 @@ export async function fetchOembed(url) {
 // Update the DOM spans for a specific URL after metadata arrives
 
 /**
- * @brief Applies cached oEmbed metadata to DOM elements.
+ * Applies cached metadata to matching video elements throughout the document.
  *
- * @param {string} url - Video URL.
+ * Matches video-title elements by exact data-url equality. Successful
+ * metadata updates nonempty titles and associated author text using
+ * textContent, then removes the title's loading class.
+ *
+ * Failed metadata only removes the loading class. Missing or pending
+ * metadata leaves the DOM unchanged. Empty metadata fields preserve
+ * existing displayed text.
+ *
+ * @param {string} url Exact cache key and data-url value to update.
  * @return {void}
  */
 export function applyOembedToDOM(url) {
