@@ -165,26 +165,33 @@ export function platform(url) {
 // Helper: extract timestamp from URL (handles ?t=90, &t=90, #t=1m30s)
 
 /**
- * @brief Extracts timestamp parameter from video URL.
+ * Extracts the first t parameter and converts its value to seconds.
  *
- * Supports formats: ?t=90, &t=90s, ?t=1m30s, etc.
+ * Supports integer seconds with an optional s suffix, minutes with an m
+ * suffix, and combined minutes and seconds, such as 90, 90s, 2m, or 1m30s.
+ * Recognizes t at the start of the input or after ?, &, or #.
  *
- * @param {string} url - Video URL.
- * @return {number|null} Timestamp in seconds, or null if not found.
+ * @param {string} url URL or parameter string to inspect.
+ * @return {?number} Nonnegative safe-integer seconds, or null if the
+ *     parameter is absent, malformed, or exceeds the safe-integer range.
  */
 export function extractTimestamp(url) {
-  // Seconds format: ?t=90 or &t=90s
-  let m = url.match(/(?:\?|&)t=(\d+)s?/);
-  if (m) return parseInt(m[1]);
+  const match = url.match(/(?:^|[?&#])t=([^&#]*)/);
+  if (!match) return null;
 
-  // Minutes:seconds format: ?t=1m30s or &t=2m
-  m = url.match(/(?:\?|&)t=(?:(\d+)m)?(\d+)s?/);
-  if (m) {
-    const min = m[1] ? parseInt(m[1]) : 0;
-    const sec = m[2] ? parseInt(m[2]) : 0;
-    return min * 60 + sec;
+  const value = match[1];
+  let seconds;
+
+  if (/^\d+s?$/.test(value)) {
+    seconds = Number(value.replace(/s$/, ''));
+  } else {
+    const units = value.match(/^(\d+)m(?:(\d+)s)?$/);
+    if (!units) return null;
+
+    seconds = Number(units[1]) * 60 + Number(units[2] || 0);
   }
-  return null;
+
+  return Number.isSafeInteger(seconds) ? seconds : null;
 }
 
 // Embed URL resolver — returns null for platforms with no iframe support
