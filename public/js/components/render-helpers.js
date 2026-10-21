@@ -329,25 +329,37 @@ export const oembedCache = new Map();
 // oEmbed endpoint resolvers — returns a fetch URL or null if unsupported
 
 /**
- * @brief Returns oEmbed endpoint URL for a given video URL.
+ * Builds a metadata endpoint URL for a recognized video platform.
  *
- * @param {string} url - Video URL.
- * @return {string|null} oEmbed API endpoint or null.
+ * Uses platform() for hostname-based classification. Routes YouTube
+ * URLs to its oEmbed endpoint and NicoNico, Bilibili, and Twitter/X
+ * URLs to noembed. Encodes the original input URL unchanged.
+ *
+ * Does not fetch metadata, validate video paths, or resolve redirects.
+ * A returned endpoint does not guarantee metadata availability.
+ *
+ * @param {string} url Absolute HTTP(S) video URL.
+ * @return {?string} Metadata endpoint URL, or null for invalid URLs,
+ *     unsupported protocols, or platforms without a configured endpoint.
  */
 export function oembedEndpoint(url) {
-  if (!url) return null;
-  // YouTube
-  if (/youtu\.be|youtube\.com/.test(url))
-    return 'https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json';
-  // NicoNico
-  if (/nicovideo\.jp|nico\.ms/.test(url))
-    return 'https://noembed.com/embed?url=' + encodeURIComponent(url);
-  // Bilibili — no public oEmbed; noembed covers some
-  if (/bilibili\.com|b23\.tv/.test(url))
-    return 'https://noembed.com/embed?url=' + encodeURIComponent(url);
-  // Twitter/X — noembed
-  if (/twitter\.com|x\.com/.test(url))
-    return 'https://noembed.com/embed?url=' + encodeURIComponent(url);
+  const pl = platform(url);
+
+  if (pl === 'yt') {
+    return (
+      'https://www.youtube.com/oembed?url=' +
+      encodeURIComponent(url) +
+      '&format=json'
+    );
+  }
+
+  if (['nico', 'bili', 'tw'].includes(pl)) {
+    return (
+      'https://noembed.com/embed?url=' +
+      encodeURIComponent(url)
+    );
+  }
+
   return null;
 }
 
