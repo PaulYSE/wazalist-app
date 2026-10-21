@@ -147,18 +147,73 @@ export const markingPips = (markings) =>
   ).join('');
 
 /**
- * @brief Detects video platform from URL.
+ * Parses an absolute HTTP(S) URL.
  *
- * @param {string} url - Video URL.
- * @return {string} Platform identifier: 'yt', 'bili', 'tw', 'nico', 'fb', or 'other'.
+ * Uses browser URL parsing without validating destination trust,
+ * credentials, or video-specific paths.
+ *
+ * @param {string} url URL to parse.
+ * @return {?URL} Parsed HTTP(S) URL, or null for invalid input or
+ *     an unsupported protocol.
+ */
+function parseVideoWebUrl(url) {
+  if (typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url);
+
+    return ['http:', 'https:'].includes(parsed.protocol)
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Checks whether a normalized hostname is a domain or its subdomain.
+ *
+ * @param {string} hostname Normalized hostname from a parsed URL.
+ * @param {string} domain Lowercase domain to match.
+ * @return {boolean} Whether the hostname matches the domain boundary.
+ */
+function hostnameMatches(hostname, domain) {
+  return (
+    hostname === domain ||
+    hostname.endsWith('.' + domain)
+  );
+}
+
+/**
+ * Identifies a video platform from an absolute HTTP(S) URL's hostname.
+ *
+ * Accepts configured domains and their subdomains. Does not inspect
+ * video paths or resolve redirects.
+ *
+ * @param {string} url Video URL to classify.
+ * @return {string} Platform identifier: yt, bili, tw, nico, fb, or
+ *     other for invalid URLs, unsupported protocols, or unknown hosts.
  */
 export function platform(url) {
-  if (!url) return 'other';
-  if (/youtu\.be|youtube\.com/.test(url)) return 'yt';
-  if (/bilibili\.com|b23\.tv/.test(url)) return 'bili';
-  if (/twitter\.com|x\.com/.test(url)) return 'tw';
-  if (/nicovideo\.jp|nico\.ms/.test(url)) return 'nico';
-  if (/facebook\.com|fb\.com/.test(url)) return 'fb';
+  const parsed = parseVideoWebUrl(url);
+  if (!parsed) return 'other';
+
+  const host = parsed.hostname;
+
+  const groups = [
+    ['yt', ['youtu.be', 'youtube.com']],
+    ['bili', ['bilibili.com', 'b23.tv']],
+    ['tw', ['twitter.com', 'x.com']],
+    ['nico', ['nicovideo.jp', 'nico.ms']],
+    ['fb', ['facebook.com', 'fb.com']],
+  ];
+
+  for (const [key, domains] of groups) {
+    if (domains.some((domain) => hostnameMatches(host, domain))) {
+      return key;
+    }
+  }
+
   return 'other';
 }
 
