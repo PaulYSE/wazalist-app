@@ -673,11 +673,17 @@ export function videoKey(url) {
 }
 
 /**
- * @brief Whether two video URLs refer to the same video (timestamp-insensitive).
+ * Checks whether two URLs produce the same non-null video comparison key.
  *
- * @param {string} a - First URL.
- * @param {string} b - Second URL.
- * @return {boolean} True if both resolve to the same video identity.
+ * Uses videoKey() for both inputs. Recognized video IDs ignore timestamp
+ * differences; fallback URL keys preserve query parameters and fragments.
+ * Returns false if either input produces a null key.
+ *
+ * Does not independently verify that the URLs identify the same video.
+ *
+ * @param {string} a First video URL.
+ * @param {string} b Second video URL.
+ * @return {boolean} Whether both URLs produce the same non-null key.
  */
 export function sameVideo(a, b) {
   const ka = videoKey(a);
