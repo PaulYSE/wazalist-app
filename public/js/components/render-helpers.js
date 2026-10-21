@@ -1,10 +1,15 @@
 /**
- * @file render-helpers.js
- * @author Paul Yong Shao En
- * @email paulyse99@gmail.com
- * @project Wazalist App
- * @date 2026-06-10
- * @brief Shared rendering utilities for marking styles/pips, video platform detection, oEmbed handling, and UI components like video buttons and like pills.
+  * @file render-helpers.js
+  * @author Paul Yong Shao En
+  * @email paulyse99@gmail.com
+  * @project Wazalist App
+  * @date 2026-10-21
+  * @fileoverview Shared helpers for marking styles, marking indicators,
+  * video links, embed URLs, metadata retrieval, and video comparison keys.
+  *
+  * Reads application state and the active document theme. Maintains
+  * in-memory caches, retrieves video metadata with bounded retries,
+  * and updates matching video metadata elements in the document.
  */
 
 import {
@@ -26,11 +31,12 @@ import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 const _msCache = new Map();
 
 /**
- * @brief Returns the active resolved theme name ('light' | 'dark' | 'slate').
- *        Reads the data-theme attribute set by the theme system; defaults to a
- *        dark-family treatment if unset.
+ * Reads the current theme name from the document's data-theme attribute.
  *
- * @return {string} Resolved theme name.
+ * Returns dark when the attribute is absent or empty. Does not validate
+ * the theme name against THEME_REGISTRY.
+ *
+ * @return {string} Nonempty theme attribute value, or dark as the fallback.
  */
 function activeTheme() {
   return document.documentElement.dataset.theme || 'dark';
@@ -42,13 +48,16 @@ const _tierByTheme = Object.fromEntries(
 );
 
 /**
- * @brief Computes marking style with memoization (theme-aware).
+ * Returns cached marking styles for the current theme's marking tier.
  *
- * The cache is keyed by theme + markings, so switching themes yields fresh
- * styles rather than stale ones computed for the previous theme.
+ * Combines active marking hues and adjusts styling by tier. Themes
+ * sharing a tier reuse cached results for the same marking combination.
+ * Returns empty class and style strings when no markings are active.
  *
- * @param {Array<boolean>} markings - Array of 6 boolean marking states.
- * @return {Object} Object containing CSS class and inline style string.
+ * The returned object is shared with the cache and must not be modified.
+ *
+ * @param {!Array<boolean>} markings Six marking states in SHAPES order.
+ * @return {{cls: string, style: string}} CSS class and inline style text.
  */
 export function markingStyle(markings) {
   const theme = activeTheme();
@@ -77,15 +86,18 @@ const MARKING_TIERS = {
 const DEFAULT_TIER = 'deep';
 
 /**
- * @brief Computes marking style without memoization (theme-tier aware).
+ * Computes marking colors for a theme tier without caching.
  *
- * Hues are fixed (SHAPES_HUES, circular-mean blend). Saturation, fill lightness,
- * and border lightness are driven by the active theme's tier, so tints stay
- * prominent against each theme's particular background.
+ * Blends active SHAPES_HUES using a circular mean. Adjusts saturation,
+ * background lightness, and left-border lightness using the tier settings
+ * and number of active markings.
  *
- * @param {Array<boolean>} markings - Array of 6 boolean marking states.
- * @param {string} tier - The active theme's marking tier.
- * @return {Object} { cls, style }.
+ * Returns empty class and style strings when no markings are active.
+ *
+ * @param {!Array<boolean>} markings Six marking states in SHAPES order.
+ * @param {string} tier Configured marking tier.
+ * @return {{cls: string, style: string}} CSS class and inline background
+ *     and left-border color declarations.
  */
 function _computeMarkingStyle(markings, tier) {
   const active = (markings || []).map((on, i) => (on ? i : -1)).filter((i) => i >= 0);
@@ -129,10 +141,14 @@ function _computeMarkingStyle(markings, tier) {
 }
 
 /**
- * @brief Generates HTML for marking pips.
+ * Builds HTML spans representing active and inactive markings.
  *
- * @param {Array<boolean>} markings - Array of 6 boolean marking states.
- * @return {string} HTML string of pip spans.
+ * Generates one span per SHAPES entry and adds the on class for active
+ * markings. Uses HTML-escaped titles from state.markingLabels, falling
+ * back to "Marking 1", "Marking 2", and so on for missing or empty labels.
+ *
+ * @param {!Array<boolean>} markings Six marking states in SHAPES order.
+ * @return {string} Concatenated marking-span HTML without a container.
  */
 export const markingPips = (markings) =>
   SHAPES.map(
@@ -364,18 +380,26 @@ export function embedUrl(url) {
 // Per-session embed cache: wazaId → array of resolved video objects
 
 /**
- * @brief Cache for embed data keyed by waza ID.
+ * Shared in-memory cache for video embed data.
  *
- * @type {Map<number, Array>}
+ * This module declares the cache; consuming modules populate and read it.
+ * Not persisted across page reloads.
+ *
+ * @type {!Map<number, *>}
  */
 export const embedCache = new Map();
 
 // Per-session oEmbed metadata cache: url → { title, author } | 'pending' | 'failed'
 
 /**
- * @brief Cache for oEmbed metadata keyed by URL.
+ * Stores video metadata or retrieval state by exact input URL.
  *
- * @type {Map<string, Object|string>}
+ * Values are metadata objects, pending, or failed. Retry eligibility
+ * and in-flight operations are tracked separately.
+ *
+ * Held in module memory; not persisted across page reloads.
+ *
+ * @type {!Map<string, ({title: string, author: string}|'pending'|'failed')>}
  */
 export const oembedCache = new Map();
 
@@ -654,10 +678,18 @@ export function prefetchOembeds(vids) {
 }
 
 /**
- * @brief Generates video button HTML for a waza.
+ * Builds external video-link buttons for a Waza.
  *
- * @param {Object} w - Waza object containing video0..video9 fields.
- * @return {string} HTML string of video buttons.
+ * Reads video0 through video9 in order and retains URLs permitted by
+ * safeWebUrl(). Escapes URLs for HTML attributes and numbers the retained
+ * links consecutively, using platform() for their labels and colors.
+ *
+ * Links open in a new tab with noopener and stop click propagation
+ * through an inline event handler.
+ *
+ * @param {!Object} w Waza containing optional video0 through video9 fields.
+ * @return {string} Video-button container HTML, or an empty string when
+ *     no permitted video URLs remain.
  */
 export function videoButtons(w) {
   const vids = [
@@ -705,11 +737,18 @@ export function videoButtons(w) {
 // Mini like/dislike pill for list/card views
 
 /**
- * @brief Generates like/dislike pill HTML for list/card views.
+ * Builds a like/dislike summary pill for a Waza card.
  *
- * @param {Object} w - Waza object with like_count and dislike_count.
- * @param {Object} p - Progress object with like property.
- * @return {string} HTML string of like/dislike pill.
+ * Defaults missing or falsy counts to zero and highlights the user's
+ * preference using LIKE_UP and LIKE_DOWN. Returns an empty string when
+ * both counts are falsy and the preference is exactly null.
+ *
+ * Counts are inserted directly into HTML and must be trusted numbers.
+ *
+ * @param {!Object} w Waza containing numeric like_count and dislike_count.
+ * @param {!Object} p Progress containing like: LIKE_UP, LIKE_DOWN, or null.
+ * @return {string} Summary pill HTML, or an empty string when there are
+ *     no counts and the user has no preference.
  */
 export function cardLikePill(w, p) {
   const lc = w.like_count || 0,
