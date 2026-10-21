@@ -569,38 +569,87 @@ export function cardLikePill(w, p) {
   );
 }
 
-/**
- * @brief Canonical identity key for a video URL — platform + id, ignoring
- *        timestamps, query params, and short/long URL form. Two URLs pointing
- *        at the same video (e.g. youtu.be/X and youtube.com/watch?v=X&t=90)
- *        produce the same key. Falls back to a normalized raw URL for
- *        platforms without an extractable id.
- *
- * @param {string} url - Video URL.
- * @return {string|null} Identity key like "yt:dRJkbHvHli4", or null for empty input.
- */
 export function videoKey(url) {
   if (!url || !url.trim()) return null;
+
   const u = url.trim();
+  const parsed = parseVideoWebUrl(u);
 
-  let m = u.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/,
-  );
-  if (m) return 'yt:' + m[1];
+  if (parsed) {
+    const host = parsed.hostname;
+    const path = parsed.pathname;
 
-  m = u.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
-  if (m) return 'bili:' + m[1].toLowerCase();
+    // YouTube.
+    let youtubeId = null;
 
-  m = u.match(/bilibili\.com\/video\/av(\d+)/i);
-  if (m) return 'bili:av' + m[1];
+    if (hostnameMatches(host, 'youtu.be')) {
+      const match = path.match(
+        /^\/([A-Za-z0-9_-]{11})(?:\/|$)/,
+      );
+      youtubeId = match ? match[1] : null;
+    } else if (hostnameMatches(host, 'youtube.com')) {
+      if (path === '/watch') {
+        const candidate = parsed.searchParams.get('v');
 
-  m = u.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)((?:sm|nm|so)\d+)/);
-  if (m) return 'nico:' + m[1];
+        if (candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate)) {
+          youtubeId = candidate;
+        }
+      } else {
+        const match = path.match(
+          /^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/,
+        );
+        youtubeId = match ? match[1] : null;
+      }
+    }
 
-  m = u.match(/(?:twitter\.com|x\.com)\/[^/]+\/status\/(\d+)/i);
-  if (m) return 'tw:' + m[1];
+    if (youtubeId) return 'yt:' + youtubeId;
 
-  // Fallback: strip protocol, www, trailing slash, and query/hash, lowercase.
+    // Bilibili.
+    const isBilibili = hostnameMatches(host, 'bilibili.com');
+    const isB23 = hostnameMatches(host, 'b23.tv');
+
+    if (isBilibili || isB23) {
+      const bvMatch = isBilibili
+        ? path.match(/^\/video\/(BV[A-Za-z0-9]+)(?:\/|$)/i)
+        : path.match(/^\/(BV[A-Za-z0-9]+)(?:\/|$)/i);
+
+      if (bvMatch) {
+        return 'bili:' + bvMatch[1].toLowerCase();
+      }
+
+      const avMatch = isBilibili
+        ? path.match(/^\/video\/av(\d+)(?:\/|$)/i)
+        : null;
+
+      if (avMatch) return 'bili:av' + avMatch[1];
+    }
+
+    // NicoNico.
+    const isNicoVideo = hostnameMatches(host, 'nicovideo.jp');
+    const isNicoShort = hostnameMatches(host, 'nico.ms');
+
+    if (isNicoVideo || isNicoShort) {
+      const match = isNicoVideo
+        ? path.match(/^\/watch\/((?:sm|nm|so)\d+)(?:\/|$)/)
+        : path.match(/^\/((?:sm|nm|so)\d+)(?:\/|$)/);
+
+      if (match) return 'nico:' + match[1];
+    }
+
+    // Twitter/X.
+    if (
+      hostnameMatches(host, 'twitter.com') ||
+      hostnameMatches(host, 'x.com')
+    ) {
+      const match = path.match(
+        /^\/[^/]+\/status\/(\d+)(?:\/|$)/,
+      );
+
+      if (match) return 'tw:' + match[1];
+    }
+  }
+
+  // Existing fallback preserved pending a separate identity-policy review.
   return (
     'raw:' +
     u
