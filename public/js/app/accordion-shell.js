@@ -1,37 +1,52 @@
 /**
- * @file app/accordion-shell.js
+ * @fileoverview Builds accordion markup and updates accordion DOM classes.
+ *
+ * Event wiring, animation styles, and application-state synchronization
+ * are managed by consuming modules.
+ *
  * @author Paul Yong Shao En
- * @email paulyse99@gmail.com
- * @project Wazalist App
- * @date 2026-06-22
- * @brief Unified accordion shell builder. Produces the animated collapsible section HTML used by Stats, Account, Compare, and Waza Detail tabs.
  */
 
+import { escapeHtml } from '../lib/escape.js';
+
 /**
- * @brief Builds an accordion section HTML string.
+ * Builds an accordion section without attaching event handlers.
  *
- * @param {string}  key        - Unique identifier for this accordion section.
- * @param {string}  label      - Header text displayed in the toggle bar.
- * @param {string}  bodyHtml   - Inner HTML rendered inside the collapsible body.
- * @param {Object}  [opts]     - Optional configuration.
- * @param {boolean} [opts.open=false]     - Whether the section starts expanded.
- * @param {boolean} [opts.visible=true]   - Whether the outer wrapper is visible.
- * @param {string}  [opts.wrapper='dsec2'] - CSS class for the outer wrapper.
- * @return {string} HTML string for the accordion section.
+ * Escapes the section key and wrapper classes for HTML attributes.
+ * Inserts label and bodyHtml as HTML; callers must supply trusted or
+ * appropriately sanitized markup and escape dynamic text within it.
+ *
+ * Expansion classes and wrapper visibility are independent. Animation
+ * and collapsed-content visibility depend on external CSS.
+ *
+ * @param {string} key Section identifier stored in data-acc.
+ * @param {string} label Trusted or sanitized heading HTML.
+ * @param {string} bodyHtml Trusted or sanitized body HTML.
+ * @param {{
+ *   open: (boolean|undefined),
+ *   visible: (boolean|undefined),
+ *   wrapper: (string|undefined)
+ * }=} opts Configuration. Defaults to closed, visible, and wrapper
+ *     class dsec2. Individual properties may be omitted.
+ * @return {string} Accordion section HTML.
  */
 export function buildAccordion(key, label, bodyHtml, opts = {}) {
-  const { open = false, visible = true, wrapper = 'dsec2' } = opts;
+  const {
+    open = false,
+    visible = true,
+    wrapper = 'dsec2',
+  } = opts;
 
   return (
     '<div class="' +
-    wrapper +
+    escapeHtml(wrapper) +
     '"' +
     (visible ? '' : ' style="display:none"') +
     '>' +
     '<div class="dsec-toggle acc-toggle' +
     (open ? '' : ' collapsed') +
     '" data-acc="' +
-    key +
+    escapeHtml(key) +
     '">' +
     '<h3 style="margin-bottom:0;border-bottom:none;padding-bottom:0">' +
     label +
@@ -49,14 +64,18 @@ export function buildAccordion(key, label, bodyHtml, opts = {}) {
 }
 
 /**
- * @brief Toggles an accordion open/closed by toggling CSS classes on the DOM.
+ * Sets an accordion's expansion classes without rebuilding its markup.
  *
- * Used when the accordion already exists in the DOM and you want to animate
- * it without rebuilding innerHTML. For mutually-exclusive accordions, call
- * closeAllAccordions() first, then this on the target.
+ * Requires a toggle element whose next element sibling is its body.
+ * A missing sibling is tolerated. Does not update wrapper visibility,
+ * application state, or persisted preferences.
  *
- * @param {HTMLElement} toggleEl - The .acc-toggle element that was clicked.
- * @param {boolean} open - Whether to open (true) or close (false).
+ * To open one section exclusively, close the container's accordions
+ * first. For exclusive click-to-toggle behavior, capture the target's
+ * previous expansion state before closing the other sections.
+ *
+ * @param {!HTMLElement} toggleEl Accordion toggle element.
+ * @param {boolean} open Whether to expand or collapse the section.
  * @return {void}
  */
 export function toggleAccordionDOM(toggleEl, open) {
@@ -65,9 +84,16 @@ export function toggleAccordionDOM(toggleEl, open) {
 }
 
 /**
- * @brief Closes all accordion sections inside a container.
+ * Removes expansion classes from accordion descendants of a container.
  *
- * @param {HTMLElement} container - Parent element containing .acc-toggle elements.
+ * Includes nested accordion toggles but not the container itself.
+ * Assumes each toggle's next element sibling is its body; a missing
+ * sibling is tolerated.
+ *
+ * Does not update wrapper visibility, application state, or persisted
+ * preferences. Visual collapsing and animation depend on external CSS.
+ *
+ * @param {!HTMLElement} container Container whose accordions should close.
  * @return {void}
  */
 export function closeAllAccordions(container) {
