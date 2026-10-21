@@ -570,10 +570,11 @@ export function cardLikePill(w, p) {
 }
 
 export function videoKey(url) {
-  if (!url || !url.trim()) return null;
+  if (typeof url !== 'string' || !url.trim()) return null;
 
   const u = url.trim();
   const parsed = parseVideoWebUrl(u);
+  if (!parsed) return null;
 
   if (parsed) {
     const host = parsed.hostname;
@@ -650,15 +651,7 @@ export function videoKey(url) {
   }
 
   // Existing fallback preserved pending a separate identity-policy review.
-  return (
-    'raw:' +
-    u
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .replace(/[?#].*$/, '')
-      .replace(/\/+$/, '')
-      .toLowerCase()
-  );
+  return 'raw:' + parsed.href;
 }
 
 /**
