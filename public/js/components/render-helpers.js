@@ -252,59 +252,112 @@ export function extractTimestamp(url) {
 // Embed URL resolver — returns null for platforms with no iframe support
 
 /**
- * @brief Converts video URL to embeddable iframe URL.
+ * Builds an iframe URL for a recognized video URL format.
  *
- * Supports YouTube, Bilibili, and NicoNico. Returns null for platforms without iframe support (Twitter/X).
+ * Supports YouTube watch, short-link, shorts, and embed paths;
+ * Bilibili BV/av paths and BV-shaped b23.tv paths; and NicoNico
+ * watch/short-link paths. Does not resolve short-link redirects.
  *
- * @param {string} url - Video URL.
- * @return {string|null} Embed URL or null.
+ * Applies timestamps recognized by extractTimestamp(). A generated
+ * URL does not guarantee that the video exists or permits embedding.
+ *
+ * @param {string} url Absolute HTTP(S) video URL.
+ * @return {?string} Embed URL, or null for invalid URLs, unsupported
+ *     hosts, or unrecognized video paths.
  */
 export function embedUrl(url) {
-  if (!url) return null;
+  const parsed = parseVideoWebUrl(url);
+  if (!parsed) return null;
 
-  // Handle timestamp for URLs that support it (YouTube, Bilibili)
+  const host = parsed.hostname;
+  const path = parsed.pathname;
   const timestamp = extractTimestamp(url);
+  const hasTimestamp = timestamp !== null;
 
-  // YouTube
-  let m = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/,
-  );
-  if (m)
+  // YouTube.
+  let youtubeId = null;
+
+  if (hostnameMatches(host, 'youtu.be')) {
+    const match = path.match(
+      /^\/([A-Za-z0-9_-]{11})(?:\/|$)/,
+    );
+    youtubeId = match ? match[1] : null;
+  } else if (hostnameMatches(host, 'youtube.com')) {
+    if (path === '/watch') {
+      const candidate = parsed.searchParams.get('v');
+
+      if (candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate)) {
+        youtubeId = candidate;
+      }
+    } else {
+      const match = path.match(
+        /^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/,
+      );
+      youtubeId = match ? match[1] : null;
+    }
+  }
+
+  if (youtubeId) {
     return (
       'https://www.youtube-nocookie.com/embed/' +
-      m[1] +
+      youtubeId +
       '?rel=0&modestbranding=1' +
-      (timestamp ? '&start=' + timestamp : '')
+      (hasTimestamp ? '&start=' + timestamp : '')
     );
-  // Bilibili BV
-  m = url.match(/(?:bilibili\.com\/video\/|b23\.tv\/)(BV[A-Za-z0-9]+)/i);
-  if (m)
-    return (
-      'https://player.bilibili.com/player.html?bvid=' +
-      m[1] +
-      '&high_quality=1&danmaku=0' +
-      (timestamp ? '&t=' + timestamp : '')
-    );
-  // Bilibili av
-  m = url.match(/bilibili\.com\/video\/av(\d+)/i);
-  if (m)
-    return (
-      'https://player.bilibili.com/player.html?aid=' +
-      m[1] +
-      '&high_quality=1&danmaku=0' +
-      (timestamp ? '&t=' + timestamp : '')
-    );
-  // NicoNico
-  m = url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)((?:sm|nm|so)\d+)/);
-  if (m) {
-    let embed =
-      'https://embed.nicovideo.jp/watch/' +
-      m[1] +
-      '?oldScript=1&referer=&from=0&allowProgrammaticFullScreen=1';
-    if (timestamp) embed = embed.replace('&from=0', '&from=' + timestamp);
-    return embed;
   }
-  // Twitter/X — no iframe embed support; links open externally via the ↗ button
+
+  // Bilibili.
+  const isBilibili = hostnameMatches(host, 'bilibili.com');
+  const isB23 = hostnameMatches(host, 'b23.tv');
+
+  if (isBilibili || isB23) {
+    const bvMatch = isBilibili
+      ? path.match(/^\/video\/(BV[A-Za-z0-9]+)(?:\/|$)/i)
+      : path.match(/^\/(BV[A-Za-z0-9]+)(?:\/|$)/i);
+
+    if (bvMatch) {
+      return (
+        'https://player.bilibili.com/player.html?bvid=' +
+        bvMatch[1] +
+        '&high_quality=1&danmaku=0' +
+        (hasTimestamp ? '&t=' + timestamp : '')
+      );
+    }
+
+    const avMatch = isBilibili
+      ? path.match(/^\/video\/av(\d+)(?:\/|$)/i)
+      : null;
+
+    if (avMatch) {
+      return (
+        'https://player.bilibili.com/player.html?aid=' +
+        avMatch[1] +
+        '&high_quality=1&danmaku=0' +
+        (hasTimestamp ? '&t=' + timestamp : '')
+      );
+    }
+  }
+
+  // NicoNico.
+  const isNicoVideo = hostnameMatches(host, 'nicovideo.jp');
+  const isNicoShort = hostnameMatches(host, 'nico.ms');
+
+  if (isNicoVideo || isNicoShort) {
+    const match = isNicoVideo
+      ? path.match(/^\/watch\/((?:sm|nm|so)\d+)(?:\/|$)/)
+      : path.match(/^\/((?:sm|nm|so)\d+)(?:\/|$)/);
+
+    if (match) {
+      return (
+        'https://embed.nicovideo.jp/watch/' +
+        match[1] +
+        '?oldScript=1&referer=&from=' +
+        (hasTimestamp ? timestamp : 0) +
+        '&allowProgrammaticFullScreen=1'
+      );
+    }
+  }
+
   return null;
 }
 
