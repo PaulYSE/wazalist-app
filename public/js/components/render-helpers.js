@@ -163,20 +163,35 @@ export const markingPips = (markings) =>
   ).join('');
 
 /**
- * Parses an absolute HTTP(S) URL.
+ * Parses and normalizes an absolute HTTP(S) video URL.
  *
- * Uses browser URL parsing without validating destination trust,
- * credentials, or video-specific paths.
+ * Corrects a legacy malformed YouTube short-link form where the first
+ * query parameter begins with an ampersand, such as:
+ *
+ *   youtu.be/VIDEO_ID&t=90s
+ *
+ * The corrected parsed URL uses:
+ *
+ *   youtu.be/VIDEO_ID?t=90s
+ *
+ * Does not validate destination trust, credentials, or video existence.
  *
  * @param {string} url URL to parse.
- * @return {?URL} Parsed HTTP(S) URL, or null for invalid input or
- *     an unsupported protocol.
+ * @return {?URL} Parsed and normalized HTTP(S) URL, or null for invalid
+ *     input or an unsupported protocol.
  */
 function parseVideoWebUrl(url) {
   if (typeof url !== 'string') return null;
 
+  let normalized = url.trim();
+
+  normalized = normalized.replace(
+    /^(https?:\/\/(?:[^./]+\.)?youtu\.be\/[A-Za-z0-9_-]{11})&(?=[^#]*=)/i,
+    '$1?',
+  );
+
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(normalized);
 
     return ['http:', 'https:'].includes(parsed.protocol)
       ? parsed
@@ -434,22 +449,27 @@ const oembedRetryAt = new Map();
  *
  * Uses platform() for hostname-based classification. Routes YouTube
  * URLs to its oEmbed endpoint and NicoNico, Bilibili, and Twitter/X
- * URLs to noembed. Encodes the original input URL unchanged.
+ * URLs to noembed.
  *
- * Does not fetch metadata, validate video paths, or resolve redirects.
- * A returned endpoint does not guarantee metadata availability.
+ * Normalizes supported legacy URL forms before embedding the source URL
+ * in the metadata request. Does not fetch metadata, validate video paths,
+ * or resolve redirects.
  *
  * @param {string} url Absolute HTTP(S) video URL.
  * @return {?string} Metadata endpoint URL, or null for invalid URLs,
  *     unsupported protocols, or platforms without a configured endpoint.
  */
 export function oembedEndpoint(url) {
-  const pl = platform(url);
+  const parsed = parseVideoWebUrl(url);
+  if (!parsed) return null;
+
+  const normalizedUrl = parsed.href;
+  const pl = platform(normalizedUrl);
 
   if (pl === 'yt') {
     return (
       'https://www.youtube.com/oembed?url=' +
-      encodeURIComponent(url) +
+      encodeURIComponent(normalizedUrl) +
       '&format=json'
     );
   }
@@ -457,7 +477,7 @@ export function oembedEndpoint(url) {
   if (['nico', 'bili', 'tw'].includes(pl)) {
     return (
       'https://noembed.com/embed?url=' +
-      encodeURIComponent(url)
+      encodeURIComponent(normalizedUrl)
     );
   }
 
