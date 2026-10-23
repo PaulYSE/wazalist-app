@@ -403,6 +403,30 @@ export const embedCache = new Map();
  */
 export const oembedCache = new Map();
 
+/**
+ * Tracks metadata requests currently running for each URL.
+ *
+ * Concurrent callers reuse the same promise instead of starting duplicate
+ * request cycles. Entries are removed when their request cycle completes.
+ *
+ * Held in module memory; not persisted across page reloads.
+ *
+ * @type {!Map<string, !Promise<void>>}
+ */
+const oembedInFlight = new Map();
+
+/**
+ * Stores the earliest retry time for failed metadata requests.
+ *
+ * Uses Date.now() timestamps. Infinity marks terminal failures that are not
+ * eligible for another retry during the current page lifetime.
+ *
+ * Held in module memory; not persisted across page reloads.
+ *
+ * @type {!Map<string, number>}
+ */
+const oembedRetryAt = new Map();
+
 // oEmbed endpoint resolvers — returns a fetch URL or null if unsupported
 
 /**
