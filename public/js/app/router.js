@@ -36,19 +36,35 @@ const DEFAULT_TAB = 'browse';
 // ── Route parsing ─────────────────────────────────────────────
 
 /**
- * @brief Parse the current URL into { tab, wazaParam, groupParam }.
+ * Parses the current URL into a recognized tab and applicable detail parameter.
  *
- * wazaParam is the raw ?waza= string (id or JP-name slug) or null,
- * and is only meaningful when tab === 'browse'.
- * groupParam is the raw ?group= string (numeric id) or null,
- * and is only meaningful when tab === 'groups'.
+ * Removes leading and trailing slashes from the pathname and matches the
+ * resulting slug against the configured application routes. Unknown slugs
+ * fall back to the Browse tab.
  *
- * @return {{tab: string, wazaParam: string|null, groupParam: string|null}}
+ * Query parameters are decoded by URLSearchParams but are not validated or
+ * resolved. The Waza parameter is returned only for Browse routes, while the
+ * Group parameter is returned only for Groups routes. A missing parameter
+ * returns null; an explicitly empty parameter returns an empty string.
+ *
+ * Does not modify browser history, activate views, select details, or render
+ * application content.
+ *
+ * @return {{
+ *   tab: string,
+ *   wazaParam: (string|null),
+ *   groupParam: (string|null)
+ * }} Recognized tab and its applicable decoded detail parameter.
  */
 export function parseRoute() {
   const u = new URL(location.href);
   const slug = u.pathname.replace(/^\/+|\/+$/g, '');
-  const tab = SLUG_TO_TAB[slug] || DEFAULT_TAB;
+  const tab = Object.prototype.hasOwnProperty.call(
+    SLUG_TO_TAB,
+    slug,
+  )
+    ? SLUG_TO_TAB[slug]
+    : DEFAULT_TAB;
   const wazaParam = tab === 'browse' ? u.searchParams.get('waza') : null;
   const groupParam = tab === 'groups' ? u.searchParams.get('group') : null;
   return { tab, wazaParam, groupParam };
@@ -57,15 +73,35 @@ export function parseRoute() {
 // ── URL building ──────────────────────────────────────────────
 
 /**
- * @brief Build the URL string for a given view.
+ * Builds an application-relative URL for a tab and optional detail selection.
  *
- * @param {string} tab - Internal tab key.
- * @param {number|null} wazaId - Open waza id, or null (browse only).
- * @param {number|null} groupId - Open group id, or null (groups only).
- * @return {string} Absolute path+query, e.g. "/browse?waza=5" or "/groups?group=3".
+ * Normalizes an unrecognized tab to the Browse route. Adds a Waza parameter
+ * only when the original tab argument is browse, and adds a Group parameter
+ * only when the original tab argument is groups.
+ *
+ * Detail IDs are included when they are not null or undefined. This function
+ * does not validate, encode, or normalize the supplied IDs. It does not
+ * preserve unrelated query parameters or URL fragments and does not modify
+ * browser history or application UI state.
+ *
+ * @param {string} tab Requested internal tab key.
+ * @param {?number=} wazaId Waza ID to include for an explicitly requested
+ *     Browse tab. Defaults to null.
+ * @param {?number=} groupId Group ID to include for an explicitly requested
+ *     Groups tab. Defaults to null.
+ * @return {string} Application-relative path and applicable detail query,
+ *     such as "/browse?waza=5" or "/groups?group=3".
  */
+
 export function buildUrl(tab, wazaId = null, groupId = null) {
-  const slug = TAB_TO_SLUG[tab] || DEFAULT_TAB;
+  const normalizedTab = Object.prototype.hasOwnProperty.call(
+    TAB_TO_SLUG,
+    tab,
+  )
+    ? tab
+    : DEFAULT_TAB;
+  
+  const slug = TAB_TO_SLUG[normalizedTab];
   let url = '/' + slug;
   if (tab === 'browse' && wazaId != null) url += '?waza=' + wazaId;
   if (tab === 'groups' && groupId != null) url += '?group=' + groupId;
@@ -75,27 +111,82 @@ export function buildUrl(tab, wazaId = null, groupId = null) {
 // ── History operations ────────────────────────────────────────
 
 /**
- * @brief Push a new history entry for the given view.
+ * Pushes a normalized application route onto the browser-history stack.
  *
- * @param {string} tab
- * @param {number|null} wazaId
- * @param {number|null} groupId
+ * Normalizes an unrecognized tab to Browse and retains only the detail ID
+ * applicable to the normalized destination tab. The generated URL and stored
+ * history state therefore describe the same route.
+ *
+ * Creates a new history-state object containing tab, wazaId, and groupId.
+ * Does not preserve unrelated properties from the current history state.
+ *
+ * Does not preserve existing query parameters or URL fragments. Does not
+ * activate views, select details, or render application content.
+ *
+ * @param {string} tab Requested destination tab key.
+ * @param {?number=} wazaId Selected Waza ID when the normalized destination
+ *     is Browse, or null. Defaults to null.
+ * @param {?number=} groupId Selected Group ID when the normalized destination
+ *     is Groups, or null. Defaults to null.
  * @return {void}
  */
 export function pushRoute(tab, wazaId = null, groupId = null) {
+  const normalizedTab = Object.prototype.hasOwnProperty.call(
+    TAB_TO_SLUG,
+    tab,
+  )
+    ? tab
+    : DEFAULT_TAB;
+
+  const normalizedWazaId =
+    normalizedTab === 'browse' && wazaId != null
+      ? wazaId
+      : null;
+
+  const normalizedGroupId =
+    normalizedTab === 'groups' && groupId != null
+      ? groupId
+      : null;
+
   history.pushState(
-    { tab, wazaId: wazaId ?? null, groupId: groupId ?? null },
+    {
+      tab: normalizedTab,
+      wazaId: normalizedWazaId,
+      groupId: normalizedGroupId,
+    },
     '',
-    buildUrl(tab, wazaId, groupId),
+    buildUrl(
+      normalizedTab,
+      normalizedWazaId,
+      normalizedGroupId,
+    ),
   );
 }
 
 /**
- * @brief Replace the current history entry for the given view (no new entry).
+ * Replaces the current browser-history entry for an application route.
  *
- * @param {string} tab
- * @param {number|null} wazaId
- * @param {number|null} groupId
+ * By default, generates the destination with buildUrl(), discarding the
+ * current query parameters and fragment.
+ *
+ * When preserveExtras is true, preserves the current query parameters and
+ * fragment, replaces the pathname, and reconciles only the destination
+ * tab's detail parameter. Parameters belonging to inactive tabs or other
+ * flows remain unchanged.
+ *
+ * Preserves existing custom history-state properties when history.state is
+ * a non-null, non-array object. Always overwrites tab, wazaId, and groupId.
+ *
+ * Does not activate views, select details, or render application content.
+ *
+ * @param {string} tab Destination tab key.
+ * @param {?number=} wazaId Selected Waza ID for Browse, or null.
+ *     Defaults to null.
+ * @param {?number=} groupId Selected Group ID for Groups, or null.
+ *     Defaults to null.
+ * @param {{preserveExtras: (boolean|undefined)}=} opts Configuration.
+ *     When preserveExtras is true, retains existing query parameters
+ *     and the URL fragment. Defaults to an empty object.
  * @return {void}
  */
 export function replaceRoute(
