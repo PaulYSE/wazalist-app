@@ -87,6 +87,38 @@ const parseStoredLabels = (value: unknown): string[] => {
 };
 
 /**
+ * @brief Parses stored progress markings into a safe six-boolean array.
+ *
+ * Invalid JSON or an invalid stored shape falls back to six false values.
+ *
+ * @param {unknown} value - Stored progress.markings database value.
+ * @return {boolean[]} Exactly six Boolean marking values.
+ */
+const parseStoredMarkings = (value: unknown): boolean[] => {
+	if (typeof value !== "string") {
+		return Array(6).fill(false);
+	}
+
+	try {
+		const parsed: unknown = JSON.parse(value);
+
+		if (
+			Array.isArray(parsed) &&
+			parsed.length === 6 &&
+			parsed.every(
+				(marking) => typeof marking === "boolean",
+			)
+		) {
+			return parsed;
+		}
+	} catch {
+		// Invalid stored JSON falls back to empty markings.
+	}
+
+	return Array(6).fill(false);
+};
+
+/**
  * @brief Validates and normalizes a submitted markings JSON string.
  *
  * The current frontend API contract submits markings as serialized JSON.
@@ -275,15 +307,24 @@ export default {
 			const user = await getUser();
 
 			if (request.method === "GET") {
-				if (user) {
-					const { results } = await env.DB.prepare(
-						"SELECT * FROM progress WHERE user_id = ?"
-					)
-						.bind(user.id)
-						.all();
-					return json(results);
+				if (!user) {
+					return json([]);
 				}
-				return json([]);
+
+				const { results } = await env.DB.prepare(
+					"SELECT * FROM progress WHERE user_id = ?",
+				)
+					.bind(user.id)
+					.all();
+
+				const normalizedResults = results.map((row) => ({
+					...row,
+					markings: JSON.stringify(
+						parseStoredMarkings(row.markings),
+					),
+				}));
+
+				return json(normalizedResults);
 			}
 
 			if (request.method === "POST") {
@@ -1593,13 +1634,21 @@ export default {
 			"SELECT shape_labels FROM users WHERE id = ?"
 		).bind(targetId).first();
 
-		const markings: Record<number, { markings: boolean[], like: number | null }> = {};
+		const markings: Record<
+			number,
+			{
+				markings: boolean[];
+				like: number | null;
+			}
+		> = {};
+
 		for (const row of progressRows) {
-			let parsed = Array(6).fill(false);
-			try { parsed = JSON.parse(row.markings as string); } catch { /* keep default */ }
 			markings[row.waza_id as number] = {
-			markings: parsed,
-			like: (row.like as number | null) ?? null,
+				markings: parseStoredMarkings(row.markings),
+				like:
+					row.like === 1 || row.like === -1
+						? row.like
+						: null,
 			};
 		}
 
@@ -1699,10 +1748,10 @@ export default {
 			).bind(uid).first();
 
 			const markings: Record<number, boolean[]> = {};
+
 			for (const row of progressRows) {
-			let parsed = Array(6).fill(false);
-			try { parsed = JSON.parse(row.markings as string); } catch { /* keep default */ }
-			markings[row.waza_id as number] = parsed;
+				markings[row.waza_id as number] =
+					parseStoredMarkings(row.markings);
 			}
 
 			const labels = parseStoredLabels(
