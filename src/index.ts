@@ -1103,6 +1103,23 @@ export default {
 			}
 			
 			const { note } = body;
+
+			if (
+				note !== undefined &&
+				note !== null &&
+				typeof note !== "string"
+			) {
+				return err("note must be a string or null");
+			}
+			
+			if (
+				typeof note === "string" &&
+				note.length > 2000
+			) {
+				return err(
+					"note must not exceed 2000 characters",
+				);
+			}
 			
 			const contrib = await env.DB.prepare(
 				"SELECT id, status FROM contributions WHERE id = ?"
