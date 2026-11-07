@@ -288,8 +288,17 @@ export default {
 			}
 			
 			const { username, password } = body;
-			if (!username || !password)
-				return err("Username and password are required");
+
+			if (
+				typeof username !== "string" ||
+				typeof password !== "string" ||
+				!username ||
+				!password
+			) {
+				return err(
+					"Username and password are required",
+				);
+			}
 
 			const user = await env.DB.prepare(
 				"SELECT id, username, password_hash, is_admin FROM users WHERE username = ?"
@@ -334,8 +343,25 @@ export default {
 			}
 			
 			const { username, email, password } = body;
-			if (!username || !password)
-				return err("Username and password are required");
+
+			if (
+				typeof username !== "string" ||
+				typeof password !== "string" ||
+				!username ||
+				!password
+			) {
+				return err(
+					"Username and password are required",
+				);
+			}
+
+			if (
+				email !== undefined &&
+				email !== null &&
+				typeof email !== "string"
+			) {
+				return err("Email must be a string");
+			}
 
 			const existing = await env.DB.prepare(
 				"SELECT id FROM users WHERE username = ?"
@@ -816,7 +842,17 @@ export default {
 			}
 			
 			const { username, new_password } = body;
-			if (!username || !new_password) return err("username and new_password are required");
+
+			if (
+				typeof username !== "string" ||
+				typeof new_password !== "string" ||
+				!username ||
+				!new_password
+			) {
+				return err(
+					"username and new_password are required",
+				);
+			}
 
 			const target = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(username).first();
 			if (!target) return err("User not found", 404);
@@ -1338,8 +1374,15 @@ export default {
 				throw error;
 			}
 			
-			const key = (body.key as string | undefined)?.trim();
-			if (!key || !/^[0-9a-f]{64}$/.test(key)) return err("Invalid join link");
+			if (typeof body.key !== "string") {
+				return err("Invalid join link");
+			}
+
+			const key = body.key.trim();
+
+			if (!/^[0-9a-f]{64}$/.test(key)) {
+				return err("Invalid join link");
+			}
 
 			const group = await env.DB.prepare(
 				"SELECT id, name FROM groups WHERE invite_key = ?"
@@ -1471,9 +1514,24 @@ export default {
 			
 				throw error;
 			}
-			const provided = (body.invite_key as string | undefined)?.trim();
-			if (!provided) return err("An invite key is required to join this group");
-			if (provided !== group.invite_key) return err("Invalid invite key");
+			if (typeof body.invite_key !== "string") {
+				return err(
+					"An invite key is required to join this group",
+				);
+			}
+
+			const provided = body.invite_key.trim();
+
+			if (!provided) {
+				return err(
+					"An invite key is required to join this group",
+				);
+			}
+
+			if (provided !== group.invite_key) {
+				return err("Invalid invite key");
+			}
+			
 			// Key is valid — create a pending application (still needs admin approval).
 			// No pre-delete here: the partial unique index on group_applications
 			// (group_id, user_id) WHERE status = 'pending' is what now prevents a
