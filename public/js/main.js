@@ -119,18 +119,25 @@ window.addEventListener('themechange', () => {
 });
 
 /**
- * @brief Resolves a waza URL parameter to a valid waza ID.
+ * @brief Resolves a decoded Waza URL parameter to a valid Waza ID.
  *
- * Supports both numeric IDs and Japanese name slugs for backward compatibility.
+ * Supports numeric IDs and exact Japanese-name parameters for backward
+ * compatibility. The parameter has already been decoded by URLSearchParams.
  *
- * @param {string} param - URL parameter value (numeric ID or JP name slug).
- * @return {number|null} Waza ID if found, null otherwise.
+ * @param {string} param - Decoded numeric ID or exact Japanese name.
+ * @return {number|null} Matching Waza ID, or null if no match exists.
  */
 function resolveWaza(param) {
   const id = parseInt(param);
-  if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) return id;
-  const decoded = decodeURIComponent(param);
-  const match = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === decoded);
+
+  if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) {
+    return id;
+  }
+
+  const match = state.wazaData.find(
+    (w) => w.name_jp && w.name_jp.trim() === param,
+  );
+
   return match ? match.id : null;
 }
 
