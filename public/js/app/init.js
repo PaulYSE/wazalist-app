@@ -163,10 +163,16 @@ export async function initApp() {
   if (wazaParam && tab === 'browse') {
     const target = (() => {
       const id = parseInt(wazaParam);
-      if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) return id;
-      const decoded = decodeURIComponent(wazaParam);
-      const m = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === decoded);
-      return m ? m.id : null;
+
+      if (!isNaN(id) && state.wazaData.some((w) => w.id === id)) {
+        return id;
+      }
+
+      const match = state.wazaData.find(
+        (w) => w.name_jp && w.name_jp.trim() === wazaParam,
+      );
+
+      return match ? match.id : null;
     })();
     if (target != null) {
       selectWazaFromHistory(target); // open without pushing
