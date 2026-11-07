@@ -1554,10 +1554,10 @@ export default {
 			markings[row.waza_id as number] = parsed;
 			}
 
-			const labels = labelsRow?.shape_labels
-			? JSON.parse(labelsRow.shape_labels as string)
-			: ["", "", "", "", "", ""];
-
+			const labels = parseStoredLabels(
+				labelsRow?.shape_labels,
+			);
+			
 			result[uid] = { markings, labels };
 		}
 
