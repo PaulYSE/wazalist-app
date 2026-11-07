@@ -71,7 +71,16 @@ const compareState = {
  */
 function loadImportedFromLS() {
   try {
-    compareState.importedLists = JSON.parse(localStorage.getItem(LS_IMPORTED) || '{}');
+    const parsed = JSON.parse(
+      localStorage.getItem(LS_IMPORTED) || '{}',
+    );
+
+    compareState.importedLists =
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed)
+        ? parsed
+        : {};
   } catch {
     compareState.importedLists = {};
   }
