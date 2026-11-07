@@ -12,6 +12,7 @@ import { initApp } from './app/init.js';
 import { initAuth } from './services/auth.js';
 import { initBrowseList, renderList } from './views/waza-browse-list.js';
 import { initBrowseState } from './state/waza-browse-state.js';
+import { initCompareState } from './state/compare-state.js';
 import {
   initWazaDetail,
   selectWazaFromHistory,
@@ -134,31 +135,9 @@ function resolveWaza(param) {
 }
 
 // ── Boot ──────────────────────────────────────────────────────
-// All modules above have finished evaluating, so it is now safe to wire DOM
-// events and run cross-module logic. Order among the initX() calls is not
-// significant (each registers listeners on its own elements); auth is wired
-// before the possible initApp() so the login screen is usable on a cold start.
 
-/**
- * @brief Initializes all modules and starts the application.
- *
- * Order of initialization:
- * 1. Browse list event handlers
- * 2. Waza detail panel handlers
- * 3. UI shell components (search, filters, mobile menu)
- * 4. Share/import modal handlers
- * 5. Groups browse list handlers
- * 6. Create group modal handlers
- * 7. Edit group modal handlers
- * 8. New waza submission modal
- * 9. Suggest edit modal
- * 10. Field edit modal (video suggest, field-specific edits)
- * 11. Onboarding tour
- * 12. Authentication UI
- * 13. Theme system
- * 14. If token exists, initialize main app
- */
 initBrowseState();
+initCompareState();
 initBrowseList();
 initWazaDetail();
 initUi();
