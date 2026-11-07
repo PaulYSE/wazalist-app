@@ -387,7 +387,7 @@ function renderBrowseDemoList() {
         escapeHtml(w.name_jp || '—') +
         '</div>' +
         '<div class="nen">' +
-        escapeHtml(w.name_en || '') +
+        escapeHtml(dispName(w)) +
         '</div>' +
         bottomRow +
         '</div>'
@@ -517,9 +517,9 @@ function runSearchDemo(query) {
 
     // Use actual wazalist list row structure
     row.innerHTML = `
-        <span class="drn">${w.name_jp}</span>
-        <span class="drs">${w.name_en}</span>
-      `;
+      <span class="drn">${escapeHtml(w.name_jp || '—')}</span>
+      <span class="drs">${escapeHtml(dispName(w))}</span>
+    `;
 
     resultsEl.appendChild(row);
     // Stagger animation
@@ -593,10 +593,10 @@ function buildStyleDemo() {
     el.setAttribute('style', ms.style);
     el.innerHTML =
       '<div class="njp">' +
-      w.name_jp +
+      escapeHtml(w.name_jp || '—') +
       '</div>' +
       '<div class="nen">' +
-      w.name_en +
+      escapeHtml(dispName(w)) +
       '</div>' +
       bottomRowHTML(w);
     return el;
@@ -610,10 +610,10 @@ function buildStyleDemo() {
     el.innerHTML =
       '<div class="wce-header">' +
       '<div class="njp">' +
-      w.name_jp +
+      escapeHtml(w.name_jp || '—') +
       '</div>' +
       '<div class="nen">' +
-      w.name_en +
+      escapeHtml(dispName(w)) +
       '</div>' +
       bottomRowHTML(w) +
       '</div>' +
@@ -631,10 +631,10 @@ function buildStyleDemo() {
     el.setAttribute('style', ms.style);
     el.innerHTML =
       '<span class="drn">' +
-      w.name_jp +
+      escapeHtml(w.name_jp || '—') +
       '</span>' +
       '<span class="drs">' +
-      w.name_en +
+      escapeHtml(dispName(w)) +
       '</span>' +
       '<div class="markings-row" style="flex-shrink:0">' +
       pipsHTML(w.markings) +
@@ -738,10 +738,10 @@ function buildMarkingDemo() {
 
     row.innerHTML =
       '<span class="drn">' +
-      w.name_jp +
+      escapeHtml(w.name_jp || '—') +
       '</span>' +
       '<span class="drs">' +
-      w.name_en +
+      escapeHtml(dispName(w)) +
       '</span>' +
       markingsHTML;
 
