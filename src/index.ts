@@ -1620,18 +1620,62 @@ export default {
 		const callerRole = await getGroupRole(groupId, user.id);
 		if (!callerRole) return err("Forbidden", 403);
 
-		const body = await request.json() as { user_ids?: number[] };
-		const userIds = body.user_ids;
+		let body: Record<string, unknown>;
 
-		if (!Array.isArray(userIds) || userIds.length === 0) {
+		try {
+			const parsed: unknown = await request.json();
+
+			if (
+				parsed === null ||
+				typeof parsed !== "object" ||
+				Array.isArray(parsed)
+			) {
+				return err("Request body must be an object");
+			}
+
+			body = parsed as Record<string, unknown>;
+		} catch (error) {
+			if (error instanceof SyntaxError) {
+				return err("Request body must be valid JSON");
+			}
+
+			throw error;
+		}
+
+		const submittedUserIds = body.user_ids;
+
+		if (
+			!Array.isArray(submittedUserIds) ||
+			submittedUserIds.length === 0
+		) {
 			return err("user_ids must be a non-empty array");
 		}
-		if (userIds.length > 10) {
+
+		if (submittedUserIds.length > 10) {
 			return err("Maximum 10 users per bulk request");
+		}
+
+		if (
+			!submittedUserIds.every(
+				(id) =>
+					Number.isSafeInteger(id) &&
+					(id as number) > 0,
+			)
+		) {
+			return err(
+				"user_ids must contain only positive integers",
+			);
+		}
+
+		const userIds = submittedUserIds as number[];
+
+		if (new Set(userIds).size !== userIds.length) {
+			return err("user_ids must not contain duplicates");
 		}
 
 		// Verify all requested users are members of this group
 		const placeholders = userIds.map(() => "?").join(",");
+			
 		const memberCheck = await env.DB.prepare(
 			`SELECT user_id FROM group_members WHERE group_id = ? AND user_id IN (${placeholders})`
 		).bind(groupId, ...userIds).all();
