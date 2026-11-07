@@ -627,7 +627,6 @@ export default {
 		
 		  return json({ success: true });
 		}
-		``
 
 		// ── Admin ─────────────────────────────────────────────────
 
