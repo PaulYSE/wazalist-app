@@ -158,6 +158,41 @@ const validateSubmittedMarkings = (value: unknown): string => {
   return JSON.stringify(parsed);
 };
 
+/**
+ * @brief Reads and validates a JSON request body as an object.
+ *
+ * Rejects malformed JSON, null, arrays, and primitive JSON values.
+ *
+ * @param {Request} request - Incoming HTTP request.
+ * @return {Promise<Record<string, unknown>>} Parsed JSON object.
+ * @throws {ValidationError} If the body is malformed or is not an object.
+ */
+const readJsonObject = async (
+	request: Request,
+): Promise<Record<string, unknown>> => {
+	let parsed: unknown;
+
+	try {
+		parsed = await request.json();
+	} catch {
+		throw new ValidationError(
+			"Request body must be valid JSON",
+		);
+	}
+
+	if (
+		parsed === null ||
+		typeof parsed !== "object" ||
+		Array.isArray(parsed)
+	) {
+		throw new ValidationError(
+			"Request body must be an object",
+		);
+	}
+
+	return parsed as Record<string, unknown>;
+};
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -240,7 +275,19 @@ export default {
 
 		// ── Login ─────────────────────────────────────────────────
 		if (path === "/api/login" && request.method === "POST") {
-			const { username, password } = await request.json();
+			let body: Record<string, unknown>;
+			
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
+			const { username, password } = body;
 			if (!username || !password)
 				return err("Username and password are required");
 
@@ -274,7 +321,19 @@ export default {
 
 		// ── Register ──────────────────────────────────────────────
 		if (path === "/api/register" && request.method === "POST") {
-			const { username, email, password } = await request.json();
+			let body: Record<string, unknown>;
+
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
+			const { username, email, password } = body;
 			if (!username || !password)
 				return err("Username and password are required");
 
@@ -465,7 +524,19 @@ export default {
 			const user = await getUser();
 			if (!user) return err("Authentication required", 401);
 
-			const { labels } = await request.json();
+			let body: Record<string, unknown>;
+
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
+			const { labels } = body;
 			if (
 			  !Array.isArray(labels) ||
 			  labels.length !== 6 ||
@@ -732,7 +803,19 @@ export default {
 			const caller = await getUser();
 			if (!caller || !caller.is_admin) return err("Forbidden", 403);
 
-			const { username, new_password } = await request.json() as Record<string, string>;
+			let body: Record<string, unknown>;
+
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
+			const { username, new_password } = body;
 			if (!username || !new_password) return err("username and new_password are required");
 
 			const target = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(username).first();
@@ -971,8 +1054,20 @@ export default {
 			if (!user || !user.is_admin) return err("Forbidden", 403);
 
 			const id = path.split("/")[4];
-			const { note } = await request.json();
-
+			let body: Record<string, unknown>;
+			
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
+			const { note } = body;
+			
 			const contrib = await env.DB.prepare(
 				"SELECT id, status FROM contributions WHERE id = ?"
 			)
@@ -1231,7 +1326,18 @@ export default {
 			const user = await getUser();
 			if (!user) return err("Authentication required", 401);
 
-			const body = await request.json() as Record<string, unknown>;
+			let body: Record<string, unknown>;
+
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
+			
 			const key = (body.key as string | undefined)?.trim();
 			if (!key || !/^[0-9a-f]{64}$/.test(key)) return err("Invalid join link");
 
@@ -1354,7 +1460,17 @@ export default {
 		}
 
 		if (policy === "invite") {
-			const body = await request.json() as Record<string, unknown>;
+			let body: Record<string, unknown>;
+
+			try {
+				body = await readJsonObject(request);
+			} catch (error) {
+				if (error instanceof ValidationError) {
+					return err(error.message, 400);
+				}
+			
+				throw error;
+			}
 			const provided = (body.invite_key as string | undefined)?.trim();
 			if (!provided) return err("An invite key is required to join this group");
 			if (provided !== group.invite_key) return err("Invalid invite key");
@@ -1448,7 +1564,17 @@ export default {
 		const callerRole = await getGroupRole(groupId, user.id);
 		if (callerRole !== "admin") return err("Forbidden", 403);
 
-		const body = await request.json() as Record<string, unknown>;
+		let body: Record<string, unknown>;
+
+		try {
+			body = await readJsonObject(request);
+		} catch (error) {
+			if (error instanceof ValidationError) {
+				return err(error.message, 400);
+			}
+		
+			throw error;
+		}
 		const updates: string[] = [];
 		const values: unknown[] = [];
 
@@ -1670,24 +1796,14 @@ export default {
 		if (!callerRole) return err("Forbidden", 403);
 
 		let body: Record<string, unknown>;
-
+		
 		try {
-			const parsed: unknown = await request.json();
-
-			if (
-				parsed === null ||
-				typeof parsed !== "object" ||
-				Array.isArray(parsed)
-			) {
-				return err("Request body must be an object");
-			}
-
-			body = parsed as Record<string, unknown>;
+			body = await readJsonObject(request);
 		} catch (error) {
-			if (error instanceof SyntaxError) {
-				return err("Request body must be valid JSON");
+			if (error instanceof ValidationError) {
+				return err(error.message, 400);
 			}
-
+		
 			throw error;
 		}
 
