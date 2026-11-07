@@ -54,6 +54,38 @@ const json = (data: unknown, status = 200) =>
  */
 const err = (msg: string, status = 400) => json({ error: msg }, status);
 
+const EMPTY_LABELS = ["", "", "", "", "", ""];
+
+/**
+ * @brief Parses stored marking labels into a safe six-string array.
+ *
+ * Invalid JSON or an invalid stored shape falls back to six empty labels.
+ *
+ * @param {unknown} value - Stored shape_labels database value.
+ * @return {string[]} Exactly six marking-label strings.
+ */
+const parseStoredLabels = (value: unknown): string[] => {
+  if (typeof value !== "string") {
+    return [...EMPTY_LABELS];
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+
+    if (
+      Array.isArray(parsed) &&
+      parsed.length === 6 &&
+      parsed.every((label) => typeof label === "string")
+    ) {
+      return parsed;
+    }
+  } catch {
+    // Invalid stored JSON falls back to the default labels.
+  }
+
+  return [...EMPTY_LABELS];
+};
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -276,8 +308,8 @@ export default {
 				"SELECT shape_labels FROM users WHERE id = ?"
 			).bind(user.id).first();
 
-			const labels = row?.shape_labels ?? '["","","","","",""]';
-			return json({ labels: JSON.parse(labels as string) });
+			const labels = parseStoredLabels(row?.shape_labels);
+			return json({ labels });
 		}
 
 		// POST /api/labels
@@ -286,8 +318,13 @@ export default {
 			if (!user) return err("Authentication required", 401);
 
 			const { labels } = await request.json();
-			if (!Array.isArray(labels) || labels.length !== 6)
-				return err("labels must be an array of 6 strings");
+			if (
+			  !Array.isArray(labels) ||
+			  labels.length !== 6 ||
+			  !labels.every((label) => typeof label === "string")
+			) {
+			  return err("labels must be an array of 6 strings");
+			}
 
 			await env.DB.prepare(
 				"UPDATE users SET shape_labels = ? WHERE id = ?"
@@ -1459,9 +1496,7 @@ export default {
 			};
 		}
 
-		const labels = labelsRow?.shape_labels
-			? JSON.parse(labelsRow.shape_labels as string)
-			: ["", "", "", "", "", ""];
+		const labels = parseStoredLabels(labelsRow?.shape_labels);
 
 		return json({ markings, labels });
 		}
