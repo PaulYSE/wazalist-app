@@ -86,6 +86,46 @@ const parseStoredLabels = (value: unknown): string[] => {
   return [...EMPTY_LABELS];
 };
 
+/**
+ * @brief Validates and normalizes a submitted markings JSON string.
+ *
+ * The current frontend API contract submits markings as serialized JSON.
+ * The decoded value must contain exactly six booleans.
+ *
+ * @param {unknown} value - Submitted markings value.
+ * @return {string} Canonical serialized six-boolean markings array.
+ * @throws {ValidationError} If the value is missing or malformed.
+ */
+const validateSubmittedMarkings = (value: unknown): string => {
+  if (typeof value !== "string") {
+    throw new ValidationError(
+      "markings must be a JSON string containing exactly six booleans",
+    );
+  }
+
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new ValidationError(
+      "markings must be valid JSON",
+    );
+  }
+
+  if (
+    !Array.isArray(parsed) ||
+    parsed.length !== 6 ||
+    !parsed.every((marking) => typeof marking === "boolean")
+  ) {
+    throw new ValidationError(
+      "markings must contain exactly six booleans",
+    );
+  }
+
+  return JSON.stringify(parsed);
+};
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -248,18 +288,74 @@ export default {
 
 			if (request.method === "POST") {
 				if (!user) return err("Authentication required", 401);
-				const { waza_id, markings, like } = await request.json();
-				if (!waza_id) return err("waza_id is required");
 
-				// Validate like value: must be null, 1, or -1
-				if (like !== null && like !== 1 && like !== -1) {
-					return err("Invalid like value: must be null, 1, or -1");
+				let body: Record<string, unknown>;
+				let serializedMarkings: string;
+
+				try {
+					const parsed: unknown = await request.json();
+
+					if (
+						parsed === null ||
+						typeof parsed !== "object" ||
+						Array.isArray(parsed)
+					) {
+						throw new ValidationError(
+							"Request body must be an object",
+						);
+					}
+
+					body = parsed as Record<string, unknown>;
+
+					if (
+						!Number.isSafeInteger(body.waza_id) ||
+						(body.waza_id as number) <= 0
+					) {
+						throw new ValidationError(
+							"waza_id must be a positive integer",
+						);
+					}
+
+					serializedMarkings =
+						validateSubmittedMarkings(body.markings);
+
+					if (
+						body.like !== null &&
+						body.like !== 1 &&
+						body.like !== -1
+					) {
+						throw new ValidationError(
+							"like must be null, 1, or -1",
+						);
+					}
+				} catch (error) {
+					if (error instanceof ValidationError) {
+						return err(error.message, 400);
+					}
+
+					if (error instanceof SyntaxError) {
+						return err(
+							"Request body must be valid JSON",
+							400,
+						);
+					}
+
+					throw error;
 				}
 
-				// `like` is an account-only field — guests must not reach this,
-				// but strip it defensively if no authenticated session exists.
-				const likeValue = user ? (like ?? null) : null;
+				const wazaId = body.waza_id as number;
+				const likeValue = body.like as -1 | 1 | null;
+				
+				const wazaExists = await env.DB.prepare(
+					"SELECT 1 FROM waza WHERE id = ?",
+				)
+					.bind(wazaId)
+					.first();
 
+				if (!wazaExists) {
+					return err("Waza not found", 404);
+				}
+				
 				await env.DB.prepare(`
 					INSERT INTO progress (user_id, waza_id, markings, like, updated_at)
 					VALUES (?, ?, ?, ?, datetime('now'))
@@ -268,7 +364,12 @@ export default {
 						like = excluded.like,
 						updated_at = datetime('now')
 				`)
-					.bind(user.id, waza_id, markings ?? "[]", likeValue)
+					.bind(
+						user.id,
+						wazaId,
+						serializedMarkings,
+						likeValue,
+					)
 					.run();
 
 				// Return fresh aggregate counts for this waza so the frontend
@@ -279,9 +380,15 @@ export default {
 						COALESCE(SUM(CASE WHEN like = -1 THEN 1 END), 0) AS dislike_count
 					FROM progress
 					WHERE waza_id = ?
-				`).bind(waza_id).first();
+				`)
+					.bind(wazaId)
+					.first();
 
-				return json({ success: true, waza_id, ...counts });
+				return json({
+					success: true,
+					waza_id: wazaId,
+					...counts,
+				});
 			}
 
 			// Allow users to wipe their progress for a waza by removing their progress history
