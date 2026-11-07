@@ -121,7 +121,7 @@ export default {
 		};
 		
 		// ── Waza ──────────────────────────────────────────────────
-		if (path === "/api/waza") {
+		if (path === "/api/waza" && request.method === "GET") {
 			const { results } = await env.DB.prepare(`
 				SELECT
 					w.*,
@@ -1616,9 +1616,20 @@ export default {
 		return json({ invite_key: group.invite_key });
 		}
 
-		// ── Fallback — serve app ──────────────────────────────────
+		// ── API fallback ───────────────────────────────────────────
+		// Unknown API routes and unsupported methods must return JSON,
+		// not the SPA shell.
+		if (path === "/api" || path.startsWith("/api/")) {
+			return err("API route not found", 404);
+		}
+
+		// ── SPA fallback ───────────────────────────────────────────
+		// Non-API browser routes receive the application shell so
+		// client-side routing can reconcile the requested URL.
 		const html = await renderHtml(env, request);
-		return new Response(html, { headers: { "content-type": "text/html" } });
+		return new Response(html, {
+			headers: { "Content-Type": "text/html" },
+		});
 	},
 	/**
 	 * @brief Cron-triggered handler. Deletes expired session rows.
