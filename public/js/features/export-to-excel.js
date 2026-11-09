@@ -11,6 +11,7 @@ import { state } from '../state/state.js';
 import { showToast } from '../components/show-toast.js';
 import { SHAPES, EXPORT_MARK_COLORS } from '../config/constants.js';
 import { getCurrentUsername, isGuest } from '../state/user-state.js';
+import { loadExcelJs } from '../services/excel-libraries.js';
 
 /**
  * @brief Selects the best video URL for Excel hyperlink.
@@ -44,12 +45,6 @@ export async function exportToExcel() {
     }
   };
 
-  // Check if ExcelJS library is available
-  if (typeof ExcelJS === 'undefined') {
-    setStatus('Excel library not loaded — please refresh and try again.', 'var(--red)');
-    return;
-  }
-
   // Collect every waza the user has marked (at least one active marking).
   const rows = [];
   state.wazaData.forEach((w) => {
@@ -61,22 +56,38 @@ export async function exportToExcel() {
   });
 
   if (!rows.length) {
-    setStatus('Nothing to export — mark some waza first.', 'var(--amber)');
+    setStatus(
+      'Nothing to export — mark some waza first.',
+      'var(--amber)',
+    );
     return;
   }
-
-  const headerName = !isGuest() && getCurrentUsername() ? getCurrentUsername() : 'Guest';
-
+  
+  const headerName =
+    !isGuest() && getCurrentUsername()
+      ? getCurrentUsername()
+      : 'Guest';
+  
   if (btn) {
     btn.disabled = true;
-    btn.textContent = '⏳ Generating…';
+    btn.textContent = '⏳ Loading Excel support…';
   }
-  setStatus('');
-
+  
+  setStatus('Downloading the Excel export library…', 'var(--text3)');
+  
   try {
-    const wb = new ExcelJS.Workbook();
+    await loadExcelJs();
+  
+    if (btn) {
+      btn.textContent = '⏳ Generating…';
+    }
+  
+    setStatus('Generating workbook…', 'var(--text3)');
+  
+    const wb = new globalThis.ExcelJS.Workbook();
     wb.creator = 'Wazalist';
     wb.created = new Date();
+  
     const ws = wb.addWorksheet('Wazalist');
     ws.getColumn(1).width = 22; // A: legend labels
     ws.getColumn(2).width = 52; // B: waza hyperlinks
@@ -145,9 +156,16 @@ export async function exportToExcel() {
 
     setStatus(`Exported ${rows.length} waza.`, 'var(--green)');
     showToast(`Exported ${rows.length} waza to Excel.`, 'green');
-  } catch (e) {
-    console.error('Export error:', e);
-    setStatus('Export failed — please try again.', 'var(--red)');
+  } catch (error) {
+    console.error('Export error:', error);
+  
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Export failed. Please try again.';
+  
+    setStatus(message, 'var(--red)');
+    showToast(message, 'red');
   } finally {
     if (btn) {
       btn.disabled = false;
