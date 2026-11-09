@@ -14,6 +14,7 @@ import { escapeHtml } from '../../lib/escape.js';
 import { SHAPES } from '../../config/constants.js';
 import { dispName } from '../../lib/search.js';
 import { saveP, saveLabels } from '../../services/progress.js';
+import { loadSheetJs } from '../../services/excel-libraries.js';
 import { showToast } from '../../components/show-toast.js';
 import { isGuest, getToken } from '../../state/user-state.js';
 import {
@@ -620,24 +621,45 @@ function bindTiInputEvents(container) {
 
   fileBtn?.addEventListener('click', () => fileInput?.click());
 
-  fileInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
+  fileInput?.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+  
     if (!file) return;
-
+  
+    fileBtn.disabled = true;
+    fileBtn.textContent = 'Loading Excel support…';
+  
     fileName.textContent = file.name;
     fileName.style.color = 'var(--text1)';
-
+  
     try {
-      // Check if XLSX library is loaded
-      if (typeof XLSX === 'undefined') {
-        throw new Error('Excel library not loaded. Please refresh the page and try again.');
-      }
+      await loadSheetJs();
+  
+      fileBtn.textContent = 'Reading file…';
+  
       await parseExcelFile(file);
       renderImport();
-    } catch (err) {
-      console.error('Excel parse error:', err);
-      const errorMsg = err.message || 'Error reading Excel file. Please try text paste instead.';
-      showToast(errorMsg, 'red');
+    } catch (error) {
+      console.error('Excel import failed:', error);
+  
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Error reading the Excel file. Please try text import instead.';
+  
+      showToast(message, 'red');
+  
+      fileName.textContent = 'Import failed. Choose the file to retry.';
+      fileName.style.color = 'var(--red)';
+    } finally {
+      fileBtn.disabled = false;
+      fileBtn.textContent = '📁 Choose File';
+  
+      /*
+       * Clear the input so selecting the same file again triggers another
+       * change event. This is important after a network or parsing failure.
+       */
+      event.target.value = '';
     }
   });
 }
