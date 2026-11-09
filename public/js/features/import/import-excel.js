@@ -29,9 +29,28 @@ import {
  */
 export async function parseExcelFile(file) {
   const data = await file.arrayBuffer();
-  const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const range = XLSX.utils.decode_range(firstSheet['!ref']);
+  if (!globalThis.XLSX) {
+    throw new Error(
+      'The Excel import library is not available.',
+    );
+  }
+  
+  const workbook = globalThis.XLSX.read(data, {
+    type: 'array',
+    cellStyles: true,
+  });
+  const firstSheet =
+    workbook.Sheets[workbook.SheetNames[0]];
+  
+  if (!firstSheet || !firstSheet['!ref']) {
+    throw new Error(
+      'The selected workbook does not contain a readable worksheet.',
+    );
+  }
+  
+  const range = globalThis.XLSX.utils.decode_range(
+    firstSheet['!ref'],
+  );
 
   resetImportExcelColors();
   const allLines = [];
@@ -39,7 +58,10 @@ export async function parseExcelFile(file) {
   // Read cells with color information
   for (let row = range.s.r; row <= range.e.r; row++) {
     for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
+      const cellAddr = globalThis.XLSX.utils.encode_cell({
+        r: row,
+        c: col,
+      });
       const cell = firstSheet[cellAddr];
 
       // Skip empty cells
