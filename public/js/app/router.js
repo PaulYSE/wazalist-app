@@ -59,10 +59,7 @@ const DEFAULT_TAB = 'browse';
 export function parseRoute() {
   const u = new URL(location.href);
   const slug = u.pathname.replace(/^\/+|\/+$/g, '');
-  const tab = Object.prototype.hasOwnProperty.call(
-    SLUG_TO_TAB,
-    slug,
-  )
+  const tab = Object.prototype.hasOwnProperty.call(SLUG_TO_TAB, slug)
     ? SLUG_TO_TAB[slug]
     : DEFAULT_TAB;
   const wazaParam = tab === 'browse' ? u.searchParams.get('waza') : null;
@@ -94,13 +91,8 @@ export function parseRoute() {
  */
 
 export function buildUrl(tab, wazaId = null, groupId = null) {
-  const normalizedTab = Object.prototype.hasOwnProperty.call(
-    TAB_TO_SLUG,
-    tab,
-  )
-    ? tab
-    : DEFAULT_TAB;
-  
+  const normalizedTab = Object.prototype.hasOwnProperty.call(TAB_TO_SLUG, tab) ? tab : DEFAULT_TAB;
+
   const slug = TAB_TO_SLUG[normalizedTab];
   let url = '/' + slug;
   if (tab === 'browse' && wazaId != null) url += '?waza=' + wazaId;
@@ -131,22 +123,11 @@ export function buildUrl(tab, wazaId = null, groupId = null) {
  * @return {void}
  */
 export function pushRoute(tab, wazaId = null, groupId = null) {
-  const normalizedTab = Object.prototype.hasOwnProperty.call(
-    TAB_TO_SLUG,
-    tab,
-  )
-    ? tab
-    : DEFAULT_TAB;
+  const normalizedTab = Object.prototype.hasOwnProperty.call(TAB_TO_SLUG, tab) ? tab : DEFAULT_TAB;
 
-  const normalizedWazaId =
-    normalizedTab === 'browse' && wazaId != null
-      ? wazaId
-      : null;
+  const normalizedWazaId = normalizedTab === 'browse' && wazaId != null ? wazaId : null;
 
-  const normalizedGroupId =
-    normalizedTab === 'groups' && groupId != null
-      ? groupId
-      : null;
+  const normalizedGroupId = normalizedTab === 'groups' && groupId != null ? groupId : null;
 
   history.pushState(
     {
@@ -155,11 +136,7 @@ export function pushRoute(tab, wazaId = null, groupId = null) {
       groupId: normalizedGroupId,
     },
     '',
-    buildUrl(
-      normalizedTab,
-      normalizedWazaId,
-      normalizedGroupId,
-    ),
+    buildUrl(normalizedTab, normalizedWazaId, normalizedGroupId),
   );
 }
 
@@ -189,12 +166,7 @@ export function pushRoute(tab, wazaId = null, groupId = null) {
  *     and the URL fragment. Defaults to an empty object.
  * @return {void}
  */
-export function replaceRoute(
-  tab,
-  wazaId = null,
-  groupId = null,
-  opts = {},
-) {
+export function replaceRoute(tab, wazaId = null, groupId = null, opts = {}) {
   let destination = buildUrl(tab, wazaId, groupId);
 
   if (opts.preserveExtras) {
@@ -225,9 +197,7 @@ export function replaceRoute(
   }
 
   const existingState =
-    history.state !== null &&
-    typeof history.state === 'object' &&
-    !Array.isArray(history.state)
+    history.state !== null && typeof history.state === 'object' && !Array.isArray(history.state)
       ? history.state
       : {};
 

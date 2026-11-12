@@ -58,12 +58,8 @@ export async function checkForGroupJoinKey() {
   // not back to the same join URL.
   // Remove only the consumed join parameter.
   url.searchParams.delete('groupJoinKey');
-  
-  history.replaceState(
-    history.state,
-    '',
-    url.pathname + url.search + url.hash,
-  );
+
+  history.replaceState(history.state, '', url.pathname + url.search + url.hash);
 
   // Fetch the group name so we can show it in the banner.
   // This is the public GET /api/groups/by-key/:key route from Phase 2a.

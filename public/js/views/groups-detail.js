@@ -11,14 +11,15 @@ import { api } from '../services/api.js';
 import { escapeHtml, safeWebUrl } from '../lib/escape.js';
 import { showToast } from '../components/show-toast.js';
 import { openEditGroup } from '../modals/group-edit.js';
-import { refreshGroups, handleConfirmedGroupDeletion, isGroupDeleted } from './groups-browse-list.js';
+import {
+  refreshGroups,
+  handleConfirmedGroupDeletion,
+  isGroupDeleted,
+} from './groups-browse-list.js';
 import { POLICY_LABEL, POLICY_CLASS } from '../config/groups-config.js';
 import { getGroupsSelectedId, resetGroupsLoaded } from '../state/groups-state.js';
 import { getCurrentUserId, isLoggedIn } from '../state/user-state.js';
-import {
-  requireApiArray,
-  requireApiObject,
-} from '../lib/api-response.js';
+import { requireApiArray, requireApiObject } from '../lib/api-response.js';
 
 // Each new render invalidates all older detail requests.
 let groupDetailRequestVersion = 0;
@@ -39,11 +40,7 @@ export async function renderGroupDetail(groupId) {
   const panel = document.getElementById('groupDetailContent');
 
   // Do not reopen a group that is no longer selected.
-  if (
-    !panel ||
-    getGroupsSelectedId() !== groupId ||
-    isGroupDeleted(groupId)
-  ) {
+  if (!panel || getGroupsSelectedId() !== groupId || isGroupDeleted(groupId)) {
     return;
   }
 
@@ -55,8 +52,7 @@ export async function renderGroupDetail(groupId) {
     !isGroupDeleted(groupId) &&
     panel.isConnected;
 
-  panel.innerHTML =
-    '<div class="d-empty" style="color:var(--text3)">Loading…</div>';
+  panel.innerHTML = '<div class="d-empty" style="color:var(--text3)">Loading…</div>';
 
   const loggedIn = isLoggedIn();
 
@@ -68,23 +64,18 @@ export async function renderGroupDetail(groupId) {
     ]);
     if (!isCurrentRequest()) return;
 
-    const g = requireApiObject(
-      groupRes,
-      'The server returned invalid Group details.',
-    );
-    
+    const g = requireApiObject(groupRes, 'The server returned invalid Group details.');
+
     const myStatus = requireApiObject(
       statusRes,
       'The server returned an invalid membership status.',
     );
-    
+
     if (g.id !== groupId || typeof g.name !== 'string') {
       throw new Error('The server returned invalid Group details.');
     }
-    
-    if (
-      !['guest', 'none', 'applied', 'member'].includes(myStatus.status)
-    ) {
+
+    if (!['guest', 'none', 'applied', 'member'].includes(myStatus.status)) {
       throw new Error('The server returned an invalid membership status.');
     }
 
@@ -175,17 +166,12 @@ export async function renderGroupDetail(groupId) {
     let pendingHTML = '';
     if (isMember) {
       try {
-        const membersRes = await api(
-          '/api/groups/' + groupId + '/members',
-        );
-        
+        const membersRes = await api('/api/groups/' + groupId + '/members');
+
         if (!isCurrentRequest()) return;
-        
-        const members = requireApiArray(
-          membersRes,
-          'The server returned an invalid member list.',
-        );
-        
+
+        const members = requireApiArray(membersRes, 'The server returned an invalid member list.');
+
         membersHTML =
           '<div class="dsec"><h3>Members</h3>' +
           '<div style="display:flex;flex-direction:column;gap:4px">' +
@@ -235,14 +221,11 @@ export async function renderGroupDetail(groupId) {
           '</div></div>';
       } catch (error) {
         if (!isCurrentRequest()) return;
-      
+
         console.error('Group member load failed:', error);
-      
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Could not load members.';
-      
+
+        const message = error instanceof Error ? error.message : 'Could not load members.';
+
         membersHTML =
           '<div class="dsec"><h3>Members</h3>' +
           '<div style="color:var(--red);font-size:13px">' +
@@ -255,17 +238,12 @@ export async function renderGroupDetail(groupId) {
 
       if (isAdmin) {
         try {
-          const appsRes = await api(
-            '/api/groups/' + groupId + '/applications',
-          );
-          
+          const appsRes = await api('/api/groups/' + groupId + '/applications');
+
           if (!isCurrentRequest()) return;
-          
-          const apps = requireApiArray(
-            appsRes,
-            'The server returned an invalid application list.',
-          );
-          
+
+          const apps = requireApiArray(appsRes, 'The server returned an invalid application list.');
+
           if (apps.length) {
             pendingHTML =
               '<div class="dsec"><h3>Pending applications <span class="badge cs-pending" style="font-size:11px">' +
@@ -296,14 +274,11 @@ export async function renderGroupDetail(groupId) {
           }
         } catch (error) {
           if (!isCurrentRequest()) return;
-        
+
           console.error('Group application load failed:', error);
-        
-          const message =
-            error instanceof Error
-              ? error.message
-              : 'Could not load applications.';
-        
+
+          const message = error instanceof Error ? error.message : 'Could not load applications.';
+
           pendingHTML =
             '<div class="dsec"><h3>Pending applications</h3>' +
             '<div style="color:var(--red);font-size:13px">' +
@@ -318,7 +293,7 @@ export async function renderGroupDetail(groupId) {
 
     // Assemble
     if (!isCurrentRequest()) return;
-    
+
     panel.innerHTML =
       '<div class="d-njp">' +
       escapeHtml(g.name) +
@@ -344,11 +319,10 @@ export async function renderGroupDetail(groupId) {
 
     // ── Wire action buttons ───────────────────────────────────
 
-    panel.querySelectorAll('[data-retry-group-detail]')
-    .forEach((btn) => {
+    panel.querySelectorAll('[data-retry-group-detail]').forEach((btn) => {
       btn.addEventListener('click', () => {
         if (!isCurrentRequest()) return;
-  
+
         renderGroupDetail(groupId);
       });
     });
@@ -408,62 +382,50 @@ export async function renderGroupDetail(groupId) {
     });
 
     // Delete
-    panel.querySelector('#deleteGroupBtn')
-    ?.addEventListener('click', async (event) => {
+    panel.querySelector('#deleteGroupBtn')?.addEventListener('click', async (event) => {
       if (!isCurrentRequest()) return;
-  
+
       const btn = event.currentTarget;
-  
+
       if (btn.disabled) return;
-  
+
       if (
         !confirm(
-          'Permanently delete "' +
-            g.name +
-            '" and remove all members? This cannot be undone.',
+          'Permanently delete "' + g.name + '" and remove all members? This cannot be undone.',
         )
       ) {
         return;
       }
-  
+
       btn.disabled = true;
       btn.textContent = 'Deleting…';
-  
+
       try {
-        const res = await api(
-          '/api/groups/' + groupId,
-          'DELETE',
-        );
-  
+        const res = await api('/api/groups/' + groupId, 'DELETE');
+
         if (res.error) {
           showToast(res.error, 'red');
           return;
         }
-  
+
         if (res.success !== true) {
-          showToast(
-            'Group deletion was not confirmed. Refresh to verify before retrying.',
-            'red',
-          );
+          showToast('Group deletion was not confirmed. Refresh to verify before retrying.', 'red');
           return;
         }
-  
+
         // Cleanup uses the current selection, not the selection
         // captured when this request started.
         handleConfirmedGroupDeletion(groupId);
-  
+
         showToast(g.name + ' has been deleted.', 'green');
-  
+
         // Refresh after local cleanup. A failed refresh must not
         // restore the deleted selection or cached group.
         await refreshGroups();
       } catch (error) {
         console.error('Group deletion failed:', error);
-  
-        showToast(
-          'Group deletion was not confirmed. Refresh to verify before retrying.',
-          'red',
-        );
+
+        showToast('Group deletion was not confirmed. Refresh to verify before retrying.', 'red');
       } finally {
         // The original button may have been removed by navigation.
         if (btn.isConnected) {
@@ -563,14 +525,11 @@ export async function renderGroupDetail(groupId) {
     });
   } catch (error) {
     if (!isCurrentRequest()) return;
-  
+
     console.error('Failed to load group detail:', error);
-  
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Could not load this Group.';
-  
+
+    const message = error instanceof Error ? error.message : 'Could not load this Group.';
+
     panel.innerHTML =
       '<div class="d-empty">' +
       '<div style="color:var(--red)">' +
@@ -579,12 +538,11 @@ export async function renderGroupDetail(groupId) {
       '<button class="btn" id="retryGroupDetailBtn" ' +
       'style="margin-top:12px">Retry</button>' +
       '</div>';
-  
-    panel.querySelector('#retryGroupDetailBtn')
-      ?.addEventListener('click', () => {
-        if (!isCurrentRequest()) return;
-  
-        renderGroupDetail(groupId);
-      });
+
+    panel.querySelector('#retryGroupDetailBtn')?.addEventListener('click', () => {
+      if (!isCurrentRequest()) return;
+
+      renderGroupDetail(groupId);
+    });
   }
 }

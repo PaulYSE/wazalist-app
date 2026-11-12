@@ -173,22 +173,21 @@ export function renderImport() {
 
             if (shouldUpdate) {
               const nextLabels = state.markingLabels.slice();
-            
-              for (const [color, markingIdx] of Object.entries(
-                getImportColorMapping(),
-              )) {
+
+              for (const [color, markingIdx] of Object.entries(getImportColorMapping())) {
                 const label = getImportExcelColorLabelKey(color);
-            
+
                 if (markingIdx >= 0 && markingIdx < 6 && label) {
                   nextLabels[markingIdx] = label;
                 }
               }
-            
+
               const result = await saveLabels(nextLabels);
-            
+
               if (!result.success) {
                 showToast(
-                  'Label save not confirmed. ' + result.error +
+                  'Label save not confirmed. ' +
+                    result.error +
                     ' Import markings will still be previewed.',
                   'red',
                 );
@@ -482,7 +481,7 @@ export function renderImport() {
         const result = await saveP(item.waza.id, {
           markings: newMarkings,
         });
-        
+
         if (!result.success) {
           showToast(
             `Import stopped: ${count} Waza saved before this failure. ` +
@@ -491,7 +490,7 @@ export function renderImport() {
           );
           return;
         }
-        
+
         count++;
       }
     }
@@ -514,7 +513,7 @@ export function renderImport() {
         const result = await saveP(item.waza.id, {
           markings: newMarkings,
         });
-        
+
         if (!result.success) {
           showToast(
             `Import stopped: ${count} Waza saved before this failure. ` +
@@ -523,7 +522,7 @@ export function renderImport() {
           );
           return;
         }
-        
+
         count++;
       }
     }
@@ -623,38 +622,38 @@ function bindTiInputEvents(container) {
 
   fileInput?.addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
-  
+
     if (!file) return;
-  
+
     fileBtn.disabled = true;
     fileBtn.textContent = 'Loading Excel support…';
-  
+
     fileName.textContent = file.name;
     fileName.style.color = 'var(--text1)';
-  
+
     try {
       await loadSheetJs();
-  
+
       fileBtn.textContent = 'Reading file…';
-  
+
       await parseExcelFile(file);
       renderImport();
     } catch (error) {
       console.error('Excel import failed:', error);
-  
+
       const message =
         error instanceof Error
           ? error.message
           : 'Error reading the Excel file. Please try text import instead.';
-  
+
       showToast(message, 'red');
-  
+
       fileName.textContent = 'Import failed. Choose the file to retry.';
       fileName.style.color = 'var(--red)';
     } finally {
       fileBtn.disabled = false;
       fileBtn.textContent = '📁 Choose File';
-  
+
       /*
        * Clear the input so selecting the same file again triggers another
        * change event. This is important after a network or parsing failure.

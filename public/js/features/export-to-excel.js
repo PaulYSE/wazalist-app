@@ -56,38 +56,32 @@ export async function exportToExcel() {
   });
 
   if (!rows.length) {
-    setStatus(
-      'Nothing to export — mark some waza first.',
-      'var(--amber)',
-    );
+    setStatus('Nothing to export — mark some waza first.', 'var(--amber)');
     return;
   }
-  
-  const headerName =
-    !isGuest() && getCurrentUsername()
-      ? getCurrentUsername()
-      : 'Guest';
-  
+
+  const headerName = !isGuest() && getCurrentUsername() ? getCurrentUsername() : 'Guest';
+
   if (btn) {
     btn.disabled = true;
     btn.textContent = '⏳ Loading Excel support…';
   }
-  
+
   setStatus('Downloading the Excel export library…', 'var(--text3)');
-  
+
   try {
     await loadExcelJs();
-  
+
     if (btn) {
       btn.textContent = '⏳ Generating…';
     }
-  
+
     setStatus('Generating workbook…', 'var(--text3)');
-  
+
     const wb = new globalThis.ExcelJS.Workbook();
     wb.creator = 'Wazalist';
     wb.created = new Date();
-  
+
     const ws = wb.addWorksheet('Wazalist');
     ws.getColumn(1).width = 22; // A: legend labels
     ws.getColumn(2).width = 52; // B: waza hyperlinks
@@ -158,12 +152,9 @@ export async function exportToExcel() {
     showToast(`Exported ${rows.length} waza to Excel.`, 'green');
   } catch (error) {
     console.error('Export error:', error);
-  
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Export failed. Please try again.';
-  
+
+    const message = error instanceof Error ? error.message : 'Export failed. Please try again.';
+
     setStatus(message, 'var(--red)');
     showToast(message, 'red');
   } finally {

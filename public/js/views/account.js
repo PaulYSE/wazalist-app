@@ -359,38 +359,31 @@ export async function renderAccount() {
   });
 
   // ── Marking Labels save ───────────────────────────────────────
-  container.querySelector('#accSaveLabelsBtn')
-    ?.addEventListener('click', async () => {
-      const btn = container.querySelector('#accSaveLabelsBtn');
-      const nextLabels = state.markingLabels.slice();
-  
-      container.querySelectorAll('.acc-labels-input').forEach((inp) => {
-        nextLabels[+inp.dataset.si] = inp.value;
-      });
-  
-      btn.disabled = true;
-      btn.textContent = 'Saving…';
-  
-      try {
-        const result = await saveLabels(nextLabels);
-  
-        if (!result.success) {
-          showToast(
-            'Label save not confirmed. ' + result.error,
-            'red',
-          );
-          return;
-        }
-  
-        showToast(
-          result.warning || 'Marking Labels saved',
-          result.warning ? 'amber' : 'green',
-        );
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Save Marking Labels';
-      }
+  container.querySelector('#accSaveLabelsBtn')?.addEventListener('click', async () => {
+    const btn = container.querySelector('#accSaveLabelsBtn');
+    const nextLabels = state.markingLabels.slice();
+
+    container.querySelectorAll('.acc-labels-input').forEach((inp) => {
+      nextLabels[+inp.dataset.si] = inp.value;
     });
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const result = await saveLabels(nextLabels);
+
+      if (!result.success) {
+        showToast('Label save not confirmed. ' + result.error, 'red');
+        return;
+      }
+
+      showToast(result.warning || 'Marking Labels saved', result.warning ? 'amber' : 'green');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Marking Labels';
+    }
+  });
 
   // ── Reset All Progress ────────────────────────────────────────
   const resetBtn = container.querySelector('#resetAccountBtn');
@@ -417,17 +410,15 @@ export async function renderAccount() {
     try {
       if (loggedIn) {
         const progressResult = await api('/api/progress', 'DELETE');
-      
+
         if (progressResult.error || progressResult.success !== true) {
-          throw new Error(
-            progressResult.error || 'The server did not confirm the progress reset.',
-          );
+          throw new Error(progressResult.error || 'The server did not confirm the progress reset.');
         }
-      
+
         const labelsResult = await api('/api/labels', 'POST', {
           labels: ['', '', '', '', '', ''],
         });
-      
+
         if (labelsResult.error || labelsResult.success !== true) {
           throw new Error(
             'Progress was reset, but the label reset was not confirmed. ' +

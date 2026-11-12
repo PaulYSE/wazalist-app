@@ -151,10 +151,7 @@ function pauseTimer(entry) {
 
   window.clearTimeout(entry.timer);
   entry.timer = null;
-  entry.remaining = Math.max(
-    0,
-    entry.remaining - (performance.now() - entry.startedAt),
-  );
+  entry.remaining = Math.max(0, entry.remaining - (performance.now() - entry.startedAt));
 }
 
 /**
@@ -238,19 +235,13 @@ function removeToast(entry) {
 export function showToast(msg, color = 'green') {
   const stack = ensureContainer();
 
-  const resolvedColor = Object.prototype.hasOwnProperty.call(
-    TOAST_COLORS,
-    color,
-  )
-    ? color
-    : 'green';
+  const resolvedColor = Object.prototype.hasOwnProperty.call(TOAST_COLORS, color) ? color : 'green';
 
   const message = String(msg ?? '');
   const duration = resolvedColor === 'green' ? 3000 : 5000;
 
   const existing = toasts.find(
-    (entry) =>
-      entry.message === message && entry.color === resolvedColor,
+    (entry) => entry.message === message && entry.color === resolvedColor,
   );
 
   if (existing) {

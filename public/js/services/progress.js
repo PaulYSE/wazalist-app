@@ -119,8 +119,7 @@ export async function saveLabels(labels = state.markingLabels) {
 
       return {
         success: true,
-        warning:
-          'Labels saved to your account, but the browser cache could not be updated.',
+        warning: 'Labels saved to your account, but the browser cache could not be updated.',
       };
     }
 
@@ -130,10 +129,7 @@ export async function saveLabels(labels = state.markingLabels) {
 
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Could not save your Marking Labels.',
+      error: error instanceof Error ? error.message : 'Could not save your Marking Labels.',
     };
   } finally {
     labelsSaving = false;
@@ -221,10 +217,7 @@ export async function saveP(id, patch, opts = {}) {
       delete state.prog[id];
     }
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Could not save your progress.';
+    const message = error instanceof Error ? error.message : 'Could not save your progress.';
 
     console.warn('Progress save failed:', id, error);
     result = { success: false, error: message };
@@ -241,10 +234,7 @@ export async function saveP(id, patch, opts = {}) {
   }
 
   if (!result.success) {
-    showToast(
-      'Save not confirmed. Previous local state restored. ' + result.error,
-      'red',
-    );
+    showToast('Save not confirmed. Previous local state restored. ' + result.error, 'red');
   } else if (!isGuest()) {
     showToast('Saved ✓', 'green');
   }

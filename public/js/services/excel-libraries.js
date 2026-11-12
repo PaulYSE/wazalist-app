@@ -14,11 +14,9 @@
 const SHEETJS_SCRIPT_ID = 'wazalist-sheetjs';
 const EXCELJS_SCRIPT_ID = 'wazalist-exceljs';
 
-const SHEETJS_URL =
-  'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+const SHEETJS_URL = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
 
-const EXCELJS_URL =
-  'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+const EXCELJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
 
 /** @type {?Promise<void>} */
 let sheetJsLoadPromise = null;
@@ -39,12 +37,7 @@ let excelJsLoadPromise = null;
  * @param {string} libraryName Human-readable library name for errors.
  * @return {!Promise<void>} Resolves when the library is available.
  */
-function loadClassicScript(
-  id,
-  src,
-  isAvailable,
-  libraryName,
-) {
+function loadClassicScript(id, src, isAvailable, libraryName) {
   if (isAvailable()) {
     return Promise.resolve();
   }
@@ -59,12 +52,7 @@ function loadClassicScript(
           if (isAvailable()) {
             resolve();
           } else {
-            reject(
-              new Error(
-                libraryName +
-                  ' downloaded but did not initialize correctly.',
-              ),
-            );
+            reject(new Error(libraryName + ' downloaded but did not initialize correctly.'));
           }
         },
         { once: true },
@@ -77,9 +65,7 @@ function loadClassicScript(
 
           reject(
             new Error(
-              'Could not download ' +
-                libraryName +
-                '. Check your connection and try again.',
+              'Could not download ' + libraryName + '. Check your connection and try again.',
             ),
           );
         },
@@ -105,12 +91,7 @@ function loadClassicScript(
 
         script.remove();
 
-        reject(
-          new Error(
-            libraryName +
-              ' downloaded but did not initialize correctly.',
-          ),
-        );
+        reject(new Error(libraryName + ' downloaded but did not initialize correctly.'));
       },
       { once: true },
     );
@@ -121,11 +102,7 @@ function loadClassicScript(
         script.remove();
 
         reject(
-          new Error(
-            'Could not download ' +
-              libraryName +
-              '. Check your connection and try again.',
-          ),
+          new Error('Could not download ' + libraryName + '. Check your connection and try again.'),
         );
       },
       { once: true },

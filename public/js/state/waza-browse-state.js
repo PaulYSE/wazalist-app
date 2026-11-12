@@ -46,12 +46,8 @@ function loadSortFromLS() {
     const prefs = JSON.parse(localStorage.getItem(LS_SORT) || '{}');
 
     return {
-      field: ['default', 'name', 'likes'].includes(prefs?.field)
-        ? prefs.field
-        : 'default',
-      order: ['asc', 'desc'].includes(prefs?.order)
-        ? prefs.order
-        : 'asc',
+      field: ['default', 'name', 'likes'].includes(prefs?.field) ? prefs.field : 'default',
+      order: ['asc', 'desc'].includes(prefs?.order) ? prefs.order : 'asc',
     };
   } catch {
     return { field: 'default', order: 'asc' };

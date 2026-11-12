@@ -235,8 +235,7 @@ export function wireCompareControls(container, onEntriesChanged) {
     onEntriesChanged();
   });
 
-  container.querySelector('#cmpRetryGroupsBtn')
-  ?.addEventListener('click', () => {
+  container.querySelector('#cmpRetryGroupsBtn')?.addEventListener('click', () => {
     // renderDashCompare() retries because the loaded flag is false.
     onEntriesChanged();
   });
@@ -289,12 +288,11 @@ function wireMemberTab(container, onEntriesChanged) {
 async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
   const memberArea = container.querySelector('#cmpAddMemberArea');
   if (!memberArea) return;
-  
-  const requestVersion =
-    (memberAreaRequestVersions.get(memberArea) || 0) + 1;
-  
+
+  const requestVersion = (memberAreaRequestVersions.get(memberArea) || 0) + 1;
+
   memberAreaRequestVersions.set(memberArea, requestVersion);
-  
+
   const isCurrentRequest = () =>
     memberAreaRequestVersions.get(memberArea) === requestVersion &&
     memberArea.isConnected &&
@@ -302,20 +300,16 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
     isCompareAddPanelOpen() &&
     getCompareAddPanelSourceType() === 'member' &&
     getCompareAddPanelGroupId() === groupId;
-  
-  memberArea.innerHTML =
-    '<div style="font-size:13px;color:var(--text3)">Loading members…</div>';
+
+  memberArea.innerHTML = '<div style="font-size:13px;color:var(--text3)">Loading members…</div>';
 
   try {
     const res = await api('/api/groups/' + groupId + '/members');
-    
+
     if (!isCurrentRequest()) return;
-    
-    const members = requireApiArray(
-      res,
-      'The server returned an invalid member list.',
-    );
-    
+
+    const members = requireApiArray(res, 'The server returned an invalid member list.');
+
     const candidates = members.filter(
       (m) => m.user_id !== getCurrentUserId() && !hasCompareEntry('member', m.user_id),
     );
@@ -356,7 +350,7 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
 
     submitBtn.addEventListener('click', async () => {
       if (!isCurrentRequest()) return;
-      
+
       const checked = memberArea.querySelectorAll('.cmp-add-member-cb:checked');
       const selected = Array.from(checked).map((cb) => ({
         id: +cb.value,
@@ -368,9 +362,9 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
       submitBtn.textContent = 'Adding…';
 
       const { entries, error } = await fetchMemberEntries(groupId, selected);
-      
+
       if (!isCurrentRequest()) return;
-      
+
       if (error) {
         showToast(error, 'red');
         submitBtn.disabled = false;
@@ -384,29 +378,21 @@ async function loadMemberCheckboxes(container, groupId, onEntriesChanged) {
     });
   } catch (error) {
     if (!isCurrentRequest()) return;
-  
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Could not load members.';
-  
+
+    const message = error instanceof Error ? error.message : 'Could not load members.';
+
     memberArea.innerHTML =
       '<div style="font-size:13px;color:var(--red)">' +
       escapeHtml(message) +
       '</div>' +
       '<button class="btn" id="cmpRetryMembersBtn" ' +
       'style="margin-top:8px">Retry members</button>';
-  
-    memberArea.querySelector('#cmpRetryMembersBtn')
-      ?.addEventListener('click', () => {
-        if (!isCurrentRequest()) return;
-  
-        loadMemberCheckboxes(
-          container,
-          groupId,
-          onEntriesChanged,
-        );
-      });
+
+    memberArea.querySelector('#cmpRetryMembersBtn')?.addEventListener('click', () => {
+      if (!isCurrentRequest()) return;
+
+      loadMemberCheckboxes(container, groupId, onEntriesChanged);
+    });
   }
 }
 

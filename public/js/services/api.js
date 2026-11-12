@@ -62,12 +62,7 @@ export const api = async (path, method = 'GET', body = null) => {
     };
   }
 
-  if (
-    res.status === 401 &&
-    data.error === 'Authentication required' &&
-    getToken() &&
-    !isGuest()
-  ) {
+  if (res.status === 401 && data.error === 'Authentication required' && getToken() && !isGuest()) {
     handleSessionExpired();
     return data;
   }

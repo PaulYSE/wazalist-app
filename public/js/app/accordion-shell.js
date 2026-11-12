@@ -31,11 +31,7 @@ import { escapeHtml } from '../lib/escape.js';
  * @return {string} Accordion section HTML.
  */
 export function buildAccordion(key, label, bodyHtml, opts = {}) {
-  const {
-    open = false,
-    visible = true,
-    wrapper = 'dsec2',
-  } = opts;
+  const { open = false, visible = true, wrapper = 'dsec2' } = opts;
 
   return (
     '<div class="' +

@@ -146,7 +146,7 @@ function matchesQuery(text, query) {
 
   const normalizedText = normalizeForSearch(text);
   const normalizedQuery = normalizeForSearch(query);
-  
+
   if (!normalizedText || !normalizedQuery) return false;
 
   // Level 1: Exact substring match (fast path)
@@ -222,55 +222,36 @@ export function isFuzzyMatch(text, query, maxDistance = 2) {
     actualMaxDist = Math.min(maxDistance, adaptiveMaxDist);
   }
 
-// Accept exact substrings without calculating edit distance.
-if (normalizedText.includes(normalizedQuery)) return true;
+  // Accept exact substrings without calculating edit distance.
+  if (normalizedText.includes(normalizedQuery)) return true;
 
-// Insertions and deletions can change the matching substring's length.
-// Examine every candidate length within the permitted distance.
-const minLength = Math.max(
-  0,
-  normalizedQuery.length - actualMaxDist,
-);
-const maxLength = normalizedQuery.length + actualMaxDist;
+  // Insertions and deletions can change the matching substring's length.
+  // Examine every candidate length within the permitted distance.
+  const minLength = Math.max(0, normalizedQuery.length - actualMaxDist);
+  const maxLength = normalizedQuery.length + actualMaxDist;
 
-for (
-  let start = 0;
-  start <= normalizedText.length - minLength;
-  start++
-) {
-  const availableMaxLength = Math.min(
-    maxLength,
-    normalizedText.length - start,
-  );
+  for (let start = 0; start <= normalizedText.length - minLength; start++) {
+    const availableMaxLength = Math.min(maxLength, normalizedText.length - start);
 
-  for (
-    let length = minLength;
-    length <= availableMaxLength;
-    length++
-  ) {
-    const candidate = normalizedText.slice(start, start + length);
+    for (let length = minLength; length <= availableMaxLength; length++) {
+      const candidate = normalizedText.slice(start, start + length);
 
-    if (
-      levenshteinDistance(candidate, normalizedQuery) <= actualMaxDist
-    ) {
-      return true;
+      if (levenshteinDistance(candidate, normalizedQuery) <= actualMaxDist) {
+        return true;
+      }
     }
   }
-}
 
-// Require every significant query word to match a word in this field.
-const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
+  // Require every significant query word to match a word in this field.
+  const queryWords = normalizedQuery.split(' ').filter((w) => w.length > 1);
 
-if (queryWords.length > 1) {
-  const textWords = normalizedText.split(' ');
+  if (queryWords.length > 1) {
+    const textWords = normalizedText.split(' ');
 
-  return queryWords.every((queryWord) =>
-    textWords.some(
-      (textWord) =>
-        levenshteinDistance(textWord, queryWord) <= actualMaxDist,
-    ),
-  );
-}
+    return queryWords.every((queryWord) =>
+      textWords.some((textWord) => levenshteinDistance(textWord, queryWord) <= actualMaxDist),
+    );
+  }
 
   return false;
 }
@@ -309,10 +290,7 @@ function parseScopedSearch(search) {
   const fields = SEARCH_SCOPES[scope];
 
   let rest = m[2].trim();
-  const exact =
-    rest.startsWith('"') &&
-    rest.endsWith('"') &&
-    rest.length >= 2;
+  const exact = rest.startsWith('"') && rest.endsWith('"') && rest.length >= 2;
 
   if (exact) rest = rest.slice(1, -1).trim();
 
@@ -346,16 +324,11 @@ export function wazaMatchesSearch(w, search) {
 
     const matchFn = scoped.exact ? matchesExactField : isFuzzyMatch;
 
-    return scoped.fields.some(
-      (field) => w[field] && matchFn(w[field], scoped.query),
-    );
+    return scoped.fields.some((field) => w[field] && matchFn(w[field], scoped.query));
   }
 
   // Global quoted queries use non-fuzzy substring/all-word matching.
-  const isQuoted =
-    search.length >= 2 &&
-    search.startsWith('"') &&
-    search.endsWith('"');
+  const isQuoted = search.length >= 2 && search.startsWith('"') && search.endsWith('"');
 
   const query = isQuoted ? search.slice(1, -1).trim() : search;
 
@@ -363,9 +336,7 @@ export function wazaMatchesSearch(w, search) {
 
   const matchFn = isQuoted ? matchesQuery : isFuzzyMatch;
 
-  return SEARCH_FIELDS.some(
-    (field) => w[field] && matchFn(w[field], query),
-  );
+  return SEARCH_FIELDS.some((field) => w[field] && matchFn(w[field], query));
 }
 
 /**

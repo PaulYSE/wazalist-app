@@ -30,27 +30,20 @@ import {
 export async function parseExcelFile(file) {
   const data = await file.arrayBuffer();
   if (!globalThis.XLSX) {
-    throw new Error(
-      'The Excel import library is not available.',
-    );
+    throw new Error('The Excel import library is not available.');
   }
-  
+
   const workbook = globalThis.XLSX.read(data, {
     type: 'array',
     cellStyles: true,
   });
-  const firstSheet =
-    workbook.Sheets[workbook.SheetNames[0]];
-  
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
   if (!firstSheet || !firstSheet['!ref']) {
-    throw new Error(
-      'The selected workbook does not contain a readable worksheet.',
-    );
+    throw new Error('The selected workbook does not contain a readable worksheet.');
   }
-  
-  const range = globalThis.XLSX.utils.decode_range(
-    firstSheet['!ref'],
-  );
+
+  const range = globalThis.XLSX.utils.decode_range(firstSheet['!ref']);
 
   resetImportExcelColors();
   const allLines = [];

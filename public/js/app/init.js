@@ -168,9 +168,7 @@ export async function initApp() {
         return id;
       }
 
-      const match = state.wazaData.find(
-        (w) => w.name_jp && w.name_jp.trim() === wazaParam,
-      );
+      const match = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === wazaParam);
 
       return match ? match.id : null;
     })();
@@ -204,7 +202,7 @@ export async function initApp() {
       await firePendingGroupJoin((groupId) => {
         switchTab('groups');
         selectGroupFromHistory(groupId);
-      
+
         // Complete the destination entry with the selected Group.
         replaceRoute('groups', null, groupId, {
           preserveExtras: true,

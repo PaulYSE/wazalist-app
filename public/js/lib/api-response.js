@@ -14,11 +14,7 @@
  *     otherwise uses fallbackMessage.
  */
 export function requireApiArray(value, fallbackMessage) {
-  if (
-    value &&
-    typeof value.error === 'string' &&
-    value.error.trim()
-  ) {
+  if (value && typeof value.error === 'string' && value.error.trim()) {
     throw new Error(value.error);
   }
 
@@ -46,19 +42,11 @@ export function requireApiArray(value, fallbackMessage) {
  *     message when present; otherwise uses fallbackMessage.
  */
 export function requireApiObject(value, fallbackMessage) {
-  if (
-    value &&
-    typeof value.error === 'string' &&
-    value.error.trim()
-  ) {
+  if (value && typeof value.error === 'string' && value.error.trim()) {
     throw new Error(value.error);
   }
 
-  if (
-    value === null ||
-    typeof value !== 'object' ||
-    Array.isArray(value)
-  ) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(fallbackMessage);
   }
 

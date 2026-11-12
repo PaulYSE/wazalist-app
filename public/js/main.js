@@ -67,16 +67,16 @@ document.getElementById('mobHelpBtn').addEventListener('click', () => {
 // ── Popstate — back button closes the detail panel ────────────
 
 /**
-* Reconciles application navigation state after browser history navigation.
-*
-* Restores the active tab and corresponding Waza or Group detail state
-* from the current URL without creating additional history entries.
-* Waza parameters are resolved through resolveWaza(), while Group
-* parameters must be numeric. Missing or invalid detail parameters close
-* any corresponding open detail selection.
-*
-* @return {void}
-*/
+ * Reconciles application navigation state after browser history navigation.
+ *
+ * Restores the active tab and corresponding Waza or Group detail state
+ * from the current URL without creating additional history entries.
+ * Waza parameters are resolved through resolveWaza(), while Group
+ * parameters must be numeric. Missing or invalid detail parameters close
+ * any corresponding open detail selection.
+ *
+ * @return {void}
+ */
 window.addEventListener('popstate', () => {
   const { tab, wazaParam, groupParam } = parseRoute();
 
@@ -134,9 +134,7 @@ function resolveWaza(param) {
     return id;
   }
 
-  const match = state.wazaData.find(
-    (w) => w.name_jp && w.name_jp.trim() === param,
-  );
+  const match = state.wazaData.find((w) => w.name_jp && w.name_jp.trim() === param);
 
   return match ? match.id : null;
 }

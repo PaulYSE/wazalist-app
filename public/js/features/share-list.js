@@ -35,11 +35,7 @@ export function checkAutoImport() {
   // Remove only the consumed parameter.
   url.searchParams.delete('import');
 
-  history.replaceState(
-    history.state,
-    '',
-    url.pathname + url.search + url.hash,
-  );
+  history.replaceState(history.state, '', url.pathname + url.search + url.hash);
 
   setTimeout(() => openImportModal(importKey), 400);
 }

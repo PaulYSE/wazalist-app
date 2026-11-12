@@ -78,7 +78,7 @@ export function showOnboarding() {
   labelsValues.forEach((_, i) => {
     labelsValues[i] = existing[i];
   });
-  
+
   const el = document.getElementById('wlOnboarding');
   el.style.display = 'flex';
   requestAnimationFrame(() => {
@@ -197,31 +197,25 @@ function renderFooter() {
         document.querySelectorAll('#obLabelsPreview .ob-labels-input'),
         (inp) => inp.value.trim(),
       );
-    
+
       saveBtn.disabled = true;
       saveBtn.textContent = 'Saving…';
-    
+
       try {
         const result = await saveLabels(nextLabels);
-    
+
         if (!result.success) {
-          showToast(
-            'Label save not confirmed. ' + result.error,
-            'red',
-          );
+          showToast('Label save not confirmed. ' + result.error, 'red');
           return;
         }
-    
+
         nextLabels.forEach((label, i) => {
           labelsValues[i] = label;
         });
-    
+
         renderDashStats();
-    
-        showToast(
-          result.warning || 'Marking Labels saved',
-          result.warning ? 'amber' : 'green',
-        );
+
+        showToast(result.warning || 'Marking Labels saved', result.warning ? 'amber' : 'green');
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Marking Labels';

@@ -1,15 +1,15 @@
 /**
-  * @file render-helpers.js
-  * @author Paul Yong Shao En
-  * @email paulyse99@gmail.com
-  * @project Wazalist App
-  * @date 2026-10-21
-  * @fileoverview Shared helpers for marking styles, marking indicators,
-  * video links, embed URLs, metadata retrieval, and video comparison keys.
-  *
-  * Reads application state and the active document theme. Maintains
-  * in-memory caches, retrieves video metadata with bounded retries,
-  * and updates matching video metadata elements in the document.
+ * @file render-helpers.js
+ * @author Paul Yong Shao En
+ * @email paulyse99@gmail.com
+ * @project Wazalist App
+ * @date 2026-10-21
+ * @fileoverview Shared helpers for marking styles, marking indicators,
+ * video links, embed URLs, metadata retrieval, and video comparison keys.
+ *
+ * Reads application state and the active document theme. Maintains
+ * in-memory caches, retrieves video metadata with bounded retries,
+ * and updates matching video metadata elements in the document.
  */
 
 import {
@@ -193,9 +193,7 @@ function parseVideoWebUrl(url) {
   try {
     const parsed = new URL(normalized);
 
-    return ['http:', 'https:'].includes(parsed.protocol)
-      ? parsed
-      : null;
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed : null;
   } catch {
     return null;
   }
@@ -209,10 +207,7 @@ function parseVideoWebUrl(url) {
  * @return {boolean} Whether the hostname matches the domain boundary.
  */
 function hostnameMatches(hostname, domain) {
-  return (
-    hostname === domain ||
-    hostname.endsWith('.' + domain)
-  );
+  return hostname === domain || hostname.endsWith('.' + domain);
 }
 
 /**
@@ -309,9 +304,7 @@ export function embedUrl(url) {
   let youtubeId = null;
 
   if (hostnameMatches(host, 'youtu.be')) {
-    const match = path.match(
-      /^\/([A-Za-z0-9_-]{11})(?:\/|$)/,
-    );
+    const match = path.match(/^\/([A-Za-z0-9_-]{11})(?:\/|$)/);
     youtubeId = match ? match[1] : null;
   } else if (hostnameMatches(host, 'youtube.com')) {
     if (path === '/watch') {
@@ -321,9 +314,7 @@ export function embedUrl(url) {
         youtubeId = candidate;
       }
     } else {
-      const match = path.match(
-        /^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/,
-      );
+      const match = path.match(/^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/);
       youtubeId = match ? match[1] : null;
     }
   }
@@ -355,9 +346,7 @@ export function embedUrl(url) {
       );
     }
 
-    const avMatch = isBilibili
-      ? path.match(/^\/video\/av(\d+)(?:\/|$)/i)
-      : null;
+    const avMatch = isBilibili ? path.match(/^\/video\/av(\d+)(?:\/|$)/i) : null;
 
     if (avMatch) {
       return (
@@ -468,17 +457,12 @@ export function oembedEndpoint(url) {
 
   if (pl === 'yt') {
     return (
-      'https://www.youtube.com/oembed?url=' +
-      encodeURIComponent(normalizedUrl) +
-      '&format=json'
+      'https://www.youtube.com/oembed?url=' + encodeURIComponent(normalizedUrl) + '&format=json'
     );
   }
 
   if (['nico', 'bili', 'tw'].includes(pl)) {
-    return (
-      'https://noembed.com/embed?url=' +
-      encodeURIComponent(normalizedUrl)
-    );
+    return 'https://noembed.com/embed?url=' + encodeURIComponent(normalizedUrl);
   }
 
   return null;
@@ -516,10 +500,7 @@ export async function fetchOembed(url) {
     return;
   }
 
-  if (
-    cached === 'failed' &&
-    Date.now() < (oembedRetryAt.get(url) || 0)
-  ) {
+  if (cached === 'failed' && Date.now() < (oembedRetryAt.get(url) || 0)) {
     applyOembedToDOM(url);
     return;
   }
@@ -583,8 +564,7 @@ export async function fetchOembed(url) {
 
         if (!response.ok) {
           const temporary =
-            response.status === 408 ||
-            (response.status >= 500 && response.status <= 599);
+            response.status === 408 || (response.status >= 500 && response.status <= 599);
 
           if (!temporary) {
             retryAt = Infinity;
@@ -622,22 +602,14 @@ export async function fetchOembed(url) {
           continue;
         }
 
-        if (
-          !data ||
-          typeof data !== 'object' ||
-          Array.isArray(data) ||
-          data.error
-        ) {
+        if (!data || typeof data !== 'object' || Array.isArray(data) || data.error) {
           retryAt = Infinity;
           return;
         }
 
         const meta = {
           title: typeof data.title === 'string' ? data.title : '',
-          author:
-            typeof data.author_name === 'string'
-              ? data.author_name
-              : '',
+          author: typeof data.author_name === 'string' ? data.author_name : '',
         };
 
         if (!meta.title.trim() && !meta.author.trim()) {
@@ -849,9 +821,7 @@ export function videoKey(url) {
     let youtubeId = null;
 
     if (hostnameMatches(host, 'youtu.be')) {
-      const match = path.match(
-        /^\/([A-Za-z0-9_-]{11})(?:\/|$)/,
-      );
+      const match = path.match(/^\/([A-Za-z0-9_-]{11})(?:\/|$)/);
       youtubeId = match ? match[1] : null;
     } else if (hostnameMatches(host, 'youtube.com')) {
       if (path === '/watch') {
@@ -861,9 +831,7 @@ export function videoKey(url) {
           youtubeId = candidate;
         }
       } else {
-        const match = path.match(
-          /^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/,
-        );
+        const match = path.match(/^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/);
         youtubeId = match ? match[1] : null;
       }
     }
@@ -883,9 +851,7 @@ export function videoKey(url) {
         return 'bili:' + bvMatch[1];
       }
 
-      const avMatch = isBilibili
-        ? path.match(/^\/video\/av(\d+)(?:\/|$)/i)
-        : null;
+      const avMatch = isBilibili ? path.match(/^\/video\/av(\d+)(?:\/|$)/i) : null;
 
       if (avMatch) return 'bili:av' + avMatch[1];
     }
@@ -903,13 +869,8 @@ export function videoKey(url) {
     }
 
     // Twitter/X.
-    if (
-      hostnameMatches(host, 'twitter.com') ||
-      hostnameMatches(host, 'x.com')
-    ) {
-      const match = path.match(
-        /^\/[^/]+\/status\/(\d+)(?:\/|$)/,
-      );
+    if (hostnameMatches(host, 'twitter.com') || hostnameMatches(host, 'x.com')) {
+      const match = path.match(/^\/[^/]+\/status\/(\d+)(?:\/|$)/);
 
       if (match) return 'tw:' + match[1];
     }

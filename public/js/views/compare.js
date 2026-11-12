@@ -40,17 +40,11 @@ let compareRenderVersion = 0;
 export async function renderDashCompare() {
   const container = document.getElementById('dashCompare');
   if (!container) return;
-   
   const renderVersion = ++compareRenderVersion;
-   
   if (!getMyGroupsLoaded()) {
     await refreshMyGroups();
   }
-   
-  if (
-    renderVersion !== compareRenderVersion ||
-    !container.isConnected
-  ) {
+  if (renderVersion !== compareRenderVersion || !container.isConnected) {
     return;
   }
 

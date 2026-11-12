@@ -67,13 +67,9 @@ export function handleConfirmedGroupDeletion(id) {
   deletedGroupIds.add(id);
 
   // Remove the confirmed deletion from cached lists immediately.
-  setGroupsData(
-    getGroupsData().filter((group) => group.id !== id),
-  );
+  setGroupsData(getGroupsData().filter((group) => group.id !== id));
 
-  setMyGroups(
-    getMyGroups().filter((group) => group.id !== id),
-  );
+  setMyGroups(getMyGroups().filter((group) => group.id !== id));
 
   resetGroupsLoaded();
   resetMyGroupsLoaded();
@@ -127,7 +123,7 @@ function selectGroup(id) {
  */
 function closeGroupDetail() {
   invalidateGroupDetailRequests();
-  
+
   setGroupsSelectedId(null);
   document.querySelector('#groupsView .main').classList.remove('waza-selected');
   renderGroupList();
@@ -263,23 +259,15 @@ export async function refreshGroups() {
 
   try {
     const res = await api('/api/groups');
-    const groups = requireApiArray(
-      res,
-      'The server returned an invalid Groups list.',
-    );
+    const groups = requireApiArray(res, 'The server returned an invalid Groups list.');
 
     // Commit cache and loaded state only after validation.
-    setGroupsData(
-      groups.filter((group) => !isGroupDeleted(group.id)),
-    );
+    setGroupsData(groups.filter((group) => !isGroupDeleted(group.id)));
     setGroupsLoaded();
   } catch (error) {
     console.error('Failed to load groups:', error);
 
-    groupsLoadError =
-      error instanceof Error
-        ? error.message
-        : 'Could not load Groups.';
+    groupsLoadError = error instanceof Error ? error.message : 'Could not load Groups.';
 
     // Preserve the previous cache, but allow a future retry.
     resetGroupsLoaded();
@@ -322,14 +310,9 @@ export async function refreshMyGroups() {
 
   try {
     const res = await api('/api/groups/mine');
-    const groups = requireApiArray(
-      res,
-      'The server returned an invalid membership list.',
-    );
+    const groups = requireApiArray(res, 'The server returned an invalid membership list.');
 
-    setMyGroups(
-      groups.filter((group) => !isGroupDeleted(group.id)),
-    );
+    setMyGroups(groups.filter((group) => !isGroupDeleted(group.id)));
     setMyGroupsLoaded();
 
     return { success: true };
@@ -337,9 +320,7 @@ export async function refreshMyGroups() {
     console.error('Failed to load my groups:', error);
 
     myGroupsLoadError =
-      error instanceof Error
-        ? error.message
-        : 'Could not load your Group memberships.';
+      error instanceof Error ? error.message : 'Could not load your Group memberships.';
 
     // Keep any previous cache, but do not treat it as a fresh success.
     resetMyGroupsLoaded();
@@ -393,7 +374,7 @@ function renderGroupList() {
 
   if (groupsLoadError) {
     countBar.textContent = 'Groups could not be loaded';
-  
+
     listEl.innerHTML =
       '<div style="padding:24px 20px;text-align:center">' +
       '<div style="color:var(--red);font-size:13px">' +
@@ -402,12 +383,11 @@ function renderGroupList() {
       '<button class="btn" id="retryGroupsBtn" ' +
       'style="margin-top:12px">Retry</button>' +
       '</div>';
-  
-    listEl.querySelector('#retryGroupsBtn')
-      ?.addEventListener('click', () => {
-        refreshGroups();
-      });
-  
+
+    listEl.querySelector('#retryGroupsBtn')?.addEventListener('click', () => {
+      refreshGroups();
+    });
+
     return;
   }
 
