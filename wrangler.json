@@ -22,7 +22,7 @@
 	},
 	"vars": {
 		"PASSWORD_RESET_BASE_URL": "https://wazalist-app.paulyse99.workers.dev",
-		"PASSWORD_RESET_FROM_EMAIL": "Wazalist <no-reply@YOUR-DOMAIN>",
+		"PASSWORD_RESET_FROM_EMAIL": "Wazalist <onboarding@resend.dev>",
 		"WAZALIST_ADMIN_EMAIL": "paulyse99@gmail.com",
 		"PASSWORD_RESET_EMAIL_MODE": "test"
 	},
