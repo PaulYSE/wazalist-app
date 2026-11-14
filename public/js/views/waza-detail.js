@@ -469,7 +469,7 @@ export function renderDetail() {
         if (!iframe) {
           iframe = document.createElement('iframe');
           iframe.allow =
-            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            'autoplay; encrypted-media; picture-in-picture';
           iframe.allowFullscreen = true;
           wrap.appendChild(iframe);
         }
