@@ -8,7 +8,7 @@ import { ValidationError } from "../validation";
  * @param {unknown} value - Stored progress.markings database value.
  * @return {boolean[]} Exactly six Boolean marking values.
  */
-const parseStoredMarkings = (value: unknown): boolean[] => {
+export const parseStoredMarkings = (value: unknown): boolean[] => {
 	if (typeof value !== "string") {
 		return Array(6).fill(false);
 	}
@@ -42,7 +42,7 @@ const parseStoredMarkings = (value: unknown): boolean[] => {
  * @return {string} Canonical serialized six-boolean markings array.
  * @throws {ValidationError} If the value is missing or malformed.
  */
-const validateSubmittedMarkings = (value: unknown): string => {
+export const validateSubmittedMarkings = (value: unknown): string => {
   if (typeof value !== "string") {
     throw new ValidationError(
       "markings must be a JSON string containing exactly six booleans",
