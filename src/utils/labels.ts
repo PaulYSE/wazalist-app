@@ -1,4 +1,4 @@
-const EMPTY_LABELS = ["", "", "", "", "", ""];
+export const EMPTY_LABELS = ["", "", "", "", "", ""];
 
 /**
  * @brief Parses stored marking labels into a safe six-string array.
