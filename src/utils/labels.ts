@@ -8,7 +8,7 @@ const EMPTY_LABELS = ["", "", "", "", "", ""];
  * @param {unknown} value - Stored shape_labels database value.
  * @return {string[]} Exactly six marking-label strings.
  */
-const parseStoredLabels = (value: unknown): string[] => {
+export const parseStoredLabels = (value: unknown): string[] => {
   if (typeof value !== "string") {
     return [...EMPTY_LABELS];
   }
