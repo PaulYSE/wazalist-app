@@ -9,7 +9,7 @@ import { ValidationError } from "../validation";
  * @return {Promise<Record<string, unknown>>} Parsed JSON object.
  * @throws {ValidationError} If the body is malformed or is not an object.
  */
-const readJsonObject = async (
+export const readJsonObject = async (
 	request: Request,
 ): Promise<Record<string, unknown>> => {
 	let parsed: unknown;
