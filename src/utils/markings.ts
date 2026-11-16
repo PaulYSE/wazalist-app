@@ -1,3 +1,4 @@
+import { ValidationError } from "../validation";
 
 /**
  * @brief Parses stored progress markings into a safe six-boolean array.
