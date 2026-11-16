@@ -8,190 +8,54 @@
  */
 
 import {
-	ValidationError,
-	readContributionBody,
-	validateWazaPayload,
-} from "./validation";
-import {
-	validateSharedList,
-	hashSharedList,
-	readSharedListBody,
-	SharedListBodyError,
-} from "./sharedListValidation";
-import { renderHtml } from "./renderHtml";
-import { renderAdmin } from "./renderAdmin";
-import { hashPassword, generateToken, getUserFromSession } from "./auth";
+  hashPassword,
+  generateToken,
+  getUserFromSession,
+} from "./auth";
+
 import {
   readGroupBody,
   validateGroupCreate,
   validateGroupUpdate,
-} from "./groupsValidation";
-
-import type {
   GroupCreateInput,
   GroupUpdateInput,
 } from "./groupsValidation";
 
-/**
- * @brief Helper to return JSON response.
- *
- * @param {unknown} data - Data to stringify.
- * @param {number} status - HTTP status code (default 200).
- * @return {Response} JSON response.
- */
-const json = (data: unknown, status = 200) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
+import { renderAdmin } from "./renderAdmin";
+import { renderHtml } from "./renderHtml";
 
-/**
- * @brief Helper to return error JSON response.
- *
- * @param {string} msg - Error message.
- * @param {number} status - HTTP status code (default 400).
- * @return {Response} JSON error response.
- */
-const err = (msg: string, status = 400) => json({ error: msg }, status);
+import {
+  SharedListBodyError,
+  hashSharedList,
+  readSharedListBody,
+  validateSharedList,
+} from "./sharedListValidation";
 
-const EMPTY_LABELS = ["", "", "", "", "", ""];
+import {
+  ValidationError,
+  readContributionBody,
+  validateWazaPayload,
+} from "./validation";
 
-/**
- * @brief Parses stored marking labels into a safe six-string array.
- *
- * Invalid JSON or an invalid stored shape falls back to six empty labels.
- *
- * @param {unknown} value - Stored shape_labels database value.
- * @return {string[]} Exactly six marking-label strings.
- */
-const parseStoredLabels = (value: unknown): string[] => {
-  if (typeof value !== "string") {
-    return [...EMPTY_LABELS];
-  }
+import { parseStoredLabels } from "./utils/labels";
 
-  try {
-    const parsed: unknown = JSON.parse(value);
+import {
+  parseStoredMarkings,
+  validateSubmittedMarkings,
+} from "./utils/markings";
 
-    if (
-      Array.isArray(parsed) &&
-      parsed.length === 6 &&
-      parsed.every((label) => typeof label === "string")
-    ) {
-      return parsed;
-    }
-  } catch {
-    // Invalid stored JSON falls back to the default labels.
-  }
+import {
+  readJsonObject,
+} from "./utils/request";
 
-  return [...EMPTY_LABELS];
-};
+import {
+  isRateLimited,
+} from "./utils/rateLimit";
 
-/**
- * @brief Parses stored progress markings into a safe six-boolean array.
- *
- * Invalid JSON or an invalid stored shape falls back to six false values.
- *
- * @param {unknown} value - Stored progress.markings database value.
- * @return {boolean[]} Exactly six Boolean marking values.
- */
-const parseStoredMarkings = (value: unknown): boolean[] => {
-	if (typeof value !== "string") {
-		return Array(6).fill(false);
-	}
-
-	try {
-		const parsed: unknown = JSON.parse(value);
-
-		if (
-			Array.isArray(parsed) &&
-			parsed.length === 6 &&
-			parsed.every(
-				(marking) => typeof marking === "boolean",
-			)
-		) {
-			return parsed;
-		}
-	} catch {
-		// Invalid stored JSON falls back to empty markings.
-	}
-
-	return Array(6).fill(false);
-};
-
-/**
- * @brief Validates and normalizes a submitted markings JSON string.
- *
- * The current frontend API contract submits markings as serialized JSON.
- * The decoded value must contain exactly six booleans.
- *
- * @param {unknown} value - Submitted markings value.
- * @return {string} Canonical serialized six-boolean markings array.
- * @throws {ValidationError} If the value is missing or malformed.
- */
-const validateSubmittedMarkings = (value: unknown): string => {
-  if (typeof value !== "string") {
-    throw new ValidationError(
-      "markings must be a JSON string containing exactly six booleans",
-    );
-  }
-
-  let parsed: unknown;
-
-  try {
-    parsed = JSON.parse(value);
-  } catch {
-    throw new ValidationError(
-      "markings must be valid JSON",
-    );
-  }
-
-  if (
-    !Array.isArray(parsed) ||
-    parsed.length !== 6 ||
-    !parsed.every((marking) => typeof marking === "boolean")
-  ) {
-    throw new ValidationError(
-      "markings must contain exactly six booleans",
-    );
-  }
-
-  return JSON.stringify(parsed);
-};
-
-/**
- * @brief Reads and validates a JSON request body as an object.
- *
- * Rejects malformed JSON, null, arrays, and primitive JSON values.
- *
- * @param {Request} request - Incoming HTTP request.
- * @return {Promise<Record<string, unknown>>} Parsed JSON object.
- * @throws {ValidationError} If the body is malformed or is not an object.
- */
-const readJsonObject = async (
-	request: Request,
-): Promise<Record<string, unknown>> => {
-	let parsed: unknown;
-
-	try {
-		parsed = await request.json();
-	} catch {
-		throw new ValidationError(
-			"Request body must be valid JSON",
-		);
-	}
-
-	if (
-		parsed === null ||
-		typeof parsed !== "object" ||
-		Array.isArray(parsed)
-	) {
-		throw new ValidationError(
-			"Request body must be an object",
-		);
-	}
-
-	return parsed as Record<string, unknown>;
-};
+import {
+  err,
+  json,
+} from "./utils/responses";
 
 export default {
 	async fetch(request, env) {
@@ -236,28 +100,6 @@ export default {
 				headers: { "Content-Type": "text/plain" },
 			});
 		}
-
-		// ── Rate limiting helper ──────────────────────────────────────
-		const isRateLimited = async (
-		db: D1Database,
-		table: string,
-		userCol: string,
-		timeCol: string,
-		userId: number,
-		limit: number,
-		window: string,
-		): Promise<boolean> => {
-		const row = await db
-			.prepare(
-			`SELECT COUNT(*) AS n FROM ${table}
-			WHERE ${userCol} = ?
-			AND ${timeCol} >= datetime('now', ?)`,
-			)
-			.bind(userId, window)
-			.first<{ n: number }>();
-
-		return (row?.n ?? 0) >= limit;
-		};
 		
 		// ── Waza ──────────────────────────────────────────────────
 		if (path === "/api/waza" && request.method === "GET") {
