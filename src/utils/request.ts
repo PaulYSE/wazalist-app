@@ -1,3 +1,5 @@
+import { ValidationError } from "../validation";
+
 /**
  * @brief Reads and validates a JSON request body as an object.
  *
