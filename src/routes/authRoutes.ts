@@ -28,6 +28,7 @@ export async function handleAuthRoutes(
     request,
     env,
     path,
+	  getUser,
   } = ctx;
 
   // ── Login ─────────────────────────────────────────────────
