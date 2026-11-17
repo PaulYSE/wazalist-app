@@ -137,6 +137,13 @@ export async function handleAuthRoutes(
 			return json({ success: true, user: { id: result.meta.last_row_id, username } });
 		}
 
+		// ── Current user (re-hydrate session on refresh) ──────────
+		if (path === "/api/me" && request.method === "GET") {
+			const user = await getUser();
+			if (!user) return err("Authentication required", 401);
+			return json({ user });
+		}
+
   return null;
 }
 
