@@ -133,13 +133,6 @@ export default {
 			return json(results);
 		}
 
-		// ── Current user (re-hydrate session on refresh) ──────────
-		if (path === "/api/me" && request.method === "GET") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-			return json({ user });
-		}
-
 		// ── Progress ──────────────────────────────────────────────
 		if (path === "/api/progress") {
 			const user = await getUser();
