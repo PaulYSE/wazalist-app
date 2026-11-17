@@ -133,58 +133,6 @@ export default {
 			return json(results);
 		}
 
-		// ── Register ──────────────────────────────────────────────
-		if (path === "/api/register" && request.method === "POST") {
-			let body: Record<string, unknown>;
-
-			try {
-				body = await readJsonObject(request);
-			} catch (error) {
-				if (error instanceof ValidationError) {
-					return err(error.message, 400);
-				}
-			
-				throw error;
-			}
-			
-			const { username, email, password } = body;
-
-			if (
-				typeof username !== "string" ||
-				typeof password !== "string" ||
-				!username ||
-				!password
-			) {
-				return err(
-					"Username and password are required",
-				);
-			}
-
-			if (
-				email !== undefined &&
-				email !== null &&
-				typeof email !== "string"
-			) {
-				return err("Email must be a string");
-			}
-
-			const existing = await env.DB.prepare(
-				"SELECT id FROM users WHERE username = ?"
-			)
-				.bind(username)
-				.first();
-			if (existing) return err("User already exists");
-
-			const { hash, salt } = await hashPassword(password);
-			const result = await env.DB.prepare(
-				"INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)"
-			)
-				.bind(username, email || null, `${salt}:${hash}`)
-				.run();
-
-			return json({ success: true, user: { id: result.meta.last_row_id, username } });
-		}
-
 		// ── Current user (re-hydrate session on refresh) ──────────
 		if (path === "/api/me" && request.method === "GET") {
 			const user = await getUser();
