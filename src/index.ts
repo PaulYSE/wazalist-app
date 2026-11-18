@@ -65,6 +65,10 @@ import {
   handleWazaRoutes,
 } from "./routes/wazaRoutes";
 
+import {
+  handleProgressRoutes,
+} from "./routes/progressRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -130,31 +134,16 @@ if (wazaResponse) {
   return wazaResponse;
 }
 
+		const progressResponse =
+  await handleProgressRoutes(ctx);
+
+if (progressResponse) {
+  return progressResponse;
+}
+
 		// ── Progress ──────────────────────────────────────────────
 		if (path === "/api/progress") {
 			const user = await getUser();
-
-			if (request.method === "GET") {
-				if (!user) {
-					return json([]);
-				}
-
-				const { results } = await env.DB.prepare(
-					"SELECT * FROM progress WHERE user_id = ?",
-				)
-					.bind(user.id)
-					.all();
-
-				const normalizedResults = results.map((row) => ({
-					...row,
-					markings: JSON.stringify(
-						parseStoredMarkings(row.markings),
-					),
-				}));
-
-				return json(normalizedResults);
-			}
-
 			if (request.method === "POST") {
 				if (!user) return err("Authentication required", 401);
 
