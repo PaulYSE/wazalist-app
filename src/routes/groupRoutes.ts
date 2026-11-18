@@ -3,6 +3,7 @@ import type {
 } from "../types/request";
 
 import {
+  err,
   json,
 } from "../utils/responses";
 
@@ -43,6 +44,38 @@ export async function handleGroupRoutes(
 
     return json(results);
   }
+
+  // ── Get group details ──────────────────────────────────────
+if (
+  path.match(/^\/api\/groups\/\d+$/) &&
+  request.method === "GET"
+) {
+  const groupId = +path.split("/")[3];
+
+  const group = await env.DB.prepare(`
+    SELECT
+      g.*,
+      COUNT(gm.user_id) AS member_count
+    FROM groups g
+    LEFT JOIN group_members gm
+      ON gm.group_id = g.id
+    WHERE g.id = ?
+    GROUP BY g.id
+  `)
+    .bind(groupId)
+    .first();
+
+  if (!group) {
+    return err("Group not found", 404);
+  }
+
+  const {
+    invite_key: _inviteKey,
+    ...publicGroup
+  } = group as Record<string, unknown>;
+
+  return json(publicGroup);
+}
 
   return null;
 }
