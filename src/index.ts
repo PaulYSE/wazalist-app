@@ -102,23 +102,35 @@ export default {
 		// ── Auth helpers ──────────────────────────────────────────
 		const authHeader = request.headers.get("Authorization");
 		const sessionToken = authHeader?.replace("Bearer ", "") || "";
-		const getUser = () =>
-			sessionToken ? getUserFromSession(env, sessionToken) : null;
-		const ctx = {
-		  request,
-		  env,
-		  url,
-		  path,
-		  getUser,
-		};
+		
+const getUser = () =>
+  sessionToken
+    ? getUserFromSession(env, sessionToken)
+    : null;
 
-		// ── Group role helper ─────────────────────────────────────────
-		const getGroupRole = async (groupId: number, userId: number): Promise<string | null> => {
-		const row = await env.DB.prepare(
-			"SELECT role FROM group_members WHERE group_id = ? AND user_id = ?"
-		).bind(groupId, userId).first();
-		return row ? (row.role as string) : null;
-		};
+const getGroupRole = async (
+  groupId: number,
+  userId: number,
+): Promise<string | null> => {
+  const row = await env.DB.prepare(
+    "SELECT role FROM group_members WHERE group_id = ? AND user_id = ?",
+  )
+    .bind(groupId, userId)
+    .first();
+
+  return row
+    ? (row.role as string)
+    : null;
+};
+
+const ctx = {
+  request,
+  env,
+  url,
+  path,
+  getUser,
+  getGroupRole,
+};
 
 		// ── Say no to robots ──────────────────────────────────────
 		if (path === "/robots.txt") {
