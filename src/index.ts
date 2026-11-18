@@ -68,6 +68,10 @@ import {
   handleProgressRoutes,
 } from "./routes/progressRoutes";
 
+import {
+  handleLabelRoutes,
+} from "./routes/labelRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -140,20 +144,14 @@ if (progressResponse) {
   return progressResponse;
 }
 
+		const labelResponse =
+  await handleLabelRoutes(ctx);
+
+if (labelResponse) {
+  return labelResponse;
+}
+
 		// ── Shape labels ──────────────────────────────────────────
-
-		// GET /api/labels
-		if (path === "/api/labels" && request.method === "GET") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-
-			const row = await env.DB.prepare(
-				"SELECT shape_labels FROM users WHERE id = ?"
-			).bind(user.id).first();
-
-			const labels = parseStoredLabels(row?.shape_labels);
-			return json({ labels });
-		}
 
 		// POST /api/labels
 		if (path === "/api/labels" && request.method === "POST") {
