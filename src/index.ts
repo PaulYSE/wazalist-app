@@ -151,41 +151,6 @@ if (labelResponse) {
   return labelResponse;
 }
 
-		// ── Shape labels ──────────────────────────────────────────
-
-		// POST /api/labels
-		if (path === "/api/labels" && request.method === "POST") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-
-			let body: Record<string, unknown>;
-
-			try {
-				body = await readJsonObject(request);
-			} catch (error) {
-				if (error instanceof ValidationError) {
-					return err(error.message, 400);
-				}
-			
-				throw error;
-			}
-			
-			const { labels } = body;
-			if (
-			  !Array.isArray(labels) ||
-			  labels.length !== 6 ||
-			  !labels.every((label) => typeof label === "string")
-			) {
-			  return err("labels must be an array of 6 strings");
-			}
-
-			await env.DB.prepare(
-				"UPDATE users SET shape_labels = ? WHERE id = ?"
-			).bind(JSON.stringify(labels), user.id).run();
-
-			return json({ success: true });
-		}
-
 		// ── List share (KV) ──────────────────────────────────────
 
 		// POST /api/list — validate contents and verify their SHA-256 key
