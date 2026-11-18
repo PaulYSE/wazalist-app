@@ -27,11 +27,12 @@ import {
 export async function handleSharedListRoutes(
   ctx: RequestContext,
 ): Promise<Response | null> {
-  const {
-    request,
-    env,
-    path,
-  } = ctx;
+const {
+  request,
+  env,
+  url,
+  path,
+} = ctx;
 
   // ── Store shared list ─────────────────────────────────────
   if (
@@ -123,6 +124,31 @@ export async function handleSharedListRoutes(
       );
     }
   }
+
+  // ── Retrieve shared list ───────────────────────────────────
+if (
+  path === "/api/list" &&
+  request.method === "GET"
+) {
+  const key =
+    url.searchParams.get("key") || "";
+
+  if (!/^[0-9a-f]{64}$/.test(key)) {
+    return err("Invalid key format");
+  }
+
+  const data =
+    await env.LIST_STORE.get(key);
+
+  if (data === null) {
+    return err(
+      "List not found or expired",
+      404,
+    );
+  }
+
+  return json({ data });
+}
 
   return null;
 }
