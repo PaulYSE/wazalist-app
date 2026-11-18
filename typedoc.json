@@ -1,0 +1,13 @@
+{
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "intentionallyNotExported": [
+    "Response",
+    "Request",
+    "IncomingRequestCfProperties",
+    "Env",
+    "ScheduledController",
+    "ExecutionContext"
+  ],
+  "highlightLanguages": ["sql"]
+}

@@ -49,6 +49,6 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"public/**/*.{js,css,html}\" \"src/**/*.{ts,js}\"",
-		"docs": "typedoc src/index.ts"
+		"docs": "typedoc"
 	}
 }
