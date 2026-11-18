@@ -158,5 +158,80 @@ export async function handleAccountRoutes(
     }
   }
 
+  // ── Change username ────────────────────────────────────────
+if (
+  path === "/api/account/username" &&
+  request.method === "POST"
+) {
+  const user = await getUser();
+
+  if (!user) {
+    return err("Authentication required", 401);
+  }
+
+  const { username, password } =
+    await request.json().catch(() => ({}));
+
+  if (!password) {
+    return err("Current password is required");
+  }
+
+  if (typeof username !== "string") {
+    return err("Username is required");
+  }
+
+  const trimmed = username.trim();
+
+  // Length is counted in Unicode code points rather than
+  // JavaScript UTF-16 code units.
+  const len = [...trimmed].length;
+
+  if (len < 3 || len > 32) {
+    return err(
+      "Username must be 3–32 characters",
+    );
+  }
+
+  const row = await env.DB.prepare(
+    "SELECT password_hash FROM users WHERE id = ?",
+  )
+    .bind(user.id)
+    .first();
+
+  const [salt, storedHash] =
+    (row!.password_hash as string).split(":");
+
+  const { hash } =
+    await hashPassword(password, salt);
+
+  if (hash !== storedHash) {
+    return err("Incorrect password", 401);
+  }
+
+  if (trimmed === user.username) {
+    return err(
+      "That is already your username",
+    );
+  }
+
+  try {
+    await env.DB.prepare(
+      "UPDATE users SET username = ?, updated_at = datetime('now') WHERE id = ?",
+    )
+      .bind(trimmed, user.id)
+      .run();
+  } catch {
+    return err(
+      "That username is already taken",
+      409,
+    );
+  }
+
+  return json({
+    success: true,
+    username: trimmed,
+  });
+}
+
   return null;
 }
