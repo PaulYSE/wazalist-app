@@ -25,13 +25,6 @@ import { renderAdmin } from "./renderAdmin";
 import { renderHtml } from "./renderHtml";
 
 import {
-  SharedListBodyError,
-  hashSharedList,
-  readSharedListBody,
-  validateSharedList,
-} from "./sharedListValidation";
-
-import {
   ValidationError,
   readContributionBody,
   validateWazaPayload,
@@ -161,16 +154,6 @@ if (labelResponse) {
 if (sharedListResponse) {
   return sharedListResponse;
 }
-
-		// ── List share (KV) ──────────────────────────────────────
-		// GET /api/list?key=... — retrieve serialized list
-		if (path === "/api/list" && request.method === "GET") {
-			const key = url.searchParams.get("key") || "";
-			if (!/^[0-9a-f]{64}$/.test(key)) return err("Invalid key format");
-			const data = await env.LIST_STORE.get(key);
-			if (data === null) return err("List not found or expired", 404);
-			return json({ data });
-		}
 
 		// ── Delete account ────────────────────────────────────────
 
