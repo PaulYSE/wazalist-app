@@ -183,65 +183,6 @@ if (adminResponse) {
   return adminResponse;
 }
 
-		// POST /api/admin/contributions/:id/reject
-		if (
-			path.match(/^\/api\/admin\/contributions\/\d+\/reject$/) &&
-			request.method === "POST"
-		) {
-			const user = await getUser();
-			if (!user || !user.is_admin) return err("Forbidden", 403);
-
-			const id = path.split("/")[4];
-			let body: Record<string, unknown>;
-			
-			try {
-				body = await readJsonObject(request);
-			} catch (error) {
-				if (error instanceof ValidationError) {
-					return err(error.message, 400);
-				}
-			
-				throw error;
-			}
-			
-			const { note } = body;
-
-			if (
-				note !== undefined &&
-				note !== null &&
-				typeof note !== "string"
-			) {
-				return err("note must be a string or null");
-			}
-			
-			if (
-				typeof note === "string" &&
-				note.length > 2000
-			) {
-				return err(
-					"note must not exceed 2000 characters",
-				);
-			}
-			
-			const contrib = await env.DB.prepare(
-				"SELECT id, status FROM contributions WHERE id = ?"
-			)
-				.bind(id)
-				.first();
-			if (!contrib) return err("Not found", 404);
-			if (contrib.status !== "pending") return err("Already reviewed");
-
-			await env.DB.prepare(`
-				UPDATE contributions
-				SET status = 'rejected', reviewed_at = datetime('now'), admin_note = ?
-				WHERE id = ?
-			`)
-				.bind(note ?? null, id)
-				.run();
-
-			return json({ success: true });
-		}
-
 		// ── Groups ────────────────────────────────────────────────────
 
 		// GET /api/groups — list all groups with member count (public)
