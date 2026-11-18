@@ -177,5 +177,25 @@ if (
   });
 }
 
+  // ── Delete all progress ────────────────────────────────────
+if (
+  path === "/api/progress" &&
+  request.method === "DELETE"
+) {
+  const user = await getUser();
+
+  if (!user) {
+    return err("Authentication required", 401);
+  }
+
+  await env.DB.prepare(
+    "DELETE FROM progress WHERE user_id = ?",
+  )
+    .bind(user.id)
+    .run();
+
+  return json({ success: true });
+}
+
   return null;
 }
