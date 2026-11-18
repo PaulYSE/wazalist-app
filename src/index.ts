@@ -69,6 +69,10 @@ import {
   handleSharedListRoutes,
 } from "./routes/sharedListRoutes";
 
+import {
+  handleAccountRoutes,
+} from "./routes/accountRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -155,103 +159,12 @@ if (sharedListResponse) {
   return sharedListResponse;
 }
 
-		// ── Delete account ────────────────────────────────────────
+		const accountResponse =
+  await handleAccountRoutes(ctx);
 
-		// DELETE /api/account — self-service account deletion
-		if (path === "/api/account" && request.method === "DELETE") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-
-			// Require password re-entry — this is irreversible.
-			const { password } = await request.json().catch(() => ({}));
-			if (!password) return err("Password confirmation is required");
-
-			const row = await env.DB.prepare(
-				"SELECT password_hash FROM users WHERE id = ?"
-			).bind(user.id).first();
-			const [salt, storedHash] = (row!.password_hash as string).split(":");
-			const { hash } = await hashPassword(password, salt);
-			if (hash !== storedHash) return err("Incorrect password", 401);
-
-			// Block deletion if sole admin of any group
-			const soloGroupAdmin = await env.DB.prepare(`
-				SELECT g.name
-				FROM group_members gm
-				JOIN groups g ON g.id = gm.group_id
-				WHERE gm.user_id = ? AND gm.role = 'admin'
-					AND (
-					SELECT COUNT(*) FROM group_members gm2
-					WHERE gm2.group_id = gm.group_id AND gm2.role = 'admin'
-					) = 1
-				LIMIT 1
-			`).bind(user.id).first();
-
-			if (soloGroupAdmin) {
-				return err(
-					`You are the only admin of "${soloGroupAdmin.name}". Promote another member or delete the group before deleting your account.`,
-					409
-				);
-			}
-
-			// Don't let the last admin delete themselves and lock out /admin.
-			if (user.is_admin) {
-				const a = await env.DB.prepare(
-					"SELECT COUNT(*) AS n FROM users WHERE is_admin = 1"
-				).first();
-				if (((a?.n as number) ?? 0) <= 1)
-					return err("Cannot delete the only admin account. Promote another admin first.", 409);
-			}
-
-			// Delete child rows first, then the user — in one atomic batch.
-			// FK cascade can't be relied on (enforcement is off by default, and
-			// progress/contributions have no ON DELETE rule anyway).
-			try {
-			  await env.DB.batch([
-			    env.DB.prepare(
-			      "DELETE FROM sessions WHERE user_id = ?",
-			    ).bind(user.id),
-			
-			    env.DB.prepare(
-			      "DELETE FROM progress WHERE user_id = ?",
-			    ).bind(user.id),
-			
-			    env.DB.prepare(
-			      "DELETE FROM contributions WHERE user_id = ?",
-			    ).bind(user.id),
-			
-			    env.DB.prepare(
-			      "DELETE FROM group_members WHERE user_id = ?",
-			    ).bind(user.id),
-			
-			    env.DB.prepare(
-			      "DELETE FROM group_applications WHERE user_id = ?",
-			    ).bind(user.id),
-			
-			    env.DB.prepare(
-			      "DELETE FROM users WHERE id = ?",
-			    ).bind(user.id),
-			  ]);
-			
-			  return json({ success: true });
-			} catch (error) {
-			  const message =
-			    error instanceof Error ? error.message : String(error);
-			
-			  if (message.includes("GROUP_LAST_ADMIN")) {
-			    return err(
-			      "Account deletion was cancelled because you are now the only admin of a group. Promote another member or delete the group, then try again.",
-			      409,
-			    );
-			  }
-			
-			  console.error("Account deletion failed:", error);
-			
-			  return err(
-			    "Could not delete your account. Please refresh to verify your account state before retrying.",
-			    500,
-			  );
-			}
-		}
+if (accountResponse) {
+  return accountResponse;
+}
 
 		// ── Change username ───────────────────────────────────────
 
