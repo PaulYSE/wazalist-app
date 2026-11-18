@@ -19,7 +19,6 @@ import {
   GroupUpdateInput,
 } from "./groupsValidation";
 
-import { renderAdmin } from "./renderAdmin";
 import { renderHtml } from "./renderHtml";
 
 import {
@@ -187,15 +186,6 @@ if (adminResponse) {
 }
 
 		// ── Admin ─────────────────────────────────────────────────
-
-		if (path === "/admin") {
-			const user = await getUser();
-			if (!user || !user.is_admin)
-				return new Response("Forbidden", { status: 403 });
-			const html = await renderAdmin(env, request);
-			return new Response(html, { headers: { "content-type": "text/html" } });
-		}
-
 		// GET /api/admin/contributions
 		if (path === "/api/admin/contributions" && request.method === "GET") {
 			const user = await getUser();
