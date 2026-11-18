@@ -7,6 +7,23 @@ import {
   json,
 } from "../utils/responses";
 
+import {
+  readGroupBody,
+  validateGroupCreate,
+} from "../groupsValidation";
+
+import type {
+  GroupCreateInput,
+} from "../groupsValidation";
+
+import {
+  ValidationError,
+} from "../validation";
+
+import {
+  isRateLimited,
+} from "../utils/rateLimit";
+
 /**
  * Handles group API routes.
  *
@@ -16,11 +33,12 @@ import {
 export async function handleGroupRoutes(
   ctx: RequestContext,
 ): Promise<Response | null> {
-  const {
-    request,
-    env,
-    path,
-  } = ctx;
+const {
+  request,
+  env,
+  path,
+  getUser,
+} = ctx;
 
   // ── List groups ───────────────────────────────────────────
   if (
@@ -75,6 +93,113 @@ if (
   } = group as Record<string, unknown>;
 
   return json(publicGroup);
+}
+
+  // ── Create group ───────────────────────────────────────────
+if (
+  path === "/api/groups" &&
+  request.method === "POST"
+) {
+  const user = await getUser();
+
+  if (!user) {
+    return err("Authentication required", 401);
+  }
+
+  if (!user.is_admin) {
+    const limited = await isRateLimited(
+      env.DB,
+      "groups",
+      "created_by",
+      "created_at",
+      user.id,
+      5,
+      "-24 hours",
+    );
+
+    if (limited) {
+      return err(
+        "You have created too many groups recently. Please wait before creating another.",
+        429,
+      );
+    }
+  }
+
+  let input: GroupCreateInput;
+
+  try {
+    const body = await readGroupBody(request);
+    input = validateGroupCreate(body);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return err(error.message, 400);
+    }
+
+    throw error;
+  }
+
+  const {
+    name,
+    join_policy,
+    social,
+  } = input;
+
+  const buffer =
+    crypto.getRandomValues(new Uint8Array(32));
+
+  const inviteKey = Array.from(buffer)
+    .map((byte) =>
+      byte.toString(16).padStart(2, "0")
+    )
+    .join("");
+
+  try {
+    const [groupResult] = await env.DB.batch([
+      env.DB.prepare(`
+        INSERT INTO groups
+          (name, join_policy, invite_key, social, created_by)
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        name,
+        join_policy,
+        inviteKey,
+        JSON.stringify(social),
+        user.id,
+      ),
+
+      env.DB.prepare(`
+        INSERT INTO group_members
+          (group_id, user_id, role)
+        VALUES (
+          (SELECT id FROM groups WHERE invite_key = ?),
+          ?,
+          'admin'
+        )
+      `).bind(
+        inviteKey,
+        user.id,
+      ),
+    ]);
+
+    const groupId =
+      groupResult.meta.last_row_id;
+
+    return json({
+      success: true,
+      group_id: groupId,
+      invite_key: inviteKey,
+    });
+  } catch (error) {
+    console.error(
+      "Atomic group creation failed:",
+      error,
+    );
+
+    return err(
+      "Could not create the group. Please try again.",
+      500,
+    );
+  }
 }
 
   return null;
