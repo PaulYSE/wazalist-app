@@ -101,20 +101,6 @@ export default {
 		  getUser,
 		};
 
-		const authResponse =
-  await handleAuthRoutes(ctx);
-
-if (authResponse) {
-  return authResponse;
-}
-
-const wazaResponse =
-  await handleWazaRoutes(ctx);
-
-if (wazaResponse) {
-  return wazaResponse;
-}
-
 		// ── Group role helper ─────────────────────────────────────────
 		const getGroupRole = async (groupId: number, userId: number): Promise<string | null> => {
 		const row = await env.DB.prepare(
@@ -136,6 +122,13 @@ if (wazaResponse) {
 		if (authResponse) {
 		  return authResponse;
 		}
+		
+const wazaResponse =
+  await handleWazaRoutes(ctx);
+
+if (wazaResponse) {
+  return wazaResponse;
+}
 
 		// ── Progress ──────────────────────────────────────────────
 		if (path === "/api/progress") {
