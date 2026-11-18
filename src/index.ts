@@ -185,26 +185,6 @@ if (adminResponse) {
   return adminResponse;
 }
 
-		// ── Admin ─────────────────────────────────────────────────
-		// GET /api/admin/contributions
-		if (path === "/api/admin/contributions" && request.method === "GET") {
-			const user = await getUser();
-			if (!user || !user.is_admin) return err("Forbidden", 403);
-
-			const status = url.searchParams.get("status") || "pending";
-			const { results } = await env.DB.prepare(`
-				SELECT c.*, u.username, w.name_jp as waza_name_jp
-				FROM contributions c
-				JOIN users u ON c.user_id = u.id
-				LEFT JOIN waza w ON c.waza_id = w.id
-				WHERE c.status = ?
-				ORDER BY c.created_at ASC
-			`)
-				.bind(status)
-				.all();
-			return json(results);
-		}
-
 		// GET /api/admin/waza/:id
 		if (path.startsWith("/api/admin/waza/") && request.method === "GET") {
 			const user = await getUser();
