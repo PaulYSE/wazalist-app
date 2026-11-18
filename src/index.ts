@@ -61,6 +61,10 @@ import {
   handleAuthRoutes,
 } from "./routes/authRoutes";
 
+import {
+  handleWazaRoutes,
+} from "./routes/wazaRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -97,6 +101,20 @@ export default {
 		  getUser,
 		};
 
+		const authResponse =
+  await handleAuthRoutes(ctx);
+
+if (authResponse) {
+  return authResponse;
+}
+
+const wazaResponse =
+  await handleWazaRoutes(ctx);
+
+if (wazaResponse) {
+  return wazaResponse;
+}
+
 		// ── Group role helper ─────────────────────────────────────────
 		const getGroupRole = async (groupId: number, userId: number): Promise<string | null> => {
 		const row = await env.DB.prepare(
@@ -117,20 +135,6 @@ export default {
 		
 		if (authResponse) {
 		  return authResponse;
-		}
-		
-		// ── Waza ──────────────────────────────────────────────────
-		if (path === "/api/waza" && request.method === "GET") {
-			const { results } = await env.DB.prepare(`
-				SELECT
-					w.*,
-					COALESCE(SUM(CASE WHEN p.like = 1 THEN 1 END), 0) AS like_count,
-					COALESCE(SUM(CASE WHEN p.like = -1 THEN 1 END), 0) AS dislike_count
-				FROM waza w
-				LEFT JOIN progress p ON p.waza_id = w.id
-				GROUP BY w.id
-			`).all();
-			return json(results);
 		}
 
 		// ── Progress ──────────────────────────────────────────────
