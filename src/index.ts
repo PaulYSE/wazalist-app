@@ -8,7 +8,6 @@
  */
 
 import {
-  hashPassword,
   getUserFromSession,
 } from "./auth";
 
@@ -75,6 +74,10 @@ import {
 import {
   handleContributionRoutes,
 } from "./routes/contributionRoutes";
+
+import {
+  handleAdminRoutes,
+} from "./routes/adminRoutes";
 
 export default {
 	async fetch(request, env) {
@@ -175,50 +178,13 @@ if (accountResponse) {
 if (contributionResponse) {
   return contributionResponse;
 }
-		
-		// ── Reset password ────────────────────────────────────────
 
-		// POST /api/admin/reset-password - app admin force-reset password
-		if (path === "/api/admin/reset-password" && request.method === "POST") {
-			const caller = await getUser();
-			if (!caller || !caller.is_admin) return err("Forbidden", 403);
+		const adminResponse =
+  await handleAdminRoutes(ctx);
 
-			let body: Record<string, unknown>;
-
-			try {
-				body = await readJsonObject(request);
-			} catch (error) {
-				if (error instanceof ValidationError) {
-					return err(error.message, 400);
-				}
-			
-				throw error;
-			}
-			
-			const { username, new_password } = body;
-
-			if (
-				typeof username !== "string" ||
-				typeof new_password !== "string" ||
-				!username ||
-				!new_password
-			) {
-				return err(
-					"username and new_password are required",
-				);
-			}
-
-			const target = await env.DB.prepare("SELECT id FROM users WHERE username = ?").bind(username).first();
-			if (!target) return err("User not found", 404);
-
-			const { hash, salt } = await hashPassword(new_password);
-
-			// Kick from all existing sessions
-			// User must log in
-			await env.DB.batch([env.DB.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").bind(`${salt}:${hash}`,target.id as number),
-								env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id as number),]);
-			return json({ success: true, message: "Password reset. All existing sessions invalidated." });
-		}
+if (adminResponse) {
+  return adminResponse;
+}
 
 		// ── Admin ─────────────────────────────────────────────────
 
