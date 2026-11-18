@@ -165,38 +165,6 @@ if (sharedListResponse) {
 if (accountResponse) {
   return accountResponse;
 }
-
-		// ── Change password ───────────────────────────────────────
-		
-		// POST /api/account/password — change password (requires current password)
-		if (path === "/api/account/password" && request.method === "POST") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-
-			const { current, next } = await request.json().catch(() => ({}));
-			if (!current || !next) return err("Current and new passwords are required");
-
-			// Verify current password.
-			const row = await env.DB.prepare(
-				"SELECT password_hash FROM users WHERE id = ?"
-			).bind(user.id).first();
-			const [salt, storedHash] = (row!.password_hash as string).split(":");
-			const { hash } = await hashPassword(current, salt);
-			if (hash !== storedHash) return err("Incorrect current password", 401);
-
-			// Hash the new password with a fresh salt, store it.
-			const { hash: newHash, salt: newSalt } = await hashPassword(next);
-			await env.DB.prepare(
-				"UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?"
-			).bind(`${newSalt}:${newHash}`, user.id).run();
-
-			// Invalidate ALL sessions — the user must log in again with the new password.
-			await env.DB.prepare("DELETE FROM sessions WHERE user_id = ?")
-				.bind(user.id)
-				.run();
-
-			return json({ success: true });
-		}
 		
 		// ── Reset password ────────────────────────────────────────
 
