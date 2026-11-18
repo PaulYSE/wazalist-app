@@ -9,7 +9,6 @@
 
 import {
   hashPassword,
-  generateToken,
   getUserFromSession,
 } from "./auth";
 
@@ -219,54 +218,6 @@ if (contributionResponse) {
 			await env.DB.batch([env.DB.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").bind(`${salt}:${hash}`,target.id as number),
 								env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(target.id as number),]);
 			return json({ success: true, message: "Password reset. All existing sessions invalidated." });
-		}
-
-		// ── Contributions ─────────────────────────────────────────
-		// POST /api/contributions
-		if (
-		  path === "/api/contributions" &&
-		  request.method === "POST"
-		) {
-		  const user = await getUser();
-		  if (!user) return err("Authentication required", 401);
-		
-		  let body: Record<string, unknown>;
-		  let payload: Record<string, string>;
-		
-		  try {
-		    body = await readContributionBody(request);
-		
-		    if (body.type !== "edit" && body.type !== "new_waza") {
-		      throw new ValidationError("Invalid type");
-		    }
-		
-		    if (body.type === "edit" && !body.waza_id) {
-		      throw new ValidationError("waza_id required for edits");
-		    }
-		
-		    payload = validateWazaPayload(body.payload);
-		  } catch (error) {
-		    if (error instanceof ValidationError) {
-		      return err(error.message, 400);
-		    }
-		
-		    throw error;
-		  }
-		
-		  await env.DB.prepare(`
-		    INSERT INTO contributions
-		      (user_id, type, waza_id, payload, status, created_at)
-		    VALUES (?, ?, ?, ?, 'pending', datetime('now'))
-		  `)
-		    .bind(
-		      user.id,
-		      body.type,
-		      body.waza_id ?? null,
-		      JSON.stringify(payload),
-		    )
-		    .run();
-		
-		  return json({ success: true });
 		}
 
 		// ── Admin ─────────────────────────────────────────────────
