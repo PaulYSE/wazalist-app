@@ -185,19 +185,6 @@ if (adminResponse) {
   return adminResponse;
 }
 
-		// GET /api/admin/waza/:id
-		if (path.startsWith("/api/admin/waza/") && request.method === "GET") {
-			const user = await getUser();
-			if (!user || !user.is_admin) return err("Forbidden", 403);
-
-			const id = path.split("/").pop();
-			const waza = await env.DB.prepare("SELECT * FROM waza WHERE id = ?")
-				.bind(id)
-				.first();
-			if (!waza) return err("Waza not found", 404);
-			return json(waza);
-		}
-
 		// POST /api/admin/contributions/:id/approve
 		if (
 		  path.match(/^\/api\/admin\/contributions\/\d+\/approve$/) &&
