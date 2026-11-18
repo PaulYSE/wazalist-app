@@ -76,6 +76,10 @@ import {
   handleAdminRoutes,
 } from "./routes/adminRoutes";
 
+import {
+  handleGroupRoutes,
+} from "./routes/groupRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -194,26 +198,15 @@ if (contributionResponse) {
 if (adminResponse) {
   return adminResponse;
 }
+		
+		const groupResponse =
+  await handleGroupRoutes(ctx);
+
+if (groupResponse) {
+  return groupResponse;
+}
 
 		// ── Groups ────────────────────────────────────────────────────
-
-		// GET /api/groups — list all groups with member count (public)
-		if (path === "/api/groups" && request.method === "GET") {
-		const { results } = await env.DB.prepare(`
-			SELECT
-			g.id,
-			g.name,
-			g.join_policy,
-			g.social,
-			g.created_at,
-			COUNT(gm.user_id) AS member_count
-			FROM groups g
-			LEFT JOIN group_members gm ON gm.group_id = g.id
-			GROUP BY g.id
-			ORDER BY g.created_at DESC
-		`).all();
-		return json(results);
-		}
 
 		// GET /api/groups/:id — group detail (public)
 		if (path.match(/^\/api\/groups\/\d+$/) && request.method === "GET") {
