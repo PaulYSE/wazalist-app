@@ -23,8 +23,6 @@ import { renderHtml } from "./renderHtml";
 
 import {
   ValidationError,
-  readContributionBody,
-  validateWazaPayload,
 } from "./validation";
 
 import { parseStoredLabels } from "./utils/labels";
@@ -184,113 +182,6 @@ if (contributionResponse) {
 if (adminResponse) {
   return adminResponse;
 }
-
-		// POST /api/admin/contributions/:id/approve
-		if (
-		  path.match(/^\/api\/admin\/contributions\/\d+\/approve$/) &&
-		  request.method === "POST"
-		) {
-		  const user = await getUser();
-		  if (!user || !user.is_admin) return err("Forbidden", 403);
-		
-		  const id = path.split("/")[4];
-		
-		  let body: Record<string, unknown>;
-		
-		  try {
-		    body = await readContributionBody(request);
-		  } catch (error) {
-		    if (error instanceof ValidationError) {
-		      return err(error.message, 400);
-		    }
-		
-		    throw error;
-		  }
-		
-		  const contrib = await env.DB.prepare(
-		    "SELECT * FROM contributions WHERE id = ?",
-		  )
-		    .bind(id)
-		    .first();
-		
-		  if (!contrib) return err("Not found", 404);
-		  if (contrib.status !== "pending") return err("Already reviewed");
-		
-		  if (
-		    contrib.type !== "edit" &&
-		    contrib.type !== "new_waza"
-		  ) {
-		    return err("Invalid stored contribution type", 400);
-		  }
-		
-		  let payload: Record<string, string>;
-		
-		  try {
-		    // Preserve the existing fallback:
-		    // null or omitted payload means use the stored contribution.
-		    let candidate: unknown = body.payload;
-		
-		    if (candidate === undefined || candidate === null) {
-		      try {
-		        candidate = JSON.parse(contrib.payload as string);
-		      } catch {
-		        throw new ValidationError(
-		          "Stored contribution payload is invalid JSON",
-		        );
-		      }
-		    }
-		
-		    payload = validateWazaPayload(candidate);
-		  } catch (error) {
-		    if (error instanceof ValidationError) {
-		      return err(error.message, 400);
-		    }
-		
-		    throw error;
-		  }
-		
-		  const keys = Object.keys(payload);
-		  const values = keys.map((key) => payload[key]);
-		
-		  if (contrib.type === "edit") {
-		    // Identifiers come exclusively from the validator's allowlist.
-		    const setClause = keys
-		      .map((key) => `"${key}" = ?`)
-		      .join(", ");
-		
-		    await env.DB.prepare(
-		      `UPDATE waza SET ${setClause} WHERE id = ?`,
-		    )
-		      .bind(...values, contrib.waza_id)
-		      .run();
-		  } else {
-		    const columns = keys
-		      .map((key) => `"${key}"`)
-		      .join(", ");
-		
-		    const placeholders = keys
-		      .map(() => "?")
-		      .join(", ");
-		
-		    await env.DB.prepare(
-		      `INSERT INTO waza (${columns}) VALUES (${placeholders})`,
-		    )
-		      .bind(...values)
-		      .run();
-		  }
-		
-		  await env.DB.prepare(`
-		    UPDATE contributions
-		    SET status = 'approved',
-		        reviewed_at = datetime('now'),
-		        admin_note = ?
-		    WHERE id = ?
-		  `)
-		    .bind(body.note ?? null, id)
-		    .run();
-		
-		  return json({ success: true });
-		}
 
 		// POST /api/admin/contributions/:id/reject
 		if (
