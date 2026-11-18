@@ -41,7 +41,6 @@ import { parseStoredLabels } from "./utils/labels";
 
 import {
   parseStoredMarkings,
-  validateSubmittedMarkings,
 } from "./utils/markings";
 
 import {
@@ -140,22 +139,6 @@ if (wazaResponse) {
 if (progressResponse) {
   return progressResponse;
 }
-
-		// ── Progress ──────────────────────────────────────────────
-		if (path === "/api/progress") {
-			const user = await getUser();
-			// Allow users to wipe their progress for a waza by removing their progress history
-			if (request.method === "DELETE") {
-				const user = await getUser();
-				if (!user) return err("Authentication required", 401);
-
-				await env.DB.prepare(
-					"DELETE FROM progress WHERE user_id = ?"
-				).bind(user.id).run();
-
-				return json({ success: true });
-			}
-		}
 
 		// ── Shape labels ──────────────────────────────────────────
 
