@@ -32,12 +32,13 @@ import {
 export async function handleAdminRoutes(
   ctx: RequestContext,
 ): Promise<Response | null> {
-  const {
-    request,
-    env,
-    path,
-    getUser,
-  } = ctx;
+const {
+  request,
+  env,
+  url,
+  path,
+  getUser,
+} = ctx;
 
   // ── Force-reset user password ─────────────────────────────
   if (
@@ -137,6 +138,37 @@ if (path === "/admin") {
       },
     },
   );
+}
+
+  // ── List contributions for review ──────────────────────────
+if (
+  path === "/api/admin/contributions" &&
+  request.method === "GET"
+) {
+  const user = await getUser();
+
+  if (!user || !user.is_admin) {
+    return err("Forbidden", 403);
+  }
+
+  const status =
+    url.searchParams.get("status") || "pending";
+
+  const { results } = await env.DB.prepare(`
+    SELECT
+      c.*,
+      u.username,
+      w.name_jp AS waza_name_jp
+    FROM contributions c
+    JOIN users u ON c.user_id = u.id
+    LEFT JOIN waza w ON c.waza_id = w.id
+    WHERE c.status = ?
+    ORDER BY c.created_at ASC
+  `)
+    .bind(status)
+    .all();
+
+  return json(results);
 }
 
   return null;
