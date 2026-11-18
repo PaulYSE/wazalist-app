@@ -208,24 +208,6 @@ if (groupResponse) {
 
 		// ── Groups ────────────────────────────────────────────────────
 
-		// GET /api/groups/:id — group detail (public)
-		if (path.match(/^\/api\/groups\/\d+$/) && request.method === "GET") {
-		const groupId = +path.split("/")[3];
-		const group = await env.DB.prepare(`
-			SELECT
-			g.*,
-			COUNT(gm.user_id) AS member_count
-			FROM groups g
-			LEFT JOIN group_members gm ON gm.group_id = g.id
-			WHERE g.id = ?
-			GROUP BY g.id
-		`).bind(groupId).first();
-		if (!group) return err("Group not found", 404);
-		// Strip invite_key from public response
-		const { invite_key: _ik, ...publicGroup } = group as Record<string, unknown>;
-		return json(publicGroup);
-		}
-
 		// POST /api/groups — create a group
 		if (path === "/api/groups" && request.method === "POST") {
 		const user = await getUser();
