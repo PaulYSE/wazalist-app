@@ -19,6 +19,10 @@ import {
   json,
 } from "../utils/responses";
 
+import {
+  renderAdmin,
+} from "../renderAdmin";
+
 /**
  * Handles application-admin API routes.
  *
@@ -108,6 +112,32 @@ export async function handleAdminRoutes(
         "Password reset. All existing sessions invalidated.",
     });
   }
+
+// ── Render admin panel ─────────────────────────────────────
+if (path === "/admin") {
+  const user = await getUser();
+
+  if (!user || !user.is_admin) {
+    return new Response(
+      "Forbidden",
+      {
+        status: 403,
+      },
+    );
+  }
+
+  const html =
+    await renderAdmin(env, request);
+
+  return new Response(
+    html,
+    {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    },
+  );
+}
 
   return null;
 }
