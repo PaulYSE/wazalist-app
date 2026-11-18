@@ -28,8 +28,6 @@ import {
   setAllBrowseMarkingFilters,
   setBrowseMarkingFilters,
   setBrowseSearchString,
-  setBrowseSortField,
-  setBrowseSortOrder,
   toggleBrowseFilterAny,
 } from '../state/waza-browse-state.js';
 import { resetMyGroupsLoaded } from '../state/user-state.js';

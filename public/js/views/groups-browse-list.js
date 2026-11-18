@@ -18,7 +18,6 @@ import {
   setGroupsSelectedId,
   getGroupsData,
   setGroupsData,
-  resetGroupsData,
   getGroupsLoaded,
   setGroupsLoaded,
   resetGroupsLoaded,
@@ -35,7 +34,6 @@ import {
   getMyGroups,
   setMyGroups,
   setMyGroupsLoaded,
-  isAdmin,
 } from '../state/user-state.js';
 import { parseRoute, pushRoute, replaceRoute } from '../app/router.js';
 

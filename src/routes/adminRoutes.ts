@@ -1,55 +1,59 @@
-import type {
-  RequestContext,
-} from "../types/request";
+/**
+ * adminRoutes.ts — Route handler for application-admin endpoints.
+ *
+ * @remarks
+ * Author: Paul Yong Shao En
+ * Contact: \<paulyse99\@gmail.com\>
+ * Project: Wazalist App
+ * Date: 2026-11-18
+ */
+import type { RequestContext } from '../types/request';
 
-import {
-  hashPassword,
-} from "../auth";
-import {
-  ValidationError,
-  readContributionBody,
-  validateWazaPayload,
-} from "../validation";
+import { hashPassword } from '../auth';
+import { ValidationError, readContributionBody, validateWazaPayload } from '../validation';
 
-import {
-  readJsonObject,
-} from "../utils/request";
+import { readJsonObject } from '../utils/request';
 
-import {
-  err,
-  json,
-} from "../utils/responses";
+import { err, json } from '../utils/responses';
 
-import {
-  renderAdmin,
-} from "../renderAdmin";
+import { renderAdmin } from '../renderAdmin';
 
 /**
  * Handles application-admin API routes.
  *
- * @param ctx Shared request context.
- * @return A response when an admin route matches, otherwise null.
+ * @remarks
+ * Every matched route requires the caller to be authenticated as an
+ * application admin (`user.is_admin`); otherwise it returns `403`.
+ * Matches:
+ *
+ * - `POST /api/admin/reset-password` — resets a user's password and
+ *   invalidates all of their sessions atomically.
+ * - `GET /admin` — serves the admin panel HTML via `renderAdmin`.
+ * - `GET /api/admin/contributions` — lists contributions filtered by the
+ *   `status` query parameter (default `pending`), oldest first.
+ * - `GET /api/admin/waza/:id` — returns a single waza row for review.
+ * - `POST /api/admin/contributions/:id/approve` — applies the contribution
+ *   to the `waza` table (UPDATE for `edit`, INSERT for `new_waza`), then
+ *   marks it approved with an optional admin note. Falls back to the
+ *   stored payload when the request body omits one.
+ * - `POST /api/admin/contributions/:id/reject` — marks a pending
+ *   contribution rejected with an optional note (max 2000 characters).
+ *
+ * Returns `null` for any unmatched path or method so the caller can
+ * continue route dispatch.
+ *
+ * @param ctx - Shared request context.
+ * @returns A response when an admin route matches, otherwise `null`.
  */
-export async function handleAdminRoutes(
-  ctx: RequestContext,
-): Promise<Response | null> {
-const {
-  request,
-  env,
-  url,
-  path,
-  getUser,
-} = ctx;
+export async function handleAdminRoutes(ctx: RequestContext): Promise<Response | null> {
+  const { request, env, url, path, getUser } = ctx;
 
   // ── Force-reset user password ─────────────────────────────
-  if (
-    path === "/api/admin/reset-password" &&
-    request.method === "POST"
-  ) {
+  if (path === '/api/admin/reset-password' && request.method === 'POST') {
     const caller = await getUser();
 
     if (!caller || !caller.is_admin) {
-      return err("Forbidden", 403);
+      return err('Forbidden', 403);
     }
 
     let body: Record<string, unknown>;
@@ -64,98 +68,72 @@ const {
       throw error;
     }
 
-    const {
-      username,
-      new_password,
-    } = body;
+    const { username, new_password } = body;
 
     if (
-      typeof username !== "string" ||
-      typeof new_password !== "string" ||
+      typeof username !== 'string' ||
+      typeof new_password !== 'string' ||
       !username ||
       !new_password
     ) {
-      return err(
-        "username and new_password are required",
-      );
+      return err('username and new_password are required');
     }
 
-    const target = await env.DB.prepare(
-      "SELECT id FROM users WHERE username = ?",
-    )
+    const target = await env.DB.prepare('SELECT id FROM users WHERE username = ?')
       .bind(username)
       .first();
 
     if (!target) {
-      return err("User not found", 404);
+      return err('User not found', 404);
     }
 
-    const {
-      hash,
-      salt,
-    } = await hashPassword(new_password);
+    const { hash, salt } = await hashPassword(new_password);
 
     await env.DB.batch([
       env.DB.prepare(
         "UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?",
-      ).bind(
-        `${salt}:${hash}`,
-        target.id as number,
-      ),
+      ).bind(`${salt}:${hash}`, target.id as number),
 
-      env.DB.prepare(
-        "DELETE FROM sessions WHERE user_id = ?",
-      ).bind(target.id as number),
+      env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(target.id as number),
     ]);
 
     return json({
       success: true,
-      message:
-        "Password reset. All existing sessions invalidated.",
+      message: 'Password reset. All existing sessions invalidated.',
     });
   }
 
-// ── Render admin panel ─────────────────────────────────────
-if (path === "/admin") {
-  const user = await getUser();
+  // ── Render admin panel ─────────────────────────────────────
+  if (path === '/admin') {
+    const user = await getUser();
 
-  if (!user || !user.is_admin) {
-    return new Response(
-      "Forbidden",
-      {
+    if (!user || !user.is_admin) {
+      return new Response('Forbidden', {
         status: 403,
-      },
-    );
-  }
+      });
+    }
 
-  const html =
-    await renderAdmin(env, request);
+    const html = await renderAdmin(env, request);
 
-  return new Response(
-    html,
-    {
+    return new Response(html, {
       headers: {
-        "Content-Type": "text/html",
+        'Content-Type': 'text/html',
       },
-    },
-  );
-}
+    });
+  }
 
   // ── List contributions for review ──────────────────────────
-if (
-  path === "/api/admin/contributions" &&
-  request.method === "GET"
-) {
-  const user = await getUser();
+  if (path === '/api/admin/contributions' && request.method === 'GET') {
+    const user = await getUser();
 
-  if (!user || !user.is_admin) {
-    return err("Forbidden", 403);
-  }
+    if (!user || !user.is_admin) {
+      return err('Forbidden', 403);
+    }
 
-  const status =
-    url.searchParams.get("status") || "pending";
+    const status = url.searchParams.get('status') || 'pending';
 
-  const { results } = await env.DB.prepare(`
+    const { results } = await env.DB.prepare(
+      `
     SELECT
       c.*,
       u.username,
@@ -165,243 +143,185 @@ if (
     LEFT JOIN waza w ON c.waza_id = w.id
     WHERE c.status = ?
     ORDER BY c.created_at ASC
-  `)
-    .bind(status)
-    .all();
+  `,
+    )
+      .bind(status)
+      .all();
 
-  return json(results);
-}
+    return json(results);
+  }
 
   // ── Get Waza for admin review ──────────────────────────────
-if (
-  path.startsWith("/api/admin/waza/") &&
-  request.method === "GET"
-) {
-  const user = await getUser();
+  if (path.startsWith('/api/admin/waza/') && request.method === 'GET') {
+    const user = await getUser();
 
-  if (!user || !user.is_admin) {
-    return err("Forbidden", 403);
+    if (!user || !user.is_admin) {
+      return err('Forbidden', 403);
+    }
+
+    const id = path.split('/').pop();
+
+    const waza = await env.DB.prepare('SELECT * FROM waza WHERE id = ?').bind(id).first();
+
+    if (!waza) {
+      return err('Waza not found', 404);
+    }
+
+    return json(waza);
   }
-
-  const id = path.split("/").pop();
-
-  const waza = await env.DB.prepare(
-    "SELECT * FROM waza WHERE id = ?",
-  )
-    .bind(id)
-    .first();
-
-  if (!waza) {
-    return err("Waza not found", 404);
-  }
-
-  return json(waza);
-}
 
   // ── Approve contribution ───────────────────────────────────
-if (
-  path.match(
-    /^\/api\/admin\/contributions\/\d+\/approve$/,
-  ) &&
-  request.method === "POST"
-) {
-  const user = await getUser();
+  if (path.match(/^\/api\/admin\/contributions\/\d+\/approve$/) && request.method === 'POST') {
+    const user = await getUser();
 
-  if (!user || !user.is_admin) {
-    return err("Forbidden", 403);
-  }
-
-  const id = path.split("/")[4];
-
-  let body: Record<string, unknown>;
-
-  try {
-    body = await readContributionBody(request);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return err(error.message, 400);
+    if (!user || !user.is_admin) {
+      return err('Forbidden', 403);
     }
 
-    throw error;
-  }
+    const id = path.split('/')[4];
 
-  const contrib = await env.DB.prepare(
-    "SELECT * FROM contributions WHERE id = ?",
-  )
-    .bind(id)
-    .first();
+    let body: Record<string, unknown>;
 
-  if (!contrib) {
-    return err("Not found", 404);
-  }
-
-  if (contrib.status !== "pending") {
-    return err("Already reviewed");
-  }
-
-  if (
-    contrib.type !== "edit" &&
-    contrib.type !== "new_waza"
-  ) {
-    return err(
-      "Invalid stored contribution type",
-      400,
-    );
-  }
-
-  let payload: Record<string, string>;
-
-  try {
-    let candidate: unknown = body.payload;
-
-    if (
-      candidate === undefined ||
-      candidate === null
-    ) {
-      try {
-        candidate = JSON.parse(
-          contrib.payload as string,
-        );
-      } catch {
-        throw new ValidationError(
-          "Stored contribution payload is invalid JSON",
-        );
+    try {
+      body = await readContributionBody(request);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return err(error.message, 400);
       }
+
+      throw error;
     }
 
-    payload = validateWazaPayload(candidate);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return err(error.message, 400);
+    const contrib = await env.DB.prepare('SELECT * FROM contributions WHERE id = ?')
+      .bind(id)
+      .first();
+
+    if (!contrib) {
+      return err('Not found', 404);
     }
 
-    throw error;
-  }
+    if (contrib.status !== 'pending') {
+      return err('Already reviewed');
+    }
 
-  const keys = Object.keys(payload);
-  const values = keys.map(
-    (key) => payload[key],
-  );
+    if (contrib.type !== 'edit' && contrib.type !== 'new_waza') {
+      return err('Invalid stored contribution type', 400);
+    }
 
-  if (contrib.type === "edit") {
-    const setClause = keys
-      .map((key) => `"${key}" = ?`)
-      .join(", ");
+    let payload: Record<string, string>;
+
+    try {
+      let candidate: unknown = body.payload;
+
+      if (candidate === undefined || candidate === null) {
+        try {
+          candidate = JSON.parse(contrib.payload as string);
+        } catch {
+          throw new ValidationError('Stored contribution payload is invalid JSON');
+        }
+      }
+
+      payload = validateWazaPayload(candidate);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return err(error.message, 400);
+      }
+
+      throw error;
+    }
+
+    const keys = Object.keys(payload);
+    const values = keys.map((key) => payload[key]);
+
+    if (contrib.type === 'edit') {
+      const setClause = keys.map((key) => `"${key}" = ?`).join(', ');
+
+      await env.DB.prepare(`UPDATE waza SET ${setClause} WHERE id = ?`)
+        .bind(...values, contrib.waza_id)
+        .run();
+    } else {
+      const columns = keys.map((key) => `"${key}"`).join(', ');
+
+      const placeholders = keys.map(() => '?').join(', ');
+
+      await env.DB.prepare(`INSERT INTO waza (${columns}) VALUES (${placeholders})`)
+        .bind(...values)
+        .run();
+    }
 
     await env.DB.prepare(
-      `UPDATE waza SET ${setClause} WHERE id = ?`,
-    )
-      .bind(...values, contrib.waza_id)
-      .run();
-  } else {
-    const columns = keys
-      .map((key) => `"${key}"`)
-      .join(", ");
-
-    const placeholders = keys
-      .map(() => "?")
-      .join(", ");
-
-    await env.DB.prepare(
-      `INSERT INTO waza (${columns}) VALUES (${placeholders})`,
-    )
-      .bind(...values)
-      .run();
-  }
-
-  await env.DB.prepare(`
+      `
     UPDATE contributions
     SET status = 'approved',
         reviewed_at = datetime('now'),
         admin_note = ?
     WHERE id = ?
-  `)
-    .bind(
-      body.note ?? null,
-      id,
+  `,
     )
-    .run();
+      .bind(body.note ?? null, id)
+      .run();
 
-  return json({ success: true });
-}
+    return json({ success: true });
+  }
 
   // ── Reject contribution ────────────────────────────────────
-if (
-  path.match(
-    /^\/api\/admin\/contributions\/\d+\/reject$/,
-  ) &&
-  request.method === "POST"
-) {
-  const user = await getUser();
+  if (path.match(/^\/api\/admin\/contributions\/\d+\/reject$/) && request.method === 'POST') {
+    const user = await getUser();
 
-  if (!user || !user.is_admin) {
-    return err("Forbidden", 403);
-  }
-
-  const id = path.split("/")[4];
-
-  let body: Record<string, unknown>;
-
-  try {
-    body = await readJsonObject(request);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return err(error.message, 400);
+    if (!user || !user.is_admin) {
+      return err('Forbidden', 403);
     }
 
-    throw error;
-  }
+    const id = path.split('/')[4];
 
-  const { note } = body;
+    let body: Record<string, unknown>;
 
-  if (
-    note !== undefined &&
-    note !== null &&
-    typeof note !== "string"
-  ) {
-    return err(
-      "note must be a string or null",
-    );
-  }
+    try {
+      body = await readJsonObject(request);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return err(error.message, 400);
+      }
 
-  if (
-    typeof note === "string" &&
-    note.length > 2000
-  ) {
-    return err(
-      "note must not exceed 2000 characters",
-    );
-  }
+      throw error;
+    }
 
-  const contrib = await env.DB.prepare(
-    "SELECT id, status FROM contributions WHERE id = ?",
-  )
-    .bind(id)
-    .first();
+    const { note } = body;
 
-  if (!contrib) {
-    return err("Not found", 404);
-  }
+    if (note !== undefined && note !== null && typeof note !== 'string') {
+      return err('note must be a string or null');
+    }
 
-  if (contrib.status !== "pending") {
-    return err("Already reviewed");
-  }
+    if (typeof note === 'string' && note.length > 2000) {
+      return err('note must not exceed 2000 characters');
+    }
 
-  await env.DB.prepare(`
+    const contrib = await env.DB.prepare('SELECT id, status FROM contributions WHERE id = ?')
+      .bind(id)
+      .first();
+
+    if (!contrib) {
+      return err('Not found', 404);
+    }
+
+    if (contrib.status !== 'pending') {
+      return err('Already reviewed');
+    }
+
+    await env.DB.prepare(
+      `
     UPDATE contributions
     SET status = 'rejected',
         reviewed_at = datetime('now'),
         admin_note = ?
     WHERE id = ?
-  `)
-    .bind(
-      note ?? null,
-      id,
+  `,
     )
-    .run();
+      .bind(note ?? null, id)
+      .run();
 
-  return json({ success: true });
-}
+    return json({ success: true });
+  }
 
   return null;
 }

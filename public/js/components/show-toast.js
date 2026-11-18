@@ -27,7 +27,6 @@ const TOAST_COLORS = {
  *   focused: boolean
  * }}
  */
-let ToastEntry;
 
 /** @type {!Array<!ToastEntry>} Oldest to newest. */
 const toasts = [];

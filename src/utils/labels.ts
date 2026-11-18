@@ -1,15 +1,35 @@
-export const EMPTY_LABELS = ["", "", "", "", "", ""];
+/**
+ * labels.ts — Helpers for parsing stored marking labels.
+ *
+ * @remarks
+ * Author: Paul Yong Shao En
+ * Contact: \<paulyse99\@gmail.com\>
+ * Project: Wazalist App
+ * Date: 2026-11-18
+ */
 
 /**
- * @brief Parses stored marking labels into a safe six-string array.
+ * Default label set: six empty strings.
  *
- * Invalid JSON or an invalid stored shape falls back to six empty labels.
+ * @remarks
+ * Returned (as a fresh copy) by `parseStoredLabels` whenever the stored
+ * value is missing or malformed.
+ */
+export const EMPTY_LABELS = ['', '', '', '', '', ''];
+
+/**
+ * Parses stored marking labels into a safe six-string array.
  *
- * @param {unknown} value - Stored shape_labels database value.
- * @return {string[]} Exactly six marking-label strings.
+ * @remarks
+ * The value must be a JSON string decoding to an array of exactly six
+ * strings. Any non-string input, invalid JSON, or invalid shape falls back
+ * to a fresh copy of `EMPTY_LABELS`.
+ *
+ * @param value - Stored `shape_labels` database value.
+ * @returns Exactly six marking-label strings.
  */
 export const parseStoredLabels = (value: unknown): string[] => {
-  if (typeof value !== "string") {
+  if (typeof value !== 'string') {
     return [...EMPTY_LABELS];
   }
 
@@ -19,7 +39,7 @@ export const parseStoredLabels = (value: unknown): string[] => {
     if (
       Array.isArray(parsed) &&
       parsed.length === 6 &&
-      parsed.every((label) => typeof label === "string")
+      parsed.every((label) => typeof label === 'string')
     ) {
       return parsed;
     }

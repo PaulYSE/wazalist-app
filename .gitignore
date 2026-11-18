@@ -191,6 +191,10 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,git
 
+### TypeDoc ###
+# TypeDoc output
+docs/
+
 ### Wrangler ###
 .wrangler/
 .env*
@@ -198,6 +202,3 @@ dist
 .dev.vars*
 !.dev.vars.example
 .vscode/settings.json
-eslint.config.mjs
-.prettierrc.json
-.prettierignore

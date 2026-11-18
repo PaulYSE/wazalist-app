@@ -468,8 +468,7 @@ export function renderDetail() {
         let iframe = wrap.querySelector('iframe');
         if (!iframe) {
           iframe = document.createElement('iframe');
-          iframe.allow =
-            'autoplay; encrypted-media; picture-in-picture';
+          iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
           iframe.allowFullscreen = true;
           wrap.appendChild(iframe);
         }
