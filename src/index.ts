@@ -73,6 +73,10 @@ import {
   handleAccountRoutes,
 } from "./routes/accountRoutes";
 
+import {
+  handleContributionRoutes,
+} from "./routes/contributionRoutes";
+
 export default {
 	async fetch(request, env) {
 		// D1 has foreign key enforcement OFF by default, and it's a per-connection
@@ -165,6 +169,13 @@ if (sharedListResponse) {
 if (accountResponse) {
   return accountResponse;
 }
+
+		const contributionResponse =
+  await handleContributionRoutes(ctx);
+
+if (contributionResponse) {
+  return contributionResponse;
+}
 		
 		// ── Reset password ────────────────────────────────────────
 
@@ -211,24 +222,6 @@ if (accountResponse) {
 		}
 
 		// ── Contributions ─────────────────────────────────────────
-
-		// GET /api/contributions/mine
-		if (path === "/api/contributions/mine" && request.method === "GET") {
-			const user = await getUser();
-			if (!user) return err("Authentication required", 401);
-
-			const { results } = await env.DB.prepare(`
-				SELECT c.*, w.name_jp as waza_name_jp
-				FROM contributions c
-				LEFT JOIN waza w ON c.waza_id = w.id
-				WHERE c.user_id = ?
-				ORDER BY c.created_at DESC
-			`)
-				.bind(user.id)
-				.all();
-			return json(results);
-		}
-
 		// POST /api/contributions
 		if (
 		  path === "/api/contributions" &&
