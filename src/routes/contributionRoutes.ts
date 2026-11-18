@@ -3,6 +3,12 @@ import type {
 } from "../types/request";
 
 import {
+  ValidationError,
+  readContributionBody,
+  validateWazaPayload,
+} from "../validation";
+
+import {
   err,
   json,
 } from "../utils/responses";
@@ -48,6 +54,66 @@ export async function handleContributionRoutes(
 
     return json(results);
   }
+
+  // ── Submit contribution ────────────────────────────────────
+if (
+  path === "/api/contributions" &&
+  request.method === "POST"
+) {
+  const user = await getUser();
+
+  if (!user) {
+    return err("Authentication required", 401);
+  }
+
+  let body: Record<string, unknown>;
+  let payload: Record<string, string>;
+
+  try {
+    body = await readContributionBody(request);
+
+    if (
+      body.type !== "edit" &&
+      body.type !== "new_waza"
+    ) {
+      throw new ValidationError("Invalid type");
+    }
+
+    if (
+      body.type === "edit" &&
+      !body.waza_id
+    ) {
+      throw new ValidationError(
+        "waza_id required for edits",
+      );
+    }
+
+    payload = validateWazaPayload(
+      body.payload,
+    );
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return err(error.message, 400);
+    }
+
+    throw error;
+  }
+
+  await env.DB.prepare(`
+    INSERT INTO contributions
+      (user_id, type, waza_id, payload, status, created_at)
+    VALUES (?, ?, ?, ?, 'pending', datetime('now'))
+  `)
+    .bind(
+      user.id,
+      body.type,
+      body.waza_id ?? null,
+      JSON.stringify(payload),
+    )
+    .run();
+
+  return json({ success: true });
+}
 
   return null;
 }
